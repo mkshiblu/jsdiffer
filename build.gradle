@@ -1,0 +1,9 @@
+plugins {
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_12
+}
+
+version '1.0-SNAPSHOT'
