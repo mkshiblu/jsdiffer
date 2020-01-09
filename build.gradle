@@ -7,3 +7,33 @@ java {
 }
 
 version '1.0-SNAPSHOT'
+project.buildDir = '/build'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+        resources {
+            srcDir 'resources/'
+        }
+    }
+    test {
+        java {
+            srcDir 'src-test/'
+        }
+        resources {
+            srcDirs = ['test-resources/', 'benchmarks/']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.6.0.201912101111-r'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+}
