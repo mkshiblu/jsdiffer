@@ -3,7 +3,45 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_12
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 version '1.0-SNAPSHOT'
+project.buildDir = '/build'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/'
+        }
+        resources {
+            srcDir 'resources/'
+        }
+    }
+    test {
+        java {
+            srcDir 'src-test/'
+        }
+        resources {
+            srcDirs = ['test-resources/', 'benchmarks/']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dependencies {
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.6.0.201912101111-r'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.0'
+    implementation group: 'com.eclipsesource.j2v8', name: 'j2v8_win32_x86_64', version: '4.6.0'
+    implementation group: 'com.eclipsesource.j2v8', name: 'j2v8_linux_x86_64', version: '4.6.0'
+    implementation group: 'com.eclipsesource.j2v8', name: 'j2v8_macosx_x86_64', version: '4.6.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+    //implementation files('libs/tajs-all.jar')
+}
