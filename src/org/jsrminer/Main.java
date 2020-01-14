@@ -11,8 +11,6 @@ public class Main {
     private static final Logger log = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
-        System.out.println("Hello");
-        log.info("Info");
         log.debug("Program Starts");
         GitService git = new JGitService();
         try {
