@@ -1,5 +1,6 @@
 package org.jsrminer;
 
+import dk.brics.tajs.options.TAJSEnvironmentConfig;
 import org.eclipse.jgit.lib.Repository;
 import org.jsrminer.api.GitHistoryRefactoringMiner;
 import org.jsrminer.api.GitService;
@@ -12,10 +13,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+
 public class JSRefactoringMiner {
 
     public static void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
-
+        //TAJSEnvironmentConfig x = null;
     }
 
     public static void detectBetweenCommits(String folder, String startCommit, String endCommit) throws Exception {
