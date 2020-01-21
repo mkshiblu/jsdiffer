@@ -7,6 +7,10 @@ import org.eclipse.jgit.lib.Repository;
 import org.jsrminer.api.GitService;
 import org.jsrminer.util.JGitService;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class Main {
     private static final Logger log = LogManager.getLogger(Main.class);
 
@@ -17,6 +21,13 @@ public class Main {
             Repository repo = git.cloneIfNotExists(
                     "tmp/refactoring-toy-example",
                     "https://github.com/danilofes/refactoring-toy-example.git");
+
+            String folder  = "tmp";
+            String startCommit  = "tod";
+            String endCommit  = "tod";
+
+            //JSRefactoringMiner.detectBetweenCommits(folder, startCommit, endCommit);
+            JSRefactoringMiner.detectBetweenDirectories("folder1", "folder2");
         } catch (Exception e) {
             e.printStackTrace();
         }
