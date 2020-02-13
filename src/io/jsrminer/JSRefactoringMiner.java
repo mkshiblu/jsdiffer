@@ -1,6 +1,7 @@
-package org.jsrminer;
+package io.jsrminer;
 
-import dk.brics.tajs.options.TAJSEnvironmentConfig;
+import io.jsrminer.diff.SourceDirDiff;
+import io.jsrminer.diff.SourceDirectory;
 import org.eclipse.jgit.lib.Repository;
 import org.jsrminer.api.GitHistoryRefactoringMiner;
 import org.jsrminer.api.GitService;
@@ -11,13 +12,17 @@ import org.jsrminer.util.JGitService;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
-
 
 public class JSRefactoringMiner {
 
     public static void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
-        //TAJSEnvironmentConfig x = null;
+        SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
+        SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
+        SourceDirDiff diff = src1.diff(src2);
+
+        System.out.println(Arrays.deepToString(diff.getCommonSourceFiles()));
     }
 
     public static void detectBetweenCommits(String folder, String startCommit, String endCommit) throws Exception {
@@ -43,7 +48,7 @@ public class JSRefactoringMiner {
                     } else {
                         System.out.println(refactorings.size() + " refactorings found in commit " + commitId);
                         for (Refactoring ref : refactorings) {
-                           // saveToFile(filePath, getResultRefactoringDescription(commitId, ref));
+                            // saveToFile(filePath, getResultRefactoringDescription(commitId, ref));
                         }
                     }
                 }
