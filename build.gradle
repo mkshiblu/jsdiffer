@@ -3,7 +3,7 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_12
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 version '1.0-SNAPSHOT'

@@ -1,5 +1,6 @@
 package org.jsrminer;
 
+import io.jsrminer.JSRefactoringMiner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -27,7 +28,7 @@ public class Main {
             String endCommit  = "tod";
 
             //JSRefactoringMiner.detectBetweenCommits(folder, startCommit, endCommit);
-            JSRefactoringMiner.detectBetweenDirectories("folder1", "folder2");
+            JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
         } catch (Exception e) {
             e.printStackTrace();
         }

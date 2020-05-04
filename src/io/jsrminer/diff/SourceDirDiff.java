@@ -1,33 +1,51 @@
 package io.jsrminer.diff;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class SourceDirDiff {
+/**
+ * Represents the difference between two folders of their files
+ * Contains, added, deleted and common files between the two directories
+ */
+public class SourceDirDiff extends Diff {
 
-    private List<SourceFile> commonSourceFiles = new ArrayList<>();
+    private Set<SourceFile> commonSourceFiles = new HashSet<>();
+    private Set<SourceFile> addedFiles = new HashSet<>();
+    private Set<SourceFile> deletedFiles = new HashSet<>();
 
-    void reportAddedSourceFile(SourceFile sourceFile) {
-
+    void addAddedFile(SourceFile sourceFile) {
+        addedFiles.add(sourceFile);
     }
 
-    void reportRemovedSourceFile(SourceFile sourceFile) {
-
+    void addToDeletedFiles(SourceFile sourceFile) {
+        deletedFiles.add(sourceFile);
     }
 
-    void reportSourceFileAtSameLocation(SourceFile sourceFile) {
+    void addFileAtSameLocation(SourceFile sourceFile) {
         commonSourceFiles.add(sourceFile);
     }
 
+    // TODO using git?
     void checkForMovedFiles() {
 
     }
 
+    // TODO using git
     void checkForRenamedFiles() {
 
     }
 
     public SourceFile[] getCommonSourceFiles() {
         return commonSourceFiles.toArray(SourceFile[]::new);
+    }
+
+    public SourceFile[] getAddedFiles() {
+        return addedFiles.toArray(SourceFile[]::new);
+    }
+
+    public SourceFile[] getDeletedFiles() {
+        return deletedFiles.toArray(SourceFile[]::new);
     }
 }
