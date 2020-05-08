@@ -23,8 +23,6 @@ public class JSRefactoringMiner {
         SourceDirDiff diff = src1.diff(src2);
 
         System.out.println(Arrays.deepToString(diff.getCommonSourceFiles()));
-
-
         System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
         System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
     }
