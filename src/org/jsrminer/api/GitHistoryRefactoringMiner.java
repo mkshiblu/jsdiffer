@@ -1,5 +1,6 @@
 package org.jsrminer.api;
 
+import io.jsrminer.RefactoringHandler;
 import org.eclipse.jgit.lib.Repository;
 
 /**

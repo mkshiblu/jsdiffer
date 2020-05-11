@@ -1,16 +1,14 @@
-// based on https://github.com/tsantalis/RefactoringMiner
-
-package org.jsrminer.api;
+package io.jsrminer.api;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.jsrminer.api.Churn;
 
 import java.util.List;
 import java.util.Map;
 
-
-public interface GitService {
+public interface IGitService {
     /**
      * Clone the git repository given by {@code cloneUrl} only if is does not exist yet in {@code folder}.
      *

@@ -1,12 +1,12 @@
 // based on https://github.com/tsantalis/RefactoringMiner
 
-package org.jsrminer.util;
+package io.jsrminer.services;
 
 import java.io.*;
 
 class ExternalProcess {
 
-    public static String execute(File workingDir, String ... commandAndArgs) {
+    public static String execute(File workingDir, String... commandAndArgs) {
         try {
             Process p = new ProcessBuilder(commandAndArgs)
                     .directory(workingDir)
@@ -24,8 +24,7 @@ class ExternalProcess {
                 } else {
                     throw new RuntimeException("Error executing command " + commandAndArgs + ":\n" + outputGobbler.getOutput());
                 }
-            }
-            finally {
+            } finally {
                 close(p.getInputStream());
                 close(p.getOutputStream());
                 //p.destroy();

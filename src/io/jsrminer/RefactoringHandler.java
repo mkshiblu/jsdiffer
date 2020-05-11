@@ -1,4 +1,4 @@
-package org.jsrminer.api;
+package io.jsrminer;
 
 import java.util.List;
 

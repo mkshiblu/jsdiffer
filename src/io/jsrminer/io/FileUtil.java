@@ -1,4 +1,4 @@
-package io.jsrminer.util;
+package io.jsrminer.io;
 
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;

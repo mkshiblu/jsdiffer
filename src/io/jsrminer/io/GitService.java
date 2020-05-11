@@ -1,7 +1,7 @@
-// based on https://github.com/tsantalis/RefactoringMiner
+package io.jsrminer.io;
 
-package org.jsrminer.util;
-
+import io.jsrminer.api.IGitService;
+import io.jsrminer.services.ExternalProcess;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -9,12 +9,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.Edit;
-import org.eclipse.jgit.diff.Edit.Type;
 import org.eclipse.jgit.diff.RenameDetector;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.RepositoryBuilder;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.patch.HunkHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -23,21 +19,69 @@ import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.jsrminer.api.Churn;
-import org.jsrminer.api.GitService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class JGitService implements GitService {
+public class GitService implements IGitService {
     private static final String REMOTE_REFS_PREFIX = "refs/remotes/origin/";
     private static final Logger log = LogManager.getLogger(GitService.class);
-    DefaultCommitsFilter commitsFilter = new DefaultCommitsFilter();
+    GitService.DefaultCommitsFilter commitsFilter = new GitService.DefaultCommitsFilter();
+
+    /**
+     * Finds the files that were added or deleted between the two commits
+     */
+    public static void fileTreeDiff(Repository repository, RevCommit commitBefore, RevCommit commitAfter
+            , List<String> filesBefore, List<String> filesAfter, String[] supportedExtensions) {
+        try {
+            ObjectId oldHead = commitBefore.getTree();
+            ObjectId head = commitAfter.getTree();
+            Set<String> allowedExtensionsSet = new HashSet<>(Arrays.asList(supportedExtensions));
+
+            // prepare the two iterators to compute the diff between
+            ObjectReader reader = repository.newObjectReader();
+            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+            oldTreeIter.reset(reader, oldHead);
+            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+            newTreeIter.reset(reader, head);
+
+            // finally get the list of changed files
+            try (Git git = new Git(repository)) {
+                List<DiffEntry> diffs = git.diff()
+                        .setNewTree(newTreeIter)
+                        .setOldTree(oldTreeIter)
+                        .setShowNameAndStatusOnly(true)
+                        .call();
+                for (DiffEntry entry : diffs) {
+                    DiffEntry.ChangeType changeType = entry.getChangeType();
+                    if (changeType != DiffEntry.ChangeType.ADD) {
+                        String oldPath = entry.getOldPath();
+                        if (allowedExtensionsSet.contains(oldPath)) {
+                            filesBefore.add(Paths.get(oldPath).toString());
+                        }
+                    }
+                    if (changeType != DiffEntry.ChangeType.DELETE) {
+                        String newPath = entry.getNewPath();
+
+                        // TODO CHECK RENAME?
+                        if (allowedExtensionsSet.contains(newPath)) {
+                            filesAfter.add(Paths.get(newPath).toString());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public Repository cloneIfNotExists(String projectPath, String cloneUrl/*, String branch*/) throws Exception {
@@ -342,11 +386,11 @@ public class JGitService implements GitService {
                 List<? extends HunkHeader> hunks = header.getHunks();
                 for (HunkHeader hunkHeader : hunks) {
                     for (Edit edit : hunkHeader.toEditList()) {
-                        if (edit.getType() == Type.INSERT) {
+                        if (edit.getType() == Edit.Type.INSERT) {
                             addedLines += edit.getLengthB();
-                        } else if (edit.getType() == Type.DELETE) {
+                        } else if (edit.getType() == Edit.Type.DELETE) {
                             deletedLines += edit.getLengthA();
-                        } else if (edit.getType() == Type.REPLACE) {
+                        } else if (edit.getType() == Edit.Type.REPLACE) {
                             deletedLines += edit.getLengthA();
                             addedLines += edit.getLengthB();
                         }
