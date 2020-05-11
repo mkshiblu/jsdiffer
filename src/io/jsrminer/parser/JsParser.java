@@ -8,7 +8,6 @@ public class JsParser implements IParser {
     @Override
     public void parse(List<String> sourceFiles) {
 
-//        V8
     }
 
     /*private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
