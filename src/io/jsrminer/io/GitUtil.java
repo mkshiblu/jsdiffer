@@ -1,7 +1,8 @@
 package io.jsrminer.io;
 
 import io.jsrminer.api.IGitService;
-import io.jsrminer.services.ExternalProcess;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -24,64 +25,23 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.jsrminer.api.Churn;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.lang.invoke.MethodHandles;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
-public class GitService implements IGitService {
+public class GitUtil implements IGitService {
+    private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private static final String REMOTE_REFS_PREFIX = "refs/remotes/origin/";
-    private static final Logger log = LogManager.getLogger(GitService.class);
-    GitService.DefaultCommitsFilter commitsFilter = new GitService.DefaultCommitsFilter();
+    private static final String GITHUB_URL = "https://github.com/";
+    private static final String BITBUCKET_URL = "https://bitbucket.org/";
 
-    /**
-     * Finds the files that were added or deleted between the two commits
-     */
-    public static void fileTreeDiff(Repository repository, RevCommit commitBefore, RevCommit commitAfter
-            , List<String> filesBefore, List<String> filesAfter, String[] supportedExtensions) {
-        try {
-            ObjectId oldHead = commitBefore.getTree();
-            ObjectId head = commitAfter.getTree();
-            Set<String> allowedExtensionsSet = new HashSet<>(Arrays.asList(supportedExtensions));
-
-            // prepare the two iterators to compute the diff between
-            ObjectReader reader = repository.newObjectReader();
-            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-            oldTreeIter.reset(reader, oldHead);
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            newTreeIter.reset(reader, head);
-
-            // finally get the list of changed files
-            try (Git git = new Git(repository)) {
-                List<DiffEntry> diffs = git.diff()
-                        .setNewTree(newTreeIter)
-                        .setOldTree(oldTreeIter)
-                        .setShowNameAndStatusOnly(true)
-                        .call();
-                for (DiffEntry entry : diffs) {
-                    DiffEntry.ChangeType changeType = entry.getChangeType();
-                    if (changeType != DiffEntry.ChangeType.ADD) {
-                        String oldPath = entry.getOldPath();
-                        if (allowedExtensionsSet.contains(oldPath)) {
-                            filesBefore.add(Paths.get(oldPath).toString());
-                        }
-                    }
-                    if (changeType != DiffEntry.ChangeType.DELETE) {
-                        String newPath = entry.getNewPath();
-
-                        // TODO CHECK RENAME?
-                        if (allowedExtensionsSet.contains(newPath)) {
-                            filesAfter.add(Paths.get(newPath).toString());
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+    GitUtil.DefaultCommitsFilter commitsFilter = new GitUtil.DefaultCommitsFilter();
 
     @Override
     public Repository cloneIfNotExists(String projectPath, String cloneUrl/*, String branch*/) throws Exception {
@@ -324,10 +284,76 @@ public class GitService implements IGitService {
         }
     }
 
-    public void fileTreeDiff(Repository repository, RevCommit currentCommit, List<String> javaFilesBefore, List<String> javaFilesCurrent, Map<String, String> renamedFilesHint) throws Exception {
+
+    /**
+     * Finds the of two commits
+     */
+    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore, final RevCommit commitAfter
+            , final List<String> filesBefore, final List<String> filesAfter, final String[] supportedExtensions) {
+        try {
+            final ObjectId oldHead = commitBefore.getTree();
+            final ObjectId head = commitAfter.getTree();
+
+            final Set<String> allowedExtensionsSet = Arrays.stream(supportedExtensions)
+                    .map(extension -> extension.toLowerCase())
+                    .collect(Collectors.toSet());
+
+            // prepare the two iterators to compute the diff between
+            ObjectReader reader = repository.newObjectReader();
+            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+            oldTreeIter.reset(reader, oldHead);
+            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+            newTreeIter.reset(reader, head);
+
+
+//            final RenameDetector rd = new RenameDetector(repository);
+//            rd.setRenameScore(80);
+//
+//            final TreeWalk tw = new TreeWalk(repository);
+//            tw.setRecursive(true);
+//            tw.addTree(oldTree);
+//            tw.addTree(newTree);
+//
+//            rd.addAll(DiffEntry.scan());
+
+            // finally get the list of changed files
+            try (Git git = new Git(repository)) {
+                List<DiffEntry> diffs = git.diff()
+                        .setNewTree(newTreeIter)
+                        .setOldTree(oldTreeIter)
+                        .setShowNameAndStatusOnly(true)
+                        .call();
+                for (DiffEntry entry : diffs) {
+                    DiffEntry.ChangeType changeType = entry.getChangeType();
+                    if (changeType != DiffEntry.ChangeType.ADD) {
+                        String oldPath = entry.getOldPath();
+                        if (allowedExtensionsSet.contains(FileUtil.getExtension(oldPath).toLowerCase()))
+                            filesBefore.add(Paths.get(oldPath).toString());
+                    }
+                    if (changeType != DiffEntry.ChangeType.DELETE) {
+                        String newPath = entry.getNewPath();
+                        // TODO CHECK RENAME?
+                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
+                            filesAfter.add(Paths.get(newPath).toString());
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Finds the file differences between two commits. The parameters are
+     */
+    public void fileTreeDiff(Repository repository, RevCommit currentCommit, List<String> javaFilesBefore,
+                             List<String> javaFilesCurrent, Map<String, String> renamedFilesHint) throws Exception {
+
         if (currentCommit.getParentCount() > 0) {
             ObjectId oldTree = currentCommit.getParent(0).getTree();
             ObjectId newTree = currentCommit.getTree();
+
             final TreeWalk tw = new TreeWalk(repository);
             tw.setRecursive(true);
             tw.addTree(oldTree);
@@ -341,6 +367,7 @@ public class GitService implements IGitService {
                 DiffEntry.ChangeType changeType = diff.getChangeType();
                 String oldPath = diff.getOldPath();
                 String newPath = diff.getNewPath();
+
                 if (changeType != DiffEntry.ChangeType.ADD) {
                     if (isJavafile(oldPath)) {
                         javaFilesBefore.add(oldPath);
@@ -401,5 +428,60 @@ public class GitService implements IGitService {
             return new Churn(addedLines, deletedLines);
         }
         return null;
+    }
+
+    /**
+     * Downloads the repo as zip and extract it on the specified folder
+     */
+    public static final void downloadProject(String cloneURL, File projectFolder, String commitId)
+            throws IOException {
+        String downloadLink = extractDownloadLink(cloneURL, commitId);
+        File destinationFile = new File(projectFolder.getParentFile(), projectFolder.getName() + "-" + commitId + ".zip");
+        log.info(String.format("Downloading archive %s", downloadLink));
+        FileUtil.download(new URL(downloadLink), destinationFile);
+
+        log.info(String.format("Unzipping archive %s", downloadLink));
+        FileUtil.unZip(destinationFile);
+
+        java.util.zip.ZipFile zipFile = new ZipFile(destinationFile);
+        try {
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                File entryDestination = new File(projectFolder.getParentFile(), entry.getName());
+                if (entry.isDirectory()) {
+                    entryDestination.mkdirs();
+                } else {
+                    entryDestination.getParentFile().mkdirs();
+                    InputStream in = zipFile.getInputStream(entry);
+                    OutputStream out = new FileOutputStream(entryDestination);
+                    IOUtils.copy(in, out);
+                    in.close();
+                    out.close();
+                }
+            }
+        } finally {
+            zipFile.close();
+        }
+    }
+
+    /**
+     * Create the download link for the the source repo as zip. Currently supports Github and BitBucket?
+     */
+    public static String extractDownloadLink(String cloneURL, String commitId) {
+        int indexOfDotGit = cloneURL.length();
+        if (cloneURL.endsWith(".git")) {
+            indexOfDotGit = cloneURL.indexOf(".git");
+        } else if (cloneURL.endsWith("/")) {
+            indexOfDotGit = cloneURL.length() - 1;
+        }
+        String downloadResource = "/";
+        if (cloneURL.startsWith(GITHUB_URL)) {
+            downloadResource = "/archive/";
+        } else if (cloneURL.startsWith(BITBUCKET_URL)) {
+            downloadResource = "/get/";
+        }
+        String downloadLink = cloneURL.substring(0, indexOfDotGit) + downloadResource + commitId + ".zip";
+        return downloadLink;
     }
 }

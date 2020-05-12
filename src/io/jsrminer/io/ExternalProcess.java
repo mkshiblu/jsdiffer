@@ -1,6 +1,6 @@
 // based on https://github.com/tsantalis/RefactoringMiner
 
-package io.jsrminer.services;
+package io.jsrminer.io;
 
 import java.io.*;
 
