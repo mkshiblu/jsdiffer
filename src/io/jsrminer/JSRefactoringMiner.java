@@ -3,21 +3,31 @@ package io.jsrminer;
 import io.jsrminer.api.IGitService;
 import io.jsrminer.diff.SourceDirDiff;
 import io.jsrminer.diff.SourceDirectory;
+import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.Charset;
 import java.util.*;
 
 public class JSRefactoringMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{".js", ".ts"}));
 
-    public static void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
+    public void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
@@ -29,7 +39,7 @@ public class JSRefactoringMiner {
         // TODO unfinished
     }
 
-    public static void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
+    public void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
         RefactoringHandler handler = null;
         IGitService gitService = new GitUtil() {
             @Override
@@ -41,7 +51,7 @@ public class JSRefactoringMiner {
         detect(gitService, repository, handler, walk.iterator());
     }
 
-    private static final void detect(IGitService gitService, Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
+    private final void detect(IGitService gitService, Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
         int commitsCount = 0;
         int errorCommitsCount = 0;
         int refactoringsCount = 0;
@@ -54,7 +64,7 @@ public class JSRefactoringMiner {
         while (i.hasNext()) {
             RevCommit currentCommit = i.next();
             try {
-                List<Refactoring> refactoringsAtRevision = detectRefactorings(repository, handler, currentCommit);
+                List<Refactoring> refactoringsAtRevision = detectRefactorings(repository, currentCommit, handler);
                 refactoringsCount += refactoringsAtRevision.size();
 
             } catch (Exception e) {
@@ -75,41 +85,76 @@ public class JSRefactoringMiner {
         log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
     }
 
-    protected static List<Refactoring> detectRefactorings(Repository repository, RefactoringHandler handler, String currentCommitId
-            , String cloneURL) {
-        List<Refactoring> refactoringsAtRevision = Collections.emptyList();
-        try {
-            File projectFolder = repository.getDirectory().getParentFile();
+    protected List<Refactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
+        List<Refactoring> refactoringsAtRevision;
+        String commitId = currentCommit.getId().getName();
+        List<String> filePathsBefore = new ArrayList<String>();
+        List<String> filePathsCurrent = new ArrayList<String>();
+        Map<String, String> renamedFilesHint = new HashMap<String, String>();
 
-            List<String> filesBefore = new ArrayList<String>();
-            List<String> filesCurrent = new ArrayList<String>();
+        GitUtil.fileTreeDiff(repository, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint);
 
-            Map<String, String> renamedFilesHint = new HashMap<String, String>();
-            String parentCommitId = populateWithGitHubAPI(cloneURL, currentCommitId, filesBefore, filesCurrent, renamedFilesHint);
+        Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
+        Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
+        Map<String, String> fileContentsBefore = new LinkedHashMap<String, String>();
+        Map<String, String> fileContentsCurrent = new LinkedHashMap<String, String>();
 
-            File currentFolder = new File(projectFolder.getParentFile(), projectFolder.getName() + "-" + currentCommitId);
-            File parentFolder = new File(projectFolder.getParentFile(), projectFolder.getName() + "-" + parentCommitId);
-            if (!currentFolder.exists()) {
-                GitUtil.downloadProject(cloneURL, projectFolder, currentCommitId);
-            }
-            if (!parentFolder.exists()) {
-                GitUtil.downloadProject(cloneURL, projectFolder, parentCommitId);
-            }
-            if (currentFolder.exists() && parentFolder.exists()) {
-                UMLModel currentUMLModel = createModel(currentFolder, filesCurrent);
-                UMLModel parentUMLModel = createModel(parentFolder, filesBefore);
-                // Diff between currentModel e parentModel
+        try (RevWalk walk = new RevWalk(repository)) {
+            // If no java files changed, there is no refactoring. Also, if there are
+            // only ADD's or only REMOVE's there is no refactoring
+            if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
+                RevCommit parentCommit = currentCommit.getParent(0);
+                populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
+                UMLModel parentUMLModel = createModel(fileContentsBefore, repositoryDirectoriesBefore);
+
+                populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
+                UMLModel currentUMLModel = createModel(fileContentsCurrent, repositoryDirectoriesCurrent);
+
                 refactoringsAtRevision = parentUMLModel.diff(currentUMLModel, renamedFilesHint).getRefactorings();
                 refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
-                log.warn(String.format("Folder %s not found", currentFolder.getPath()));
+                //logger.info(String.format("Ignored revision %s with no changes in java files", commitId));
+                refactoringsAtRevision = Collections.emptyList();
             }
-        } catch (Exception e) {
-            log.warn(String.format("Ignored revision %s due to error", currentCommitId), e);
-            handler.handleException(currentCommitId, e);
-        }
-        handler.handle(currentCommitId, refactoringsAtRevision);
+            handler.handle(commitId, refactoringsAtRevision);
 
+            walk.dispose();
+        }
         return refactoringsAtRevision;
+    }
+
+    private void populateFileContents(Repository repository, RevCommit commit,
+                                      List<String> filePaths, Map<String, String> fileContents,
+                                      Set<String> repositoryDirectories) throws Exception {
+        log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
+        RevTree parentTree = commit.getTree();
+        try (TreeWalk treeWalk = new TreeWalk(repository)) {
+            treeWalk.addTree(parentTree);
+            treeWalk.setRecursive(true);
+            while (treeWalk.next()) {
+                String pathString = treeWalk.getPathString();
+                if (filePaths.contains(pathString)) {
+                    ObjectId objectId = treeWalk.getObjectId(0);
+                    ObjectLoader loader = repository.open(objectId);
+                    StringWriter writer = new StringWriter();
+                    IOUtils.copy(loader.openStream(), writer, Charset.defaultCharset());
+                    fileContents.put(pathString, writer.toString());
+                }
+                if (isExtensionAllowed(pathString) && pathString.contains("/")) {
+                    String directory = pathString.substring(0, pathString.lastIndexOf("/"));
+                    repositoryDirectories.add(directory);
+                    //include sub-directories
+                    String subDirectory = new String(directory);
+                    while (subDirectory.contains("/")) {
+                        subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf("/"));
+                        repositoryDirectories.add(subDirectory);
+                    }
+                }
+            }
+        }
+    }
+
+    protected boolean isExtensionAllowed(String path) {
+        return supportedExtensions.contains(FileUtil.getExtension(path).toLowerCase());
     }
 }

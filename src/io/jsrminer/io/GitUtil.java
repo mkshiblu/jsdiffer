@@ -284,70 +284,70 @@ public class GitUtil implements IGitService {
         }
     }
 
-
-    /**
-     * Finds the of two commits
-     */
-    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore, final RevCommit commitAfter
-            , final List<String> filesBefore, final List<String> filesAfter, final String[] supportedExtensions) {
-        try {
-            final ObjectId oldHead = commitBefore.getTree();
-            final ObjectId head = commitAfter.getTree();
-
-            final Set<String> allowedExtensionsSet = Arrays.stream(supportedExtensions)
-                    .map(extension -> extension.toLowerCase())
-                    .collect(Collectors.toSet());
-
-            // prepare the two iterators to compute the diff between
-            ObjectReader reader = repository.newObjectReader();
-            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-            oldTreeIter.reset(reader, oldHead);
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            newTreeIter.reset(reader, head);
-
-
-//            final RenameDetector rd = new RenameDetector(repository);
-//            rd.setRenameScore(80);
 //
-//            final TreeWalk tw = new TreeWalk(repository);
-//            tw.setRecursive(true);
-//            tw.addTree(oldTree);
-//            tw.addTree(newTree);
+//    /**
+//     * Finds the of two commits
+//     */
+//    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore, final RevCommit commitAfter
+//            , final List<String> filesBefore, final List<String> filesAfter, final String[] supportedExtensions) {
+//        try {
+//            final ObjectId oldHead = commitBefore.getTree();
+//            final ObjectId head = commitAfter.getTree();
 //
-//            rd.addAll(DiffEntry.scan());
-
-            // finally get the list of changed files
-            try (Git git = new Git(repository)) {
-                List<DiffEntry> diffs = git.diff()
-                        .setNewTree(newTreeIter)
-                        .setOldTree(oldTreeIter)
-                        .setShowNameAndStatusOnly(true)
-                        .call();
-                for (DiffEntry entry : diffs) {
-                    DiffEntry.ChangeType changeType = entry.getChangeType();
-                    if (changeType != DiffEntry.ChangeType.ADD) {
-                        String oldPath = entry.getOldPath();
-                        if (allowedExtensionsSet.contains(FileUtil.getExtension(oldPath).toLowerCase()))
-                            filesBefore.add(Paths.get(oldPath).toString());
-                    }
-                    if (changeType != DiffEntry.ChangeType.DELETE) {
-                        String newPath = entry.getNewPath();
-                        // TODO CHECK RENAME?
-                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
-                            filesAfter.add(Paths.get(newPath).toString());
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//            final Set<String> allowedExtensionsSet = Arrays.stream(supportedExtensions)
+//                    .map(extension -> extension.toLowerCase())
+//                    .collect(Collectors.toSet());
+//
+//            // prepare the two iterators to compute the diff between
+//            ObjectReader reader = repository.newObjectReader();
+//            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+//            oldTreeIter.reset(reader, oldHead);
+//            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+//            newTreeIter.reset(reader, head);
+//
+//
+////            final RenameDetector rd = new RenameDetector(repository);
+////            rd.setRenameScore(80);
+////
+////            final TreeWalk tw = new TreeWalk(repository);
+////            tw.setRecursive(true);
+////            tw.addTree(oldTree);
+////            tw.addTree(newTree);
+////
+////            rd.addAll(DiffEntry.scan());
+//
+//            // finally get the list of changed files
+//            try (Git git = new Git(repository)) {
+//                List<DiffEntry> diffs = git.diff()
+//                        .setNewTree(newTreeIter)
+//                        .setOldTree(oldTreeIter)
+//                        .setShowNameAndStatusOnly(true)
+//                        .call();
+//                for (DiffEntry entry : diffs) {
+//                    DiffEntry.ChangeType changeType = entry.getChangeType();
+//                    if (changeType != DiffEntry.ChangeType.ADD) {
+//                        String oldPath = entry.getOldPath();
+//                        if (allowedExtensionsSet.contains(FileUtil.getExtension(oldPath).toLowerCase()))
+//                            filesBefore.add(Paths.get(oldPath).toString());
+//                    }
+//                    if (changeType != DiffEntry.ChangeType.DELETE) {
+//                        String newPath = entry.getNewPath();
+//                        // TODO CHECK RENAME?
+//                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
+//                            filesAfter.add(Paths.get(newPath).toString());
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
     /**
      * Finds the file differences between two commits. The parameters are
      */
-    public void fileTreeDiff(Repository repository, RevCommit currentCommit, List<String> javaFilesBefore,
+    public static void fileTreeDiff(Repository repository, RevCommit currentCommit, List<String> javaFilesBefore,
                              List<String> javaFilesCurrent, Map<String, String> renamedFilesHint) throws Exception {
 
         if (currentCommit.getParentCount() > 0) {
@@ -387,7 +387,7 @@ public class GitUtil implements IGitService {
         }
     }
 
-    private boolean isJavafile(String path) {
+    private static boolean isJavafile(String path) {
         return path.endsWith(".java");
     }
 
@@ -431,12 +431,12 @@ public class GitUtil implements IGitService {
     }
 
     /**
-     * Downloads the repo as zip and extract it on the specified folder
+     * Downloads the repo as zip and extract it on the specified folder. TODO use NULL
      */
-    public static final void downloadProject(String cloneURL, File projectFolder, String commitId)
+    public static final void downloadProject(String cloneURL, File destinationFolder, String commitId)
             throws IOException {
         String downloadLink = extractDownloadLink(cloneURL, commitId);
-        File destinationFile = new File(projectFolder.getParentFile(), projectFolder.getName() + "-" + commitId + ".zip");
+        File destinationFile = new File(destinationFolder.getParentFile(), destinationFolder.getName() + "-" + commitId + ".zip");
         log.info(String.format("Downloading archive %s", downloadLink));
         FileUtil.download(new URL(downloadLink), destinationFile);
 
@@ -448,7 +448,7 @@ public class GitUtil implements IGitService {
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
-                File entryDestination = new File(projectFolder.getParentFile(), entry.getName());
+                File entryDestination = new File(destinationFolder.getParentFile(), entry.getName());
                 if (entry.isDirectory()) {
                     entryDestination.mkdirs();
                 } else {
