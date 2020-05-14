@@ -1,6 +1,5 @@
 package io.jsrminer;
 
-import io.jsrminer.api.IGitService;
 import io.jsrminer.io.GitUtil;
 import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;

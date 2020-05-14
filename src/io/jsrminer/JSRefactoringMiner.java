@@ -1,12 +1,10 @@
 package io.jsrminer;
 
-import io.jsrminer.api.IGitService;
 import io.jsrminer.diff.SourceDirDiff;
 import io.jsrminer.diff.SourceDirectory;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -41,17 +39,11 @@ public class JSRefactoringMiner {
 
     public void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
         RefactoringHandler handler = null;
-        IGitService gitService = new GitUtil() {
-            @Override
-            public boolean isCommitAnalyzed(String sha1) {
-                return handler.skipCommit(sha1);
-            }
-        };
-        Iterable<RevCommit> walk = gitService.createRevsWalkBetweenCommits(repository, startCommitId, endCommitId);
-        detect(gitService, repository, handler, walk.iterator());
+        Iterable<RevCommit> walk = GitUtil.createRevsWalkBetweenCommits(repository, startCommitId, endCommitId);
+        detect(repository, handler, walk.iterator());
     }
 
-    private final void detect(IGitService gitService, Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
+    private final void detect(Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
         int commitsCount = 0;
         int errorCommitsCount = 0;
         int refactoringsCount = 0;
