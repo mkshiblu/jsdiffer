@@ -15,15 +15,15 @@ public class Main {
         log.debug("Program Starts");
         IGitService git = new GitUtil();
         try {
-            Repository repo = git.cloneIfNotExists(
-                    "tmp/refactoring-toy-example",
-                    "https://github.com/danilofes/refactoring-toy-example.git");
+            Repository repo = git.openRepository("F:\\PROJECTS_REPO\\toy_js");
+                    //"tmp/toy_js",
+                    //"https://github.com/danilofes/refactoring-toy-example.git");
 
             String folder = "tmp";
-            String startCommit = "tod";
-            String endCommit = "tod";
+            String startCommit = "de83eb12c7fa8970d3952d506c5b5c3e844e9016";
+            String endCommit = "b8c28a85bd7019009d15ee05ebb4011527312dbe";
 
-            JSRefactoringMiner.detectBetweenCommits(repo, startCommit, endCommit);
+            new JSRefactoringMiner().detectBetweenCommits(repo, startCommit, endCommit);
             //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
         } catch (Exception e) {
             e.printStackTrace();

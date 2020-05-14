@@ -283,12 +283,13 @@ public class GitUtil implements IGitService {
             return "RegularCommitsFilter";
         }
     }
-
+//
 //
 //    /**
 //     * Finds the of two commits
 //     */
-//    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore, final RevCommit commitAfter
+//    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore
+//            , final RevCommit commitAfter
 //            , final List<String> filesBefore, final List<String> filesAfter, final String[] supportedExtensions) {
 //        try {
 //            final ObjectId oldHead = commitBefore.getTree();
@@ -304,17 +305,6 @@ public class GitUtil implements IGitService {
 //            oldTreeIter.reset(reader, oldHead);
 //            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
 //            newTreeIter.reset(reader, head);
-//
-//
-////            final RenameDetector rd = new RenameDetector(repository);
-////            rd.setRenameScore(80);
-////
-////            final TreeWalk tw = new TreeWalk(repository);
-////            tw.setRecursive(true);
-////            tw.addTree(oldTree);
-////            tw.addTree(newTree);
-////
-////            rd.addAll(DiffEntry.scan());
 //
 //            // finally get the list of changed files
 //            try (Git git = new Git(repository)) {
@@ -332,9 +322,13 @@ public class GitUtil implements IGitService {
 //                    }
 //                    if (changeType != DiffEntry.ChangeType.DELETE) {
 //                        String newPath = entry.getNewPath();
-//                        // TODO CHECK RENAME?
 //                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
 //                            filesAfter.add(Paths.get(newPath).toString());
+//
+//                            if (changeType == DiffEntry.ChangeType.RENAME) {
+//                                String oldPath = entry.getOldPath();
+//                                renamedFilesHint.put(oldPath, newPath);
+//                            }
 //                        }
 //                    }
 //                }
@@ -347,48 +341,52 @@ public class GitUtil implements IGitService {
     /**
      * Finds the file differences between two commits. The parameters are
      */
-    public static void fileTreeDiff(Repository repository, RevCommit currentCommit, List<String> javaFilesBefore,
-                             List<String> javaFilesCurrent, Map<String, String> renamedFilesHint) throws Exception {
+    public static void fileTreeDiff(Repository repository, RevCommit commitBefore, RevCommit commitAfter, List<String> filesBefore,
+                                    List<String> filesAfter, Map<String, String> renamedFilesHint, String[] allowedFileExtensions) throws Exception {
 
-        if (currentCommit.getParentCount() > 0) {
-            ObjectId oldTree = currentCommit.getParent(0).getTree();
-            ObjectId newTree = currentCommit.getTree();
+        ObjectId oldTree = commitBefore.getTree();
+        ObjectId newTree = commitAfter.getTree();
 
-            final TreeWalk tw = new TreeWalk(repository);
-            tw.setRecursive(true);
-            tw.addTree(oldTree);
-            tw.addTree(newTree);
+        final Set<String> allowedExtensionsSet = Arrays.stream(allowedFileExtensions)
+                .map(extension -> extension.toLowerCase())
+                .collect(Collectors.toSet());
 
-            final RenameDetector rd = new RenameDetector(repository);
-            rd.setRenameScore(80);
-            rd.addAll(DiffEntry.scan(tw));
+        final TreeWalk tw = new TreeWalk(repository);
+        tw.setRecursive(true);
+        tw.addTree(oldTree);
+        tw.addTree(newTree);
 
-            for (DiffEntry diff : rd.compute(tw.getObjectReader(), null)) {
-                DiffEntry.ChangeType changeType = diff.getChangeType();
-                String oldPath = diff.getOldPath();
-                String newPath = diff.getNewPath();
+        final RenameDetector rd = new RenameDetector(repository);
+        rd.setRenameScore(80);
+        rd.addAll(DiffEntry.scan(tw));
 
-                if (changeType != DiffEntry.ChangeType.ADD) {
-                    if (isJavafile(oldPath)) {
-                        javaFilesBefore.add(oldPath);
-                    }
+        for (DiffEntry diff : rd.compute(tw.getObjectReader(), null)) {
+            DiffEntry.ChangeType changeType = diff.getChangeType();
+            String oldPath = diff.getOldPath();
+            String newPath = diff.getNewPath();
+
+            if (changeType != DiffEntry.ChangeType.ADD) {
+                if (isFileExtensionAllowed(allowedExtensionsSet, oldPath)) {
+                    filesBefore.add(oldPath);
                 }
-                if (changeType != DiffEntry.ChangeType.DELETE) {
-                    if (isJavafile(newPath)) {
-                        javaFilesCurrent.add(newPath);
-                    }
+            }
+            if (changeType != DiffEntry.ChangeType.DELETE) {
+                if (isFileExtensionAllowed(allowedExtensionsSet, newPath)) {
+                    filesAfter.add(newPath);
                 }
-                if (changeType == DiffEntry.ChangeType.RENAME && diff.getScore() >= rd.getRenameScore()) {
-                    if (isJavafile(oldPath) && isJavafile(newPath)) {
-                        renamedFilesHint.put(oldPath, newPath);
-                    }
+            }
+            if (changeType == DiffEntry.ChangeType.RENAME && diff.getScore() >= rd.getRenameScore()) {
+                if (isFileExtensionAllowed(allowedExtensionsSet, oldPath) && isFileExtensionAllowed(allowedExtensionsSet, newPath)) {
+                    renamedFilesHint.put(oldPath, newPath);
                 }
             }
         }
     }
 
-    private static boolean isJavafile(String path) {
-        return path.endsWith(".java");
+    private static boolean isFileExtensionAllowed(Set<String> allowedExtensionsSet, String filePath) {
+        if (allowedExtensionsSet == null)
+            return true;
+        return allowedExtensionsSet.contains(FileUtil.getExtension(filePath).toLowerCase());
     }
 
     @Override

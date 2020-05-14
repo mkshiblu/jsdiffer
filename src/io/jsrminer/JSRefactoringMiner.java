@@ -81,18 +81,21 @@ public class JSRefactoringMiner {
             }
         }
 
-        handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
+        // handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
         log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
     }
 
     protected List<Refactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
-        List<Refactoring> refactoringsAtRevision;
+        RevCommit parentCommit = currentCommit.getParent(0);
+        List<Refactoring> refactoringsAtRevision = null;
         String commitId = currentCommit.getId().getName();
+
         List<String> filePathsBefore = new ArrayList<String>();
         List<String> filePathsCurrent = new ArrayList<String>();
         Map<String, String> renamedFilesHint = new HashMap<String, String>();
 
-        GitUtil.fileTreeDiff(repository, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint);
+        GitUtil.fileTreeDiff(repository, parentCommit, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint
+                , supportedExtensions.toArray(String[]::new));
 
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
@@ -103,20 +106,20 @@ public class JSRefactoringMiner {
             // If no java files changed, there is no refactoring. Also, if there are
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
-                RevCommit parentCommit = currentCommit.getParent(0);
+
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                UMLModel parentUMLModel = createModel(fileContentsBefore, repositoryDirectoriesBefore);
+                //UMLModel parentUMLModel = createModel(fileContentsBefore, repositoryDirectoriesBefore);
 
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                UMLModel currentUMLModel = createModel(fileContentsCurrent, repositoryDirectoriesCurrent);
+                //UMLModel currentUMLModel = createModel(fileContentsCurrent, repositoryDirectoriesCurrent);
 
-                refactoringsAtRevision = parentUMLModel.diff(currentUMLModel, renamedFilesHint).getRefactorings();
-                refactoringsAtRevision = filter(refactoringsAtRevision);
+                //refactoringsAtRevision = parentUMLModel.diff(currentUMLModel, renamedFilesHint).getRefactorings();
+                //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
                 //logger.info(String.format("Ignored revision %s with no changes in java files", commitId));
                 refactoringsAtRevision = Collections.emptyList();
             }
-            handler.handle(commitId, refactoringsAtRevision);
+            //handler.handle(commitId, refactoringsAtRevision);
 
             walk.dispose();
         }
