@@ -92,7 +92,7 @@ public class GitUtil {
         return repository;
     }
 
-    public Repository openRepository(String repositoryPath) throws Exception {
+    public static Repository openRepository(String repositoryPath) throws Exception {
         File folder = new File(repositoryPath);
         Repository repository;
         if (folder.exists()) {

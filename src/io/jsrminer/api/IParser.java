@@ -1,4 +1,4 @@
-package io.jsrminer.parser;
+package io.jsrminer.api;
 
 import java.util.List;
 

@@ -2,13 +2,16 @@ package io.jsrminer.parser;
 
 import java.util.List;
 
-import com.eclipsesource.v8.V8Array;
+import io.jsrminer.api.IParser;
 
 public class JsParser implements IParser {
     @Override
     public void parse(List<String> sourceFiles) {
-
+        JavaScriptEngine jsEngine = new JavaScriptEngine();
+        jsEngine.createNodeJsEnvironment();
+        jsEngine.addBabelParser();
     }
+
 
     /*private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
         try {

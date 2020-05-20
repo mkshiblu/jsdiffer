@@ -12,9 +12,8 @@ public class Main {
 
     public static void main(String[] args) {
         log.debug("Program Starts");
-        IGitService git = new GitUtil();
         try {
-            Repository repo = git.openRepository("F:\\PROJECTS_REPO\\toy_js");
+            Repository repo = GitUtil.openRepository("F:\\PROJECTS_REPO\\toy_js");
                     //"tmp/toy_js",
                     //"https://github.com/danilofes/refactoring-toy-example.git");
 
