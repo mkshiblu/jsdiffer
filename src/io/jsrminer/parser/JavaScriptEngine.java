@@ -1,6 +1,7 @@
 package io.jsrminer.parser;
 
 import com.eclipsesource.v8.NodeJS;
+import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 
 import java.io.File;
@@ -10,7 +11,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class JavaScriptEngine {
+/**
+ * Represents the JS engine or environment where JS scripts could be executed
+ */
+class JavaScriptEngine {
     public static final String NODE_MODULES_DIRECTORY_NAME = "node_modules";
 
     private NodeJS nodeJs;
@@ -32,12 +36,20 @@ public class JavaScriptEngine {
         }
     }
 
-    public void addBabelParser(){
+    /**
+     * Create a function parse(script) in the environment which calls the underlying babelParser.parse function
+     * Also creates a toJson(object) function to format an object as json
+     */
+    public void addBabelParser() {
         this.babelV8Object = this.nodeJs.require(new File(nodeModules, "@babel/parser"));
         this.nodeJs.getRuntime().add("babelParser", this.babelV8Object);
         String plugins = "['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators', 'optionalCatchBinding']";
         this.nodeJs.getRuntime().executeVoidScript("function parse(script) {return babelParser.parse(script, {ranges: true, tokens: true, sourceType: 'unambiguous', allowImportExportEverywhere: true, allowReturnOutsideFunction: true, plugins: " + plugins + " });}");
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) {return JSON.stringify(object);}");
+    }
+
+    public Object executeFunction(final String name, final Object... args) {
+        return this.nodeJs.getRuntime().executeJSFunction(name, args);
     }
 
     private void createNodeJSLibFiles(String... paths) {
