@@ -64,7 +64,7 @@ public class JSRefactoringMiner {
 
             } catch (Exception e) {
                 log.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
-                handler.handleException(currentCommit.getId().getName(), e);
+              //  handler.handleException(currentCommit.getId().getName(), e);
                 errorCommitsCount++;
             }
 

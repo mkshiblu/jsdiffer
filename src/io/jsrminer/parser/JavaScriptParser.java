@@ -3,6 +3,7 @@ package io.jsrminer.parser;
 import java.util.List;
 import java.util.Map;
 
+import com.eclipsesource.v8.V8Object;
 import io.jsrminer.api.IParser;
 import io.jsrminer.uml.UMLModel;
 
@@ -14,13 +15,20 @@ public class JavaScriptParser {
 
         for (String filepath : fileContents.keySet()) {
             final String content = fileContents.get(filepath);
-            processScript(content);
+            processScript(content, jsEngine);
         }
         return null;
     }
 
-    private void processScript(String script) {
+    private void processScript(String script, JavaScriptEngine jsEngine) {
+        try {
+            V8Object bableParsed = (V8Object) jsEngine.executeFunction("parse", script);
 
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        } finally {
+
+        }
     }
 
 //    private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
