@@ -4,6 +4,9 @@ import io.jsrminer.diff.SourceDirDiff;
 import io.jsrminer.diff.SourceDirectory;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
+import io.jsrminer.uml.UMLModel;
+import io.jsrminer.uml.UMLModelDiff;
+import io.jsrminer.uml.UMLModelFactory;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -23,7 +26,7 @@ import java.util.*;
 
 public class JSRefactoringMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{".js", ".ts"}));
+    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js", "ts"}));
 
     public void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
@@ -43,7 +46,7 @@ public class JSRefactoringMiner {
         detect(repository, handler, walk.iterator());
     }
 
-    private final void detect(Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
+    private void detect(Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
         int commitsCount = 0;
         int errorCommitsCount = 0;
         int refactoringsCount = 0;
@@ -99,12 +102,15 @@ public class JSRefactoringMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
+                // TODO Multi thread?
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                //UMLModel parentUMLModel = createModel(fileContentsBefore, repositoryDirectoriesBefore);
+                UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore, repositoryDirectoriesBefore);
 
+                // TODO multi thread?
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                //UMLModel currentUMLModel = createModel(fileContentsCurrent, repositoryDirectoriesCurrent);
+                UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent, repositoryDirectoriesCurrent);
 
+                UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
                 //refactoringsAtRevision = parentUMLModel.diff(currentUMLModel, renamedFilesHint).getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
