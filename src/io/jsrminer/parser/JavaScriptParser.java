@@ -24,6 +24,8 @@ public class JavaScriptParser {
         try {
             V8Object bableParsed = (V8Object) jsEngine.executeFunction("parse", script);
 
+            jsEngine.createNodeJsEnvironment();
+
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
