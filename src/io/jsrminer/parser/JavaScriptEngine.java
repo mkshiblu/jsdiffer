@@ -66,4 +66,8 @@ class JavaScriptEngine {
             }
         }
     }
+
+    public String toJson(Object object) {
+        return this.nodeJs.getRuntime().executeJSFunction("toJson", object).toString();
+    }
 }

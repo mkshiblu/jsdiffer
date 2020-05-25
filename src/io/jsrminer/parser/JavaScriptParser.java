@@ -21,15 +21,19 @@ public class JavaScriptParser {
     }
 
     private void processScript(String script, JavaScriptEngine jsEngine) {
+        V8Object bableParsed = null;
         try {
-            V8Object bableParsed = (V8Object) jsEngine.executeFunction("parse", script);
+            bableParsed = (V8Object) jsEngine.executeFunction("parse", script);
+            String tokens = jsEngine.toJson(bableParsed);
 
-            jsEngine.createNodeJsEnvironment();
-
+            if (tokens != null){
+                Object x = bableParsed.get("FunctionDeclaration");
+            }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         } finally {
-
+            if (bableParsed !=null)
+                bableParsed.release();
         }
     }
 

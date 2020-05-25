@@ -18,8 +18,8 @@ public class Main {
                     //"https://github.com/danilofes/refactoring-toy-example.git");
 
             String folder = "tmp";
-            String startCommit = "de83eb12c7fa8970d3952d506c5b5c3e844e9016";
-            String endCommit = "b8c28a85bd7019009d15ee05ebb4011527312dbe";
+            String startCommit = "c7b452480c5b74ccb2a3e721f487d4fcf98abfd7";
+            String endCommit = "2ef9925ca949b85c421fef7cbb09131186ac0b53";
 
             new JSRefactoringMiner().detectBetweenCommits(repo, startCommit, endCommit);
             //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
