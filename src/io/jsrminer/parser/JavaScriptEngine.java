@@ -42,7 +42,7 @@ class JavaScriptEngine {
     public void addBabelParser() {
         this.babelV8Object = this.nodeJs.require(new File(nodeModules, "@babel/parser"));
         this.nodeJs.getRuntime().add("babelParser", this.babelV8Object);
-        String plugins = "['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators', 'optionalCatchBinding']";
+        String plugins = "['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']";
         this.nodeJs.getRuntime().executeVoidScript("function parse(script) {return babelParser.parse(script, {ranges: true, tokens: true, sourceType: 'unambiguous', allowImportExportEverywhere: true, allowReturnOutsideFunction: true, plugins: " + plugins + " });}");
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) {return JSON.stringify(object);}");
     }
