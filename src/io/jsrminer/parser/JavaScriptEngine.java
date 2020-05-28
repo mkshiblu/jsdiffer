@@ -2,6 +2,7 @@ package io.jsrminer.parser;
 
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8Object;
+import io.jsrminer.io.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
  */
 class JavaScriptEngine {
     public static final String NODE_MODULES_DIRECTORY_NAME = "node_modules";
+    public static final String SCRIPTS_DIRECTORY_NAME = "scripts";
 
     private NodeJS nodeJs;
     private File nodeModules;
@@ -35,6 +37,7 @@ class JavaScriptEngine {
         }
     }
 
+    V8Object parser;
     /**
      * Create a function parse(script) in the environment which calls the underlying babelParser.parse function
      * Also creates a toJson(object) function to format an object as json
@@ -42,9 +45,17 @@ class JavaScriptEngine {
     public void addBabelParser() {
         this.babelV8Object = this.nodeJs.require(new File(nodeModules, "@babel/parser"));
         this.nodeJs.getRuntime().add("babelParser", this.babelV8Object);
+
         String plugins = "['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']";
-        this.nodeJs.getRuntime().executeVoidScript("function parse(script) {return babelParser.parse(script, {ranges: true, tokens: true, sourceType: 'unambiguous', allowImportExportEverywhere: true, allowReturnOutsideFunction: true, plugins: " + plugins + " });}");
+        this.nodeJs.getRuntime().executeVoidScript("function parse2(script) {return babelParser.parse(script, {ranges: true, tokens: true, sourceType: 'unambiguous', allowImportExportEverywhere: true, allowReturnOutsideFunction: true, plugins: " + plugins + " });}");
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) {return JSON.stringify(object);}");
+
+        //Test
+        parser = this.nodeJs.require(new File(FileUtil.getResourcePath(SCRIPTS_DIRECTORY_NAME),
+                "Parser.js"));
+        this.nodeJs.getRuntime().add("parser", parser);
+        this.nodeJs.getRuntime().executeVoidScript("function parse(script) { return parser.parse(script); }");
+        //parser.release();
     }
 
     public Object executeFunction(final String name, final Object... args) {

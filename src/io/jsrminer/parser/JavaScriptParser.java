@@ -23,7 +23,7 @@ public class JavaScriptParser {
     private void processScript(String script, JavaScriptEngine jsEngine) {
         V8Object bableParsed = null;
         try {
-            bableParsed = (V8Object) jsEngine.executeFunction("parse", script);
+            String json = (String) jsEngine.executeFunction("parse", script);
             String tokens = jsEngine.toJson(bableParsed);
 
             if (tokens != null){
