@@ -1,7 +1,6 @@
 package io.jsrminer.parser;
 
 import com.eclipsesource.v8.NodeJS;
-import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 
 import java.io.File;
