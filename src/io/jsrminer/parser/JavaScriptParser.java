@@ -20,20 +20,15 @@ public class JavaScriptParser {
         return null;
     }
 
-    private void processScript(String script, JavaScriptEngine jsEngine) {
-        V8Object bableParsed = null;
-        try {
-            String json = (String) jsEngine.executeFunction("parse", script);
-            String tokens = jsEngine.toJson(bableParsed);
 
-            if (tokens != null){
-                Object x = bableParsed.get("FunctionDeclaration");
-            }
+    
+    private void processScript(String script, JavaScriptEngine jsEngine) {
+        try {
+            // Json ist the whole program currently let's say its just the fds
+            String json = (String) jsEngine.executeFunction("parse", script);
+
         } catch (Exception ex) {
             throw new RuntimeException(ex);
-        } finally {
-            if (bableParsed !=null)
-                bableParsed.release();
         }
     }
 

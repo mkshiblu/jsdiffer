@@ -14,8 +14,8 @@ function parse(script) {
     
     const ast = babelParser.parse(script,
         {
-            ranges: true,
-            tokens: true,
+            //ranges: true,
+            //tokens: true,
             sourceType: 'unambiguous',
             allowImportExportEverywhere: true,
             allowReturnOutsideFunction: true,
@@ -28,6 +28,6 @@ function parse(script) {
     return JSON.stringify(functionDeclarations);
 };
 
-parse('function x() { } ');
+parse('function x() { var d = function () {}; } ');
 
 module.exports.parse = parse;

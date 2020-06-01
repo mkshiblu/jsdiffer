@@ -11,6 +11,7 @@ function FunctionDeclarationVisitor(/*namespace*/) {
     this.FunctionDeclaration = (path, ars) => {
         const fd = path.node;
         const statements = fd.body;
+        const name = fd.id.name;
         //const fullyQualifiedName = namespace + "." + fd.id.name;
       //  path.get('body').traverse(new StateDeclarationVisitor(fullyQualifiedName));
        // path.skip();
