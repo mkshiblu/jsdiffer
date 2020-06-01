@@ -1,5 +1,5 @@
 const babelParser = require('@babel/parser');
-// const traverse = require('@babel/traverse');
+const traverse = require('@babel/traverse');
 // const path = require('path');
 // const content = 'var x;'
 
