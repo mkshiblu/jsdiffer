@@ -1,5 +1,7 @@
 const babelParser = require('@babel/parser');
 const traverse = require('@babel/traverse');
+const visitor = require('./ast/Visitor');
+
 // const path = require('path');
 // const content = 'var x;'
 
@@ -8,36 +10,24 @@ const traverse = require('@babel/traverse');
 //     plugins: ['jsx'],
 // });
 
-module.exports.parse = function parse(script) {
-    return JSON.stringify(
-            babelParser.parse(script,
-            {
-                ranges: true,
-                tokens: true,
-                sourceType: 'unambiguous',
-                allowImportExportEverywhere: true,
-                allowReturnOutsideFunction: true,
-                plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
-            })
-        );
+function parse(script) {
+    
+    const ast = babelParser.parse(script,
+        {
+            ranges: true,
+            tokens: true,
+            sourceType: 'unambiguous',
+            allowImportExportEverywhere: true,
+            allowReturnOutsideFunction: true,
+            plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
+        });
+
+    traverse.default(ast, new visitor.FunctionDeclarationVisitor());
+    const functionDeclarations = visitor.getFunctionDeclarations();
+
+    return JSON.stringify(functionDeclarations);
 };
 
-//
-//const root = "res";
-//const uniqueFilePath = "res." + path.parse(filePath).name;
-//traverse.default(ast, new visitor.FunctionDeclarationVisitor(uniqueFilePath));
-//
-//functionDeclarations.forEach(function (element) {
-//    printAsJson(element);
-//});
-//
-//traverse.default(ast, new f.FunctionDeclarationVisitor(uniqueFilePath, functionDeclarations));
-//
-//function printAsJson(json) {
-//    console.log(JSON.stringify(json));
-//}
-//
-//const functionInvocation = functionInvocation.getStateSetterInvocations();
-//functionInvocation.forEach(function (element) {
-//    printAsJson(element);
-//});
+parse('function x() { } ');
+
+module.exports.parse = parse;
