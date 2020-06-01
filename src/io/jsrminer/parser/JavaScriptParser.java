@@ -1,17 +1,14 @@
 package io.jsrminer.parser;
 
-import java.util.List;
 import java.util.Map;
-
-import com.eclipsesource.v8.V8Object;
-import io.jsrminer.api.IParser;
 import io.jsrminer.uml.UMLModel;
 
 public class JavaScriptParser {
+
     public UMLModel parse(Map<String, String> fileContents) {
         JavaScriptEngine jsEngine = new JavaScriptEngine();
         jsEngine.createNodeJsEnvironment();
-        jsEngine.addBabelParser();
+        jsEngine.createParseFunction();
 
         for (String filepath : fileContents.keySet()) {
             final String content = fileContents.get(filepath);
@@ -20,16 +17,20 @@ public class JavaScriptParser {
         return null;
     }
 
+    private String convert(String json){
+        return null;
+    }
 
-    
-    private void processScript(String script, JavaScriptEngine jsEngine) {
+    private String processScript(String script, JavaScriptEngine jsEngine) {
+        String json = null;
         try {
             // Json ist the whole program currently let's say its just the fds
-            String json = (String) jsEngine.executeFunction("parse", script);
-
+             json = (String) jsEngine.executeFunction("parse", script);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+
+        return json;
     }
 
 //    private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
