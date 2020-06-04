@@ -8,19 +8,32 @@ const functionDeclarations = [];
 // A visitor for FunctionDeclaration
 function FunctionDeclarationVisitor(/*namespace*/) {
 
-    this.FunctionDeclaration = (path, ars) => {
+    this.FunctionDeclaration = (path) => {
         const fd = path.node;
         const statements = fd.body;
         const name = fd.id.name;
         //const fullyQualifiedName = namespace + "." + fd.id.name;
-      //  path.get('body').traverse(new StateDeclarationVisitor(fullyQualifiedName));
-       // path.skip();
+        // path.skip();
         saveFunctionDeclaration(fd);
+    };
+
+    this.FunctionExpression = (path) => {
+        const fd = path.node;
     };
 };
 
 function saveFunctionDeclaration(node) {
-    functionDeclarations.push({ name: node.id.name, body: node.body, loc: node.loc });
+    const loc = node.loc;
+
+    functionDeclarations.push({
+        name: node.id.name, body: node.body
+        , location: {
+            startLine: loc.start.line,
+            startColumn: loc.start.column,
+            endLine: loc.end.line,
+            endColumn: loc.end.column
+        }
+    });
 }
 
 exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;

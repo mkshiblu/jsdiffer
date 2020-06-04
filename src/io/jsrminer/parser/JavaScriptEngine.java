@@ -14,7 +14,7 @@ class JavaScriptEngine implements AutoCloseable {
     private NodeJS nodeJs;
     private V8Object parser;
 
-    public void createNodeJsEnvironment() {
+    public JavaScriptEngine() {
         this.nodeJs = NodeJS.createNodeJS();
 
         // Add a utility toJson function

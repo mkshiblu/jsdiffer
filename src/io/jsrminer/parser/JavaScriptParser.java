@@ -1,13 +1,13 @@
 package io.jsrminer.parser;
 
 import java.util.Map;
+
 import io.jsrminer.uml.UMLModel;
 
 public class JavaScriptParser {
 
     public UMLModel parse(Map<String, String> fileContents) {
         JavaScriptEngine jsEngine = new JavaScriptEngine();
-        jsEngine.createNodeJsEnvironment();
         jsEngine.createParseFunction();
 
         for (String filepath : fileContents.keySet()) {
@@ -17,15 +17,15 @@ public class JavaScriptParser {
         return null;
     }
 
-    private String convert(String json){
+    private String convert(String json) {
         return null;
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {
         String json = null;
         try {
-            // Json ist the whole program currently let's say its just the fds
-             json = (String) jsEngine.executeFunction("parse", script);
+            // Json the whole program currently let's say its just the fds
+            json = (String) jsEngine.executeFunction("parse", script);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
