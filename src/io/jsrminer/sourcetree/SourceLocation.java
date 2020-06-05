@@ -3,7 +3,6 @@ package io.jsrminer.sourcetree;
 public class SourceLocation {
     /**
      * File where the code element resides
-     * Relative path of the filename from the root folder is preferred
      */
     private String file = null;
 

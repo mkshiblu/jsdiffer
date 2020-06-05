@@ -1,4 +1,4 @@
-package io.jsrminer.diff;
+package io.jsrminer.io;
 
 import org.apache.commons.io.FileUtils;
 

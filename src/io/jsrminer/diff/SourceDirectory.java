@@ -1,5 +1,6 @@
 package io.jsrminer.diff;
 
+import io.jsrminer.io.SourceFile;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;

@@ -26,6 +26,8 @@ public class JavaScriptParser {
         try {
             // Json the whole program currently let's say its just the fds
             json = (String) jsEngine.executeFunction("parse", script);
+
+            
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

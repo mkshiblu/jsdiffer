@@ -1,8 +1,8 @@
 package io.jsrminer.diff;
 
-import java.util.ArrayList;
+import io.jsrminer.io.SourceFile;
+
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

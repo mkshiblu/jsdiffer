@@ -16,4 +16,8 @@ public abstract class CodeElement {
     public SourceLocation getLocation() {
         return location;
     }
+
+    public void setLocation(SourceLocation location) {
+        this.location = location;
+    }
 }
