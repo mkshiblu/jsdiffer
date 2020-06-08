@@ -1,5 +1,8 @@
 package io.jsrminer.sourcetree;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Arrays;
 
 public class FunctionDeclaration extends CodeElement {
@@ -27,7 +30,8 @@ public class FunctionDeclaration extends CodeElement {
      * For example if function y() is declared inside x() in file f.js, it will return f.x.y.
      * From this, the name and the qualified names are extracted
      */
-    public FunctionDeclaration(String fullyQualifiedName) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public FunctionDeclaration(@JsonProperty("fullyQualifiedName") String fullyQualifiedName) {
         this.fullyQualifiedName = fullyQualifiedName;
 
         int idx = fullyQualifiedName.lastIndexOf('.');

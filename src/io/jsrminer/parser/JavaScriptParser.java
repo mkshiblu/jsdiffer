@@ -1,8 +1,21 @@
 package io.jsrminer.parser;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.eclipsesource.v8.V8;
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Object;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.IntNode;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLModel;
 
@@ -24,6 +37,25 @@ public class JavaScriptParser {
     }
 
     private FunctionDeclaration convert(String json) {
+        final String qualifiedName = json;
+        ObjectMapper mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(FunctionDeclaration.class, new StdDeserializer<FunctionDeclaration>((JavaType) null) {
+            @Override
+            public FunctionDeclaration deserialize(JsonParser jp, DeserializationContext ctxt)
+                    throws IOException, JsonProcessingException {
+                JsonNode node = jp.getCodec().readTree(jp);
+                String qualifiedName = node.get("qualifiedName").asText();
+                return new FunctionDeclaration(qualifiedName);
+            }
+        });
+        mapper.registerModule(module);
+
+        try {
+            FunctionDeclaration fd = mapper.readValue(json, FunctionDeclaration.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -31,9 +63,19 @@ public class JavaScriptParser {
         String json = null;
         try {
             // Json the whole program currently let's say its just the fds
-            json = (String) jsEngine.executeFunction("parse", script);
+            //json = (String) jsEngine.executeFunction("parse", script);
+            V8Array fdsArray = (V8Array) jsEngine.executeFunction("parse", script);
+            String qualifiedName;
+            String body;
 
-            
+            int len = fdsArray.length();
+            for (int i = 0; i < len; i++) {
+                V8Object fd = (V8Object) fdsArray.get(i);
+                qualifiedName = (String) fd.get("qualifiedName");
+                fd.release();
+            }
+
+            fdsArray.release();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

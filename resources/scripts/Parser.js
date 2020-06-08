@@ -15,7 +15,8 @@ function parse(script) {
     traverse.default(ast, new visitor.FunctionDeclarationVisitor());
     const functionDeclarations = visitor.getFunctionDeclarations();
 
-    return JSON.stringify(functionDeclarations);
+   // return JSON.stringify(functionDeclarations);
+    return functionDeclarations;
 };
 
 //parse('function x() { var d = function namedExp() {}; function y(s) { } d = function() {}; }');
