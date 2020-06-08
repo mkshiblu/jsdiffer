@@ -2,20 +2,10 @@ const babelParser = require('@babel/parser');
 const traverse = require('@babel/traverse');
 const visitor = require('./ast/Visitor');
 
-// const path = require('path');
-// const content = 'var x;'
-
-// const ast = babelParser.parse(content, {
-//     sourceType: 'module',
-//     plugins: ['jsx'],
-// });
-
 function parse(script) {
     
     const ast = babelParser.parse(script,
         {
-            //ranges: true,
-            //tokens: true,
             sourceType: 'unambiguous',
             allowImportExportEverywhere: true,
             allowReturnOutsideFunction: true,
@@ -28,6 +18,6 @@ function parse(script) {
     return JSON.stringify(functionDeclarations);
 };
 
-parse('function x() { var d = function () {}; } ');
+//parse('function x() { var d = function namedExp() {}; function y(s) { } d = function() {}; }');
 
 module.exports.parse = parse;

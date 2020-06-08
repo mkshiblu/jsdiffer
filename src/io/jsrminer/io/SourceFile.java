@@ -11,7 +11,7 @@ public class SourceFile {
     private File sourceDirectory;
     private String relativePathToSourceDirectory;
 
-    SourceFile(File file, String srcDirPath) {
+    public SourceFile(File file, String srcDirPath) {
         this.file = file;
         String path = file.getPath();
         int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length();

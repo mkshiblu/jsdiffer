@@ -1,7 +1,9 @@
 package io.jsrminer.parser;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLModel;
 
 public class JavaScriptParser {
@@ -10,14 +12,18 @@ public class JavaScriptParser {
         JavaScriptEngine jsEngine = new JavaScriptEngine();
         jsEngine.createParseFunction();
 
+        final HashMap<String, FunctionDeclaration> fds = new HashMap<>();
+
         for (String filepath : fileContents.keySet()) {
             final String content = fileContents.get(filepath);
-            processScript(content, jsEngine);
+            final String json = processScript(content, jsEngine);
+            final FunctionDeclaration fd = convert(json);
+            fds.put(filepath, fd);
         }
         return null;
     }
 
-    private String convert(String json) {
+    private FunctionDeclaration convert(String json) {
         return null;
     }
 

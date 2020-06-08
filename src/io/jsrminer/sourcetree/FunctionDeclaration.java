@@ -8,23 +8,19 @@ public class FunctionDeclaration extends CodeElement {
     /**
      * The name of the function.
      */
-    private String name;
+    public final String name;
 
     /**
      * Qualified name excluding the filename but including the parent function name.
      * For example if function y() is declared inside x(), it will return x.y.
      */
-    private String qualifiedName;
+    public final String qualifiedName;
 
     /**
      * Fully Qualified name including the filename, parent function name if any.
      * For example if function y() is declared inside x() in file f.js, it will return f.x.y.
      */
-    private String fullyQualifiedName;
-
-    public FunctionDeclaration() {
-
-    }
+    public String fullyQualifiedName;
 
     /**
      * Fully Qualified name including the filename, parent function name if any.
@@ -50,10 +46,6 @@ public class FunctionDeclaration extends CodeElement {
 
     public void setParameters(String[] parameters) {
         this.parameters = parameters;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String[] getParameters() {

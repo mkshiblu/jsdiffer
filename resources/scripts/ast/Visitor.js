@@ -12,26 +12,34 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const fd = path.node;
         const statements = fd.body;
         const name = fd.id.name;
-        //const fullyQualifiedName = namespace + "." + fd.id.name;
-        // path.skip();
-        //const
-
-        concatScopes(path);
-        saveFunctionDeclaration(fd);
+        const namespace = concatScopes(path);
+        const qualifiedName = namespace == null ? name : namespace + '.' + name;
+        saveFunctionDeclaration(fd, qualifiedName);
     };
 
     this.FunctionExpression = (path) => {
-        const fd = path.node;
+        const fe = path.node;
 
-        concatScopes(path);
-        saveFunctionDeclaration(fd);
+        // If it's a named functionExpression process it as declaration since it is subject to rename
+        if (fe.id != null) {
+            const body = fe.body;
+            const name = fe.id.name;
+            const namespace =  concatScopes(path);
+            const qualifiedName = namespace == null ? name: namespace + '.' + name;
+            saveFunctionDeclaration(fe, qualifiedName);
+        }else {
+
+            // This is an unmamed function expression. TODO handle
+        }
     };
 };
 
-function saveFunctionDeclaration(node) {
+function saveFunctionDeclaration(node, qualifiedName) {
     const loc = node.loc;
     functionDeclarations.push({
-        name: node.id.name, body: node.body
+        qualifiedName: qualifiedName
+        , body: node.body
+        , params: node.params.map(id => id.name)
         , location: {
             startLine: loc.start.line,
             startColumn: loc.start.column,
@@ -55,7 +63,7 @@ function concatScopes(path) {
         namespace += scope.block.id.name;
         scope = scope.parent;
     }
-    return scope;
+    return namespace == '' ? null : namespace;
 }
 
 exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
