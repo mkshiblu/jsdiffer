@@ -24,10 +24,10 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         if (fe.id != null) {
             const body = fe.body;
             const name = fe.id.name;
-            const namespace =  concatScopes(path);
-            const qualifiedName = namespace == null ? name: namespace + '.' + name;
+            const namespace = concatScopes(path);
+            const qualifiedName = namespace == null ? name : namespace + '.' + name;
             saveFunctionDeclaration(fe, qualifiedName);
-        }else {
+        } else {
 
             // This is an unmamed function expression. TODO handle
         }
@@ -38,7 +38,7 @@ function saveFunctionDeclaration(node, qualifiedName) {
     const loc = node.loc;
     functionDeclarations.push({
         qualifiedName: qualifiedName
-        , body: node.body
+        , body: JSON.stringify(node.body)
         , params: node.params.map(id => id.name)
         , location: {
             startLine: loc.start.line,

@@ -4,7 +4,7 @@ public class SourceLocation {
     /**
      * File where the code element resides
      */
-    private String file = null;
+    private String file;
 
     public final int startLine;
     public final int startColumn;
@@ -25,5 +25,9 @@ public class SourceLocation {
 
     public String getFile() {
         return file;
+    }
+
+    public void setFile(String file) {
+        this.file = file;
     }
 }

@@ -20,4 +20,8 @@ public abstract class CodeElement {
     public void setLocation(SourceLocation location) {
         this.location = location;
     }
+
+    public String getFile() {
+        return location.getFile();
+    }
 }

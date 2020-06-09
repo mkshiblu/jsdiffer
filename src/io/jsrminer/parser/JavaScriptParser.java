@@ -1,86 +1,82 @@
 package io.jsrminer.parser;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.eclipsesource.v8.V8;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.IntNode;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class JavaScriptParser {
 
     public UMLModel parse(Map<String, String> fileContents) {
-        JavaScriptEngine jsEngine = new JavaScriptEngine();
-        jsEngine.createParseFunction();
+        final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();
+        UMLModel umlModel = new UMLModel();
 
-        final HashMap<String, FunctionDeclaration> fds = new HashMap<>();
+        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+            jsEngine.createParseFunction();
 
-        for (String filepath : fileContents.keySet()) {
-            final String content = fileContents.get(filepath);
-            final String json = processScript(content, jsEngine);
-            final FunctionDeclaration fd = convert(json);
-            fds.put(filepath, fd);
-        }
-        return null;
-    }
-
-    private FunctionDeclaration convert(String json) {
-        final String qualifiedName = json;
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(FunctionDeclaration.class, new StdDeserializer<FunctionDeclaration>((JavaType) null) {
-            @Override
-            public FunctionDeclaration deserialize(JsonParser jp, DeserializationContext ctxt)
-                    throws IOException, JsonProcessingException {
-                JsonNode node = jp.getCodec().readTree(jp);
-                String qualifiedName = node.get("qualifiedName").asText();
-                return new FunctionDeclaration(qualifiedName);
+            for (String filepath : fileContents.keySet()) {
+                final String content = fileContents.get(filepath);
+                final V8Array fdsArray = processScript(content, jsEngine);
+                final FunctionDeclaration[] fd = covert(fdsArray, filepath);
+                fds.put(filepath, fd);
+                fdsArray.release();
             }
-        });
-        mapper.registerModule(module);
-
-        try {
-            FunctionDeclaration fd = mapper.readValue(json, FunctionDeclaration.class);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return null;
     }
 
-    private String processScript(String script, JavaScriptEngine jsEngine) {
-        String json = null;
+    private FunctionDeclaration[] covert(final V8Array fdsArray, String file) {
+        final FunctionDeclaration[] fds = new FunctionDeclaration[fdsArray.length()];
+
+        FunctionDeclaration fd;
+        SourceLocation location;
+        String qualifiedName;
+        String body;
+        V8Array v8ParamsArray;
+
+        for (int i = 0; i < fds.length; i++) {
+            // Extract nodes
+            V8Object v8Fd = fdsArray.getObject(i);
+            V8Object v8Location = v8Fd.getObject("location");
+
+            // Extract fds info
+            qualifiedName = v8Fd.getString("qualifiedName");
+            body = v8Fd.getString("body");
+            v8ParamsArray = v8Fd.getArray("params");
+
+            // Create java object
+            fd = new FunctionDeclaration(qualifiedName);
+            fd.setParameters(V8ToJava.toStringArray(v8ParamsArray));
+
+            location = V8ToJava.parseLocation(v8Location);
+            location.setFile(file);
+            fd.setLocation(location);
+            fd.setBody(body);
+
+            fds[i] = fd;
+            v8Fd.release();
+            v8Location.release();
+            v8ParamsArray.release();
+        }
+
+        fdsArray.release();
+        return fds;
+    }
+
+    private V8Array processScript(String script, JavaScriptEngine jsEngine) {
+        // String json = null;
         try {
-            // Json the whole program currently let's say its just the fds
             //json = (String) jsEngine.executeFunction("parse", script);
-            V8Array fdsArray = (V8Array) jsEngine.executeFunction("parse", script);
-            String qualifiedName;
-            String body;
-
-            int len = fdsArray.length();
-            for (int i = 0; i < len; i++) {
-                V8Object fd = (V8Object) fdsArray.get(i);
-                qualifiedName = (String) fd.get("qualifiedName");
-                fd.release();
-            }
-
-            fdsArray.release();
+            return (V8Array) jsEngine.executeFunction("parse", script);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-
-        return json;
     }
 
 //    private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
