@@ -19,6 +19,4 @@ function parse(script) {
     return functionDeclarations;
 };
 
-//parse('function x() { var d = function namedExp() {}; function y(s) { } d = function() {}; }');
-
 module.exports.parse = parse;

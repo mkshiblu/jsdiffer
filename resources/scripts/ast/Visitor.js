@@ -60,7 +60,11 @@ function concatScopes(path) {
     let namespace = '';
     let scope = path.scope.parent;
     while (scope.parent != null) {
+        if(scope.block.id){ 
         namespace += scope.block.id.name;
+        }else{
+            namespace += "$|$"; // TODO handle this
+        }
         scope = scope.parent;
     }
     return namespace == '' ? null : namespace;

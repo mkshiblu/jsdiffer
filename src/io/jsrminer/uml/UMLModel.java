@@ -52,13 +52,14 @@ public class UMLModel {
 
                 for (FunctionDeclaration fd1 : uncommon1.values()) {
 
-                    for (FunctionDeclaration fd2 : uncommon2.values())
+                    for (FunctionDeclaration fd2 : uncommon2.values()) {
                         if (fd1.hasIdenticalBody(fd2) &&
-                                ((fd1.namespace != null && fd2.namespace != null && fd1.namespace.equals(fd2.namespace)))
-                                || fd1.namespace == fd2.namespace) {
+                                ((fd1.namespace != null && fd1.namespace.equals(fd2.namespace))
+                                        || fd1.namespace == fd2.namespace)) {
                             // fd1 has renamved to fd2
                             diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
                         }
+                    }
                 }
             }
         }
