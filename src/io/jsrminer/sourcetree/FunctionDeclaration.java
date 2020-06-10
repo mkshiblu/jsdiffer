@@ -19,6 +19,7 @@ public class FunctionDeclaration extends CodeElement {
      */
     public final String qualifiedName;
 
+    public final String namespace;
 
     /**
      * Fully Qualified name including the filename, parent function name if any.
@@ -33,33 +34,16 @@ public class FunctionDeclaration extends CodeElement {
         int idx = qualifiedName.lastIndexOf('.');
         if (idx != -1) {
             name = qualifiedName.substring(idx + 1);
+            namespace = qualifiedName.substring(0, idx);
         } else {
             name = qualifiedName;
+            namespace = null;
         }
     }
 
-//
-//    /**
-//     * Fully Qualified name including the filename, parent function name if any.
-//     * For example if function y() is declared inside x() in file f.js, it will return f.x.y.
-//     * From this, the name and the qualified names are extracted
-//     */
-//    public FunctionDeclaration(String fullyQualifiedName) {
-//        this.fullyQualifiedName = fullyQualifiedName;
-//
-//        int idx = fullyQualifiedName.lastIndexOf('.');
-//        if (idx != -1) {
-//            name = fullyQualifiedName.substring(idx + 1);
-//        } else {
-//            name = fullyQualifiedName;
-//        }
-//
-//        if ((idx = fullyQualifiedName.indexOf('.')) != -1)
-//            qualifiedName = fullyQualifiedName.substring(idx + 1);
-//        else {
-//            qualifiedName = fullyQualifiedName;
-//        }
-//    }
+    public boolean hasIdenticalBody(FunctionDeclaration fd) {
+        return this.body.equals(fd.body);
+    }
 
     public void setParameters(String[] parameters) {
         this.parameters = parameters;

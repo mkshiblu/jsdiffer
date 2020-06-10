@@ -13,7 +13,7 @@ public class JavaScriptParser {
 
     public UMLModel parse(Map<String, String> fileContents) {
         final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();
-        UMLModel umlModel = new UMLModel();
+        final UMLModel umlModel = new UMLModel();
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
             jsEngine.createParseFunction();
@@ -28,7 +28,8 @@ public class JavaScriptParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return null;
+        umlModel.setFunctionDeclarations(fds);
+        return umlModel;
     }
 
     private FunctionDeclaration[] covert(final V8Array fdsArray, String file) {
