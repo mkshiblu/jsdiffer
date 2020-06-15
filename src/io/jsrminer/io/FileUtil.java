@@ -88,4 +88,8 @@ public class FileUtil {
             zipFile.close();
         }*/
     }
+
+    public static String getResourcePath(String resourceName) {
+        return FileUtil.class.getClassLoader().getResource(resourceName).getFile();
+    }
 }

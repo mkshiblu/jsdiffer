@@ -1,7 +1,6 @@
 package io.jsrminer.io;
 
-import io.jsrminer.api.IGitService;
-import org.apache.commons.io.FileUtils;
+import io.jsrminer.api.Churn;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,22 +19,18 @@ import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
-import org.jsrminer.api.Churn;
-
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class GitUtil implements IGitService {
+public class GitUtil {
     private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private static final String REMOTE_REFS_PREFIX = "refs/remotes/origin/";
     private static final String GITHUB_URL = "https://github.com/";
@@ -43,7 +38,6 @@ public class GitUtil implements IGitService {
 
     GitUtil.DefaultCommitsFilter commitsFilter = new GitUtil.DefaultCommitsFilter();
 
-    @Override
     public Repository cloneIfNotExists(String projectPath, String cloneUrl/*, String branch*/) throws Exception {
         File folder = new File(projectPath);
         Repository repository;
@@ -98,8 +92,7 @@ public class GitUtil implements IGitService {
         return repository;
     }
 
-    @Override
-    public Repository openRepository(String repositoryPath) throws Exception {
+    public static Repository openRepository(String repositoryPath) throws Exception {
         File folder = new File(repositoryPath);
         Repository repository;
         if (folder.exists()) {
@@ -134,7 +127,6 @@ public class GitUtil implements IGitService {
         }
     }
 
-    @Override
     public int countCommits(Repository repository, String branch) throws Exception {
         RevWalk walk = new RevWalk(repository);
         try {
@@ -221,7 +213,6 @@ public class GitUtil implements IGitService {
         return walk;
     }
 
-    @Override
     public Iterable<RevCommit> createRevsWalkBetweenTags(Repository repository, String startTag, String endTag)
             throws Exception {
         Ref refFrom = repository.findRef(startTag);
@@ -243,8 +234,7 @@ public class GitUtil implements IGitService {
         return ref.getObjectId();
     }
 
-    @Override
-    public Iterable<RevCommit> createRevsWalkBetweenCommits(Repository repository, String startCommitId, String endCommitId)
+    public static Iterable<RevCommit> createRevsWalkBetweenCommits(Repository repository, String startCommitId, String endCommitId)
             throws Exception {
         ObjectId from = repository.resolve(startCommitId);
         ObjectId to = repository.resolve(endCommitId);
@@ -389,7 +379,6 @@ public class GitUtil implements IGitService {
         return allowedExtensionsSet.contains(FileUtil.getExtension(filePath).toLowerCase());
     }
 
-    @Override
     public Churn churn(Repository repository, RevCommit currentCommit) throws Exception {
         if (currentCommit.getParentCount() > 0) {
             ObjectId oldTree = currentCommit.getParent(0).getTree();

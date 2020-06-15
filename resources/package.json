@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@babel/parser": "^7.0.0",
+    "@babel/traverse": "^7.0.0",
+    "@babel/types": "^7.0.0",
+    "esm": "^3.2.25",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {}
+}

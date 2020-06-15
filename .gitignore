@@ -24,7 +24,7 @@ fabric.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# *.jar
 *.war
 *.nar
 *.ear
@@ -59,3 +59,4 @@ gradle-app.setting
 .idea
 docs/JS Function Declaration.synctex.gz
 *.aux
+resources/.vscode/
