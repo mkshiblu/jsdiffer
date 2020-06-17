@@ -60,15 +60,31 @@ function concatScopes(path) {
     let namespace = '';
     let scope = path.scope.parent;
     while (scope.parent != null) {
-        if(scope.block.id){ 
-        namespace += scope.block.id.name;
-        }else{
+        if (scope.block.id) {
+            namespace += scope.block.id.name;
+        } else {
             namespace += "$|$"; // TODO handle this
+            // e.g; $|$$|$.get
+            // if (inBrowser) {
+            //     try {
+            //         var opts = {};
+            //         Object.defineProperty(opts, 'passive', ({
+            //             get: function get() {
+            //                 /* istanbul ignore next */
+            //                 supportsPassive = true;
+            //             }
+            //         })); // https://github.com/facebook/flow/issues/285
+            //         window.addEventListener('test-passive', null, opts);
+            //     } catch (e) { }
+            // }
+
         }
         scope = scope.parent;
     }
     return namespace == '' ? null : namespace;
 }
 
+
+//print("FunctCount: " + functionDeclarations.size());
 exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
-exports.getFunctionDeclarations = () => functionDeclarations;
+exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));
