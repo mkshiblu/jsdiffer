@@ -1,7 +1,6 @@
 const babelParser = require('@babel/parser');
-//const fs = require('fs');
 const t = require('@babel/types');
-//const path = require('path');
+const processor = require('./FunctionBodyProcessor');
 
 const functionDeclarations = [];
 
@@ -14,6 +13,7 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const name = fd.id.name;
         const namespace = concatScopes(path);
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
+        processor.processFunctionBody(fd.body)
         saveFunctionDeclaration(fd, qualifiedName);
     };
 
@@ -32,6 +32,11 @@ function FunctionDeclarationVisitor(/*namespace*/) {
             // This is an unmamed function expression. TODO handle
         }
     };
+
+    // Could be a declaration or declaration expression
+    this.Function = (path) => {
+
+    }
 };
 
 function saveFunctionDeclaration(node, qualifiedName) {
