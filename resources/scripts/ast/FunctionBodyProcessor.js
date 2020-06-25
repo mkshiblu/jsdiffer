@@ -1,15 +1,17 @@
 const { identifier } = require("@babel/types");
 
+const variableDeclaratorProcessor = require('./VariableDeclarator');
+
 exports.processFunctionBody = function processFunctionBody(functionBody) {
 
-    const nodes = functionBody.body;
-    for (let i = 0; i < nodes.length; i++) {
+    let statements = [];
 
-        const node = nodes[i];
-
+    const bodyNodes = functionBody.body;
+    for (let i = 0; i < bodyNodes.length; i++) {
+        const node = bodyNodes[i];
         switch (node.type) {
             case 'VariableDeclaration':
-                processVariableDeclaration(node);
+                statements.push(processVariableDeclaration(node));
                 break;
             case 'FunctionDeclaration':
                 processFunctionDeclaration(node);
@@ -21,31 +23,23 @@ exports.processFunctionBody = function processFunctionBody(functionBody) {
                 break;
         }
     }
+
+    return statements;
 }
 
-function processVariableDeclaration(variableDeclarationNode) {
-    const declarationNodes = variableDeclarationNode.declarations;
+function processVariableDeclaration(variableDeclaration) {
+    let temp = [];
+    const declarationNodes = variableDeclaration.declarations;
     for (let i = 0; i < declarationNodes.length; i++) {
         const declaration = declarationNodes[i];
+        switch (declaration.type) {
 
-        switch(declaration.type) {
-            
             case 'VariableDeclarator':
-                processsVariableDeclarator(declaration)
+                temp.push(variableDeclaratorProcessor.toStatement(declaration));
                 break;
         }
     }
-}
-
-
-function processsVariableDeclarator(variableDeclarator) {
-    
-    let vd = {};
-    switch(variableDeclarator.id.type){
-        case 'Identifier':
-            vd.name = variableDeclarator.id.name;
-            break;
-    }
+    return temp;
 }
 
 function processFunctionDeclaration(functionDeclaration) {
