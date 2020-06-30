@@ -19,12 +19,27 @@ exports.processFunctionBody = function processFunctionBody(functionBody) {
             case 'ExpressionStatement':
                 processExpressionStatement(node);
                 break;
+            case 'IfStatement':
+                processIfStatement(node);
+                break;
             default:
                 break;
         }
     }
 
     return statements;
+}
+
+function processIfStatement(ifStatement) {
+        const ifBody = ifStatement.consequent; // type could be a block statement
+    const condition = ifStatement.test;
+        switch (condition.type) {
+            case 'BinaryExpression':
+                const left = condition.left;
+                const operator = condition.operator;
+                const right = condition.right;
+                break;
+        }
 }
 
 function processVariableDeclaration(variableDeclaration) {
