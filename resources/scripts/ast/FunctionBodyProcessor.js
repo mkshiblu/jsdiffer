@@ -31,15 +31,29 @@ exports.processFunctionBody = function processFunctionBody(functionBody) {
 }
 
 function processIfStatement(ifStatement) {
-        const ifBody = ifStatement.consequent; // type could be a block statement
+    const ifBody = ifStatement.consequent; // type could be a block statement
     const condition = ifStatement.test;
-        switch (condition.type) {
-            case 'BinaryExpression':
-                const left = condition.left;
-                const operator = condition.operator;
-                const right = condition.right;
-                break;
-        }
+    switch (condition.type) {
+        case 'BinaryExpression':
+            const left = condition.left;
+            const operator = condition.operator;
+            const right = condition.right;
+            processExpression(right);
+            break;
+    }
+}
+
+function processExpression(expression) {
+    switch (expression.type) {
+        case 'BinaryExpression':
+            const left = condition.left;
+            const operator = condition.operator;
+            const right = condition.right;
+            break;
+        case 'NumericLiteral':
+            const value = expression.value;
+            break;
+    }
 }
 
 function processVariableDeclaration(variableDeclaration) {
