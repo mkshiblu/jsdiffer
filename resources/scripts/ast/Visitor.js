@@ -13,6 +13,8 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const name = fd.id.name;
         const namespace = concatScopes(path);
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
+
+        // Pass the path instead of the body because path has the string repreentation?
         const funcBody = processor.processFunctionBody(fd.body)
         saveFunctionDeclaration(fd, qualifiedName);
     };

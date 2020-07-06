@@ -31,6 +31,11 @@ exports.processFunctionBody = function processFunctionBody(functionBody) {
 }
 
 function processIfStatement(ifStatement) {
+    const result = {
+        name: 'if',
+        expressionList: []
+    };
+
     const ifBody = ifStatement.consequent; // type could be a block statement
     const condition = ifStatement.test;
     switch (condition.type) {
@@ -41,6 +46,9 @@ function processIfStatement(ifStatement) {
             processExpression(right);
             break;
     }
+
+    // TODO add the expression to the list
+    return result.expressionList.push(condition);
 }
 
 function processExpression(expression) {
