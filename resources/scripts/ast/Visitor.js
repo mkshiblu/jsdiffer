@@ -15,7 +15,7 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
 
         // Pass the path instead of the body because path has the string repreentation?
-        const funcBody = processor.processFunctionBody(fd.body)
+        const funcBody = processor.processFunctionBody(path.get('body'));
         saveFunctionDeclaration(fd, qualifiedName);
     };
 

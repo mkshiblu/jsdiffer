@@ -2,25 +2,26 @@ const { identifier } = require("@babel/types");
 
 const variableDeclaratorProcessor = require('./VariableDeclarator');
 
-exports.processFunctionBody = function processFunctionBody(functionBody) {
+exports.processFunctionBody = function processFunctionBody(bodyPath) {
 
     let statements = [];
-
-    const bodyNodes = functionBody.body;
+    const bodyNodes = bodyPath.get('body');
     for (let i = 0; i < bodyNodes.length; i++) {
-        const node = bodyNodes[i];
+        const nodePath = bodyNodes[i];
+        const node = nodePath.node;
         switch (node.type) {
             case 'VariableDeclaration':
-                statements.push(processVariableDeclaration(node));
+                statements.push(processVariableDeclaration(nodePath));
                 break;
             case 'FunctionDeclaration':
-                processFunctionDeclaration(node);
+                processFunctionDeclaration(nodePath);
                 break;
             case 'ExpressionStatement':
-                processExpressionStatement(node);
+                processExpressionStatement(nodePath);
                 break;
             case 'IfStatement':
-                processIfStatement(node);
+                const ifStr = processIfStatement(nodePath);
+                statements.push(ifStr);
                 break;
             default:
                 break;
@@ -30,7 +31,14 @@ exports.processFunctionBody = function processFunctionBody(functionBody) {
     return statements;
 }
 
-function processIfStatement(ifStatement) {
+
+// The main function for recursively going deep and extracting all the informations
+function processStatement(path) {
+    
+}
+
+function processIfStatement(ifStatementPath) {
+    const ifStatement = ifStatementPath.node;
     const result = {
         name: 'if',
         expressionList: []
@@ -47,8 +55,10 @@ function processIfStatement(ifStatement) {
             break;
     }
 
+    const expressionStr = ifStatementPath.get('test').toString();
+    result.expressionList.push(expressionStr);
     // TODO add the expression to the list
-    return result.expressionList.push(condition);
+    return result;
 }
 
 function processExpression(expression) {
@@ -64,8 +74,10 @@ function processExpression(expression) {
     }
 }
 
-function processVariableDeclaration(variableDeclaration) {
+function processVariableDeclaration(variableDeclarationPath) {
     let temp = [];
+    const variableDeclaration = variableDeclarationPath.node;
+
     const declarationNodes = variableDeclaration.declarations;
     for (let i = 0; i < declarationNodes.length; i++) {
         const declaration = declarationNodes[i];
