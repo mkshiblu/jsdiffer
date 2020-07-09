@@ -8,6 +8,7 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
     const bodyNodes = bodyPath.get('body');
     for (let i = 0; i < bodyNodes.length; i++) {
         const nodePath = bodyNodes[i];
+        processStatement(nodePath);
         const node = nodePath.node;
         switch (node.type) {
             case 'VariableDeclaration':
@@ -34,13 +35,52 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
 
 // The main function for recursively going deep and extracting all the informations
 function processStatement(path) {
-    
+
+    const processors = new Map();
+    processors.set('IfStatement', processIfStatement);
+    processors.set('VariableDeclaration', processVariableDeclaration);
+    const res = [];
+    const stack = [path];
+    while (stack.length > 0) {
+        const nodePath = stack.pop();
+        const processor = processors.get(nodePath.node.type);
+        if (processor) {
+            res.push(processor(nodePath));
+        } else {
+            console.log("Yet to be implemented" + nodePath.node.type);
+        }
+    }
+}
+
+// It's a leaf node?
+function processVariableDeclaration(variableDeclarationPath) {
+    let temp = [];
+    const variableDeclaration = variableDeclarationPath.node;
+
+    // const declarationNodes = variableDeclaration.declarations;
+    // for (let i = 0; i < declarationNodes.length; i++) {
+    //     const declaration = declarationNodes[i];
+    //     switch (declaration.type) {
+
+    //         case 'VariableDeclarator':
+    //             temp.push(variableDeclaratorProcessor.toStatement(declaration));
+    //             break;
+    //     }
+    // }
+
+    // //return temp;
+    return {
+        type: variableDeclaration.type,
+        statement: variableDeclarationPath.toString(),
+    };
 }
 
 function processIfStatement(ifStatementPath) {
     const ifStatement = ifStatementPath.node;
     const result = {
-        name: 'if',
+        type: ifStatement.type,
+        // For composite we store the expression that appears inside the bracket and it's name
+        statement: 'if',
         expressionList: []
     };
 
@@ -57,7 +97,6 @@ function processIfStatement(ifStatementPath) {
 
     const expressionStr = ifStatementPath.get('test').toString();
     result.expressionList.push(expressionStr);
-    // TODO add the expression to the list
     return result;
 }
 
@@ -72,23 +111,6 @@ function processExpression(expression) {
             const value = expression.value;
             break;
     }
-}
-
-function processVariableDeclaration(variableDeclarationPath) {
-    let temp = [];
-    const variableDeclaration = variableDeclarationPath.node;
-
-    const declarationNodes = variableDeclaration.declarations;
-    for (let i = 0; i < declarationNodes.length; i++) {
-        const declaration = declarationNodes[i];
-        switch (declaration.type) {
-
-            case 'VariableDeclarator':
-                temp.push(variableDeclaratorProcessor.toStatement(declaration));
-                break;
-        }
-    }
-    return temp;
 }
 
 function processFunctionDeclaration(functionDeclaration) {
