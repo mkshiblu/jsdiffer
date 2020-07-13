@@ -2,13 +2,25 @@ const { identifier } = require("@babel/types");
 
 const variableDeclaratorProcessor = require('./VariableDeclarator');
 
+const processors = new Map();
+
+function initNodeProcessors() {
+    processors.set('IfStatement', processIfStatement);
+    processors.set('VariableDeclaration', processVariableDeclaration);
+    processors.set('BlockStatement', processBlockStatement);
+    processors.set('ReturnStatement', processReturnStatement);
+}
+
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
+
+    initNodeProcessors();
 
     let statements = [];
     const bodyNodes = bodyPath.get('body');
     for (let i = 0; i < bodyNodes.length; i++) {
         const nodePath = bodyNodes[i];
         processStatement(nodePath);
+
         const node = nodePath.node;
         switch (node.type) {
             case 'VariableDeclaration':
@@ -32,23 +44,32 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
     return statements;
 }
 
-
 // The main function for recursively going deep and extracting all the informations
 function processStatement(path) {
 
-    const processors = new Map();
-    processors.set('IfStatement', processIfStatement);
-    processors.set('VariableDeclaration', processVariableDeclaration);
     const res = [];
-    const stack = [path];
-    while (stack.length > 0) {
-        const nodePath = stack.pop();
-        const processor = processors.get(nodePath.node.type);
-        if (processor) {
-            res.push(processor(nodePath));
-        } else {
-            console.log("Yet to be implemented" + nodePath.node.type);
+    const process = processors.get(path.node.type);
+
+    if (process) {
+        const statement = process(path);
+
+        if (statement.bodyPaths) {
+            statement.bodyPaths.forEach(processStatement);
         }
+
+        res.push(statement);
+    } else {
+        console.log("Processor to be implemented" + path.node.type);
+    }
+
+    return res;
+}
+
+function processBlockStatement(path) {
+    return {
+        type: path.node.type,
+        statement: '{',
+        bodyPaths: path.get('body')
     }
 }
 
@@ -81,10 +102,11 @@ function processIfStatement(ifStatementPath) {
         type: ifStatement.type,
         // For composite we store the expression that appears inside the bracket and it's name
         statement: 'if',
-        expressionList: []
+        expressions: [],
+        bodyPaths: []
     };
 
-    const ifBody = ifStatement.consequent; // type could be a block statement
+    // TODO: Handle expressions
     const condition = ifStatement.test;
     switch (condition.type) {
         case 'BinaryExpression':
@@ -94,9 +116,17 @@ function processIfStatement(ifStatementPath) {
             processExpression(right);
             break;
     }
+    // TODO handle else if else
 
     const expressionStr = ifStatementPath.get('test').toString();
-    result.expressionList.push(expressionStr);
+    result.expressions.push(expressionStr);
+
+    // Extract body
+    const bodyPath = ifStatementPath.get('consequent');
+
+    if (bodyPath)
+        result.bodyPaths.push(bodyPath);
+
     return result;
 }
 
@@ -119,4 +149,11 @@ function processFunctionDeclaration(functionDeclaration) {
 
 function processExpressionStatement(expressionStatement) {
 
+}
+
+function processReturnStatement(path) {
+  return {
+      type: path.node.type,
+      statement: path.toString()
+  }    
 }
