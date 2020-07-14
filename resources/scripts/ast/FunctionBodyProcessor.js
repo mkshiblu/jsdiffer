@@ -15,61 +15,74 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
 
     initNodeProcessors();
 
-    let statements = [];
+    let parent = {};
     const bodyNodes = bodyPath.get('body');
     for (let i = 0; i < bodyNodes.length; i++) {
         const nodePath = bodyNodes[i];
-        processStatement(nodePath);
+        processStatement(nodePath, parent);
 
-        const node = nodePath.node;
-        switch (node.type) {
-            case 'VariableDeclaration':
-                statements.push(processVariableDeclaration(nodePath));
-                break;
-            case 'FunctionDeclaration':
-                processFunctionDeclaration(nodePath);
-                break;
-            case 'ExpressionStatement':
-                processExpressionStatement(nodePath);
-                break;
-            case 'IfStatement':
-                const ifStr = processIfStatement(nodePath);
-                statements.push(ifStr);
-                break;
-            default:
-                break;
-        }
+        // const node = nodePath.node;
+        // switch (node.type) {
+        //     case 'VariableDeclaration':
+        //         statements.push(processVariableDeclaration(nodePath));
+        //         break;
+        //     case 'FunctionDeclaration':
+        //         processFunctionDeclaration(nodePath);
+        //         break;
+        //     case 'ExpressionStatement':
+        //         processExpressionStatement(nodePath);
+        //         break;
+        //     case 'IfStatement':
+        //         const ifStr = processIfStatement(nodePath);
+        //         statements.push(ifStr);
+        //         break;
+        //     default:
+        //         break;
+        // }
     }
 
     return statements;
 }
 
+//const processedNodes = [];
 // The main function for recursively going deep and extracting all the informations
-function processStatement(path) {
+// Parent is the parent node
+function processStatement(path, parent) {
 
-    const res = [];
     const process = processors.get(path.node.type);
-
     if (process) {
-        const statement = process(path);
+        const res = process(path);
 
-        if (statement.bodyPaths) {
-            statement.bodyPaths.forEach(processStatement);
+        if (res.bodyPaths) {
+            res.bodyPaths.forEach(bodyPath => processStatement(bodyPath, res));
         }
 
-        res.push(statement);
+        addStatement(parent, res);
+
+  //      processedNodes.push(res);
     } else {
         console.log("Processor to be implemented" + path.node.type);
     }
 
-    return res;
+//    return processedNodes;
 }
+
+
+function addStatement(parent, childStatement) {
+    if (!parent.children) {
+        parent.children = [];
+    }
+
+    parent.children.push(childStatement);
+}
+
 
 function processBlockStatement(path) {
     return {
         type: path.node.type,
         statement: '{',
-        bodyPaths: path.get('body')
+        bodyPaths: path.get('body'),
+        children: []
     }
 }
 
@@ -152,8 +165,8 @@ function processExpressionStatement(expressionStatement) {
 }
 
 function processReturnStatement(path) {
-  return {
-      type: path.node.type,
-      statement: path.toString()
-  }    
+    return {
+        type: path.node.type,
+        statement: path.toString()
+    }
 }
