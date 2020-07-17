@@ -15,36 +15,16 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
 
     initNodeProcessors();
 
-    let parent = {};
+    let fd = {};
     const bodyNodes = bodyPath.get('body');
     for (let i = 0; i < bodyNodes.length; i++) {
         const nodePath = bodyNodes[i];
-        processStatement(nodePath, parent);
-
-        // const node = nodePath.node;
-        // switch (node.type) {
-        //     case 'VariableDeclaration':
-        //         statements.push(processVariableDeclaration(nodePath));
-        //         break;
-        //     case 'FunctionDeclaration':
-        //         processFunctionDeclaration(nodePath);
-        //         break;
-        //     case 'ExpressionStatement':
-        //         processExpressionStatement(nodePath);
-        //         break;
-        //     case 'IfStatement':
-        //         const ifStr = processIfStatement(nodePath);
-        //         statements.push(ifStr);
-        //         break;
-        //     default:
-        //         break;
-        // }
+        processStatement(nodePath, fd);
     }
 
-    return statements;
+    return fd;
 }
 
-//const processedNodes = [];
 // The main function for recursively going deep and extracting all the informations
 // Parent is the parent node
 function processStatement(path, parent) {
