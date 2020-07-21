@@ -1,6 +1,7 @@
 const { identifier } = require("@babel/types");
 
 const variableDeclaratorProcessor = require('./VariableDeclarator');
+const astUtil = require('./AstUtil');
 
 const processors = new Map();
 let bodyPaths = [];
@@ -33,20 +34,18 @@ function processStatement(path, parent) {
     const process = processors.get(path.node.type);
     if (process) {
         bodyPaths = [];
-        const res = process(path);
+        const statement = process(path);
+        
+        statement.sourceLocation = astUtil.getFormattedLocation(path.node);
 
         if (bodyPaths) {
-            bodyPaths.forEach(bodyPath => processStatement(bodyPath, res));
+            bodyPaths.forEach(bodyPath => processStatement(bodyPath, statement));
         }
 
-        addStatement(parent, res);
-
-  //      processedNodes.push(res);
+        addStatement(parent, statement);
     } else {
         console.log("Processor to be implemented" + path.node.type);
     }
-
-//    return processedNodes;
 }
 
 
@@ -54,7 +53,6 @@ function addStatement(parent, childStatement) {
     if (!parent.statements) {
         parent.statements = [];
     }
-
     parent.statements.push(childStatement);
 }
 
