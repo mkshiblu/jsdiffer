@@ -12,6 +12,7 @@ function initNodeProcessors() {
     nodePathProcesses.set('VariableDeclaration', processVariableDeclaration);
     nodePathProcesses.set('BlockStatement', processBlockStatement);
     nodePathProcesses.set('ReturnStatement', processReturnStatement);
+    nodePathProcesses.set('EmptyStatement', processEmptyStatement);
 }
 
 function processFunctionDeclaration(functionDeclarationPath) {
@@ -29,7 +30,6 @@ function processFunctionDeclaration(functionDeclarationPath) {
 }
 
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
-
     initNodeProcessors();
 
     let functionBody = {};
@@ -150,8 +150,11 @@ function processExpression(expression) {
     }
 }
 
-function processExpressionStatement(expressionStatement) {
 
+function processEmptyStatement(emptyStatementPath) {
+    return {
+        type: emptyStatementPath.node.type
+    }
 }
 
 function processReturnStatement(path) {
@@ -160,3 +163,6 @@ function processReturnStatement(path) {
         text: path.toString()
     }
 }
+
+
+exports.processFunctionDeclaration = processFunctionDeclaration;
