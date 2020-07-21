@@ -53,9 +53,9 @@ public class JavaScriptParser {
 
             // Create java object
             fd = new FunctionDeclaration(qualifiedName);
-            fd.setParameters(V8ToJava.toStringArray(v8ParamsArray));
+            fd.setParameters(JV8.toStringArray(v8ParamsArray));
 
-            location = V8ToJava.parseLocation(v8Location);
+            location = JV8.parseLocation(v8Location);
             location.setFile(file);
             fd.setLocation(location);
             fd.setBody(body);

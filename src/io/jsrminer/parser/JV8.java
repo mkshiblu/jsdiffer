@@ -4,7 +4,7 @@ import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import io.jsrminer.sourcetree.SourceLocation;
 
-class V8ToJava {
+class JV8 {
     static SourceLocation parseLocation(V8Object v8Location) {
         return new SourceLocation(v8Location.getInteger("startLine")
                 , v8Location.getInteger("startColumn")
