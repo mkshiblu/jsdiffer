@@ -3,14 +3,29 @@ const { identifier } = require("@babel/types");
 const variableDeclaratorProcessor = require('./VariableDeclarator');
 const astUtil = require('./AstUtil');
 
-const processors = new Map();
+const nodePathProcesses = new Map();
 let bodyPaths = [];
 
 function initNodeProcessors() {
-    processors.set('IfStatement', processIfStatement);
-    processors.set('VariableDeclaration', processVariableDeclaration);
-    processors.set('BlockStatement', processBlockStatement);
-    processors.set('ReturnStatement', processReturnStatement);
+    nodePathProcesses.set('FunctionDeclaration', processFunctionDeclaration);
+    nodePathProcesses.set('IfStatement', processIfStatement);
+    nodePathProcesses.set('VariableDeclaration', processVariableDeclaration);
+    nodePathProcesses.set('BlockStatement', processBlockStatement);
+    nodePathProcesses.set('ReturnStatement', processReturnStatement);
+}
+
+function processFunctionDeclaration(functionDeclarationPath) {
+    const node = functionDeclarationPath.node;
+    const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
+    const name = node.id.name
+    bodyPaths.push(functionDeclarationPath.get('body'));
+
+    return {
+        type: node.type,
+        qualifiedName,
+        name,
+        params: node.params.map(id => id.name)
+    };
 }
 
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
@@ -31,11 +46,11 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
 // Parent is the parent node
 function processStatement(path, parent) {
 
-    const process = processors.get(path.node.type);
+    const process = nodePathProcesses.get(path.node.type);
     if (process) {
         bodyPaths = [];
         const statement = process(path);
-        
+
         statement.sourceLocation = astUtil.getFormattedLocation(path.node);
 
         if (bodyPaths) {
@@ -58,7 +73,7 @@ function addStatement(parent, childStatement) {
 
 
 function processBlockStatement(path) {
-    bodyPaths= path.get('body');    
+    bodyPaths = path.get('body');
     return {
         type: path.node.type,
         text: '{',
@@ -133,10 +148,6 @@ function processExpression(expression) {
             const value = expression.value;
             break;
     }
-}
-
-function processFunctionDeclaration(functionDeclaration) {
-
 }
 
 function processExpressionStatement(expressionStatement) {
