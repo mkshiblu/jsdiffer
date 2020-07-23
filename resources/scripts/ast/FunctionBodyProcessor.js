@@ -1,6 +1,7 @@
 const { identifier } = require("@babel/types");
 
 const variableDeclaratorProcessor = require('./VariableDeclarator');
+const functionDeclarationProcessor = require('../parser/FunctionDeclarationProcessor');
 const astUtil = require('./AstUtil');
 
 const nodePathProcesses = new Map();
@@ -16,17 +17,19 @@ function initNodeProcessors() {
 }
 
 function processFunctionDeclaration(functionDeclarationPath) {
-    const node = functionDeclarationPath.node;
-    const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
-    const name = node.id.name
-    bodyPaths.push(functionDeclarationPath.get('body'));
+    // const node = functionDeclarationPath.node;
+    // const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
+    // const name = node.id.name
+    // bodyPaths.push(functionDeclarationPath.get('body'));
 
-    return {
-        type: node.type,
-        qualifiedName,
-        name,
-        params: node.params.map(id => id.name)
-    };
+    // return {
+    //     type: node.type,
+    //     qualifiedName,
+    //     name,
+    //     params: node.params.map(id => id.name)
+    // };
+
+    return functionDeclarationProcessor.processFunctionDeclaration(functionDeclarationPath, processStatement);
 }
 
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
