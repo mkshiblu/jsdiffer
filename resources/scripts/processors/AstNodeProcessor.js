@@ -12,7 +12,11 @@ const processNodePath = (function () {
         ['EmptyStatement', statementProcessor.processEmptyStatement]
     ]);
 
-    return function (nodePath) {
-        nodePathProcesses.get(nodePath)
+    return function (nodePath, processStatement) {
+        const process = nodePathProcesses.get(nodePath.node.type);
+        const rt =  process(nodePath, processStatement);
+        return rt;
     }
 })();
+
+exports.processNodePath = processNodePath;

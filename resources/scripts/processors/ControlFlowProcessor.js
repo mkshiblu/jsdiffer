@@ -30,3 +30,11 @@ exports.processIfStatement = (ifStatementPath, processStatement) => {
 
     return statement;
 }
+
+
+exports.processReturnStatement = function (path) {
+    return {
+        type: path.node.type,
+        text: path.toString()
+    }
+}
