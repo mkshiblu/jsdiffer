@@ -1,9 +1,10 @@
 package io.jsrminer.sourcetree;
 
-import java.util.List;
-
-public class SingleStatement extends AbstractStatement {
-    private List<AbstractStatement> statementList;
+public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
     //private List<VariableDeclaration> variableDeclarations;
+
+    public SingleStatement(String statement, String filePath) {
+        // TODO parse JSON
+    }
 }

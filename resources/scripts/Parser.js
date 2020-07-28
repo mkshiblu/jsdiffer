@@ -1,6 +1,6 @@
 const babelParser = require('@babel/parser');
 const traverse = require('@babel/traverse');
-const visitor = require('./Visitor');
+const visitor = require('./parser/Visitor');
 
 function parse(script) {
     console.time('parse');

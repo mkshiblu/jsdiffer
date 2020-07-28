@@ -16,7 +16,6 @@ class JavaScriptEngine implements AutoCloseable {
 
     public JavaScriptEngine() {
         this.nodeJs = NodeJS.createNodeJS();
-
         // Add a utility toJson function
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) {return JSON.stringify(object);}");
     }

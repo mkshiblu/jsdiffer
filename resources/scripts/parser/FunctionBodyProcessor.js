@@ -16,10 +16,8 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
 }
 
 function processStatement(path, parent) {
-
-    //const process = nodePathProcesses.get(path.node.type);
     if (process) {
-        const statement = nodePorcessor.processNodePath(path, processStatement);//process(path);
+        const statement = nodePorcessor.processNodePath(path, processStatement);
         statement.sourceLocation = astUtil.getFormattedLocation(path.node);
         addStatement(parent, statement);
     } else {

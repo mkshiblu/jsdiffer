@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-public abstract class AbstractStatement extends CodeElement {
+public abstract class Statement extends CodeElement {
     // statementCount
     // getLeaves?
 }

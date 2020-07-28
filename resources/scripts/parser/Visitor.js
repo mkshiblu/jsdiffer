@@ -15,8 +15,9 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
 
         // Pass the path instead of the body because path has the string repreentation?
-        const funcBody = processor.processFunctionBody(path.get('body'));
-        saveFunctionDeclaration(fd, qualifiedName);
+        const processedBody = processor.processFunctionBody(path.get('body'));
+        saveFunctionDeclaration(fd, qualifiedName, processedBody);
+        path.skip();
     };
 
     this.FunctionExpression = (path) => {
@@ -41,11 +42,11 @@ function FunctionDeclarationVisitor(/*namespace*/) {
     }
 };
 
-function saveFunctionDeclaration(node, qualifiedName) {
+function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     const loc = node.loc;
     functionDeclarations.push({
         qualifiedName: qualifiedName
-        , body: JSON.stringify(node.body)
+        , body: JSON.stringify(functionBody)
         , params: node.params.map(id => id.name)
         , location: {
             startLine: loc.start.line,

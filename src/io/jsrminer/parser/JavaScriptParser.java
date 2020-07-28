@@ -21,7 +21,7 @@ public class JavaScriptParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
                 final V8Array fdsArray = processScript(content, jsEngine);
-                final FunctionDeclaration[] fd = covert(fdsArray, filepath);
+                final FunctionDeclaration[] fd = convert(fdsArray, filepath);
                 fds.put(filepath, fd);
                 fdsArray.release();
             }
@@ -32,7 +32,7 @@ public class JavaScriptParser {
         return umlModel;
     }
 
-    private FunctionDeclaration[] covert(final V8Array fdsArray, String file) {
+    private FunctionDeclaration[] convert(final V8Array fdsArray, String file) {
         final FunctionDeclaration[] fds = new FunctionDeclaration[fdsArray.length()];
 
         FunctionDeclaration fd;

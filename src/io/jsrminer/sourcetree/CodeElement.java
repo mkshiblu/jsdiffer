@@ -4,13 +4,14 @@ package io.jsrminer.sourcetree;
  * Base class for all the code elements
  */
 public abstract class CodeElement {
-    private SourceLocation location;
+    protected SourceLocation location;
+    protected String text;
 
     public CodeElement() {
     }
 
-    public CodeElement(SourceLocation location) {
-        this.location = location;
+    public CodeElement(String text) {
+        this.text = text;
     }
 
     public SourceLocation getLocation() {
@@ -23,5 +24,13 @@ public abstract class CodeElement {
 
     public String getFile() {
         return location.getFile();
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 }
