@@ -58,6 +58,10 @@ public class FunctionDeclaration extends CodeElement {
         fullyQualifiedName = location.getFile() + "|" + qualifiedName;
     }
 
+    public boolean hasIdenticalBody(FunctionDeclaration fd) {
+        return this.body.equals(fd.body);
+    }
+
     // region Setters & getters
     public String[] getParameters() {
         return parameters;
@@ -69,6 +73,10 @@ public class FunctionDeclaration extends CodeElement {
 
     public String getFullyQualifiedName() {
         return fullyQualifiedName;
+    }
+
+    public void setBody(FunctionBody body) {
+        this.body = body;
     }
 
     public FunctionBody getBody() {

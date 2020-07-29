@@ -1,4 +1,4 @@
-package io.jsrminer.parser;
+package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8Object;

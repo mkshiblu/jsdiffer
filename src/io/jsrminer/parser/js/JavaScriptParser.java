@@ -1,7 +1,8 @@
-package io.jsrminer.parser;
+package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import io.jsrminer.sourcetree.FunctionBody;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
@@ -58,7 +59,7 @@ public class JavaScriptParser {
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
             fd.setLocation(location);
-            fd.setBody(body);
+            fd.setBody(new FunctionBody(body));
 
             fds[i] = fd;
             v8Fd.release();
@@ -79,34 +80,4 @@ public class JavaScriptParser {
             throw new RuntimeException(ex);
         }
     }
-
-//    private void getCst(CstRoot root, SourceFile sourceFile, String content, SourceFileSet sources) throws Exception {
-//        try {
-//            V8Object babelAst = (V8Object) this.nodeJs.getRuntime().executeJSFunction("parse", content);
-//
-//            // System.out.print(String.format("Parsing %s ... ", sources.describeLocation(sourceFile)));
-//            // long timestamp = System.currentTimeMillis();
-//            try (JsValueV8 astRoot = new JsValueV8(babelAst, this::toJson)) {
-//
-//                TokenizedSource tokenizedSource = buildTokenizedSourceFromAst(sourceFile, astRoot);
-//                root.addTokenizedFile(tokenizedSource);
-//
-//                // System.out.println(String.format("Done in %d ms", System.currentTimeMillis() - timestamp));
-//                Map<String, Set<CstNode>> callerMap = new HashMap<>();
-//                getCst(0, root, sourceFile, content, astRoot, callerMap);
-//
-//                root.forEachNode((calleeNode, depth) -> {
-//                    if (calleeNode.getType().equals(JsNodeType.FUNCTION) && callerMap.containsKey(calleeNode.getLocalName())) {
-//                        Set<CstNode> callerNodes = callerMap.get(calleeNode.getLocalName());
-//                        for (CstNode callerNode : callerNodes) {
-//                            root.getRelationships().add(new CstNodeRelationship(CstNodeRelationshipType.USE, callerNode.getId(), calleeNode.getId()));
-//                        }
-//                    }
-//                });
-//            }
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException(String.format("Error parsing %s: %s", sources.describeLocation(sourceFile), e.getMessage()), e);
-//        }
-//    }
 }

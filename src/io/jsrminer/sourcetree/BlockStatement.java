@@ -11,7 +11,7 @@ public class BlockStatement extends Statement {
     // exp
     // vd
 
-    public BlockStatement(String blockStatement, String filePath) {
+    public BlockStatement(String blockStatement) {
 
     }
 }

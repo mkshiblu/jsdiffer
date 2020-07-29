@@ -1,6 +1,7 @@
 const babelParser = require('@babel/parser');
 const t = require('@babel/types');
 const processor = require('./FunctionBodyProcessor');
+const astUtil = require('./AstUtil');
 
 const functionDeclarations = [];
 
@@ -43,17 +44,11 @@ function FunctionDeclarationVisitor(/*namespace*/) {
 };
 
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {
-    const loc = node.loc;
     functionDeclarations.push({
         qualifiedName: qualifiedName
         , body: JSON.stringify(functionBody)
         , params: node.params.map(id => id.name)
-        , location: {
-            startLine: loc.start.line,
-            startColumn: loc.start.column,
-            endLine: loc.end.line,
-            endColumn: loc.end.column
-        }
+        , location: astUtil.getFormattedLocation(node)
     });
 }
 
@@ -92,7 +87,5 @@ function concatScopes(path) {
     return namespace == '' ? null : namespace;
 }
 
-
-//print("FunctCount: " + functionDeclarations.size());
 exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
 exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));

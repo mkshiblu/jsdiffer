@@ -14,8 +14,13 @@ const processNodePath = (function () {
 
     return function (nodePath, processStatement) {
         const process = nodePathProcesses.get(nodePath.node.type);
-        const rt =  process(nodePath, processStatement);
-        return rt;
+        if (process) {
+            const rt = process(nodePath, processStatement);
+            return rt;
+        }
+
+        return nodePath.toString();
+        //throw 'Processeor not implemented for : ' + nodePath.node.type;
     }
 })();
 
