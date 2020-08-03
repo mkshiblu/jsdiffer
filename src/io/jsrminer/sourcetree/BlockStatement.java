@@ -17,13 +17,13 @@ public class BlockStatement extends Statement {
 
     }
 
-    public BlockStatement(String blockStatementJson) {
-        fromJson(blockStatementJson);
-    }
+//    public BlockStatement(String blockStatementJson) {
+//        fromJson(blockStatementJson);
+//    }
 
     public static BlockStatement fromJson(String blockStatementJson) {
         //BlockStatement block = new BlockStatement();
-        BlockStatement block = JsonIterator.deserialize(blockStatementJson, BlockStatement.class)
+        BlockStatement block = JsonIterator.deserialize(blockStatementJson, BlockStatement.class);
         return null;
     }
 }
