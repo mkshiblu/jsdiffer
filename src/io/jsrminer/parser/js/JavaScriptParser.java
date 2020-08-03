@@ -2,15 +2,17 @@ package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import io.jsrminer.api.IParser;
 import io.jsrminer.sourcetree.FunctionBody;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class JavaScriptParser {
+public class JavaScriptParser implements IParser {
 
     public UMLModel parse(Map<String, String> fileContents) {
         final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();

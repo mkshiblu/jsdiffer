@@ -1,5 +1,7 @@
 package io.jsrminer.sourcetree;
 
+import com.jsoniter.JsonIterator;
+
 import java.util.List;
 
 /**
@@ -11,7 +13,17 @@ public class BlockStatement extends Statement {
     // exp
     // vd
 
-    public BlockStatement(String blockStatement) {
+    public BlockStatement() {
 
+    }
+
+    public BlockStatement(String blockStatementJson) {
+        fromJson(blockStatementJson);
+    }
+
+    public static BlockStatement fromJson(String blockStatementJson) {
+        //BlockStatement block = new BlockStatement();
+        BlockStatement block = JsonIterator.deserialize(blockStatementJson, BlockStatement.class)
+        return null;
     }
 }

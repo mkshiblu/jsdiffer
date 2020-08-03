@@ -13,9 +13,16 @@ public class Main {
     public static void main(String[] args) {
         log.debug("Program Starts");
         try {
-            Repository repo = GitUtil.openRepository("E:\\PROJECTS_REPO\\toy_js");
-            String startCommit = "6ec57527498d04e62c1df38d45fbb65dc63f0b43";
-            String endCommit = "ce3f05c03832a7f7bd91b0b12c8bea0aa230572e";
+            Repository repo = GitUtil.openRepository("F:\\PROJECTS_REPO\\toy_js");
+            //"tmp/toy_js",
+            //"https://github.com/danilofes/refactoring-toy-example.git");
+
+            String folder = "tmp";
+            // String startCommit = "2c52c4265ba420ff47dc35eb1060a57c0813ee5d";
+            //String endCommit = "a08feed8c410b89fa049fdbd6b9459e2d858e912";
+
+            String startCommit = "c7b452480c5b74ccb2a3e721f487d4fcf98abfd7";
+            String endCommit = "2ef9925ca949b85c421fef7cbb09131186ac0b53";
             new JSRefactoringMiner().detectBetweenCommits(repo, startCommit, endCommit);
             //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
         } catch (Exception e) {
