@@ -4,20 +4,10 @@ import com.jsoniter.JsonIterator;
 
 import java.io.IOException;
 
-public class FunctionBody extends BlockStatement {
-    public FunctionBody(String functionBody) throws IOException {
+public class FunctionBody extends CodeElement {
+    public FunctionBody(String functionBody) {
 
-        JsonIterator itr = JsonIterator.parse(functionBody);
-
-        for (String field = itr.readObject(); field != null; field = itr.readObject()) {
-            switch (field) {
-                case "statements":
-                    //this.statements = itr.readArray();
-                    continue;
-                default:
-                    break;
-            }
-        }
+        BlockStatement body = BlockStatement.fromJson(functionBody);
     }
 }
 

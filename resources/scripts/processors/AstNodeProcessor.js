@@ -9,7 +9,8 @@ const processNodePath = (function () {
         ['IfStatement', controlFlowProcessor.processIfStatement],
         ['BlockStatement', statementProcessor.processBlockStatement],
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
-        ['EmptyStatement', statementProcessor.processEmptyStatement]
+        ['EmptyStatement', statementProcessor.processEmptyStatement],
+        ['ExpressionStatement', statementProcessor.processExpressionStatement],
     ]);
 
     return function (nodePath, processStatement) {
@@ -19,8 +20,8 @@ const processNodePath = (function () {
             return rt;
         }
 
-        return nodePath.toString();
-        //throw 'Processeor not implemented for : ' + nodePath.node.type;
+        //return 'Processeor not implemented for : ' + nodePath.node.type + " : " + nodePath.toString();
+        throw 'Processeor not implemented for : ' + nodePath.node.type;
     }
 })();
 

@@ -1,10 +1,5 @@
 package io.jsrminer.sourcetree;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Arrays;
-
 public class FunctionDeclaration extends CodeElement {
     private String[] parameters;
 
@@ -53,9 +48,9 @@ public class FunctionDeclaration extends CodeElement {
     }
 
     @Override
-    public void setLocation(SourceLocation location) {
-        super.setLocation(location);
-        fullyQualifiedName = location.getFile() + "|" + qualifiedName;
+    public void setSourceLocation(SourceLocation sourceLocation) {
+        super.setSourceLocation(sourceLocation);
+        fullyQualifiedName = sourceLocation.getFile() + "|" + qualifiedName;
     }
 
     public boolean hasIdenticalBody(FunctionDeclaration fd) {

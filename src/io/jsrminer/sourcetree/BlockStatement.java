@@ -1,6 +1,7 @@
 package io.jsrminer.sourcetree;
 
 import com.jsoniter.JsonIterator;
+import com.jsoniter.any.Any;
 
 import java.util.List;
 
@@ -17,13 +18,29 @@ public class BlockStatement extends Statement {
 
     }
 
-//    public BlockStatement(String blockStatementJson) {
-//        fromJson(blockStatementJson);
-//    }
-
+    //@JsonCreator
     public static BlockStatement fromJson(String blockStatementJson) {
-        //BlockStatement block = new BlockStatement();
-        BlockStatement block = JsonIterator.deserialize(blockStatementJson, BlockStatement.class);
-        return null;
+        BlockStatement block = new BlockStatement();
+        Any any = JsonIterator.deserialize(blockStatementJson);
+
+        // Parse source location
+        SourceLocation location = any.get("loc").as(SourceLocation.class);
+        block.sourceLocation = location;
+
+        // Parse the nested statements
+        List<Any> statements = any.get("statements").asList();
+        for (Any statement: statements) {
+            String type = statement.get("type").toString();
+            boolean isComposite =  "BlockStatement".equals(type);
+
+            if (isComposite) {
+                // TO Do a block statement again
+            }else {
+                // A leaf statement
+                block.statements.add(new SingleStatement(statement.toString()));
+            }
+        }
+
+        return block;
     }
 }

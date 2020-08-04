@@ -9,7 +9,6 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
@@ -60,7 +59,7 @@ public class JavaScriptParser implements IParser {
 
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
-            fd.setLocation(location);
+            fd.setSourceLocation(location);
             fd.setBody(new FunctionBody(body));
 
             fds[i] = fd;
