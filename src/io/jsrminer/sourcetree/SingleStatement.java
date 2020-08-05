@@ -11,7 +11,7 @@ public class SingleStatement extends Statement {
         // TODO find types
     }
 
-    // TODO Move to factory or convert to member method?
+    // TODO Move to factory
     public static SingleStatement fromJson(String statement) {
         SingleStatement singleStatement = new SingleStatement();
         Any any = JsonIterator.deserialize(statement);
@@ -21,7 +21,7 @@ public class SingleStatement extends Statement {
 
         // Type
         String type = any.toString("type");
-        if (CodeElementType.IF_STATEMENT == type) {
+        if (CodeElementType.IF_STATEMENT == CodeElementType.getFromTitleCase(type)) {
             singleStatement.type = CodeElementType.IF_STATEMENT;
         }
         return singleStatement;
