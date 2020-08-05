@@ -10,12 +10,16 @@ import java.util.List;
  * May contain other block statements or statements (i.e. composite statements)
  */
 public class BlockStatement extends Statement {
-    List<Statement> statements;
+    protected List<Statement> statements;
     // exp
     // vd
 
     public BlockStatement() {
 
+    }
+
+    public void addStatement(Statement statement){
+        this.statements.add(statement);
     }
 
     //@JsonCreator
@@ -25,7 +29,7 @@ public class BlockStatement extends Statement {
 
         // Parse source location
         SourceLocation location = any.get("loc").as(SourceLocation.class);
-        block.sourceLocation = location;
+        block.setSourceLocation(location);
 
         // Parse the nested statements
         List<Any> statements = any.get("statements").asList();
@@ -37,7 +41,8 @@ public class BlockStatement extends Statement {
                 // TO Do a block statement again
             }else {
                 // A leaf statement
-                block.statements.add(new SingleStatement(statement.toString()));
+                SingleStatement singleStatement = SingleStatement.fromJson(statement.toString());
+                block.addStatement(singleStatement);
             }
         }
 

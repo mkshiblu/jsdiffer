@@ -2,17 +2,19 @@ package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
+import com.jsoniter.JsonIterator;
+import com.jsoniter.any.Any;
 import io.jsrminer.api.IParser;
-import io.jsrminer.sourcetree.FunctionBody;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLModel;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
 
+    @Override
     public UMLModel parse(Map<String, String> fileContents) {
         final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();
         final UMLModel umlModel = new UMLModel();
@@ -70,6 +72,33 @@ public class JavaScriptParser implements IParser {
 
         fdsArray.release();
         return fds;
+    }
+
+    //@JsonCreator
+    public static BlockStatement fromJson(String blockStatementJson) {
+        BlockStatement block = new BlockStatement();
+        Any any = JsonIterator.deserialize(blockStatementJson);
+
+        // Parse source location
+        SourceLocation location = any.get("loc").as(SourceLocation.class);
+        block.setSourceLocation(location);
+
+        // Parse the nested statements
+        List<Any> statements = any.get("statements").asList();
+        for (Any statement: statements) {
+            String type = statement.get("type").toString();
+            boolean isComposite =  "BlockStatement".equals(type);
+
+            if (isComposite) {
+                // TO Do a block statement again
+            }else {
+                // A leaf statement
+                SingleStatement singleStatement = SingleStatement.fromJson(statement.toString());
+                block.addStatement(singleStatement);
+            }
+        }
+
+        return block;
     }
 
     private V8Array processScript(String script, JavaScriptEngine jsEngine) {

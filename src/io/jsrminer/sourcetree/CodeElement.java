@@ -6,6 +6,7 @@ package io.jsrminer.sourcetree;
 public abstract class CodeElement {
     protected SourceLocation sourceLocation;
     protected String text;
+    protected CodeElementType type;
 
     public CodeElement() {
     }
@@ -32,5 +33,13 @@ public abstract class CodeElement {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public void setType(CodeElementType type) {
+        this.type = type;
+    }
+
+    public CodeElementType getType(){
+        return type;
     }
 }
