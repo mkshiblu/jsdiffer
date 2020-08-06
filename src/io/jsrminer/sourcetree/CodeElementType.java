@@ -5,8 +5,10 @@ import java.util.Map;
 
 public enum CodeElementType {
     EXPRESSION_STATEMENT("ExpressionStatement"),
-    IF_STATEMENT("IfStatement"), BLOCK_STATEMENT("BlockStatement"),
-    FUNCTION_DECLARATION("FunctionDeclaration"), RETURN_STATEMENT("ReturnStatement");
+    IF_STATEMENT("IfStatement"),
+    BLOCK_STATEMENT("BlockStatement"),
+    FUNCTION_DECLARATION("FunctionDeclaration"),
+    RETURN_STATEMENT("ReturnStatement");
 
     public final String titleCase;
 

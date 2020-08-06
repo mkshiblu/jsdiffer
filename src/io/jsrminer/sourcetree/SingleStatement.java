@@ -12,18 +12,20 @@ public class SingleStatement extends Statement {
     }
 
     // TODO Move to factory
-    public static SingleStatement fromJson(String statement) {
+    public static SingleStatement fromJson(String singleStatementJson) {
         SingleStatement singleStatement = new SingleStatement();
-        Any any = JsonIterator.deserialize(statement);
+        Any any = JsonIterator.deserialize(singleStatementJson);
 
         // Text
         singleStatement.text = any.toString("text");
 
         // Type
         String type = any.toString("type");
-        if (CodeElementType.IF_STATEMENT == CodeElementType.getFromTitleCase(type)) {
-            singleStatement.type = CodeElementType.IF_STATEMENT;
-        }
+        singleStatement.type = CodeElementType.getFromTitleCase(type);
+
+        //Loc
+        singleStatement.sourceLocation = any.get("loc").as(SourceLocation.class);
+
         return singleStatement;
     }
 }
