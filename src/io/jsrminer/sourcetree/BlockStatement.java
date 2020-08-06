@@ -3,7 +3,8 @@ package io.jsrminer.sourcetree;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 
-import java.util.List;
+import java.security.KeyStore;
+import java.util.*;
 
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
@@ -15,37 +16,63 @@ public class BlockStatement extends Statement {
     // vd
 
     public BlockStatement() {
-
     }
 
-    public void addStatement(Statement statement){
+    public void addStatement(Statement statement) {
         this.statements.add(statement);
     }
 
-    //@JsonCreator
-    public static BlockStatement fromJson(String blockStatementJson) {
-        BlockStatement block = new BlockStatement();
+    public static BlockStatement fromJson(final String blockStatementJson) {
+        // Helper variables
+        BlockStatement currentBlock, childBlock;
+        Statement child;
+        boolean isComposite;
+        int indexInParent;
+        List<Any> statements;
+        Map.Entry<BlockStatement, Any> currentEntry;
+
+        final Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed = new LinkedList<>();
+        final BlockStatement newBlock = new BlockStatement();
+        //Enqueue to process
         Any any = JsonIterator.deserialize(blockStatementJson);
+        blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
 
-        // Parse source location
-        SourceLocation location = any.get("loc").as(SourceLocation.class);
-        block.setSourceLocation(location);
+        while (!blocksToBeProcessed.isEmpty()) {
+            indexInParent = -1;
 
-        // Parse the nested statements
-        List<Any> statements = any.get("statements").asList();
-        for (Any statement: statements) {
-            String type = statement.get("type").toString();
-            boolean isComposite =  "BlockStatement".equals(type);
+            // Extract the block and the corresponding json stored as any
+            currentEntry = blocksToBeProcessed.remove();
+            currentBlock = currentEntry.getKey();
+            any = currentEntry.getValue();
 
-            if (isComposite) {
-                // TO Do a block statement again
-            }else {
-                // A leaf statement
-                SingleStatement singleStatement = SingleStatement.fromJson(statement.toString());
-                block.addStatement(singleStatement);
+            // Parse source location
+            final SourceLocation location = any.get("loc").as(SourceLocation.class);
+            currentBlock.setSourceLocation(location);
+
+            // Parse the nested statements
+            statements = any.get("statements").asList();
+            currentBlock.statements = new ArrayList<>(statements.size());
+
+            for (Any childAny : statements) {
+                isComposite = CodeElementType.BLOCK_STATEMENT
+                        .titleCase.equals(childAny.get("type").toString());
+
+                if (isComposite) {
+
+                    // If composite enqueue the block and corresponding json to be processed later
+                    childBlock = new BlockStatement();
+                    blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(childBlock, childAny));
+                    child = childBlock;
+                } else {
+                    // A leaf statement
+                    child = SingleStatement.fromJson(childAny.toString());
+                }
+
+                child.positionIndexInParent = ++indexInParent;
+                currentBlock.addStatement(child);
             }
         }
 
-        return block;
+        return newBlock;
     }
 }

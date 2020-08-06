@@ -5,9 +5,10 @@ import com.jsoniter.JsonIterator;
 import java.io.IOException;
 
 public class FunctionBody extends CodeElement {
-    public FunctionBody(String functionBody) {
+    private final BlockStatement blockStatement;
 
-        BlockStatement body = BlockStatement.fromJson(functionBody);
+    public FunctionBody(String functionBody) {
+        blockStatement = BlockStatement.fromJson(functionBody);
     }
 }
 
