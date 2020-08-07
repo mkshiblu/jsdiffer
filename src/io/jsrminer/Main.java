@@ -18,7 +18,7 @@ public class Main {
             //"https://github.com/danilofes/refactoring-toy-example.git");
 
             String folder = "tmp";
-           // String startCommit = "2c52c4265ba420ff47dc35eb1060a57c0813ee5d";
+            // String startCommit = "2c52c4265ba420ff47dc35eb1060a57c0813ee5d";
             //String endCommit = "a08feed8c410b89fa049fdbd6b9459e2d858e912";
 
             String startCommit = "c7b452480c5b74ccb2a3e721f487d4fcf98abfd7";

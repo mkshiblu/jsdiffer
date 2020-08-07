@@ -1,7 +1,6 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.api.IParser;
-import io.jsrminer.parser.JavaScriptParser;
+import io.jsrminer.parser.js.JavaScriptParser;
 
 import java.util.Map;
 import java.util.Set;

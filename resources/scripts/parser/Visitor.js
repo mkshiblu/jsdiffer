@@ -1,7 +1,7 @@
 const babelParser = require('@babel/parser');
-//const fs = require('fs');
 const t = require('@babel/types');
-//const path = require('path');
+const processor = require('./FunctionBodyProcessor');
+const astUtil = require('./AstUtil');
 
 const functionDeclarations = [];
 
@@ -14,7 +14,11 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const name = fd.id.name;
         const namespace = concatScopes(path);
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
-        saveFunctionDeclaration(fd, qualifiedName);
+
+        // Pass the path instead of the body because path has the string repreentation?
+        const processedBody = processor.processFunctionBody(path.get('body'));
+        saveFunctionDeclaration(fd, qualifiedName, processedBody);
+        path.skip();
     };
 
     this.FunctionExpression = (path) => {
@@ -32,20 +36,19 @@ function FunctionDeclarationVisitor(/*namespace*/) {
             // This is an unmamed function expression. TODO handle
         }
     };
+
+    // Could be a declaration or declaration expression
+    this.Function = (path) => {
+
+    }
 };
 
-function saveFunctionDeclaration(node, qualifiedName) {
-    const loc = node.loc;
+function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     functionDeclarations.push({
         qualifiedName: qualifiedName
-        , body: JSON.stringify(node.body)
+        , body: JSON.stringify(functionBody)
         , params: node.params.map(id => id.name)
-        , location: {
-            startLine: loc.start.line,
-            startColumn: loc.start.column,
-            endLine: loc.end.line,
-            endColumn: loc.end.column
-        }
+        , location: astUtil.getFormattedLocation(node)
     });
 }
 
@@ -60,10 +63,24 @@ function concatScopes(path) {
     let namespace = '';
     let scope = path.scope.parent;
     while (scope.parent != null) {
-        if(scope.block.id){ 
-        namespace += scope.block.id.name;
-        }else{
+        if (scope.block.id) {
+            namespace += scope.block.id.name;
+        } else {
             namespace += "$|$"; // TODO handle this
+            // e.g; $|$$|$.get
+            // if (inBrowser) {
+            //     try {
+            //         var opts = {};
+            //         Object.defineProperty(opts, 'passive', ({
+            //             get: function get() {
+            //                 /* istanbul ignore next */
+            //                 supportsPassive = true;
+            //             }
+            //         })); // https://github.com/facebook/flow/issues/285
+            //         window.addEventListener('test-passive', null, opts);
+            //     } catch (e) { }
+            // }
+
         }
         scope = scope.parent;
     }
@@ -71,4 +88,4 @@ function concatScopes(path) {
 }
 
 exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
-exports.getFunctionDeclarations = () => functionDeclarations;
+exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));

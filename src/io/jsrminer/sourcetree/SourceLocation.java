@@ -11,6 +11,10 @@ public class SourceLocation {
     public final int endLine;
     public final int endColumn;
 
+    public SourceLocation() {
+        this(-1, -1, -1, -1);
+    }
+
     public SourceLocation(String file, int startLine, int startColumn, int endLine, int endColumn) {
         this(startLine, startColumn, endLine, endColumn);
         this.file = file;

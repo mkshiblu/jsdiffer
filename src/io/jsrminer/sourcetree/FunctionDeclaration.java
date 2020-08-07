@@ -1,10 +1,5 @@
 package io.jsrminer.sourcetree;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Arrays;
-
 public class FunctionDeclaration extends CodeElement {
     private String[] parameters;
 
@@ -27,7 +22,13 @@ public class FunctionDeclaration extends CodeElement {
      */
     private String fullyQualifiedName;
 
-    private String body;
+    private FunctionBody body;
+
+
+    /**
+     * Stores whether the body of the function is empty or not
+     */
+    private boolean isEmptyBody;
 
     public FunctionDeclaration(String qualifiedName) {
         this.qualifiedName = qualifiedName;
@@ -41,43 +42,44 @@ public class FunctionDeclaration extends CodeElement {
         }
     }
 
-    public boolean hasIdenticalBody(FunctionDeclaration fd) {
-        return this.body.equals(fd.body);
-    }
-
-    public void setParameters(String[] parameters) {
-        this.parameters = parameters;
-    }
-
-    public String[] getParameters() {
-        return parameters;
-    }
-
-//    @Override
-//    public String toString() {
-//        return fullyQualifiedName;
-//    }
-
     @Override
     public String toString() {
         return qualifiedName;
     }
 
     @Override
-    public void setLocation(SourceLocation location) {
-        super.setLocation(location);
-        fullyQualifiedName = location.getFile() + "|" + qualifiedName;
+    public void setSourceLocation(SourceLocation sourceLocation) {
+        super.setSourceLocation(sourceLocation);
+        fullyQualifiedName = sourceLocation.getFile() + "|" + qualifiedName;
+    }
+
+    public boolean hasIdenticalBody(FunctionDeclaration fd) {
+        return this.body.equals(fd.body);
+    }
+
+    // region Setters & getters
+    public String[] getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(String[] parameters) {
+        this.parameters = parameters;
     }
 
     public String getFullyQualifiedName() {
         return fullyQualifiedName;
     }
 
-    public String getBody() {
+    public void setBody(FunctionBody body) {
+        this.body = body;
+    }
+
+    public FunctionBody getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setIsEmptyBody(boolean isEmptyBody) {
+        this.isEmptyBody = isEmptyBody;
     }
+    //endregion
 }

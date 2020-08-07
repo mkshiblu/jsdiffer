@@ -1,7 +1,5 @@
-
 const parser = require('./Parser');
-const fs = require('fs');
-const content = fs.readFileSync('F:\\Research\\test\\vue.js', 'UTF-8');
 
-//parser.parse('function x() { var d = function namedExp() {}; function y(s) { } d = function() {}; }');
+const content ='function x() { var d = 1; if (d  == 1) { return 5; } function y(p) { }; return 6; }';
+//content = require('fs').fs.readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
 parser.parse(content);

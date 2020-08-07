@@ -4,24 +4,42 @@ package io.jsrminer.sourcetree;
  * Base class for all the code elements
  */
 public abstract class CodeElement {
-    private SourceLocation location;
+    protected SourceLocation sourceLocation;
+    protected String text;
+    protected CodeElementType type;
 
     public CodeElement() {
     }
 
-    public CodeElement(SourceLocation location) {
-        this.location = location;
+    public CodeElement(String text) {
+        this.text = text;
     }
 
-    public SourceLocation getLocation() {
-        return location;
+    public SourceLocation getSourceLocation() {
+        return sourceLocation;
     }
 
-    public void setLocation(SourceLocation location) {
-        this.location = location;
+    public void setSourceLocation(SourceLocation sourceLocation) {
+        this.sourceLocation = sourceLocation;
     }
 
     public String getFile() {
-        return location.getFile();
+        return sourceLocation.getFile();
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setType(CodeElementType type) {
+        this.type = type;
+    }
+
+    public CodeElementType getType(){
+        return type;
     }
 }

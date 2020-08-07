@@ -111,7 +111,8 @@ public class JSRefactoringMiner {
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent, repositoryDirectoriesCurrent);
 
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
-                //refactoringsAtRevision = parentUMLModel.diff(currentUMLModel, renamedFilesHint).getRefactorings();
+
+                refactoringsAtRevision = umlModelBefore.diff(umlModelCurrent/*, renamedFilesHint*/).getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
                 //logger.info(String.format("Ignored revision %s with no changes in java files", commitId));

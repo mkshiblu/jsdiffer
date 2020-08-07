@@ -57,7 +57,7 @@ public class UMLModel {
                                 ((fd1.namespace != null && fd1.namespace.equals(fd2.namespace))
                                         || fd1.namespace == fd2.namespace)) {
                             // fd1 has renamved to fd2
-                            diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
+                           // diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
                         }
                     }
                 }

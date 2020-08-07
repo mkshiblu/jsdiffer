@@ -60,3 +60,4 @@ gradle-app.setting
 docs/JS Function Declaration.synctex.gz
 *.aux
 resources/.vscode/
+.vscode/

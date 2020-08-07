@@ -1,4 +1,4 @@
-package io.jsrminer.parser;
+package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8Object;
@@ -16,7 +16,6 @@ class JavaScriptEngine implements AutoCloseable {
 
     public JavaScriptEngine() {
         this.nodeJs = NodeJS.createNodeJS();
-
         // Add a utility toJson function
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) {return JSON.stringify(object);}");
     }

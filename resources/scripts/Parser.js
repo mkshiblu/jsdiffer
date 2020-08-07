@@ -1,9 +1,9 @@
 const babelParser = require('@babel/parser');
 const traverse = require('@babel/traverse');
-const visitor = require('./ast/Visitor');
+const visitor = require('./parser/Visitor');
 
 function parse(script) {
-    
+    console.time('parse');
     const ast = babelParser.parse(script,
         {
             sourceType: 'unambiguous',
@@ -12,10 +12,12 @@ function parse(script) {
             plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
         });
 
+    console.timeEnd('parse');
+    
     traverse.default(ast, new visitor.FunctionDeclarationVisitor());
     const functionDeclarations = visitor.getFunctionDeclarations();
 
-   // return JSON.stringify(functionDeclarations);
+    // return JSON.stringify(functionDeclarations);
     return functionDeclarations;
 };
 
