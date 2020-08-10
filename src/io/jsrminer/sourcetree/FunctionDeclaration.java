@@ -22,15 +22,24 @@ public class FunctionDeclaration extends CodeElement {
      */
     private String fullyQualifiedName;
 
+    /**
+     * Holds the body of the function
+     */
     private FunctionBody body;
-
 
     /**
      * Stores whether the body of the function is empty or not
      */
     private boolean isEmptyBody;
 
-    public FunctionDeclaration(String qualifiedName) {
+    /**
+     * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
+     * file and not nested
+     */
+    public final boolean isTopLevel;
+
+    public FunctionDeclaration(String qualifiedName, boolean isTopLevel) {
+        this.isTopLevel = isTopLevel;
         this.qualifiedName = qualifiedName;
         int idx = qualifiedName.lastIndexOf('.');
         if (idx != -1) {
@@ -57,6 +66,10 @@ public class FunctionDeclaration extends CodeElement {
         return this.body.equals(fd.body);
     }
 
+    public String getFullyQualifiedName() {
+        return fullyQualifiedName;
+    }
+
     // region Setters & getters
     public String[] getParameters() {
         return parameters;
@@ -64,10 +77,6 @@ public class FunctionDeclaration extends CodeElement {
 
     public void setParameters(String[] parameters) {
         this.parameters = parameters;
-    }
-
-    public String getFullyQualifiedName() {
-        return fullyQualifiedName;
     }
 
     public void setBody(FunctionBody body) {

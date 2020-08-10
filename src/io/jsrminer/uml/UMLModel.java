@@ -1,5 +1,7 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.api.Diffable;
+import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 
 import java.util.HashMap;
@@ -8,23 +10,24 @@ import java.util.Map;
 /**
  * Abstracts the source code
  */
-public class UMLModel {
+public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
-    private HashMap<String, FunctionDeclaration[]> functionDeclarations;
+    private HashMap<String, FunctionDeclaration[]> fileFunctionDeclarations;
 
+    @Override
     public UMLModelDiff diff(UMLModel umlModel) {
 
         UMLModelDiff diff = new UMLModelDiff();
-        for (Map.Entry<String, FunctionDeclaration[]> entry : functionDeclarations.entrySet()) {
-
+        for (Map.Entry<String, FunctionDeclaration[]> entry : fileFunctionDeclarations.entrySet()) {
             final String file = entry.getKey();
             final FunctionDeclaration[] fds1 = entry.getValue();
 
-            FunctionDeclaration[] fds2 = umlModel.functionDeclarations.get(file);
+            FunctionDeclaration[] fds2 = umlModel.fileFunctionDeclarations.get(file);
 
+            // Check if the common file has some fds
             if (fds2 != null) {
 
-                // Convert to hashmap
+                // Convert common file's fds to hashmap
                 HashMap<String, FunctionDeclaration> fdMap1 = new HashMap<>();
                 for (FunctionDeclaration fd : fds1) {
                     fdMap1.put(fd.getFullyQualifiedName(), fd);
@@ -35,7 +38,7 @@ public class UMLModel {
                     fdMap2.put(fd.getFullyQualifiedName(), fd);
                 }
 
-
+                // region Find uncommon functions between the two files
                 HashMap<String, FunctionDeclaration> uncommon1 = new HashMap<>();
                 HashMap<String, FunctionDeclaration> uncommon2 = new HashMap<>();
                 for (FunctionDeclaration fd1 : fds1) {
@@ -49,29 +52,28 @@ public class UMLModel {
                         uncommon2.put(fd2.getFullyQualifiedName(), fd2);
                     }
                 }
+                // endregion
 
+
+                // region match body of the common named functions
                 for (FunctionDeclaration fd1 : uncommon1.values()) {
-
                     for (FunctionDeclaration fd2 : uncommon2.values()) {
                         if (fd1.hasIdenticalBody(fd2) &&
                                 ((fd1.namespace != null && fd1.namespace.equals(fd2.namespace))
                                         || fd1.namespace == fd2.namespace)) {
                             // fd1 has renamved to fd2
-                           // diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
+                            // diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
                         }
                     }
                 }
+                // endregion
             }
         }
 
         return diff;
     }
 
-    public void setFunctionDeclarations(final HashMap<String, FunctionDeclaration[]> functionDeclarations) {
-        this.functionDeclarations = functionDeclarations;
-    }
-
-    public HashMap<String, FunctionDeclaration[]> getFunctionDeclarations() {
-        return functionDeclarations;
+    public void setFileFunctionDeclarations(final HashMap<String, FunctionDeclaration[]> fileFunctionDeclarations) {
+        this.fileFunctionDeclarations = fileFunctionDeclarations;
     }
 }

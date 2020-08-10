@@ -1,11 +1,11 @@
-package io.jsrminer.uml;
+package io.jsrminer.uml.diff;
 
 import io.jsrminer.Refactoring;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class UMLModelDiff {
+public class UMLModelDiff extends Diff {
     private List<Refactoring> refactorings = new ArrayList<>();
 
     public void addRefactoring(Refactoring ref) {

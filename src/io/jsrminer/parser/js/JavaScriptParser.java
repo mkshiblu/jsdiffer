@@ -32,7 +32,7 @@ public class JavaScriptParser implements IParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        umlModel.setFunctionDeclarations(fds);
+        umlModel.setFileFunctionDeclarations(fds);
         return umlModel;
     }
 
@@ -56,7 +56,7 @@ public class JavaScriptParser implements IParser {
             v8ParamsArray = v8Fd.getArray("params");
 
             // Create java object
-            fd = new FunctionDeclaration(qualifiedName);
+            fd = new FunctionDeclaration(qualifiedName, true);
             fd.setParameters(JV8.toStringArray(v8ParamsArray));
 
             location = JV8.parseLocation(v8Location);

@@ -1,11 +1,11 @@
 package io.jsrminer;
 
-import io.jsrminer.diff.SourceDirDiff;
-import io.jsrminer.diff.SourceDirectory;
+import io.jsrminer.uml.diff.SourceDirDiff;
+import io.jsrminer.uml.diff.SourceDirectory;
+import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
 import io.jsrminer.uml.UMLModel;
-import io.jsrminer.uml.UMLModelDiff;
 import io.jsrminer.uml.UMLModelFactory;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
