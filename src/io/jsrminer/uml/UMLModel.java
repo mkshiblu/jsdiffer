@@ -17,7 +17,7 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
     @Override
     public UMLModelDiff diff(UMLModel umlModel) {
 
-        UMLModelDiff diff = new UMLModelDiff();
+        UMLModelDiff modelDiff = new UMLModelDiff(this, umlModel);
         for (Map.Entry<String, FunctionDeclaration[]> entry : fileFunctionDeclarations.entrySet()) {
             final String file = entry.getKey();
             final FunctionDeclaration[] fds1 = entry.getValue();
@@ -54,24 +54,15 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
                 }
                 // endregion
 
+                // Diff the operations
+                modelDiff.diffOperations();
 
-                // region match body of the common named functions
-                for (FunctionDeclaration fd1 : uncommon1.values()) {
-                    for (FunctionDeclaration fd2 : uncommon2.values()) {
-                        if (fd1.hasIdenticalBody(fd2) &&
-                                ((fd1.namespace != null && fd1.namespace.equals(fd2.namespace))
-                                        || fd1.namespace == fd2.namespace)) {
-                            // fd1 has renamved to fd2
-                            // diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
-                        }
-                    }
-                }
-                // endregion
             }
         }
 
-        return diff;
+        return modelDiff;
     }
+
 
     public void setFileFunctionDeclarations(final HashMap<String, FunctionDeclaration[]> fileFunctionDeclarations) {
         this.fileFunctionDeclarations = fileFunctionDeclarations;
