@@ -32,7 +32,7 @@ public class JavaScriptParser implements IParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        umlModel.setFileFunctionDeclarations(fds);
+        umlModel.setSourceFileContents(fds);
         return umlModel;
     }
 
