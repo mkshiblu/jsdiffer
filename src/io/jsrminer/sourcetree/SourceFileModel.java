@@ -20,4 +20,8 @@ public class SourceFileModel {
     public FunctionDeclaration[] getFunctionDeclarations() {
         return functionDeclarations;
     }
+
+    public void diff(SourceFileModel sourceFileModel){
+
+    }
 }

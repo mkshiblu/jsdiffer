@@ -61,4 +61,7 @@ public class FunctionBodyMapper {
     public void preProcess(){
 
     }
+
+    public void mapStatements() {
+    }
 }

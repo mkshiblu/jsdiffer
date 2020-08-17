@@ -2,9 +2,10 @@ package io.jsrminer.uml;
 
 import io.jsrminer.api.Diffable;
 import io.jsrminer.sourcetree.SourceFileModel;
+import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.SourceFileModelDiffer;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.uml.diff.UMLModelDiffer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,24 +19,44 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
     @Override
     public UMLModelDiff diff(UMLModel umlModel) {
-        UMLModelDiffer modelDiffer = new UMLModelDiffer();
-        UMLModelDiff modelDiff = modelDiffer.diff(this, umlModel);
+        final UMLModelDiff modelDiff = new UMLModelDiff(this, umlModel);
+
+        // Diff on common files and functions
+        for (Map.Entry<String, SourceFileModel> entry : sourceModelMap.entrySet()) {
+            final String file = entry.getKey();
+            final SourceFileModel sourceFileModel2 = umlModel.getSourceFileModel(file);
+
+            // Check if model2 contains the same file
+            if (sourceFileModel2 != null) {
+                SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2);
+                SourceFileModelDiff sourceDiff = sourceDiffer.diff();
+            }
+        }
+
         return modelDiff;
     }
 
-    public FunctionDeclaration[] getFunctionDeclarationsInSourceFile(String file) {
-        SourceFileModel sourceModel;
-        if ((sourceModel = sourceModelMap.get(file)) != null) {
-            return sourceModel.getFunctionDeclarations();
+    public FunctionDeclaration[] getFunctionDeclarationsInSource(String file) {
+        SourceFileModel sourceFileModel;
+        if ((sourceFileModel = sourceModelMap.get(file)) != null) {
+            return sourceFileModel.getFunctionDeclarations();
         }
         return null;
+    }
+
+    public boolean containsSourceFileModel(String file) {
+        return sourceModelMap.containsKey(file);
+    }
+
+    public SourceFileModel getSourceFileModel(String file) {
+        return sourceModelMap.get(file);
     }
 
     public Map<String, SourceFileModel> getSourceFileModels() {
         return sourceModelMap;
     }
 
-    public void setSourceFileContents(final HashMap<String, SourceFileModel> sourceModelMap) {
+    public void setSourceFileModels(final HashMap<String, SourceFileModel> sourceModelMap) {
         this.sourceModelMap = sourceModelMap;
     }
 }
