@@ -81,7 +81,7 @@ public class SourceFileModelDiffer {
             // If function exists in both file
             if (function2 != null) {
                 FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
-                mapper.mapStatements();
+                mapper.map();
             }
         }
     }

@@ -7,6 +7,7 @@ import com.jsoniter.any.Any;
 import io.jsrminer.api.IParser;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLModel;
+import io.jsrminer.uml.UMLParameter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ public class JavaScriptParser implements IParser {
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
-        final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();
+        final HashMap<String, SourceFileModel> sourceModels = new HashMap<>();
         final UMLModel umlModel = new UMLModel();
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
@@ -25,14 +26,19 @@ public class JavaScriptParser implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
                 final V8Array fdsArray = processScript(content, jsEngine);
-                final FunctionDeclaration[] fd = convert(fdsArray, filepath);
-                fds.put(filepath, fd);
+                final FunctionDeclaration[] fds = convert(fdsArray, filepath);
+
+                // Create source model
+                final SourceFileModel source  = new SourceFileModel();
+                source.setFunctionDeclarations(fds);
+
+                sourceModels.put(filepath, source);
                 fdsArray.release();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        umlModel.setSourceFileModels(fds);
+        umlModel.setSourceFileModels(sourceModels);
         return umlModel;
     }
 
@@ -57,7 +63,7 @@ public class JavaScriptParser implements IParser {
 
             // Create java object
             fd = new FunctionDeclaration(qualifiedName, true);
-            fd.setParameters(JV8.toStringArray(v8ParamsArray));
+            fd.setParameters(convertToUMLParameters(v8ParamsArray));
 
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
@@ -74,6 +80,17 @@ public class JavaScriptParser implements IParser {
         return fds;
     }
 
+    UMLParameter[] convertToUMLParameters(final V8Array v8ParamsArray) {
+        final UMLParameter[] params = new UMLParameter[v8ParamsArray.length()];
+        String name;
+        for (int i = 0; i < params.length; i++) {
+            name = v8ParamsArray.getString(i);
+            params[i] = new UMLParameter(name);
+        }
+        v8ParamsArray.release();
+        return params;
+    }
+
     //@JsonCreator
     public static BlockStatement fromJson(String blockStatementJson) {
         BlockStatement block = new BlockStatement();
@@ -85,13 +102,13 @@ public class JavaScriptParser implements IParser {
 
         // Parse the nested statements
         List<Any> statements = any.get("statements").asList();
-        for (Any statement: statements) {
+        for (Any statement : statements) {
             String type = statement.get("type").toString();
-            boolean isComposite =  "BlockStatement".equals(type);
+            boolean isComposite = "BlockStatement".equals(type);
 
             if (isComposite) {
                 // TO Do a block statement again
-            }else {
+            } else {
                 // A leaf statement
                 SingleStatement singleStatement = SingleStatement.fromJson(statement.toString());
                 block.addStatement(singleStatement);

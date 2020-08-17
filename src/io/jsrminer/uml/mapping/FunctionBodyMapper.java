@@ -3,6 +3,7 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionBody;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.UMLParameter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -60,8 +61,5 @@ public class FunctionBodyMapper {
      */
     public void preProcess(){
 
-    }
-
-    public void mapStatements() {
     }
 }

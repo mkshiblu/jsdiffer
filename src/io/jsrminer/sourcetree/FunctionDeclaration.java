@@ -1,7 +1,9 @@
 package io.jsrminer.sourcetree;
 
+import io.jsrminer.uml.UMLParameter;
+
 public class FunctionDeclaration extends CodeElement {
-    private String[] parameters;
+    private UMLParameter[] parameters;
 
     /**
      * The name of the function.
@@ -71,11 +73,11 @@ public class FunctionDeclaration extends CodeElement {
     }
 
     // region Setters & getters
-    public String[] getParameters() {
+    public UMLParameter[] getParameters() {
         return parameters;
     }
 
-    public void setParameters(String[] parameters) {
+    public void setParameters(UMLParameter[] parameters) {
         this.parameters = parameters;
     }
 
@@ -91,4 +93,8 @@ public class FunctionDeclaration extends CodeElement {
         this.isEmptyBody = isEmptyBody;
     }
     //endregion
+
+    public boolean nameEquals(FunctionDeclaration function) {
+        return this.name != null && this.name.equals(function.name);
+    }
 }
