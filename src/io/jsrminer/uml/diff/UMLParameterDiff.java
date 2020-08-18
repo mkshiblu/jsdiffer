@@ -5,15 +5,16 @@ import io.jsrminer.uml.UMLParameter;
 public class UMLParameterDiff extends Diff {
 
     final boolean isNameChanged;
+    final boolean defaultValueChanged;
     final UMLParameter parameter1;
     final UMLParameter parameter2;
 
     public UMLParameterDiff(UMLParameter parameter1, UMLParameter parameter2) {
         this.parameter1 = parameter1;
         this.parameter2 = parameter2;
-        isNameChanged = parameter1.name.equals(parameter2.name);
-
-        // TODO type change, annotation etc
+        isNameChanged = !parameter1.name.equals(parameter2.name);
+        defaultValueChanged = !parameter1.getDefaultValue().equals(parameter2.getDefaultValue());
+        // TODO handle default value since it could expression and other function calls or a huge function expression
     }
 
     @Override

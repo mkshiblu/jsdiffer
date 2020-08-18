@@ -3,6 +3,7 @@ package io.jsrminer.sourcetree;
 import io.jsrminer.uml.UMLParameter;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FunctionDeclaration extends CodeElement {
@@ -10,8 +11,7 @@ public class FunctionDeclaration extends CodeElement {
     /**
      * Name parameter map
      */
-    private Map<String, UMLParameter> parameterMap;
-
+    private Map<String, UMLParameter> nameParameterMap;
     /**
      * The name of the function.
      */
@@ -81,13 +81,17 @@ public class FunctionDeclaration extends CodeElement {
 
     // region Setters & getters
     public Map<String, UMLParameter> getParameters() {
-        return parameterMap;
+        return nameParameterMap;
     }
 
     public void setParameters(UMLParameter[] parameters) {
-        this.parameterMap = new HashMap<>(parameters.length);
-        for (UMLParameter parameter : parameters) {
-            parameterMap.put(parameter.name, parameter);
+        this.nameParameterMap = new HashMap<>(parameters.length);
+        LinkedHashMap<String, String> x;
+        UMLParameter parameter;
+        for (int i = 0; i < parameters.length; i++) {
+            parameter = parameters[i];
+            parameter.setIndexPositionInParent(i);
+            nameParameterMap.put(parameter.name, parameter);
         }
     }
 
@@ -105,11 +109,11 @@ public class FunctionDeclaration extends CodeElement {
     //endregion
 
     public boolean hasParameterOfName(String name) {
-        return parameterMap.containsKey(name);
+        return nameParameterMap.containsKey(name);
     }
 
     public UMLParameter getParameter(String parameterName) {
-        return parameterMap.get(parameterName);
+        return nameParameterMap.get(parameterName);
     }
 
     public boolean nameEquals(FunctionDeclaration function) {
