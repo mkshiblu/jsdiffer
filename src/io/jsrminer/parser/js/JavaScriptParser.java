@@ -63,7 +63,7 @@ public class JavaScriptParser implements IParser {
 
             // Create java object
             fd = new FunctionDeclaration(qualifiedName, true);
-            fd.setParameters(convertToUMLParameters(v8ParamsArray));
+            fd.setParameterMap(convertToUMLParameters(v8ParamsArray));
 
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
