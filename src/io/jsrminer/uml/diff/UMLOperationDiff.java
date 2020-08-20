@@ -3,11 +3,8 @@ package io.jsrminer.uml.diff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLParameter;
 
-
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.AbstractMap.SimpleEntry;
 
@@ -42,8 +39,8 @@ public class UMLOperationDiff extends Diff {
      */
     protected void tryMatchRemovedAndAddedParameters() {
         matchParametersWithSameName();
-        matchParametersWithSameIndexPosition();
         matchParametersWithSameDefaultValue();
+        matchParametersWithSameIndexPosition();
     }
 
     //first round match parameters with the same name
@@ -63,33 +60,81 @@ public class UMLOperationDiff extends Diff {
         }
     }
 
+    /**
+     * Only tries to match if both function has ssame number of parameters
+     */
     private void matchParametersWithSameIndexPosition() {
-        final Map<Integer, UMLParameter> indexPositionMap = new HashMap<>(addedParameters.size());
-        for (UMLParameter addedParameter : addedParameters.values()) {
-            indexPositionMap.put(addedParameter.getIndexPositionInParent(), addedParameter);
-        }
+        // We only try to match if both function have same number of parameters
+        if (function1.parameterCount() == function2.parameterCount()) {
+            final Map<Integer, UMLParameter> indexPositionMap = new HashMap<>(addedParameters.size());
+            for (UMLParameter addedParameter : addedParameters.values()) {
+                indexPositionMap.put(addedParameter.getIndexPositionInParent(), addedParameter);
+            }
 
-        final Set<String> removedParameterNames = removedParameters.keySet();
-        UMLParameter addedParameter, removedParameter;
+            final Set<String> removedParameterNames = removedParameters.keySet();
+            UMLParameter addedParameter, removedParameter;
 
-        for (String removedParameterName : removedParameterNames) {
-            removedParameter = removedParameters.get(removedParameterName);
-            addedParameter = indexPositionMap.get(removedParameter.getIndexPositionInParent());
+            for (String removedParameterName : removedParameterNames) {
+                removedParameter = removedParameters.get(removedParameterName);
+                addedParameter = indexPositionMap.get(removedParameter.getIndexPositionInParent());
 
-            if (removedParameter != null) {
-                final UMLParameterDiff parameterDiff = new UMLParameterDiff(removedParameter
-                        , addedParameter);
-                parameterDiffs.add(parameterDiff);
+                if (addedParameter != null) {
+                    final UMLParameterDiff parameterDiff = new UMLParameterDiff(removedParameter
+                            , addedParameter);
+                    parameterDiffs.add(parameterDiff);
 
-                // Since match found, remove it from unmatched parameter list
-                addedParameters.remove(removedParameterName);
-                removedParameters.remove(addedParameter.name);
+                    // Since match found, remove it from unmatched parameter list
+                    removedParameters.remove(removedParameterName);
+                    addedParameters.remove(addedParameter.name);
+                }
             }
         }
     }
 
-    // Third round mach leftover unmatched params with same default value
+    // Match parameters with same default value
     private void matchParametersWithSameDefaultValue() {
+        final List<UMLParameter> matchedDefaultValueParameters = new ArrayList<>();
+        final List<UMLParameter> removedParameterWithDefaultValue = removedParameters.values()
+                .stream()
+                .filter(param -> param.hasDefaultValue())
+                .collect(Collectors.toList());
+
+        final Set<UMLParameter> addedParametersWithDefaultValue = addedParameters.values()
+                .stream()
+                .filter(param -> param.hasDefaultValue())
+                .collect(Collectors.toSet());
+
+        if (addedParametersWithDefaultValue.size() > 0) {
+            // TODO optimise by removing On^2 with DP
+            for (UMLParameter removedParameter : removedParameterWithDefaultValue) {
+                matchedDefaultValueParameters.clear();
+
+                for (UMLParameter addedParameter : addedParametersWithDefaultValue) {
+                    if (removedParameter.hasSameDefaultValue(addedParameter)) {
+                        matchedDefaultValueParameters.add(addedParameter);
+                    }
+                }
+
+                if (matchedDefaultValueParameters.size() > 0) {
+                    // Sort by index position in parent
+                    // Then Sort by name similarity?
+                    matchedDefaultValueParameters.sort(Comparator.comparingInt(
+                            (UMLParameter parameter) -> Math.abs(removedParameter.getIndexPositionInParent() - parameter.getIndexPositionInParent())
+                    ));
+
+                    UMLParameter bestMatchAddedParameter = matchedDefaultValueParameters.get(0);
+                    final UMLParameterDiff parameterDiff = new UMLParameterDiff(removedParameter
+                            , bestMatchAddedParameter);
+                    parameterDiffs.add(parameterDiff);
+
+                    // Since match found, remove it from unmatched parameter list
+                    removedParameters.remove(removedParameter.name);
+                    addedParameters.remove(bestMatchAddedParameter.name);
+
+                    addedParametersWithDefaultValue.remove(bestMatchAddedParameter);
+                }
+            }
+        }
     }
 
     /**

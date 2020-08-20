@@ -32,4 +32,8 @@ public class UMLParameter {
     public void setIndexPositionInParent(int indexPositionInParent) {
         this.indexPositionInParent = indexPositionInParent;
     }
+
+    public boolean hasDefaultValue() {
+        return this.defaultValue != null;
+    }
 }

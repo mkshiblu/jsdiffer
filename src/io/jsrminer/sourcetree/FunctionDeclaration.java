@@ -11,7 +11,7 @@ public class FunctionDeclaration extends CodeElement {
     /**
      * Name parameter map
      */
-    private Map<String, UMLParameter> nameParameterMap;
+    private Map<String, UMLParameter> nameParameterMap = new HashMap<>();
     /**
      * The name of the function.
      */
@@ -85,7 +85,7 @@ public class FunctionDeclaration extends CodeElement {
     }
 
     public void setParameters(UMLParameter[] parameters) {
-        this.nameParameterMap = new HashMap<>(parameters.length);
+        this.nameParameterMap.clear();
         LinkedHashMap<String, String> x;
         UMLParameter parameter;
         for (int i = 0; i < parameters.length; i++) {
@@ -118,5 +118,9 @@ public class FunctionDeclaration extends CodeElement {
 
     public boolean nameEquals(FunctionDeclaration function) {
         return this.name != null && this.name.equals(function.name);
+    }
+
+    public int parameterCount(){
+        return this.nameParameterMap.size();
     }
 }
