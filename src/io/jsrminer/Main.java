@@ -14,15 +14,9 @@ public class Main {
         log.debug("Program Starts");
         try {
             Repository repo = GitUtil.openRepository("F:\\PROJECTS_REPO\\toy_js");
-            //"tmp/toy_js",
-            //"https://github.com/danilofes/refactoring-toy-example.git");
-
             String folder = "tmp";
-            // String startCommit = "2c52c4265ba420ff47dc35eb1060a57c0813ee5d";
-            //String endCommit = "a08feed8c410b89fa049fdbd6b9459e2d858e912";
-
-            String startCommit = "c7b452480c5b74ccb2a3e721f487d4fcf98abfd7";
-            String endCommit = "2ef9925ca949b85c421fef7cbb09131186ac0b53";
+            String startCommit = "9fa37a104973ca762d2dc90e30ef00d28b81a649";
+            String endCommit = "2b48feaa0b8caa027c28592b8696de347d86d3fd";
             new JSRefactoringMiner().detectBetweenCommits(repo, startCommit, endCommit);
             //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
         } catch (Exception e) {

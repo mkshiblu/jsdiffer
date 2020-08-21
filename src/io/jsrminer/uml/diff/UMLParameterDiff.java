@@ -13,7 +13,7 @@ public class UMLParameterDiff extends Diff {
         this.parameter1 = parameter1;
         this.parameter2 = parameter2;
         isNameChanged = !parameter1.name.equals(parameter2.name);
-        defaultValueChanged = !parameter1.getDefaultValue().equals(parameter2.getDefaultValue());
+        defaultValueChanged = !parameter1.hasSameDefaultValue(parameter2);
         // TODO handle default value since it could expression and other function calls or a huge function expression
     }
 

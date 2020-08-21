@@ -31,12 +31,12 @@ public class SourceFileModelDiffer {
             // region Convert common file's fds to hashmap
             final HashMap<String, FunctionDeclaration> functionMap1 = new HashMap<>();
             for (FunctionDeclaration function1 : functions1) {
-                functionMap1.put(function1.getFullyQualifiedName(), function1);
+                functionMap1.put(function1.qualifiedName, function1);
             }
 
             final HashMap<String, FunctionDeclaration> functionMap2 = new HashMap<>();
             for (FunctionDeclaration function2 : functions2) {
-                functionMap2.put(function2.getFullyQualifiedName(), function2);
+                functionMap2.put(function2.qualifiedName, function2);
             }
 
             diffOperations(sourceDiff, functionMap1, functionMap2);
@@ -80,7 +80,7 @@ public class SourceFileModelDiffer {
             }
         }
         // TODO for now mapping
-        FunctionBodyMapper mapper = new FunctionBodyMapper(functionMap1.get("ARenamed"), functionMap2.get("A2"));
+        FunctionBodyMapper mapper = new FunctionBodyMapper(functionMap1.get("x"), functionMap2.get("x2"));
         mapper.map();
     }
 
@@ -90,13 +90,13 @@ public class SourceFileModelDiffer {
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
         for (FunctionDeclaration fd1 : functionMap1.values()) {
-            if (!functionMap2.containsKey(fd1.getFullyQualifiedName())) {
+            if (!functionMap2.containsKey(fd1.qualifiedName)) {
                 sourceDiff.reportRemovedOperation(fd1);
             }
         }
 
         for (FunctionDeclaration fd2 : functionMap2.values()) {
-            if (!functionMap1.containsKey(fd2.getFullyQualifiedName())) {
+            if (!functionMap1.containsKey(fd2.qualifiedName)) {
                 sourceDiff.reportAddedOperation(fd2);
             }
         }
