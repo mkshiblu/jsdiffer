@@ -3,7 +3,6 @@ package io.jsrminer.sourcetree;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 
-import java.security.KeyStore;
 import java.util.*;
 
 /**
@@ -54,8 +53,7 @@ public class BlockStatement extends Statement {
             currentBlock.statements = new ArrayList<>(statements.size());
 
             for (Any childAny : statements) {
-                isComposite = CodeElementType.BLOCK_STATEMENT
-                        .titleCase.equals(childAny.get("type").toString());
+                isComposite = childAny.keys().contains("statements");
 
                 if (isComposite) {
 
