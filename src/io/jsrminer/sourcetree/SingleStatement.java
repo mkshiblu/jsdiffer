@@ -28,4 +28,9 @@ public class SingleStatement extends Statement {
 
         return singleStatement;
     }
+
+    @Override
+    public String toString() {
+        return text;
+    }
 }

@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class BlockStatement extends Statement {
     protected List<Statement> statements;
+    protected List<String> expressions = new ArrayList<>();
     // exp
     // vd
 
@@ -19,6 +20,10 @@ public class BlockStatement extends Statement {
 
     public void addStatement(Statement statement) {
         this.statements.add(statement);
+    }
+
+    void addExpression(String expression) {
+        this.expressions.add(expression);
     }
 
     public static BlockStatement fromJson(final String blockStatementJson) {
@@ -52,6 +57,17 @@ public class BlockStatement extends Statement {
             statements = any.get("statements").asList();
             currentBlock.statements = new ArrayList<>(statements.size());
 
+            // Parse Type
+            String type = any.toString("type");
+            currentBlock.type = CodeElementType.getFromTitleCase(type);
+
+            // Parse Expression (Todo optimize
+            if (any.keys().contains("expressions")) {
+                for (Any exp : any.get("expressions").asList()) {
+                    currentBlock.addExpression(exp.toString());
+                }
+            }
+
             for (Any childAny : statements) {
                 isComposite = childAny.keys().contains("statements");
 
@@ -72,5 +88,20 @@ public class BlockStatement extends Statement {
         }
 
         return newBlock;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.type.titleCase);
+        if (expressions.size() > 0) {
+            sb.append("(");
+            for (int i = 0; i < expressions.size() - 1; i++) {
+                sb.append(expressions.get(i).toString()).append("; ");
+            }
+            sb.append(expressions.get(expressions.size() - 1).toString());
+            sb.append(")");
+        }
+        return sb.toString();
     }
 }
