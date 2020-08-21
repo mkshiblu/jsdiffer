@@ -4,6 +4,7 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionBody;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.UMLOperationDiff;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -24,34 +25,39 @@ public class FunctionBodyMapper {
         FunctionBody body2 = function2.getBody();
 
         if (body1 != null && body2 != null) {
+            final UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
+            final Map<String, UMLParameter> addedParameters = operationDiff.getAddedParameters();
+            final Map<String, UMLParameter> removedParameters = operationDiff.getRemovedParameters();
+            final Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
+            final Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
+
             BlockStatement block1 = body1.blockStatement;
             BlockStatement block2 = body2.blockStatement;
 
-            Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
-            Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
-
-            List<UMLParameter> addedParameters = operationDiff.getAddedParameters();
-            if(addedParameters.size() == 1) {
-                UMLParameter addedParameter = addedParameters.get(0);
-                if(UMLModelDiff.looksLikeSameType(addedParameter.getType().getClassType(), operation1.getClassName())) {
-                    parameterToArgumentMap1.put("this.", "");
-                    //replace "parameterName." with ""
-                    parameterToArgumentMap2.put(addedParameter.getName() + ".", "");
-                }
-            }
-            List<UMLParameter> removedParameters = operationDiff.getRemovedParameters();
-            if(removedParameters.size() == 1) {
-                UMLParameter removedParameter = removedParameters.get(0);
-                if(UMLModelDiff.looksLikeSameType(removedParameter.getType().getClassType(), operation2.getClassName())) {
-                    parameterToArgumentMap1.put(removedParameter.getName() + ".", "");
-                    parameterToArgumentMap2.put("this.", "");
-                }
-            }
+//            if (addedParameters.size() == 1) {
+//                Collection<UMLParameter> addedParameter = addedParameters.first();
+//
+//                if (UMLModelDiff.looksLikeSameType(addedParameter.getType().getClassType(),
+//                        operation1.getClassName())) {
+//                    parameterToArgumentMap1.put("this.", "");
+//                    //replace "parameterName." with ""
+//                    parameterToArgumentMap2.put(addedParameter.getName() + ".", "");
+//                }
+//            }
+//
+//            if (removedParameters.size() == 1) {
+//                UMLParameter removedParameter = removedParameters.get(0);
+//                if (UMLModelDiff.looksLikeSameType(removedParameter.getType().getClassType(), operation2.getClassName())) {
+//                    parameterToArgumentMap1.put(removedParameter.getName() + ".", "");
+//                    parameterToArgumentMap2.put("this.", "");
+//                }
+//            }
 
         }
     }
 
-    /** Consists of Abstraction and Argumentization
+    /**
+     * Consists of Abstraction and Argumentization
      * Abstraction: When follows these formats
      * return exp; returned exp
      * Type var = exp; variable initializer
@@ -59,7 +65,7 @@ public class FunctionBodyMapper {
      * call(exp); single argument of method invocation
      * if (exp) Condition of a composite
      */
-    public void preProcess(){
+    public void preProcess() {
 
     }
 }

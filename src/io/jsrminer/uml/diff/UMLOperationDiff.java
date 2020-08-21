@@ -39,8 +39,8 @@ public class UMLOperationDiff extends Diff {
      */
     protected void tryMatchRemovedAndAddedParameters() {
         matchParametersWithSameName();
-        matchParametersWithSameDefaultValue();
         matchParametersWithSameIndexPosition();
+        matchParametersWithSameDefaultValue();
     }
 
     //first round match parameters with the same name
@@ -179,4 +179,15 @@ public class UMLOperationDiff extends Diff {
                 && matchedParameterCount == parameterNames1.size() && matchedParameterCount == parameterNames2.size()
                 && !parameterNames1.equals(parameterNames2);
     }
+
+    // region setters and getters
+
+    public Map<String, UMLParameter> getAddedParameters() {
+        return addedParameters;
+    }
+
+    public Map<String, UMLParameter> getRemovedParameters() {
+        return removedParameters;
+    }
+    // endregion
 }

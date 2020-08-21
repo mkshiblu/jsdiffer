@@ -1,7 +1,5 @@
 package io.jsrminer.uml;
 
-import javax.xml.namespace.QName;
-
 public class UMLParameter {
     public final String name;
     private String defaultValue;    // IT  could be expression, function call or can use an earlier parameter
@@ -20,9 +18,9 @@ public class UMLParameter {
     }
 
     public boolean hasSameDefaultValue(UMLParameter parameter) {
-        if (this.defaultValue == parameter.defaultValue)
+        if (this.defaultValue == null && parameter.defaultValue == null)
             return true;
-        return this.defaultValue != null && this.defaultValue.equals(parameter.defaultValue))
+        return this.defaultValue.equals(parameter.defaultValue);
     }
 
     public int getIndexPositionInParent() {

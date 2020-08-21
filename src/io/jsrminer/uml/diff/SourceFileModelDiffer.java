@@ -3,18 +3,16 @@ package io.jsrminer.uml.diff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.UMLModel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 public class SourceFileModelDiffer {
 
     public final SourceFileModel source1;
     public final SourceFileModel source2;
 
-    private final List<FunctionBodyMapper> operationBodyMapperList = new ArrayList<>();
+    private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
 
     public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2) {
         this.source1 = source1;
@@ -41,21 +39,53 @@ public class SourceFileModelDiffer {
                 functionMap2.put(function2.getFullyQualifiedName(), function2);
             }
 
-            reportAddedAndRemovedOperations(sourceDiff, functionMap1, functionMap2);
-            reportAddedAndRemovedClass();
-
+            diffOperations(sourceDiff, functionMap1, functionMap2);
         }
         return sourceDiff;
     }
 
+    /**
+     * Diff operations between two common files
+     */
+    protected void diffOperations(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
+        // Process Annotations
+        // Process Inheritance
+        reportAddedAndRemovedOperations(sourceDiff, functionMap1, functionMap2);
+        createBodyMappers(sourceDiff, functionMap1, functionMap2);
+//        processAttributes();
+//        checkForAttributeChanges();
+//        processAnonymousClasses();
+//        checkForOperationSignatureChanges();
+//        checkForInlinedOperations();
+//        checkForExtractedOperations();
+    }
 
-    private void reportAddedAndRemovedClass() {
-        // TODO
+    protected void createBodyMappers(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
+
+        // First map by fully qualified name? TODO revisit
+        for (FunctionDeclaration function1 : functionMap1.values()) {
+            final FunctionDeclaration function2 = functionMap2.get(function1.qualifiedName);
+            // If function exists in both file
+            if (function2 != null) {
+                FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
+                mapper.map();
+            }
+        }
+
+        for (FunctionDeclaration function1 : functionMap1.values()) {
+            // Not qualified but contains the function in the same index?
+            if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
+                    && !sourceDiff.isRemovedOperation(function1.name)) {
+// TODO
+            }
+        }
+        // TODO for now mapping
+        FunctionBodyMapper mapper = new FunctionBodyMapper(functionMap1.get("ARenamed"), functionMap2.get("A2"));
+        mapper.map();
     }
 
     // Adds the added and removed ops in the model diff
     private void reportAddedAndRemovedOperations(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
-
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
@@ -73,16 +103,4 @@ public class SourceFileModelDiffer {
         // endregion
     }
 
-    protected void createBodyMappers(FunctionDeclaration[] functions1, HashMap<String, FunctionDeclaration> functionMap2) {
-
-        // TOdo reviesit
-        for (FunctionDeclaration function1 : functions1) {
-            final FunctionDeclaration function2 = functionMap2.get(function1.getFullyQualifiedName());
-            // If function exists in both file
-            if (function2 != null) {
-                FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
-                mapper.map();
-            }
-        }
-    }
 }

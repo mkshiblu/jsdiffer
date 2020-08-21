@@ -3,8 +3,8 @@ package io.jsrminer.uml.diff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a diff between two version of the same source file
@@ -13,8 +13,8 @@ public class SourceFileModelDiff {
     public final SourceFileModel sourceFileModel1;
     public final SourceFileModel sourceFileModel2;
 
-    private final Set<FunctionDeclaration> addedOperations = new HashSet<>();
-    private final Set<FunctionDeclaration> removedOperations = new HashSet<>();
+    private final Map<String, FunctionDeclaration> addedOperations = new HashMap<>();
+    private final Map<String, FunctionDeclaration> removedOperations = new HashMap<>();
 
     public SourceFileModelDiff(SourceFileModel sourceFileModel1, SourceFileModel sourceFileModel2) {
         this.sourceFileModel1 = sourceFileModel1;
@@ -22,10 +22,14 @@ public class SourceFileModelDiff {
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {
-        addedOperations.add(addedOperation);
+        addedOperations.put(addedOperation.name, addedOperation);
     }
 
     public void reportRemovedOperation(FunctionDeclaration removedOperation) {
-        removedOperations.add(removedOperation);
+        removedOperations.put(removedOperation.name, removedOperation);
+    }
+
+    public boolean isRemovedOperation(String functionName) {
+        return this.removedOperations.containsKey(functionName);
     }
 }
