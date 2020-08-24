@@ -57,7 +57,7 @@ public class PreProcessor {
         return afterReplacements;
     }
 
-    public String getRepresentationAfterReplacingParametersWithArguments(SingleStatement statement) {
+    public String getArgumentizedString(SingleStatement statement) {
         return this.afterReplacementsMap.get(statement);
     }
 

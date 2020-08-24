@@ -1,25 +1,22 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.FunctionBody;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import org.eclipse.jgit.annotations.NonNull;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FunctionBodyMapper {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
+    protected final PreProcessor preProcessor;
 
     public FunctionBodyMapper(@NonNull FunctionDeclaration function1, @NonNull FunctionDeclaration function2) {
         this.function1 = function1;
         this.function2 = function2;
+        this.preProcessor = new PreProcessor();
     }
 
     public void map() {
@@ -34,17 +31,61 @@ public class FunctionBodyMapper {
 
             List<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
             List<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
-
-            PreProcessor preProcessor = new PreProcessor();
-            mapAndReplaceParametersWithArguments(operationDiff, leaves1, leaves2, preProcessor);
-
+            mapAndReplaceParametersWithArguments(operationDiff, leaves1, leaves2);
             // Reset leaves
             //processLeaves();
         }
     }
 
-    void matchLeaves(List<SingleStatement> leaves1, List<SingleStatement> leaves2){
-        
+    void matchLeaves(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+        if (leaves1.size() <= leaves2.size()) {
+            // Exact string+depth matching - leaf nodes
+            matchLeavesWithIdenticalStringAndDepth(leaves1, leaves2);
+        }
+    }
+
+    void matchLeavesWithIdenticalStringAndDepth(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+        //exact string+depth matching - leaf nodes
+        for (ListIterator<SingleStatement> iterator1 = leaves1.listIterator();
+             iterator1.hasNext(); ) {
+
+            SingleStatement leaf1 = iterator1.next();
+            TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+
+            for (ListIterator<SingleStatement> iterator2 = leaves2.listIterator(); iterator2.hasNext(); ) {
+                SingleStatement leaf2 = iterator2.next();
+
+                String argumentizedString1 = preProcessor.getArgumentizedString(leaf1);
+                String argumentizedString2 =  preProcessor.getArgumentizedString(leaf2);
+
+                // Check if strings are identical
+                if ((leaf1.getText().equals(leaf2.getText())
+                        || argumentizedString1.equals(argumentizedString2))
+                        && leaf1.getDepth() == leaf2.getDepth()) {
+                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+                    mappingSet.add(mapping);
+                }
+            }
+            if (!mappingSet.isEmpty()) {
+                LeafStatementMapping minStatementMapping = mappingSet.first();
+                mappings.add(minStatementMapping);
+                leaves2.remove(minStatementMapping.getFragment2());
+                iterator1.remove();
+            }
+        }
+    }
+
+    private LeafStatementMapping createLeafMapping(SingleStatement leaf1, SingleStatement leaf2, Map<String, String> parameterToArgumentMap) {
+//        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
+//        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
+        LeafStatementMapping mapping = new LeafStatementMapping(leaf1, leaf2);
+//        for(String key : parameterToArgumentMap.keySet()) {
+//            String value = parameterToArgumentMap.get(key);
+//            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
+//                mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
+//            }
+//        }
+        return mapping;
     }
     /**
      * Consists of Abstraction and Argumentization
@@ -60,8 +101,7 @@ public class FunctionBodyMapper {
     }
 
     void mapAndReplaceParametersWithArguments(UMLOperationDiff operationDiff, List<SingleStatement> leaves1,
-                                              List<SingleStatement> leaves2,
-                                              PreProcessor preProcessor) {
+                                              List<SingleStatement> leaves2) {
         Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
         Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 

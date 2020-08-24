@@ -37,6 +37,8 @@ public class BlockStatement extends Statement {
 
         final Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed = new LinkedList<>();
         final BlockStatement newBlock = new BlockStatement();
+        newBlock.depth = 0;
+
         //Enqueue to process
         Any any = JsonIterator.deserialize(blockStatementJson);
         blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
@@ -83,6 +85,7 @@ public class BlockStatement extends Statement {
                 }
 
                 child.positionIndexInParent = ++indexInParent;
+                child.depth = currentBlock.depth + 1;
                 currentBlock.addStatement(child);
             }
         }
