@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FunctionDeclaration extends CodeElement {
+public class FunctionDeclaration extends CodeFragment {
 
     /**
      * Name parameter map

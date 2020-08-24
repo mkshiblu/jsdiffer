@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-public abstract class Statement extends CodeElement {
+public abstract class Statement extends CodeFragment {
 
     protected int positionIndexInParent = -1;
 

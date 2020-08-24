@@ -90,6 +90,18 @@ public class BlockStatement extends Statement {
         return newBlock;
     }
 
+    public List<SingleStatement> getAllLeafStatementsIncludingNested() {
+        final List<SingleStatement> leaves = new ArrayList<>();
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                leaves.addAll(((BlockStatement) statement).getAllLeafStatementsIncludingNested());
+            } else {
+                leaves.add((SingleStatement) statement);
+            }
+        }
+        return leaves;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -10,7 +10,7 @@ public class SingleStatement extends Statement {
     public SingleStatement() {
         // TODO find types
     }
-
+    
     // TODO Move to factory
     public static SingleStatement fromJson(String singleStatementJson) {
         SingleStatement singleStatement = new SingleStatement();

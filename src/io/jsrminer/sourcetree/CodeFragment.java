@@ -3,15 +3,15 @@ package io.jsrminer.sourcetree;
 /**
  * Base class for all the code elements
  */
-public abstract class CodeElement {
+public abstract class CodeFragment {
     protected SourceLocation sourceLocation;
     protected String text;
     protected CodeElementType type;
 
-    public CodeElement() {
+    public CodeFragment() {
     }
 
-    public CodeElement(String text) {
+    public CodeFragment(String text) {
         this.text = text;
     }
 
