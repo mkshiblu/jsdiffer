@@ -8,6 +8,7 @@ public enum CodeElementType {
     IF_STATEMENT("IfStatement"),
     BLOCK_STATEMENT("BlockStatement"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
+    EMPTY_STATEMENT("EmptyStatement"),
     RETURN_STATEMENT("ReturnStatement");
 
     public final String titleCase;

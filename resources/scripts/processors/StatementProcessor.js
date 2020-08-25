@@ -15,7 +15,8 @@ exports.processBlockStatement = (blockStatementPath, processStatement) => {
 
 exports.processEmptyStatement = (emptyStatementPath) => {
     return {
-        type: emptyStatementPath.node.type
+        type: emptyStatementPath.node.type,
+        text: emptyStatementPath.toString()
     }
 }
 

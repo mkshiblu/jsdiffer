@@ -13,6 +13,8 @@ public class FunctionBodyMapper {
     public final FunctionDeclaration function2;
     protected final PreProcessor preProcessor;
 
+    private Set<StatementMapping> mappings = new LinkedHashSet<>();
+
     public FunctionBodyMapper(@NonNull FunctionDeclaration function1, @NonNull FunctionDeclaration function2) {
         this.function1 = function1;
         this.function2 = function2;
@@ -31,20 +33,22 @@ public class FunctionBodyMapper {
 
             List<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
             List<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
-            mapAndReplaceParametersWithArguments(operationDiff, leaves1, leaves2);
+            replaceParametersWithArguments(operationDiff, leaves1, leaves2);
             // Reset leaves
-            //processLeaves();
+            matchLeaves(leaves1, leaves2);
         }
     }
 
     void matchLeaves(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
         if (leaves1.size() <= leaves2.size()) {
             // Exact string+depth matching - leaf nodes
-            matchLeavesWithIdenticalStringAndDepth(leaves1, leaves2);
+            matchLeavesByStringAndDepth(leaves1, leaves2);
         }
     }
 
-    void matchLeavesWithIdenticalStringAndDepth(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+    void matchLeavesByStringAndDepth(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
+
         //exact string+depth matching - leaf nodes
         for (ListIterator<SingleStatement> iterator1 = leaves1.listIterator();
              iterator1.hasNext(); ) {
@@ -56,20 +60,22 @@ public class FunctionBodyMapper {
                 SingleStatement leaf2 = iterator2.next();
 
                 String argumentizedString1 = preProcessor.getArgumentizedString(leaf1);
-                String argumentizedString2 =  preProcessor.getArgumentizedString(leaf2);
+                String argumentizedString2 = preProcessor.getArgumentizedString(leaf2);
 
-                // Check if strings are identical
-                if ((leaf1.getText().equals(leaf2.getText())
-                        || argumentizedString1.equals(argumentizedString2))
-                        && leaf1.getDepth() == leaf2.getDepth()) {
+                // Check if strings are identical and they are in same depth
+                // In the same depth there could be only one identical string
+                if (leaf1.getDepth() == leaf2.getDepth() && (leaf1.getText().equals(leaf2.getText())
+                        || argumentizedString1.equals(argumentizedString2))) {
                     LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
                     mappingSet.add(mapping);
                 }
             }
+
             if (!mappingSet.isEmpty()) {
                 LeafStatementMapping minStatementMapping = mappingSet.first();
                 mappings.add(minStatementMapping);
-                leaves2.remove(minStatementMapping.getFragment2());
+
+                leaves2.remove(minStatementMapping.statement2);
                 iterator1.remove();
             }
         }
@@ -87,6 +93,7 @@ public class FunctionBodyMapper {
 //        }
         return mapping;
     }
+
     /**
      * Consists of Abstraction and Argumentization
      * Abstraction: When follows these formats
@@ -100,8 +107,8 @@ public class FunctionBodyMapper {
 
     }
 
-    void mapAndReplaceParametersWithArguments(UMLOperationDiff operationDiff, List<SingleStatement> leaves1,
-                                              List<SingleStatement> leaves2) {
+    void replaceParametersWithArguments(UMLOperationDiff operationDiff, List<SingleStatement> leaves1,
+                                        List<SingleStatement> leaves2) {
         Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
         Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 
