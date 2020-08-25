@@ -42,11 +42,12 @@ public class FunctionBodyMapper {
     void matchLeaves(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
         if (leaves1.size() <= leaves2.size()) {
             // Exact string+depth matching - leaf nodes
-            matchLeavesByStringAndDepth(leaves1, leaves2);
+            matchLeavesByText(leaves1, leaves2, false);
+            matchLeavesByText(leaves1, leaves2, true);
         }
     }
 
-    void matchLeavesByStringAndDepth(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+    void matchLeavesByText(List<SingleStatement> leaves1, List<SingleStatement> leaves2, boolean ignoreNestingDepth) {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
 
         //exact string+depth matching - leaf nodes
@@ -63,9 +64,8 @@ public class FunctionBodyMapper {
                 String argumentizedString2 = preProcessor.getArgumentizedString(leaf2);
 
                 // Check if strings are identical and they are in same depth
-                // In the same depth there could be only one identical string
-                if (leaf1.getDepth() == leaf2.getDepth() && (leaf1.getText().equals(leaf2.getText())
-                        || argumentizedString1.equals(argumentizedString2))) {
+                if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
+                        && (leaf1.getText().equals(leaf2.getText()) || argumentizedString1.equals(argumentizedString2))) {
                     LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
                     mappingSet.add(mapping);
                 }
@@ -79,6 +79,19 @@ public class FunctionBodyMapper {
                 iterator1.remove();
             }
         }
+    }
+
+    private String createArgumentizedString(SingleStatement statement1, SingleStatement statement2) {
+        String argumentizedString = preProcessor.getArgumentizedString(statement1);
+
+        // TODO replace return value with the argumentaized string
+//        if (leaf1 instanceof StatementObject && leaf2 instanceof AbstractExpression) {
+//            if (argumentizedString.startsWith("return ") && argumentizedString.endsWith(";\n")) {
+//                argumentizedString = argumentizedString.substring("return ".length(),
+//                        argumentizedString.lastIndexOf(";\n"));
+//            }
+//        }
+        return argumentizedString;
     }
 
     private LeafStatementMapping createLeafMapping(SingleStatement leaf1, SingleStatement leaf2, Map<String, String> parameterToArgumentMap) {
