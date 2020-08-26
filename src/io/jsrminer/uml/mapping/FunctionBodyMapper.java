@@ -31,37 +31,41 @@ public class FunctionBodyMapper {
             BlockStatement block1 = body1.blockStatement;
             BlockStatement block2 = body2.blockStatement;
 
-            List<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
-            List<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
+            Set<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
+            Set<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
             replaceParametersWithArguments(operationDiff, leaves1, leaves2);
             // Reset leaves
             matchLeaves(leaves1, leaves2);
         }
     }
 
-    void matchLeaves(List<SingleStatement> leaves1, List<SingleStatement> leaves2) {
+    void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
         if (leaves1.size() <= leaves2.size()) {
             // Exact string+depth matching - leaf nodes
-            matchLeavesByText(leaves1, leaves2, false);
-            matchLeavesByText(leaves1, leaves2, true);
+            matchLeavesWithIdenticalText(leaves1, leaves2, false);
+
+            // Exact string any depth
+            matchLeavesWithIdenticalText(leaves1, leaves2, true);
+
+            //
+            matchLeavesWithVariableRenames(leaves1, leaves2);
         }
     }
 
-    void matchLeavesByText(List<SingleStatement> leaves1, List<SingleStatement> leaves2, boolean ignoreNestingDepth) {
+    void matchLeavesWithIdenticalText(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2, boolean ignoreNestingDepth) {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
 
-        //exact string+depth matching - leaf nodes
-        for (ListIterator<SingleStatement> iterator1 = leaves1.listIterator();
-             iterator1.hasNext(); ) {
+        //exact string matching
+        for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
 
             SingleStatement leaf1 = iterator1.next();
             TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
 
-            for (ListIterator<SingleStatement> iterator2 = leaves2.listIterator(); iterator2.hasNext(); ) {
+            for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                 SingleStatement leaf2 = iterator2.next();
 
-                String argumentizedString1 = preProcessor.getArgumentizedString(leaf1);
-                String argumentizedString2 = preProcessor.getArgumentizedString(leaf2);
+                String argumentizedString1 = createArgumentizedString(leaf1, leaf2);
+                String argumentizedString2 = createArgumentizedString(leaf2, leaf1);
 
                 // Check if strings are identical and they are in same depth
                 if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
@@ -81,6 +85,79 @@ public class FunctionBodyMapper {
         }
     }
 
+    private void matchLeavesWithVariableRenames(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
+        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
+
+        for(Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext();) {
+            SingleStatement leaf1 = iterator1.next();
+            TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+
+//            for(Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext();) {
+//                SingleStatement leaf2 = iterator2.next();
+//
+//                ReplacementFinder replacementFinder = createReplacementFinder(leaf1, leaf2, leaves1, leaves2);
+//                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap, replacementFinder);
+//                if (replacements != null) {
+//                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+//                    mapping.addReplacements(replacements);
+//                    for(AbstractCodeFragment leaf : leaves2) {
+//                        if(leaf.equals(leaf2)) {
+//                            break;
+//                        }
+//                        UMLClassBaseDiff classDiff = this.classDiff != null ? this.classDiff : parentMapper != null ? parentMapper.classDiff : null;
+//                        mapping.temporaryVariableAssignment(leaf, leaves2, refactorings, classDiff);
+//                        if(mapping.isIdenticalWithExtractedVariable()) {
+//                            break;
+//                        }
+//                    }
+//                    for(AbstractCodeFragment leaf : leaves1) {
+//                        if(leaf.equals(leaf1)) {
+//                            break;
+//                        }
+//                        mapping.inlinedVariableAssignment(leaf, leaves2, refactorings);
+//                        if(mapping.isIdenticalWithInlinedVariable()) {
+//                            break;
+//                        }
+//                    }
+//                    mappingSet.add(mapping);
+//                }
+//            }
+//            if(!mappingSet.isEmpty()) {
+//                AbstractMap.SimpleEntry<CompositeStatementObject, CompositeStatementObject> switchParentEntry = null;
+//                if(variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
+//                    //postpone mapping
+//                    postponedMappingSets.add(mappingSet);
+//                }
+//                else if((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
+//                    LeafMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
+//                    mappings.add(bestMapping);
+//                    leaves2.remove(bestMapping.getFragment1());
+//                    iterator1.remove();
+//                }
+//                else {
+//                    LeafMapping minStatementMapping = mappingSet.first();
+//                    mappings.add(minStatementMapping);
+//                    leaves2.remove(minStatementMapping.getFragment2());
+//                    iterator1.remove();
+//                }
+//            }
+        }
+    }
+
+    private ReplacementFinder createReplacementFinder(SingleStatement leaf1, SingleStatement leaf2,
+                                                      Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2) {
+        List<? extends CodeFragment> unmatchedLeaves1 = new ArrayList<CodeFragment>(leaves1);
+        unmatchedLeaves1.remove(leaf1);
+        List<? extends CodeFragment> unmatchedLeaves2 = new ArrayList<CodeFragment>(leaves2);
+        unmatchedLeaves2.remove(leaf2);
+        ReplacementFinder replacementFinder = new ReplacementFinder(
+                createArgumentizedString(leaf1, leaf2),
+                createArgumentizedString(leaf1, leaf2),
+                unmatchedLeaves1, unmatchedLeaves2);
+        return replacementFinder;
+    }
+
+    // TODO: Similar to processInput without checking for abstractexpression
     private String createArgumentizedString(SingleStatement statement1, SingleStatement statement2) {
         String argumentizedString = preProcessor.getArgumentizedString(statement1);
 
@@ -120,8 +197,8 @@ public class FunctionBodyMapper {
 
     }
 
-    void replaceParametersWithArguments(UMLOperationDiff operationDiff, List<SingleStatement> leaves1,
-                                        List<SingleStatement> leaves2) {
+    void replaceParametersWithArguments(UMLOperationDiff operationDiff, Set<SingleStatement> leaves1,
+                                        Set<SingleStatement> leaves2) {
         Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
         Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 

@@ -93,8 +93,12 @@ public class BlockStatement extends Statement {
         return newBlock;
     }
 
-    public List<SingleStatement> getAllLeafStatementsIncludingNested() {
-        final List<SingleStatement> leaves = new ArrayList<>();
+    /**
+     * Returns all the single statements including children's of children in a bottom up fashion
+     * (i.e. lowest level children will be the first elements of the list sorted by their index position in parent)
+     */
+    public Set<SingleStatement> getAllLeafStatementsIncludingNested() {
+        final Set<SingleStatement> leaves = new LinkedHashSet<>();
         for (Statement statement : this.statements) {
             if (statement instanceof BlockStatement) {
                 leaves.addAll(((BlockStatement) statement).getAllLeafStatementsIncludingNested());
