@@ -1,5 +1,5 @@
 const astUtil = require('./AstUtil');
-const nodePorcessor = require('../processors/AstNodeProcessor');
+const nodeProcessor = require('../processors/AstNodeProcessor');
 
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
     const parent = {};
@@ -8,11 +8,17 @@ exports.processFunctionBody = function processFunctionBody(bodyPath) {
     return functionBody;
 }
 
+/**
+ * Could be called by each node recursively if they have child to be processed
+ */
 function processStatement(path, parent) {
-        const statement = nodePorcessor.processNodePath(path, processStatement);
-        statement.loc = astUtil.getFormattedLocation(path.node);
-        addStatement(parent, statement);
+    const statement = nodeProcessor.processNodePath(path, processStatement);
+    statement.loc = astUtil.getFormattedLocation(path.node);
+
+    // Add children
+    addStatement(parent, statement);
 }
+
 
 function addStatement(parent, childStatement) {
     if (!parent.statements) {

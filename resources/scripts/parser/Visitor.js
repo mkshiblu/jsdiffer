@@ -5,8 +5,8 @@ const astUtil = require('./AstUtil');
 
 const functionDeclarations = [];
 
-// A visitor for FunctionDeclaration
-function FunctionDeclarationVisitor(/*namespace*/) {
+
+function Visitor() {
 
     this.FunctionDeclaration = (path) => {
         const fd = path.node;
@@ -15,7 +15,6 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const namespace = concatScopes(path);
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
 
-        // Pass the path instead of the body because path has the string repreentation?
         const processedBody = processor.processFunctionBody(path.get('body'));
         saveFunctionDeclaration(fd, qualifiedName, processedBody);
         path.skip();
@@ -24,7 +23,7 @@ function FunctionDeclarationVisitor(/*namespace*/) {
     this.FunctionExpression = (path) => {
         const fe = path.node;
 
-        // If it's a named functionExpression process it as declaration since it is subject to rename
+        // If it's a named functionExpression process it as declaration since it is subject to rename?
         if (fe.id != null) {
             const body = fe.body;
             const name = fe.id.name;
@@ -87,5 +86,5 @@ function concatScopes(path) {
     return namespace == '' ? null : namespace;
 }
 
-exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
+exports.Visitor = Visitor;
 exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));

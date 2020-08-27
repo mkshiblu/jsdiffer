@@ -3,6 +3,8 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
+import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementFinder;
 import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
@@ -88,59 +90,57 @@ public class FunctionBodyMapper {
     private void matchLeavesWithVariableRenames(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
 
-        for(Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext();) {
+        for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
             SingleStatement leaf1 = iterator1.next();
             TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
 
-//            for(Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext();) {
-//                SingleStatement leaf2 = iterator2.next();
-//
-//                ReplacementFinder replacementFinder = createReplacementFinder(leaf1, leaf2, leaves1, leaves2);
-//                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap, replacementFinder);
-//                if (replacements != null) {
-//                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+            for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                SingleStatement leaf2 = iterator2.next();
+
+                ReplacementFinder replacementFinder = createReplacementFinder(leaf1, leaf2, leaves1, leaves2);
+                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap);
+                if (replacements != null) {
+                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
 //                    mapping.addReplacements(replacements);
-//                    for(AbstractCodeFragment leaf : leaves2) {
-//                        if(leaf.equals(leaf2)) {
+//                    for (AbstractCodeFragment leaf : leaves2) {
+//                        if (leaf.equals(leaf2)) {
 //                            break;
 //                        }
 //                        UMLClassBaseDiff classDiff = this.classDiff != null ? this.classDiff : parentMapper != null ? parentMapper.classDiff : null;
 //                        mapping.temporaryVariableAssignment(leaf, leaves2, refactorings, classDiff);
-//                        if(mapping.isIdenticalWithExtractedVariable()) {
+//                        if (mapping.isIdenticalWithExtractedVariable()) {
 //                            break;
 //                        }
 //                    }
-//                    for(AbstractCodeFragment leaf : leaves1) {
-//                        if(leaf.equals(leaf1)) {
+//                    for (AbstractCodeFragment leaf : leaves1) {
+//                        if (leaf.equals(leaf1)) {
 //                            break;
 //                        }
 //                        mapping.inlinedVariableAssignment(leaf, leaves2, refactorings);
-//                        if(mapping.isIdenticalWithInlinedVariable()) {
+//                        if (mapping.isIdenticalWithInlinedVariable()) {
 //                            break;
 //                        }
 //                    }
 //                    mappingSet.add(mapping);
-//                }
-//            }
-//            if(!mappingSet.isEmpty()) {
+                }
+            }
+            if (!mappingSet.isEmpty()) {
 //                AbstractMap.SimpleEntry<CompositeStatementObject, CompositeStatementObject> switchParentEntry = null;
-//                if(variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
+//                if (variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
 //                    //postpone mapping
 //                    postponedMappingSets.add(mappingSet);
-//                }
-//                else if((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
+//                } else if ((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
 //                    LeafMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
 //                    mappings.add(bestMapping);
 //                    leaves2.remove(bestMapping.getFragment1());
 //                    iterator1.remove();
-//                }
-//                else {
+//                } else {
 //                    LeafMapping minStatementMapping = mappingSet.first();
 //                    mappings.add(minStatementMapping);
 //                    leaves2.remove(minStatementMapping.getFragment2());
 //                    iterator1.remove();
 //                }
-//            }
+            }
         }
     }
 

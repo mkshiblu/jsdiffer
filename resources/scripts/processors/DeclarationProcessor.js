@@ -24,8 +24,17 @@ exports.processFunctionDeclaration = (functionDeclarationPath, processStatement)
     return statement;
 }
 
-exports.processVariableDeclaration = (variableDeclarationPath) => {
-    const variableDeclaration = variableDeclarationPath.node;
+/**
+* 
+* interface VariableDeclaration <: Declaration {
+*     type: "VariableDeclaration";
+*    declarations: [ VariableDeclarator ];
+*    kind: "var" | "let" | "const";
+* }
+ * @param {*} path variableDeclaration path
+ */
+exports.processVariableDeclaration = (path) => {
+    const variableDeclaration = path.node;
     // const declarationNodes = variableDeclaration.declarations;
     // let temp = [];
     // for (let i = 0; i < declarationNodes.length; i++) {
@@ -41,6 +50,6 @@ exports.processVariableDeclaration = (variableDeclarationPath) => {
     // //return temp;
     return {
         type: variableDeclaration.type,
-        text: variableDeclarationPath.toString(),
+        text: path.toString(),
     };
 }
