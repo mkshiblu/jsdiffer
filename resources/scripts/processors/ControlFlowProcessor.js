@@ -1,5 +1,15 @@
-exports.processIfStatement = (ifStatementPath, processStatement) => {
-    const ifStatement = ifStatementPath.node;
+/**
+    interface IfStatement <: Statement {
+    type: "IfStatement";
+    test: Expression;
+    consequent: Statement;
+    alternate: Statement | null;
+    }
+ * @param {*} path 
+ * @param {*} processStatement 
+ */
+exports.processIfStatement = (path, processStatement) => {
+    const ifStatement = path.node;
     const statement = {
         type: ifStatement.type,
         // For composite we store the expression that appears inside the bracket and it's name
@@ -19,11 +29,11 @@ exports.processIfStatement = (ifStatementPath, processStatement) => {
     // }
     // TODO handle else if else
 
-    const expressionStr = ifStatementPath.get('test').toString();
+    const expressionStr = path.get('test').toString();
     statement.expressions.push(expressionStr);
 
     // Extract body
-    const bodyPath = ifStatementPath.get('consequent');
+    const bodyPath = path.get('consequent');
 
     if (bodyPath)
         processStatement(bodyPath, statement);

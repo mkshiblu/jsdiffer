@@ -14,26 +14,14 @@ const processNodePath = (function () {
     ]);
 
 
-    
+    function processExpression(expression) {
 
-    this.VariableDeclaration = (path) => {
-        const variableDeclaration = path.node;
-
-        // If variable declarations are passed as state
-        if (this.variableDeclarations) {
-
-            // Add the variable declaration to the passed state
-            this.variableDeclarations.push({
-                // name: 
-                // scope: 
-            });
-        }
     }
-    
-    return function (nodePath, processStatement, visitor) {
+
+    return function (nodePath, processStatement) {
         const process = nodePathProcesses.get(nodePath.node.type);
         if (process) {
-            const rt = process(nodePath, processStatement, visitor);
+            const rt = process(nodePath, processStatement, processExpression);
             return rt;
         }
 

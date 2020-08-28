@@ -5,42 +5,56 @@ const astUtil = require('./AstUtil');
 
 const functionDeclarations = [];
 
-
-function Visitor() {
-
-    this.FunctionDeclaration = (path) => {
-        const fd = path.node;
-        const statements = fd.body;
-        const name = fd.id.name;
-        const namespace = concatScopes(path);
-        const qualifiedName = namespace == null ? name : namespace + '.' + name;
-
-        const processedBody = processor.processFunctionBody(path.get('body'));
-        saveFunctionDeclaration(fd, qualifiedName, processedBody);
-        path.skip();
-    };
-
-    this.FunctionExpression = (path) => {
-        const fe = path.node;
-
-        // If it's a named functionExpression process it as declaration since it is subject to rename?
-        if (fe.id != null) {
-            const body = fe.body;
-            const name = fe.id.name;
+const visitor = (function () {
+    return function Visitor() {
+        this.FunctionDeclaration = (path) => {
+            const fd = path.node;
+            const statements = fd.body;
+            const name = fd.id.name;
             const namespace = concatScopes(path);
             const qualifiedName = namespace == null ? name : namespace + '.' + name;
-            saveFunctionDeclaration(fe, qualifiedName);
-        } else {
 
-            // This is an unmamed function expression. TODO handle
+            const processedBody = processor.processFunctionBody(path.get('body'));
+            saveFunctionDeclaration(fd, qualifiedName, processedBody);
+            path.skip();
+        };
+
+        this.FunctionExpression = (path) => {
+            const fe = path.node;
+
+            // If it's a named functionExpression process it as declaration since it is subject to rename?
+            if (fe.id != null) {
+                const body = fe.body;
+                const name = fe.id.name;
+                const namespace = concatScopes(path);
+                const qualifiedName = namespace == null ? name : namespace + '.' + name;
+                saveFunctionDeclaration(fe, qualifiedName);
+            } else {
+
+                // This is an unmamed function expression. TODO handle
+            }
+        };
+
+        // Could be a declaration or declaration expression
+        this.Function = (path) => {
+
         }
-    };
 
-    // Could be a declaration or declaration expression
-    this.Function = (path) => {
+        this.VariableDeclaration = (path) => {
+            const variableDeclaration = path.node;
 
+            // If variable declarations are passed as state
+            if (this.variableDeclarations) {
+
+                // Add the variable declaration to the passed state
+                this.variableDeclarations.push({
+                    // name: 
+                    // scope: 
+                });
+            }
+        }
     }
-};
+})();
 
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     functionDeclarations.push({
@@ -86,5 +100,5 @@ function concatScopes(path) {
     return namespace == '' ? null : namespace;
 }
 
-exports.Visitor = Visitor;
+exports.Visitor = visitor;
 exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));
