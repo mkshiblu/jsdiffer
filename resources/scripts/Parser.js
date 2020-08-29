@@ -14,7 +14,7 @@ function parse(script) {
 
     console.timeEnd('parse');
     
-    traverse.default(ast, new visitor.Visitor());
+    traverse.default(ast, visitor.Visitor);
     const functionDeclarations = visitor.getFunctionDeclarations();
 
     // return JSON.stringify(functionDeclarations);

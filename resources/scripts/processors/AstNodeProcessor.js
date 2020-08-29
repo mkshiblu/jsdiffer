@@ -2,7 +2,9 @@ const declarationProcessor = require('./DeclarationProcessor');
 const controlFlowProcessor = require('./ControlFlowProcessor');
 const statementProcessor = require('./StatementProcessor');
 
+
 const processNodePath = (function () {
+    const visitor = require('../parser/Visitor');
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
@@ -13,8 +15,9 @@ const processNodePath = (function () {
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
     ]);
 
-
-    function processExpression(expression) {
+    function processExpression(path) {
+        const variableDeclarations = [];
+        path.traverse(visitor.Visitor, variableDeclarations);
 
     }
 

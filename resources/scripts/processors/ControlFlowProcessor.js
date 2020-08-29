@@ -8,7 +8,7 @@
  * @param {*} path 
  * @param {*} processStatement 
  */
-exports.processIfStatement = (path, processStatement) => {
+exports.processIfStatement = (path, processStatement, processExpression) => {
     const ifStatement = path.node;
     const statement = {
         type: ifStatement.type,
@@ -29,6 +29,8 @@ exports.processIfStatement = (path, processStatement) => {
     // }
     // TODO handle else if else
 
+    const extractedInfo = processExpression(path.get('test'));
+    
     const expressionStr = path.get('test').toString();
     statement.expressions.push(expressionStr);
 
