@@ -19,20 +19,10 @@ exports.processIfStatement = (path, processStatement, processExpression) => {
 
     // TODO: Handle expressions
     const condition = ifStatement.test;
-    // switch (condition.type) {
-    //     case 'BinaryExpression':
-    //         const left = condition.left;
-    //         const operator = condition.operator;
-    //         const right = condition.right;
-    //         processExpression(right);
-    //         break;
-    // }
     // TODO handle else if else
 
-    const extractedInfo = processExpression(path.get('test'));
-    
-    const expressionStr = path.get('test').toString();
-    statement.expressions.push(expressionStr);
+    const expression = processExpression(path.get('test'));
+    statement.expressions.push(expression);
 
     // Extract body
     const bodyPath = path.get('consequent');

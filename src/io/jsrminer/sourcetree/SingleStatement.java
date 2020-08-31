@@ -3,9 +3,13 @@ package io.jsrminer.sourcetree;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
-    //private List<VariableDeclaration> variableDeclarations;
+    private Set<VariableDeclaration> variableDeclarations = new LinkedHashSet<>();
+    private Set<String> variables = new LinkedHashSet<>();
 
     public SingleStatement() {
         // TODO find types
@@ -32,5 +36,16 @@ public class SingleStatement extends Statement {
     @Override
     public String toString() {
         return text;
+    }
+
+    /**
+     * Returns the identifiers involved in this statement
+     */
+    public Set<String> getVariables(){
+        return this.variables;
+    }
+
+    public Set<VariableDeclaration> getVariableDeclarations(){
+        return variableDeclarations;
     }
 }

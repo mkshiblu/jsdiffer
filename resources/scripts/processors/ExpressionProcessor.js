@@ -1,6 +1,7 @@
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
     ['Identifier', processIdentifier],
+    ['NumericLiteral', processNumericLiteral],
 ]);
 
 /**
@@ -9,10 +10,12 @@ const processes = new Map([
  * an expression can also be a pattern.
  * @param {*} node 
  */
-function processExpression(path) {
+function processExpression(path, expressionResult) {
     const node = path.node;
-    const process = processes.get(nodePath.node.type);
+    const process = processes.get(path.node.type);
     if (process) {
+        process(path, expressionResult);
+        return expressionResult;
     } else {
         throw 'Processeor not implemented for : ' + path.node.type;
     }
@@ -26,13 +29,14 @@ interface BinaryExpression<: Expression {
     right: Expression;
 }
  */
-function processBinaryExpression(path) {
+function processBinaryExpression(path, expressionResult) {
     const node = path.node;
     const left = node.left;
     const operator = node.operator;
     const right = node.right;
-    processExpression(left);
-    processExpression(right);
+    expressionResult.binaryOperators.push(operator);
+    processExpression(path.get('left'), expressionResult);
+    processExpression(path.get('right'), expressionResult);
 }
 
 /**
@@ -43,8 +47,20 @@ function processBinaryExpression(path) {
 An identifier. Note that an identifier may be an expression or a destructuring pattern
  * @param {*} path 
  */
-function processIdentifier(path) {
+function processIdentifier(path, { identifiers = [] }) {
     const name = path.node.name;
+    identifiers.push(name);
+}
+
+/**
+ * interface NumericLiteral <: Literal {
+  type: "NumericLiteral";
+  value: number;
+}
+ * @param {*} path 
+ */
+function processNumericLiteral(path, { numericLiterals = [] }) {
+    numericLiterals.push(path.node.value);
 }
 
 exports.processExpression = processExpression;

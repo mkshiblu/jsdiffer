@@ -2,7 +2,6 @@ const parser = require('./Parser');
 
 const content ='function x() { var d = 1; if (d  == 1) { return 5; } function y(p) { }; return 6; }';
 //content = require('fs').fs.readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
-const json = parser.parse(content);
-
-console.log(JSON.stringify(json));
-//JSON.stringify(json);
+const sourceModel = parser.parse(content);
+const json = JSON.stringify(sourceModel);
+console.log(json);

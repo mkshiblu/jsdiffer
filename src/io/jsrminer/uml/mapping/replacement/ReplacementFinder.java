@@ -78,9 +78,11 @@ public class ReplacementFinder {
         VariableDeclaration variableDeclarationWithArrayInitializer2 = declarationWithArrayInitializer(variableDeclarations2);
         OperationInvocation invocationCoveringTheEntireStatement1 = statement1.invocationCoveringEntireFragment();
         OperationInvocation invocationCoveringTheEntireStatement2 = statement2.invocationCoveringEntireFragment();
-        Set<String> variables1 = new LinkedHashSet<String>(statement1.getVariables());
-        Set<String> variables2 = new LinkedHashSet<String>(statement2.getVariables());
-        Set<String> variableIntersection = new LinkedHashSet<String>(variables1);
+
+        // Get a copu of variables
+        Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
+        Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
+        Set<String> variableIntersection = new LinkedHashSet<>(variables1);
 
         variableIntersection.retainAll(variables2);
         // ignore the variables in the intersection that also appear with "this." prefix in the sets of variables

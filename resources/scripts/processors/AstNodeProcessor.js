@@ -1,6 +1,7 @@
 const declarationProcessor = require('./DeclarationProcessor');
 const controlFlowProcessor = require('./ControlFlowProcessor');
 const statementProcessor = require('./StatementProcessor');
+const expressionProcessor = require('./ExpressionProcessor');
 
 
 const processNodePath = (function () {
@@ -16,9 +17,15 @@ const processNodePath = (function () {
     ]);
 
     function processExpression(path) {
-        const variableDeclarations = [];
-        path.traverse(visitor.Visitor, variableDeclarations);
-
+        const expressionInfo = {
+            identifiers: [],
+            numericLiterals: [],
+            variableDeclarations: [],
+            binaryOperators: []
+        };
+        
+        const expression = expressionProcessor.processExpression(path, expressionInfo);
+        return expression;
     }
 
     return function (nodePath, processStatement) {
