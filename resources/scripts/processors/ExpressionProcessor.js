@@ -34,7 +34,7 @@ function processBinaryExpression(path, expressionResult) {
     const left = node.left;
     const operator = node.operator;
     const right = node.right;
-    expressionResult.binaryOperators.push(operator);
+    expressionResult.infixOperators.push(operator);
     processExpression(path.get('left'), expressionResult);
     processExpression(path.get('right'), expressionResult);
 }
@@ -60,7 +60,7 @@ function processIdentifier(path, { identifiers = [] }) {
  * @param {*} path 
  */
 function processNumericLiteral(path, { numericLiterals = [] }) {
-    numericLiterals.push(path.node.value);
+    numericLiterals.push(path.toString());
 }
 
 exports.processExpression = processExpression;

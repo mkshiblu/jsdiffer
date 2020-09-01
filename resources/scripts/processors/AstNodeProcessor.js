@@ -18,10 +18,11 @@ const processNodePath = (function () {
 
     function processExpression(path) {
         const expressionInfo = {
+            text: path.toString(),
             identifiers: [],
             numericLiterals: [],
             variableDeclarations: [],
-            binaryOperators: []
+            infixOperators: []
         };
         
         const expression = expressionProcessor.processExpression(path, expressionInfo);

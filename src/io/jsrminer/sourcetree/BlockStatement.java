@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class BlockStatement extends Statement {
     protected List<Statement> statements;
-    protected List<String> expressions = new ArrayList<>();
+    protected List<Expression> expressions = new ArrayList<>();
     // exp
     // vd
 
@@ -22,7 +22,7 @@ public class BlockStatement extends Statement {
         this.statements.add(statement);
     }
 
-    void addExpression(String expression) {
+    void addExpression(Expression expression) {
         this.expressions.add(expression);
     }
 
@@ -65,8 +65,9 @@ public class BlockStatement extends Statement {
 
             // Parse Expression (Todo optimize
             if (any.keys().contains("expressions")) {
-                for (Any exp : any.get("expressions").asList()) {
-                    currentBlock.addExpression(exp.toString());
+                for (Any expressionAny : any.get("expressions").asList()) {
+                    Expression expression = Expression.fromJSON(expressionAny.toString());
+                    currentBlock.addExpression(expression);
                 }
             }
 
