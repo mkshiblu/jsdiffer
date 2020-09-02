@@ -39,6 +39,9 @@ public abstract class CodeFragment {
         this.type = type;
     }
 
+    /**
+     * Returns the Code Element type of this fragment
+     */
     public CodeElementType getType(){
         return type;
     }
