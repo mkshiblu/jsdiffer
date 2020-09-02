@@ -1,6 +1,5 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
@@ -12,8 +11,8 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
 
     @Override
     public int compareTo(LeafStatementMapping o) {
-        double distance1 = this.getNormalizedTextualDistance();
-        double distance2 = o.getNormalizedTextualDistance();
+        double distance1 = this.normalizedTextualDistance();
+        double distance2 = o.normalizedTextualDistance();
 
         if (distance1 != distance2) {
             if (this.isIdenticalWithExtractedVariable() && !o.isIdenticalWithExtractedVariable()) {
@@ -54,7 +53,7 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
      * the longest string between the two statements. When calculating the edit distance, it uses the lower cased version of
      * the two statement
      */
-    double getNormalizedTextualDistance() {
+    double normalizedTextualDistance() {
         final String text1 = statement1.getText();
         final String text2 = statement2.getText();
         final double distance;

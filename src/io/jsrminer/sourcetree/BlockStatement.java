@@ -85,6 +85,7 @@ public class BlockStatement extends Statement {
                     child = SingleStatement.fromJson(childAny.toString());
                 }
 
+                child.parent = currentBlock;
                 child.positionIndexInParent = ++indexInParent;
                 child.depth = currentBlock.depth + 1;
                 currentBlock.addStatement(child);
