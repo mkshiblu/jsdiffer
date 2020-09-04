@@ -3,6 +3,18 @@ const controlFlowProcessor = require('./ControlFlowProcessor');
 const statementProcessor = require('./StatementProcessor');
 const expressionProcessor = require('./ExpressionProcessor');
 
+function processExpression(path) {
+    const expressionInfo = {
+        text: path.toString(),
+        identifiers: [],
+        numericLiterals: [],
+        variableDeclarations: [],
+        infixOperators: []
+    };
+
+    const expression = expressionProcessor.processExpression(path, expressionInfo);
+    return expression;
+}
 
 const processNodePath = (function () {
     const visitor = require('../parser/Visitor');
@@ -15,19 +27,6 @@ const processNodePath = (function () {
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
     ]);
-
-    function processExpression(path) {
-        const expressionInfo = {
-            text: path.toString(),
-            identifiers: [],
-            numericLiterals: [],
-            variableDeclarations: [],
-            infixOperators: []
-        };
-        
-        const expression = expressionProcessor.processExpression(path, expressionInfo);
-        return expression;
-    }
 
     return function (nodePath, processStatement) {
         const process = nodePathProcesses.get(nodePath.node.type);
@@ -42,3 +41,4 @@ const processNodePath = (function () {
 })();
 
 exports.processNodePath = processNodePath;
+exports.processExpression = processExpression;

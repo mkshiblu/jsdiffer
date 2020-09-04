@@ -1,9 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
-import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.Expression;
-import io.jsrminer.sourcetree.SingleStatement;
-import io.jsrminer.sourcetree.VariableDeclaration;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
 
 import java.util.*;
@@ -76,8 +73,8 @@ public class ReplacementFinder {
         final VariableDeclaration variableDeclarationWithArrayInitializer1 = findDeclarationWithArrayInitializer(variableDeclarations1);
         final VariableDeclaration variableDeclarationWithArrayInitializer2 = findDeclarationWithArrayInitializer(variableDeclarations2);
 
-        OperationInvocation invocationCoveringTheEntireStatement1 = statement1.invocationCoveringEntireFragment();
-        OperationInvocation invocationCoveringTheEntireStatement2 = statement2.invocationCoveringEntireFragment();
+        //OperationInvocation invocationCoveringTheEntireStatement1 = statement1.invocationCoveringEntireFragment();
+        //OperationInvocation invocationCoveringTheEntireStatement2 = statement2.invocationCoveringEntireFragment();
 //
 //        // Get a copu of variables
 //        Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
