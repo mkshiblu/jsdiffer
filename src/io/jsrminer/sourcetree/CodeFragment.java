@@ -42,7 +42,12 @@ public abstract class CodeFragment {
     /**
      * Returns the Code Element type of this fragment
      */
-    public CodeElementType getType(){
+    public CodeElementType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return text;
     }
 }

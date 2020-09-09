@@ -1,7 +1,15 @@
+const t = require('@babel/types');
+const literals = require("./Literals");
+
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
     ['Identifier', processIdentifier],
-    ['NumericLiteral', processNumericLiteral],
+    ['NumericLiteral', literals.processNumericLiteral],
+    ['StringLiteral', literals.processStringLiteral],
+    ['NewExpression', processNewExpression],
+    ['CallExpression', processCallExpression],
+    ['AssignmentExpression', processAssignmentExpression],
+    ['MemberExpression', processMemberExpression],
 ]);
 
 /**
@@ -19,6 +27,80 @@ function processExpression(path, expressionResult) {
     } else {
         throw 'Processeor not implemented for : ' + path.node.type;
     }
+}
+
+/* interface CallExpression<: Expression {
+    type: "CallExpression";
+    callee: Expression | Super | Import;
+    arguments: [Expression | SpreadElement];
+    optional: boolean | null;
+} */
+function processCallExpression(path, expressionResult) {
+    const node = path.node;
+    const callee = path.node.callee;
+    let name;
+    let expression;
+
+    if (t.isIdentifier(callee)) {
+        name = callee.name;
+    } else if (t.isMemberExpression(callee)) {
+        // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
+        name = callee.property.name;
+        expression = path.get('callee').get('object').toString();
+
+        // Todo find chain method calls
+        // TODO handle arguments
+    } else {
+        throw "Unsupported callee: " + node.callee.type;
+    }
+
+    const result = {
+        text: path.toString(),
+        type: node.type,
+        functionName: name,
+        expression,
+        arguments: [],
+    };
+
+    path.get('arguments')
+        .forEach((argumentPath) => {
+            result.arguments.push(argumentPath.toString());
+        });
+
+    expressionResult.functionInvocations.push(result);
+}
+
+/* interface NewExpression<: CallExpression {
+    type: "NewExpression";
+    optional: boolean | null;
+} */
+function processNewExpression(path, expressionResult) {
+
+    const node = path.node;
+
+    if (!t.isIdentifier(node.callee)) {
+        throw "Unsupported callee " + node.type;
+    }
+    const result = {
+        constructorName: node.callee.name,
+        arguments: []
+    };
+
+    path.get('arguments')
+        .forEach((argumentPath) => {
+            result.arguments.push(argumentPath.toString());
+            processExpression(argumentPath, expressionResult);
+            // if (t.isIdentifier(argument)) {
+            //     result.arguments.push(argument.name)
+            // } else if (t.isStringLiteral(argument)) {
+            //     result.arguments.push(argument.value);
+            // } else {
+            //     throw "Unsupported argument type : " + argument.type;
+            // }
+
+        });
+
+    expressionResult.constructorInvocations.push(result);
 }
 
 /**
@@ -39,6 +121,48 @@ function processBinaryExpression(path, expressionResult) {
     processExpression(path.get('right'), expressionResult);
 }
 
+/* interface AssignmentExpression<: Expression {
+    type: "AssignmentExpression";
+    operator: AssignmentOperator;
+    left: Pattern | Expression;
+    right: Expression;
+}
+An assignment operator expression.
+
+    AssignmentOperator
+enum AssignmentOperator {
+    "=" | "+=" | "-=" | "*=" | "/=" | "%="
+        | "<<=" | ">>=" | ">>>="
+        | "|=" | "^=" | "&="
+}
+An assignment operator token. */
+function processAssignmentExpression(path, expressionResult) {
+    const node = path.node;
+    const operator = node.operator;
+    expressionResult.infixOperators.push(operator);
+    processExpression(path.get('left'), expressionResult);
+    processExpression(path.get('right'), expressionResult);
+}
+
+/* interface MemberExpression<: Expression, Pattern {
+    type: "MemberExpression";
+    object: Expression | Super;
+    property: Expression;
+    computed: boolean;
+    optional: boolean | null;
+}
+A member expression.If computed is true, the node corresponds to a computed(a[b])
+ member expression and property is an Expression.If computed is false, the node 
+ corresponds to a static(a.b) member expression and property is an Identifier.
+ The optional flags indicates that the member expression can be called even if 
+ the object is null or undefined.If this is the object value(null / undefined) 
+ should be returned. */
+function processMemberExpression(path, expressionResult) {
+    const node = path.node;
+    processIdentifier(path.get('object'), expressionResult);
+    processIdentifier(path.get('property'), expressionResult);
+}
+
 /**
  * interface Identifier <: Expression, Pattern {
   type: "Identifier";
@@ -50,17 +174,6 @@ An identifier. Note that an identifier may be an expression or a destructuring p
 function processIdentifier(path, { identifiers = [] }) {
     const name = path.node.name;
     identifiers.push(name);
-}
-
-/**
- * interface NumericLiteral <: Literal {
-  type: "NumericLiteral";
-  value: number;
-}
- * @param {*} path 
- */
-function processNumericLiteral(path, { numericLiterals = [] }) {
-    numericLiterals.push(path.toString());
 }
 
 exports.processExpression = processExpression;

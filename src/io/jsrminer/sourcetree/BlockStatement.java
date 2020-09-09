@@ -60,16 +60,18 @@ public class BlockStatement extends Statement {
             currentBlock.statements = new ArrayList<>(statements.size());
 
             // Parse Type
-            String type = any.toString("type");
-            currentBlock.type = CodeElementType.getFromTitleCase(type);
+            currentBlock.type = CodeElementType.getFromTitleCase(any.toString("type"));
 
-            // Parse Expression (Todo optimize
+            // Parse Expressions (Todo optimize
             if (any.keys().contains("expressions")) {
                 for (Any expressionAny : any.get("expressions").asList()) {
                     Expression expression = Expression.fromJSON(expressionAny.toString());
                     currentBlock.addExpression(expression);
                 }
             }
+
+            // Parse text
+            currentBlock.text = any.toString("text");
 
             for (Any childAny : statements) {
                 isComposite = childAny.keys().contains("statements");
@@ -110,19 +112,19 @@ public class BlockStatement extends Statement {
         }
         return leaves;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.type.titleCase);
-        if (expressions.size() > 0) {
-            sb.append("(");
-            for (int i = 0; i < expressions.size() - 1; i++) {
-                sb.append(expressions.get(i).toString()).append("; ");
-            }
-            sb.append(expressions.get(expressions.size() - 1).toString());
-            sb.append(")");
-        }
-        return sb.toString();
-    }
+//
+//    @Override
+//    public String toString() {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(this.type.titleCase);
+//        if (expressions.size() > 0) {
+//            sb.append("(");
+//            for (int i = 0; i < expressions.size() - 1; i++) {
+//                sb.append(expressions.get(i).toString()).append("; ");
+//            }
+//            sb.append(expressions.get(expressions.size() - 1).toString());
+//            sb.append(")");
+//        }
+//        return sb.toString();
+//    }
 }

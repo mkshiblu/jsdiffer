@@ -4,17 +4,20 @@ import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
     private Set<VariableDeclaration> variableDeclarations = new LinkedHashSet<>();
     private Set<String> variables = new LinkedHashSet<>();
+    private Map<String, List<OperationInvocation>> methodInvocationMap;
 
     public SingleStatement() {
         // TODO find types
     }
-    
+
     // TODO Move to factory
     public static SingleStatement fromJson(String singleStatementJson) {
         SingleStatement singleStatement = new SingleStatement();
@@ -41,11 +44,15 @@ public class SingleStatement extends Statement {
     /**
      * Returns the identifiers involved in this statement
      */
-    public Set<String> getVariables(){
+    public Set<String> getVariables() {
         return this.variables;
     }
 
-    public Set<VariableDeclaration> getVariableDeclarations(){
+    public Set<VariableDeclaration> getVariableDeclarations() {
         return variableDeclarations;
+    }
+
+    public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
+        return methodInvocationMap;
     }
 }
