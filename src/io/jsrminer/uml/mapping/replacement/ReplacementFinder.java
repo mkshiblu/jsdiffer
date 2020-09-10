@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
 import java.util.*;
 
@@ -15,8 +16,8 @@ public class ReplacementFinder {
 
     public ReplacementFinder(String argumentizedString1, String argumentizedString2,
                              List<? extends CodeFragment> unMatchedStatements1, List<? extends CodeFragment> unMatchedStatements2) {
-        setArgumentizedString1(argumentizedString1);
         this.argumentizedString2 = argumentizedString2;
+        setArgumentizedString1(argumentizedString1);
         this.unMatchedStatements1 = unMatchedStatements1;
         this.unMatchedStatements2 = unMatchedStatements2;
         this.replacements = new LinkedHashSet<Replacement>();
@@ -65,14 +66,15 @@ public class ReplacementFinder {
         return replacements;
     }
 
-    private void filterUnmatchedVariables(SingleStatement statement1, SingleStatement statement2) {
+    private void filterUnmatchedVariables(SingleStatement statement1, SingleStatement statement2,
+                                          OperationInvocation invocationCoveringTheEntireStatement1,
+                                          OperationInvocation invocationCoveringTheEntireStatement2) {
         final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
         final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
 
         // Find common variables
         final Set<String> commonVariables = new LinkedHashSet<>(variables1);
         commonVariables.retainAll(variables2);
-
 
         // ignore the variables in the intersection that are static fields
         Set<String> variablesToBeRemovedFromCommon = new LinkedHashSet<>();
@@ -126,10 +128,11 @@ public class ReplacementFinder {
         final VariableDeclaration variableDeclarationWithArrayInitializer1 = findDeclarationWithArrayInitializer(variableDeclarations1);
         final VariableDeclaration variableDeclarationWithArrayInitializer2 = findDeclarationWithArrayInitializer(variableDeclarations2);
 
-        final OperationInvocation invocationCoveringTheEntireStatement1 = statement1.invocationCoveringEntireFragment();
-        final OperationInvocation invocationCoveringTheEntireStatement2 = statement2.invocationCoveringEntireFragment();
+        final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
+        final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
 
-        filterUnmatchedVariables(statement1, statement2);
+        filterUnmatchedVariables(statement1, statement2, invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+
         // Get a copu of variables
         final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
         final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());

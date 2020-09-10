@@ -28,13 +28,10 @@ exports.processEmptyStatement = (emptyStatementPath) => {
 // }
 exports.processExpressionStatement = (path) => {
 
-    // const statement = {
-    //     type: path.node.type,
-    //     text: path.toString()
-    // };
-    const statement = astProcessor.processExpression(path.get('expression'));
-    statement.type = path.node.type;
-    statement.text = path.toString;
-
-    return statement;
+    const statement = {
+        type: path.node.type,
+        text: path.toString()
+    };
+    const expression = astProcessor.processExpression(path.get('expression'));
+    return Object.assign(expression, statement);
 }

@@ -13,16 +13,6 @@ exports.processFunctionDeclaration = (functionDeclarationPath, processStatement)
         params: node.params.map(id => id.name)
     };
     processStatement(functionDeclarationPath.get('body'), statement);
-
-    // return {
-    //     statement: {
-    //         type: node.type,
-    //         //qualifiedName,
-    //         name,
-    //         params: node.params.map(id => id.name)
-    //     },
-    //     bodyPaths = functionDeclarationPath.get('body')
-    // };
     return statement;
 }
 
@@ -44,13 +34,14 @@ interface VariableDeclarator <: Node {
 exports.processVariableDeclaration = (path) => {
     const node = path.node;
     const kind = node.kind;
-    let initializer;
+    let initializer = {};
+
     // Extract initilaizer which is an expression
     const declarators = path.get("declarations");
 
     // TODO remove if no such things found
     if (declarators.length > 1) {
-        throw "not supported yet multi-lenght initializers" + variableDeclarationPath;
+        throw "not supported yet multi-length initializers" + variableDeclarationPath;
     }
 
     const declaratorPath = declarators[0];
@@ -60,11 +51,17 @@ exports.processVariableDeclaration = (path) => {
         initializer = astProcessor.processExpression(declaratorPath.get("init"));
     }
 
-    return {
-        variableName,
-        kind,
-        initializer,
+    const statement = {
         type: node.type,
         text: path.toString(),
+        identifiers: [variableName, ...initializer.identifiers],
+        variableDeclarations: [{
+            text: path.toString(),
+            variableName,
+            kind,
+            initializer,
+        }]
     };
+
+    return statement;
 }

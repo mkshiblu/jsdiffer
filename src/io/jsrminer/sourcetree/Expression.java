@@ -34,4 +34,8 @@ public class Expression extends CodeFragment {
 
         return expression;
     }
+
+    public void setVariables(String[] variables) {
+        this.variables = variables;
+    }
 }

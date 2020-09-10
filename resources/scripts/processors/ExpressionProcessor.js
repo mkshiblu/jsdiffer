@@ -10,6 +10,7 @@ const processes = new Map([
     ['CallExpression', processCallExpression],
     ['AssignmentExpression', processAssignmentExpression],
     ['MemberExpression', processMemberExpression],
+    ['ArrayExpression', processArrayExpression],
 ]);
 
 /**
@@ -26,6 +27,14 @@ function processExpression(path, expressionResult) {
         return expressionResult;
     } else {
         throw 'Processeor not implemented for : ' + path.node.type;
+    }
+}
+
+
+function processArrayExpression(path, expressionResult) {
+    return {
+        type: path.node.type,
+        text: path.toString()
     }
 }
 
@@ -47,7 +56,7 @@ function processCallExpression(path, expressionResult) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
         name = callee.property.name;
         expression = path.get('callee').get('object').toString();
-
+        processExpression(path.get('callee').get('object'), expressionResult);
         // Todo find chain method calls
         // TODO handle arguments
     } else {

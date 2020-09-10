@@ -1,8 +1,8 @@
 package io.jsrminer.sourcetree;
 
-public class VariableDeclaration {
-
+public class VariableDeclaration extends CodeFragment {
     private Expression initializer;
+    private VariableDeclarationKind kind;
     public final String variableName;
 
     public VariableDeclaration(String variableName) {
@@ -23,5 +23,13 @@ public class VariableDeclaration {
      */
     public Expression getInitializer() {
         return this.initializer;
+    }
+
+    public void setKind(VariableDeclarationKind kind) {
+        this.kind = kind;
+    }
+
+    public VariableDeclarationKind getKind() {
+        return kind;
     }
 }

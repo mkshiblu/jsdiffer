@@ -1,44 +1,20 @@
 package io.jsrminer.sourcetree;
 
-import com.jsoniter.JsonIterator;
-import com.jsoniter.any.Any;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
     private Set<VariableDeclaration> variableDeclarations = new LinkedHashSet<>();
     private Set<String> variables = new LinkedHashSet<>();
-    private Map<String, List<OperationInvocation>> methodInvocationMap;
+    private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
 
     public SingleStatement() {
-        // TODO find types
     }
 
-    // TODO Move to factory
-    public static SingleStatement fromJson(String singleStatementJson) {
-        SingleStatement singleStatement = new SingleStatement();
-        Any any = JsonIterator.deserialize(singleStatementJson);
-
-        // Text
-        singleStatement.text = any.toString("text");
-
-        // Type
-        String type = any.toString("type");
-        singleStatement.type = CodeElementType.getFromTitleCase(type);
-
-        //Loc
-        singleStatement.sourceLocation = any.get("loc").as(SourceLocation.class);
-
-        return singleStatement;
-    }
 
     @Override
     public String toString() {
-        return text;
+        return super.toString();
     }
 
     /**
@@ -46,6 +22,10 @@ public class SingleStatement extends Statement {
      */
     public Set<String> getVariables() {
         return this.variables;
+    }
+
+    public void setVariables(Set<String> variables) {
+        this.variables = variables;
     }
 
     public Set<VariableDeclaration> getVariableDeclarations() {

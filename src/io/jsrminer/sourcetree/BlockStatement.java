@@ -2,6 +2,7 @@ package io.jsrminer.sourcetree;
 
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
+import io.jsrminer.parser.CompositeJsonFactory;
 
 import java.util.*;
 
@@ -84,7 +85,7 @@ public class BlockStatement extends Statement {
                     child = childBlock;
                 } else {
                     // A leaf statement
-                    child = SingleStatement.fromJson(childAny.toString());
+                    child = CompositeJsonFactory.createSingleStatement(childAny);
                 }
 
                 child.parent = currentBlock;
