@@ -34,7 +34,7 @@ interface VariableDeclarator <: Node {
 exports.processVariableDeclaration = (path) => {
     const node = path.node;
     const kind = node.kind;
-    let initializer = {};
+    let initializer;
 
     // Extract initilaizer which is an expression
     const declarators = path.get("declarations");
@@ -51,17 +51,28 @@ exports.processVariableDeclaration = (path) => {
         initializer = astProcessor.processExpression(declaratorPath.get("init"));
     }
 
+    const variableDeclaration = {
+        text: path.toString(),
+        variableName,
+        kind,
+    };
+
     const statement = {
         type: node.type,
         text: path.toString(),
-        identifiers: [variableName, ...initializer.identifiers],
-        variableDeclarations: [{
-            text: path.toString(),
-            variableName,
-            kind,
-            initializer,
-        }]
+        identifiers: [variableName],
+        // functionInvocations: [],
+        // objectCreations: []
+        variableDeclarations: [variableDeclaration]
     };
+
+    if (initializer) {
+        variableDeclaration.initializer = initializer;
+        statement.variableDeclarations
+        statement.identifiers.push(...initializer.identifiers);
+        statement.functionInvocations = initializer.functionInvocations;
+        statement.objectCreations = initializer.objectCreations;
+    }
 
     return statement;
 }

@@ -2,7 +2,6 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
 import java.util.*;
 
@@ -66,59 +65,71 @@ public class ReplacementFinder {
         return replacements;
     }
 
-    private void filterUnmatchedVariables(SingleStatement statement1, SingleStatement statement2,
-                                          OperationInvocation invocationCoveringTheEntireStatement1,
-                                          OperationInvocation invocationCoveringTheEntireStatement2) {
+    private Map<SingleStatement, Set<String>> filterUnmatchedVariables(SingleStatement statement1, SingleStatement statement2,
+                                                                       OperationInvocation invocationCoveringTheEntireStatement1,
+                                                                       OperationInvocation invocationCoveringTheEntireStatement2) {
         final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
         final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
-
-        // Find common variables
-        final Set<String> commonVariables = new LinkedHashSet<>(variables1);
-        commonVariables.retainAll(variables2);
-
-        // ignore the variables in the intersection that are static fields
-        Set<String> variablesToBeRemovedFromCommon = new LinkedHashSet<>();
-        for (String commonVariable : commonVariables) {
-            // ignore the variables in the intersection that also appear with "this." prefix in the sets of variables
-            if (!commonVariable.startsWith("this.") && !commonVariables.contains("this." + commonVariable) &&
-                    (variables1.contains("this." + commonVariable) || variables2.contains("this." + commonVariable))) {
-                variablesToBeRemovedFromCommon.add(commonVariable);
-            }
-
-            if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                    invocationCoveringTheEntireStatement1.identicalName(invocationCoveringTheEntireStatement2)) {
-                if (!invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
-                        invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
-                    for (String argument : invocationCoveringTheEntireStatement1.getArguments()) {
-                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
-                        if (argument.contains(commonVariable) && !argument.equals(commonVariable) && !argumentNoWhiteSpace.contains("+" + commonVariable + "+") &&
-                                !argumentNoWhiteSpace.contains(commonVariable + "+") && !argumentNoWhiteSpace.contains("+" + commonVariable) &&
-                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements1, commonVariable, argument)) {
-                            variablesToBeRemovedFromCommon.add(commonVariable);
-                        }
-                    }
-                } else if (invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
-                        !invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
-                    for (String argument : invocationCoveringTheEntireStatement2.getArguments()) {
-                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
-                        if (argument.contains(commonVariable) && !argument.equals(commonVariable) && !argumentNoWhiteSpace.contains("+" + commonVariable + "+") &&
-                                !argumentNoWhiteSpace.contains(commonVariable + "+") && !argumentNoWhiteSpace.contains("+" + commonVariable) &&
-                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements2, commonVariable, argument)) {
-                            variablesToBeRemovedFromCommon.add(commonVariable);
-                        }
-                    }
-                }
-            }
-            if (commonVariable.toUpperCase().equals(commonVariable) && !ReplacementUtil.sameCharsBeforeAfter(statement1.getString(), statement2.getString(), commonVariable)) {
-                variablesToBeRemovedFromCommon.add(commonVariable);
-            }
-        }
-
-        commonVariables.removeAll(variablesToBeRemovedFromCommon);
-
-        // remove common variables from the two sets
-        variables1.removeAll(commonVariables);
-        variables2.removeAll(commonVariables);
+//
+//        // 1. Find common variables
+//        final Set<String> commonVariables = new LinkedHashSet<>(variables1);
+//        commonVariables.retainAll(variables2);
+//
+//        // 2. Some of the common variables are not common such as variable with this prefixed
+//        Set<String> variablesToBeRemovedFromCommon = new LinkedHashSet<>();
+//        for (String commonVariable : commonVariables) {
+//
+//            // 2. ignore the variables in the intersection that also appear with "this." prefix in the sets of variables
+//            if (!commonVariable.startsWith("this.") && !commonVariables.contains("this." + commonVariable) &&
+//                    (variables1.contains("this." + commonVariable) || variables2.contains("this." + commonVariable))) {
+//                variablesToBeRemovedFromCommon.add(commonVariable);
+//            }
+//
+//            // If both statements have same named invocation covering entire statement
+//            // Check if the argumetns contain any of the common variable
+//            if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+//                    invocationCoveringTheEntireStatement1.equalsName(invocationCoveringTheEntireStatement2)) {
+//
+//                // If both invocation does not contain the common variable as an argument
+//                if (!invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
+//                        invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
+//
+//                    for (String argument : invocationCoveringTheEntireStatement1.getArguments()) {
+//                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
+//                        if (argument.contains(commonVariable) && !argument.equals(commonVariable)
+//                                && !argumentNoWhiteSpace.contains("+" + commonVariable + "+")
+//                                && !argumentNoWhiteSpace.contains(commonVariable + "+")
+//                                && !argumentNoWhiteSpace.contains("+" + commonVariable)
+//                                && !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements1, commonVariable, argument)) {
+//                            variablesToBeRemovedFromCommon.add(commonVariable);
+//                        }
+//                    }
+//                } else if (invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
+//                        !invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
+//                    // invocation 1 contains, but not invocation 2
+//                    for (String argument : invocationCoveringTheEntireStatement2.getArguments()) {
+//                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
+//                        if (argument.contains(commonVariable) && !argument.equals(commonVariable) && !argumentNoWhiteSpace.contains("+" + commonVariable + "+") &&
+//                                !argumentNoWhiteSpace.contains(commonVariable + "+") && !argumentNoWhiteSpace.contains("+" + commonVariable) &&
+//                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements2, commonVariable, argument)) {
+//                            variablesToBeRemovedFromCommon.add(commonVariable);
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (commonVariable.toUpperCase().equals(commonVariable)
+//                    && !ReplacementUtil.sameCharsBeforeAfter(statement1.getText(), statement2.getText(), commonVariable)) {
+//                variablesToBeRemovedFromCommon.add(commonVariable);
+//            }
+//        }
+//
+//        commonVariables.removeAll(variablesToBeRemovedFromCommon);
+//
+//        // remove common variables from the two sets
+//        variables1.removeAll(commonVariables);
+//        variables2.removeAll(commonVariables);
+        return Map.of(statement1, variables1, statement2, variables2);
     }
 
     public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap) {
@@ -131,57 +142,58 @@ public class ReplacementFinder {
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
 
-        filterUnmatchedVariables(statement1, statement2, invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
+        Map<SingleStatement, Set<String>> unmatchedVariablesMap = filterUnmatchedVariables(statement1, statement2, invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2);
 
         // Get a copu of variables
-        final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
-        final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
-        final Set<String> variableIntersection = new LinkedHashSet<>(variables1);
-        variableIntersection.retainAll(variables2);
+        final Set<String> variables1 = unmatchedVariablesMap.get(statement1);
+        final Set<String> variables2 = unmatchedVariablesMap.get(statement2);
 
-
-        // ignore the variables in the intersection that also appear with "this." prefix in the sets of variables
-        // ignore the variables in the intersection that are static fields
-        Set<String> variablesToBeRemovedFromTheIntersection = new LinkedHashSet<String>();
-        for (String variable : variableIntersection) {
-            if (!variable.startsWith("this.") && !variableIntersection.contains("this." + variable) &&
-                    (variables1.contains("this." + variable) || variables2.contains("this." + variable))) {
-                variablesToBeRemovedFromTheIntersection.add(variable);
-            }
-            if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                    invocationCoveringTheEntireStatement1.identicalName(invocationCoveringTheEntireStatement2)) {
-                if (!invocationCoveringTheEntireStatement1.getArguments().contains(variable) &&
-                        invocationCoveringTheEntireStatement2.getArguments().contains(variable)) {
-                    for (String argument : invocationCoveringTheEntireStatement1.getArguments()) {
-                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
-                        if (argument.contains(variable) && !argument.equals(variable) && !argumentNoWhiteSpace.contains("+" + variable + "+") &&
-                                !argumentNoWhiteSpace.contains(variable + "+") && !argumentNoWhiteSpace.contains("+" + variable) &&
-                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements1, variable, argument)) {
-                            variablesToBeRemovedFromTheIntersection.add(variable);
-                        }
-                    }
-                } else if (invocationCoveringTheEntireStatement1.getArguments().contains(variable) &&
-                        !invocationCoveringTheEntireStatement2.getArguments().contains(variable)) {
-                    for (String argument : invocationCoveringTheEntireStatement2.getArguments()) {
-                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
-                        if (argument.contains(variable) && !argument.equals(variable) && !argumentNoWhiteSpace.contains("+" + variable + "+") &&
-                                !argumentNoWhiteSpace.contains(variable + "+") && !argumentNoWhiteSpace.contains("+" + variable) &&
-                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements2, variable, argument)) {
-                            variablesToBeRemovedFromTheIntersection.add(variable);
-                        }
-                    }
-                }
-            }
-            if (variable.toUpperCase().equals(variable) && !ReplacementUtil.sameCharsBeforeAfter(statement1.getString(), statement2.getString(), variable)) {
-                variablesToBeRemovedFromTheIntersection.add(variable);
-            }
-        }
-
-        variableIntersection.removeAll(variablesToBeRemovedFromTheIntersection);
-
-        // remove common variables from the two sets
-        variables1.removeAll(variableIntersection);
-        variables2.removeAll(variableIntersection);
+//        final Set<String> variableIntersection = new LinkedHashSet<>(variables1);
+//        variableIntersection.retainAll(variables2);
+//
+//
+//        // ignore the variables in the intersection that also appear with "this." prefix in the sets of variables
+//        // ignore the variables in the intersection that are static fields
+//        Set<String> variablesToBeRemovedFromTheIntersection = new LinkedHashSet<String>();
+//        for (String variable : variableIntersection) {
+//            if (!variable.startsWith("this.") && !variableIntersection.contains("this." + variable) &&
+//                    (variables1.contains("this." + variable) || variables2.contains("this." + variable))) {
+//                variablesToBeRemovedFromTheIntersection.add(variable);
+//            }
+//            if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+//                    invocationCoveringTheEntireStatement1.identicalName(invocationCoveringTheEntireStatement2)) {
+//                if (!invocationCoveringTheEntireStatement1.getArguments().contains(variable) &&
+//                        invocationCoveringTheEntireStatement2.getArguments().contains(variable)) {
+//                    for (String argument : invocationCoveringTheEntireStatement1.getArguments()) {
+//                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
+//                        if (argument.contains(variable) && !argument.equals(variable) && !argumentNoWhiteSpace.contains("+" + variable + "+") &&
+//                                !argumentNoWhiteSpace.contains(variable + "+") && !argumentNoWhiteSpace.contains("+" + variable) &&
+//                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements1, variable, argument)) {
+//                            variablesToBeRemovedFromTheIntersection.add(variable);
+//                        }
+//                    }
+//                } else if (invocationCoveringTheEntireStatement1.getArguments().contains(variable) &&
+//                        !invocationCoveringTheEntireStatement2.getArguments().contains(variable)) {
+//                    for (String argument : invocationCoveringTheEntireStatement2.getArguments()) {
+//                        String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
+//                        if (argument.contains(variable) && !argument.equals(variable) && !argumentNoWhiteSpace.contains("+" + variable + "+") &&
+//                                !argumentNoWhiteSpace.contains(variable + "+") && !argumentNoWhiteSpace.contains("+" + variable) &&
+//                                !nonMatchedStatementUsesVariableInArgument(replacementInfo.statements2, variable, argument)) {
+//                            variablesToBeRemovedFromTheIntersection.add(variable);
+//                        }
+//                    }
+//                }
+//            }
+//            if (variable.toUpperCase().equals(variable) && !ReplacementUtil.sameCharsBeforeAfter(statement1.getString(), statement2.getString(), variable)) {
+//                variablesToBeRemovedFromTheIntersection.add(variable);
+//            }
+//        }
+//
+//        variableIntersection.removeAll(variablesToBeRemovedFromTheIntersection);
+//
+//        // remove common variables from the two sets
+//        variables1.removeAll(variableIntersection);
+//        variables2.removeAll(variableIntersection);
 //
 //        // replace variables with the corresponding arguments
 //        replaceVariablesWithArguments(variables1, parameterToArgumentMap);

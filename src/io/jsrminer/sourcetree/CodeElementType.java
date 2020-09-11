@@ -9,8 +9,11 @@ public enum CodeElementType {
     BLOCK_STATEMENT("BlockStatement"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     EMPTY_STATEMENT("EmptyStatement"),
+    FUNCTION_INVOCATION("CallExpression"),
+    CONSTRUCTOR_INVOCATION("THIS_CONSTRUCTOR_INVOCATION"),    // TODO ReVisit type (this())
+    SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
+    OBJECT_CREATION("NewExpression"),
     RETURN_STATEMENT("ReturnStatement");
-
     public final String titleCase;
 
     private CodeElementType(String titleCase) {

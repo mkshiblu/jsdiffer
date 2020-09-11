@@ -48,14 +48,14 @@ function processCallExpression(path, expressionResult) {
     const node = path.node;
     const callee = path.node.callee;
     let name;
-    let expression;
+    let expressionText;
 
     if (t.isIdentifier(callee)) {
         name = callee.name;
     } else if (t.isMemberExpression(callee)) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
         name = callee.property.name;
-        expression = path.get('callee').get('object').toString();
+        expressionText = path.get('callee').get('object').toString();
         processExpression(path.get('callee').get('object'), expressionResult);
         // Todo find chain method calls
         // TODO handle arguments
@@ -67,9 +67,13 @@ function processCallExpression(path, expressionResult) {
         text: path.toString(),
         type: node.type,
         functionName: name,
-        expression,
         arguments: [],
     };
+
+
+    if (expressionText) {
+        result.expressionText = expressionText;
+    }
 
     path.get('arguments')
         .forEach((argumentPath) => {
@@ -86,14 +90,32 @@ function processCallExpression(path, expressionResult) {
 function processNewExpression(path, expressionResult) {
 
     const node = path.node;
+    let name;
+    let expressionText;
 
-    if (!t.isIdentifier(node.callee)) {
-        throw "Unsupported callee " + node.type;
+    if (t.isIdentifier(node.callee)) {
+        name = node.callee.name;
+    } else if (t.isMemberExpression(callee)) {
+        // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
+        name = callee.property.name;
+        expressionText = path.get('callee').get('object').toString();
+        processExpression(path.get('callee').get('object'), expressionResult);
+        // Todo find chain method calls
+        // TODO handle arguments
+    } else {
+        throw "Unsupported callee: " + node.callee.type;
     }
+
     const result = {
-        constructorName: node.callee.name,
-        arguments: []
+        typeName: name,
+        arguments: [],
+        text: path.toString(),
+        type: node.type,
     };
+
+    if (expressionText) {
+        result.expressionText = expressionText;
+    }
 
     path.get('arguments')
         .forEach((argumentPath) => {
@@ -109,7 +131,7 @@ function processNewExpression(path, expressionResult) {
 
         });
 
-    expressionResult.constructorInvocations.push(result);
+    expressionResult.objectCreations.push(result);
 }
 
 /**

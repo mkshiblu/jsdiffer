@@ -1,10 +1,9 @@
 package io.jsrminer.uml.mapping.replacement;
 
-import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
-import io.jsrminer.sourcetree.OperationInvocation;
-import io.jsrminer.sourcetree.SingleStatement;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ public enum InvocationCoverage {
     }
 
     /**
-     * Checks if the statement contains method invocation text covering the entire statement's text
+     * Checks if the statement contains method invocation which text covers the entire statement's text
      */
     private OperationInvocation findInvocationCoveringEntireFragment(SingleStatement statement) {
         Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
@@ -42,12 +41,12 @@ public enum InvocationCoverage {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                 } else if (("return " + invocationText + ";\n").equals(statementText)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
-                } else if (isCastExpressionCoveringEntireFragment(invocationText)) {
+                } else if (isCastExpressionCoveringEntireFragment(statementText, invocationText)) {
                     coveregeType = InvocationCoverageType.CAST_CALL;
-                } else if (expressionIsTheInitializerOfVariableDeclaration(invocationText)) {
+                } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), invocationText)) {
                     coveregeType = InvocationCoverageType.VARIABLE_DECLARATION_INITIALIZER_CALL;
-                } else if (invocation.getLocationInfo().getCodeElementType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
-                        invocation.getLocationInfo().getCodeElementType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
+                } else if (invocation.getType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
+                        invocation.getType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                 }
 
@@ -58,5 +57,41 @@ public enum InvocationCoverage {
             }
         }
         return null;
+    }
+
+    /**
+     * Checks if a cast expression covers the entire statement in return
+     *
+     * @return
+     */
+    private boolean isCastExpressionCoveringEntireFragment(String statementText, String expression) {
+        int index = statementText.indexOf(expression + ";\n");
+        if (index != -1) {
+            String prefix = statementText.substring(0, index);
+            if (prefix.contains("(") && prefix.contains(")")) {
+                String casting = prefix.substring(prefix.indexOf("("), prefix.indexOf(")") + 1);
+                if (("return " + casting + expression + ";\n").equals(statementText)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean expressionIsTheInitializerOfVariableDeclaration(Collection<VariableDeclaration> variableDeclarations, String expression) {
+//        List<VariableDeclaration> variableDeclarations = getVariableDeclarations();
+        Expression intializer;
+        if (variableDeclarations.size() == 1 && (intializer = variableDeclarations.iterator().next().getInitializer()) != null) {
+            String intializerText = intializer.getText();
+            if (intializerText.equals(expression))
+                return true;
+            if (intializerText.startsWith("(")) {
+                //ignore casting
+                String initializerWithoutCasting = intializerText.substring(intializerText.indexOf(")") + 1/*, initializer.length()*/);
+                if (initializerWithoutCasting.equals(expression))
+                    return true;
+            }
+        }
+        return false;
     }
 }

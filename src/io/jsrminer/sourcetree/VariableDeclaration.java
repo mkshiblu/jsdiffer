@@ -25,6 +25,10 @@ public class VariableDeclaration extends CodeFragment {
         return this.initializer;
     }
 
+    public void setInitializer(Expression initializer) {
+        this.initializer = initializer;
+    }
+
     public void setKind(VariableDeclarationKind kind) {
         this.kind = kind;
     }

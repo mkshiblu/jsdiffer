@@ -5,7 +5,7 @@ import com.eclipsesource.v8.V8Object;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.api.IParser;
-import io.jsrminer.parser.CompositeJsonFactory;
+import io.jsrminer.parser.JsonCompositeFactory;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLParameter;
@@ -111,7 +111,7 @@ public class JavaScriptParser implements IParser {
                 // TO Do a block statement again
             } else {
                 // A leaf statement
-                SingleStatement singleStatement = CompositeJsonFactory.createSingleStatement(statement);
+                SingleStatement singleStatement = JsonCompositeFactory.createSingleStatement(statement);
                 block.addStatement(singleStatement);
             }
         }

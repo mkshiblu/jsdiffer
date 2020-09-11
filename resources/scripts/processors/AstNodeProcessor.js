@@ -16,6 +16,7 @@ function processExpression(path) {
         infixOperators: [],
         functionInvocations: [],
         constructorInvocations: [],
+        objectCreations: [],
         arguments: [],
     };
 

@@ -28,7 +28,18 @@ public class OperationInvocation extends Invocation {
     public void setExpression(String expression) {
         this.expression = expression;
     }
-    
+
+    public List<String> getArguments() {
+        return arguments;
+    }
+
+    /**
+     * Returns true if the function names are equal
+     */
+    public boolean equalsName(OperationInvocation operationInvocation) {
+        return this.functionName.equals(operationInvocation.functionName);
+    }
+
     @Override
     public String toString() {
         if (text != null)

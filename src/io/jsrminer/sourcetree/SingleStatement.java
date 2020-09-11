@@ -7,6 +7,7 @@ public class SingleStatement extends Statement {
     private Set<VariableDeclaration> variableDeclarations = new LinkedHashSet<>();
     private Set<String> variables = new LinkedHashSet<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
+    private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
 
     public SingleStatement() {
     }
@@ -34,5 +35,9 @@ public class SingleStatement extends Statement {
 
     public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
         return methodInvocationMap;
+    }
+
+    public Map<String, List<ObjectCreation>> getCreationMap() {
+        return creationMap;
     }
 }
