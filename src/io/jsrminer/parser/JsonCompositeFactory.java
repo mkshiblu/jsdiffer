@@ -89,6 +89,12 @@ public class JsonCompositeFactory {
         }
         // endregion
 
+        // TODO check contents of invocationArguments (i.e. could it be variable?
+        if (any.keys().contains("argumentsWithIdentifier")) {
+            singleStatement.getArgumentsWithIdentifiers().addAll(any.get("argumentsWithIdentifier")
+                    .as(singleStatement.getArgumentsWithIdentifiers().getClass()));
+        }
+
         return singleStatement;
     }
 

@@ -94,4 +94,9 @@ public enum InvocationCoverage {
         }
         return false;
     }
+
+    public void clearCache(){
+        invocationCoverageTypeMap.clear();
+        invocationCoveringEntireFragmentMap.clear();
+    }
 }

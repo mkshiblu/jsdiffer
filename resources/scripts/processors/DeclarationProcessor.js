@@ -47,10 +47,7 @@ exports.processVariableDeclaration = (path) => {
     const declaratorPath = declarators[0];
     const declaratorNode = declaratorPath.node;
     const variableName = declaratorNode.id.name;
-    if (declaratorNode.init) {
-        initializer = astProcessor.processExpression(declaratorPath.get("init"));
-    }
-
+    
     const variableDeclaration = {
         text: path.toString(),
         variableName,
@@ -65,6 +62,10 @@ exports.processVariableDeclaration = (path) => {
         // objectCreations: []
         variableDeclarations: [variableDeclaration]
     };
+
+    if (declaratorNode.init) {
+        initializer = astProcessor.processExpression(declaratorPath.get("init"), statement);
+    }
 
     if (initializer) {
         variableDeclaration.initializer = initializer;

@@ -36,7 +36,7 @@ public class OperationInvocation extends Invocation {
     /**
      * Returns true if the function names are equal
      */
-    public boolean equalsName(OperationInvocation operationInvocation) {
+    public boolean equalsInovkedFunctionName(OperationInvocation operationInvocation) {
         return this.functionName.equals(operationInvocation.functionName);
     }
 

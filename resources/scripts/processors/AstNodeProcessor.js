@@ -6,7 +6,7 @@ const expressionProcessor = require('./ExpressionProcessor');
 const loopsProcessor = require('./LoopsProcessor');
 const exceptions = require('./Exceptions');
 
-function processExpression(path) {
+function processExpression(path, statement) {
     const expressionInfo = {
         text: path.toString(),
         identifiers: [],
@@ -20,7 +20,7 @@ function processExpression(path) {
         arguments: [],
     };
 
-    const expression = expressionProcessor.processExpression(path, expressionInfo);
+    const expression = expressionProcessor.processExpression(path, expressionInfo, statement);
     return expression;
 }
 
@@ -41,6 +41,7 @@ const processNodePath = (function () {
     return function (nodePath, processStatement) {
         const process = nodePathProcesses.get(nodePath.node.type);
         if (process) {
+            // TODO, type, text, location etc.
             const rt = process(nodePath, processStatement, processExpression);
             return rt;
         }

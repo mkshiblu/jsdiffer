@@ -19,11 +19,11 @@ const processes = new Map([
  * an expression can also be a pattern.
  * @param {*} node 
  */
-function processExpression(path, expressionResult) {
+function processExpression(path, expressionResult, statement) {
     const node = path.node;
     const process = processes.get(path.node.type);
     if (process) {
-        process(path, expressionResult);
+        process(path, expressionResult, statement);
         return expressionResult;
     } else {
         throw 'Processeor not implemented for : ' + path.node.type;
@@ -44,7 +44,7 @@ function processArrayExpression(path, expressionResult) {
     arguments: [Expression | SpreadElement];
     optional: boolean | null;
 } */
-function processCallExpression(path, expressionResult) {
+function processCallExpression(path, expressionResult, statement) {
     const node = path.node;
     const callee = path.node.callee;
     let name;
@@ -77,6 +77,7 @@ function processCallExpression(path, expressionResult) {
 
     path.get('arguments')
         .forEach((argumentPath) => {
+            processArgument(argumentPath, statement);
             result.arguments.push(argumentPath.toString());
         });
 
@@ -87,7 +88,7 @@ function processCallExpression(path, expressionResult) {
     type: "NewExpression";
     optional: boolean | null;
 } */
-function processNewExpression(path, expressionResult) {
+function processNewExpression(path, expressionResult, statement) {
 
     const node = path.node;
     let name;
@@ -117,8 +118,10 @@ function processNewExpression(path, expressionResult) {
         result.expressionText = expressionText;
     }
 
+
     path.get('arguments')
         .forEach((argumentPath) => {
+            processArgument(argumentPath, statement);
             result.arguments.push(argumentPath.toString());
             processExpression(argumentPath, expressionResult);
             // if (t.isIdentifier(argument)) {
@@ -133,6 +136,18 @@ function processNewExpression(path, expressionResult) {
 
     expressionResult.objectCreations.push(result);
 }
+
+// TODO remove duplication in newexp and callexp and check arguments type
+function processArgument(argumentPath, statement) {
+    if (statement && (t.isCallExpression(argumentPath.node) || t.isNewExpression(argumentPath.node)
+        || t.isIdentifier(argumentPath.node))) {
+        if (!statement.argumentsWithIdentifier)
+            statement.argumentsWithIdentifier = [];
+
+        statement.argumentsWithIdentifier.push(argumentPath.toString());
+    }
+}
+
 
 /**
 interface BinaryExpression<: Expression {
@@ -167,12 +182,12 @@ enum AssignmentOperator {
         | "|=" | "^=" | "&="
 }
 An assignment operator token. */
-function processAssignmentExpression(path, expressionResult) {
+function processAssignmentExpression(path, expressionResult, statement) {
     const node = path.node;
     const operator = node.operator;
     expressionResult.infixOperators.push(operator);
-    processExpression(path.get('left'), expressionResult);
-    processExpression(path.get('right'), expressionResult);
+    processExpression(path.get('left'), expressionResult, statement);
+    processExpression(path.get('right'), expressionResult, statement);
 }
 
 /* interface MemberExpression<: Expression, Pattern {

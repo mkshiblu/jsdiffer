@@ -145,10 +145,10 @@ public class FunctionBodyMapper {
     }
 
     private ReplacementFinder createReplacementFinder(SingleStatement leaf1, SingleStatement leaf2,
-                                                      Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2) {
-        List<? extends CodeFragment> unmatchedLeaves1 = new ArrayList<CodeFragment>(leaves1);
+                                                      Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
+        List<SingleStatement> unmatchedLeaves1 = new ArrayList<>(leaves1);
         unmatchedLeaves1.remove(leaf1);
-        List<? extends CodeFragment> unmatchedLeaves2 = new ArrayList<CodeFragment>(leaves2);
+        List<SingleStatement> unmatchedLeaves2 = new ArrayList<>(leaves2);
         unmatchedLeaves2.remove(leaf2);
         ReplacementFinder replacementFinder = new ReplacementFinder(
                 createArgumentizedString(leaf1, leaf2),

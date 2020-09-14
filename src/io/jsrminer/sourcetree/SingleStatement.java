@@ -8,6 +8,7 @@ public class SingleStatement extends Statement {
     private Set<String> variables = new LinkedHashSet<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
+    private Set<String> identifierArguments = new LinkedHashSet<>();
 
     public SingleStatement() {
     }
@@ -39,5 +40,12 @@ public class SingleStatement extends Statement {
 
     public Map<String, List<ObjectCreation>> getCreationMap() {
         return creationMap;
+    }
+
+    /**
+     * Returns arguments which are Invocations
+     */
+    public Set<String> getArgumentsWithIdentifiers() {
+        return identifierArguments;
     }
 }

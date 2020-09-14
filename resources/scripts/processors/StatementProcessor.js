@@ -32,6 +32,6 @@ exports.processExpressionStatement = (path) => {
         type: path.node.type,
         text: path.toString()
     };
-    const expression = astProcessor.processExpression(path.get('expression'));
+    const expression = astProcessor.processExpression(path.get('expression'), statement);
     return Object.assign(expression, statement);
 }
