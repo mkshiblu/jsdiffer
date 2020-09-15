@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
+import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
 
@@ -7,10 +8,12 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
+
 public class ReplacementFinder {
     private String argumentizedString1;
     private String argumentizedString2;
-    private int rawDistance;
+    private int rawEditDistance;
     private Set<Replacement> replacements;
     final List<SingleStatement> unMatchedStatements1;
     final List<SingleStatement> unMatchedStatements2;
@@ -36,11 +39,11 @@ public class ReplacementFinder {
 
     public void setArgumentizedString1(String string) {
         this.argumentizedString1 = string;
-        this.rawDistance = StringDistance.editDistance(this.argumentizedString1, this.argumentizedString2);
+        this.rawEditDistance = StringDistance.editDistance(this.argumentizedString1, this.argumentizedString2);
     }
 
-    public int getRawDistance() {
-        return rawDistance;
+    public int getRawEditDistance() {
+        return rawEditDistance;
     }
 
     public void addReplacement(Replacement r) {
@@ -83,14 +86,15 @@ public class ReplacementFinder {
         replaceVariablesWithArguments(variables1, parameterToArgumentMap);
         replaceVariablesWithArguments(variables2, parameterToArgumentMap);
 
+
+        //  Argument match?
         Set<String> arguments1 = new LinkedHashSet<>(statement1.getArgumentsWithIdentifiers());
         Set<String> arguments2 = new LinkedHashSet<>(statement2.getArgumentsWithIdentifiers());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
 
         if (!argumentsWithIdenticalMethodCalls(arguments1, arguments2, variables1, variables2)) {
-            findReplacements(arguments1, variables2, replacementInfo, ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE);
+            findReplacements(arguments1, variables2, ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE);
         }
-
 
         final List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations());
         final List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations());
@@ -1042,6 +1046,184 @@ public class ReplacementFinder {
 //            }
 //        }
         return null;
+    }
+
+    // TODO Optimize
+    private Set<Replacement> findReplacements(Set<String> strings1, Set<String> strings2, ReplacementType type) throws RefactoringMinerTimedOutException {
+        TreeMap<Double, Set<Replacement>> globalReplacementMap = new TreeMap<>();
+        TreeMap<Double, Set<Replacement>> replacementCache = new TreeMap<>();
+
+        final Set<Replacement> result = new HashSet<>();
+        boolean isSet2Bigger = strings1.size() <= strings2.size();
+        final Set<String> setA = isSet2Bigger ? strings1 : strings2;
+        final Set<String> setB = isSet2Bigger ? strings2 : strings1;
+
+        for (String s1 : setA) {
+
+            // Holds replacement map with their normalized edit distance sorted
+            TreeMap<Double, Replacement> replacementMap = new TreeMap<>();
+            for (String s2 : setB) {
+                if (Thread.interrupted()) {
+                    throw new RefactoringMinerTimedOutException();
+                }
+//                boolean containsMethodSignatureOfAnonymousClass1 = containsMethodSignatureOfAnonymousClass(s1);
+//                boolean containsMethodSignatureOfAnonymousClass2 = containsMethodSignatureOfAnonymousClass(s2);
+//
+//
+//                if (containsMethodSignatureOfAnonymousClass1 != containsMethodSignatureOfAnonymousClass2 &&
+//                        operation1.getVariableDeclaration(s1) == null && operation2.getVariableDeclaration(s2) == null) {
+//                    continue;
+//                }
+                String temp = ReplacementUtil.performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(), s1, s2);
+                int editDistanceAfterReplacement = StringDistance.editDistance(temp, this.getArgumentizedString2());
+
+                // Check if string edit distance becomes smaller after the replacement
+                if (editDistanceAfterReplacement >= 0 && editDistanceAfterReplacement < this.getRawEditDistance()) {
+
+                    // Store the normalized distance of this two strings
+                    Replacement replacement = new Replacement(s1, s2, type);
+                    double normalizedDistance = (double) editDistanceAfterReplacement / (double) Math.max(temp.length(), this.getArgumentizedString2().length());
+                    replacementMap.put(normalizedDistance, replacement);
+
+                    if (replacementCache.containsKey(normalizedDistance)) {
+                        replacementCache.get(normalizedDistance).add(replacement);
+                    } else {
+                        Set<Replacement> r = new LinkedHashSet<>();
+                        r.add(replacement);
+                        replacementCache.put(normalizedDistance, r);
+                    }
+
+                    // If fully matched no need to for further replacement for this two mappings
+                    if (editDistanceAfterReplacement == 0) {
+                        break;
+                    }
+                }
+            }
+            // Check if replacement is found and take the best match one (lowest edit distance)
+            if (!replacementMap.isEmpty()) {
+                /// Take the best match one in each round (treemap is sorted by distance)
+                Double normalizedDistance = replacementMap.firstEntry().getKey();
+                Replacement replacement = replacementMap.firstEntry().getValue();
+                if (globalReplacementMap.containsKey(normalizedDistance)) {
+                    globalReplacementMap.get(normalizedDistance).add(replacement);
+                } else {
+                    Set<Replacement> r = new LinkedHashSet<>();
+                    r.add(replacement);
+                    globalReplacementMap.put(normalizedDistance, r);
+                }
+                if (normalizedDistance == 0) {
+                    break;
+                }
+            }
+        }
+
+        // CHeck if atleast one replacement found and change the argumentize string
+        if (!globalReplacementMap.isEmpty()) {
+            Double normalizedDistance = globalReplacementMap.firstEntry().getKey();
+            if (normalizedDistance == 0) {
+                for (Replacement replacement : globalReplacementMap.firstEntry().getValue()) {
+                    result.add(replacement);
+                    //replacementInfo.addReplacement(replacement);
+                    //replacementInfo.setArgumentizedString1(ReplacementUtil
+                    //      .performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
+                    String strAfterReplacement = ReplacementUtil.performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter());
+                    this.setArgumentizedString1(strAfterReplacement);
+                }
+            } else {
+                // If no identical match found
+                Set<String> processedBefores = new LinkedHashSet<>();
+                for (Set<Replacement> replacements : globalReplacementMap.values()) {
+                    for (Replacement replacement : replacements) {
+                        if (!processedBefores.contains(replacement.getBefore())) {
+                            result.add(replacement);
+                            String strAfterReplacement = ReplacementUtil.performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(),
+                                    replacement.getBefore(), replacement.getAfter());
+                            this.setArgumentizedString1(strAfterReplacement);
+                            //replacementInfo.addReplacement(replacement);
+//                            replacementInfo.setArgumentizedString1(ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
+                            processedBefores.add(replacement.getBefore());
+                        } else {
+                            //find the next best match for replacement.getAfter() from the replacement cache
+                            for (Set<Replacement> replacements2 : replacementCache.values()) {
+                                for (Replacement replacement2 : replacements2) {
+                                    if (replacement2.getAfter().equals(replacement.getAfter()) && !replacement2.equals(replacement)) {
+                                        //replacementInfo.addReplacement(replacement2);
+                                        result.add(replacement2);
+                                        this.setArgumentizedString1(ReplacementUtil.performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(),
+                                                replacement2.getBefore(), replacement2.getAfter()));
+                                        processedBefores.add(replacement2.getBefore());
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+
+    /**
+     * TODO for Javascript
+     **/
+    public static boolean containsMethodSignatureOfAnonymousClass(String s) {
+//        String[] lines = s.split("\\n");
+//        if (s.contains(" -> ") && lines.length > 1) {
+//            return true;
+//        }
+//        for (String line : lines) {
+//            line = VariableReplacementAnalysis.prepareLine(line);
+//            if (Visitor.METHOD_SIGNATURE_PATTERN.matcher(line).matches()) {
+//                return true;
+//            }
+//        }
+        return false;
+    }
+
+    private boolean argumentsWithIdenticalMethodCalls(Set<String> arguments1, Set<String> arguments2,
+                                                      Set<String> variables1, Set<String> variables2) {
+        int identicalMethodCalls = 0;
+        if (arguments1.size() == arguments2.size()) {
+            Iterator<String> it1 = arguments1.iterator();
+            Iterator<String> it2 = arguments2.iterator();
+
+            while (it1.hasNext() && it2.hasNext()) {
+                String arg1 = it1.next();
+                String arg2 = it2.next();
+                if (arg1.contains("(") && arg2.contains("(") && arg1.contains(")") && arg2.contains(")")) {
+                    int indexOfOpeningParenthesis1 = arg1.indexOf("(");
+                    int indexOfClosingParenthesis1 = arg1.indexOf(")");
+                    boolean openingParenthesisInsideSingleQuotes1 = isInsideSingleQuotes(arg1, indexOfOpeningParenthesis1);
+                    boolean openingParenthesisInsideDoubleQuotes1 = isInsideDoubleQuotes(arg1, indexOfOpeningParenthesis1);
+                    boolean closingParenthesisInsideSingleQuotes1 = isInsideSingleQuotes(arg1, indexOfClosingParenthesis1);
+                    boolean closingParenthesisInsideDoubleQuotes1 = isInsideDoubleQuotes(arg1, indexOfClosingParenthesis1);
+                    int indexOfOpeningParenthesis2 = arg2.indexOf("(");
+                    int indexOfClosingParenthesis2 = arg2.indexOf(")");
+                    boolean openingParenthesisInsideSingleQuotes2 = isInsideSingleQuotes(arg2, indexOfOpeningParenthesis2);
+                    boolean openingParenthesisInsideDoubleQuotes2 = isInsideDoubleQuotes(arg2, indexOfOpeningParenthesis2);
+                    boolean closingParenthesisInsideSingleQuotes2 = isInsideSingleQuotes(arg2, indexOfClosingParenthesis2);
+                    boolean closingParenthesisInsideDoubleQuotes2 = isInsideDoubleQuotes(arg2, indexOfClosingParenthesis2);
+                    if (!openingParenthesisInsideSingleQuotes1 && !closingParenthesisInsideSingleQuotes1 &&
+                            !openingParenthesisInsideDoubleQuotes1 && !closingParenthesisInsideDoubleQuotes1 &&
+                            !openingParenthesisInsideSingleQuotes2 && !closingParenthesisInsideSingleQuotes2 &&
+                            !openingParenthesisInsideDoubleQuotes2 && !closingParenthesisInsideDoubleQuotes2) {
+                        String s1 = arg1.substring(0, indexOfOpeningParenthesis1);
+                        String s2 = arg2.substring(0, indexOfOpeningParenthesis2);
+                        if (s1.equals(s2) && s1.length() > 0) {
+                            String args1 = arg1.substring(indexOfOpeningParenthesis1 + 1, indexOfClosingParenthesis1);
+                            String args2 = arg2.substring(indexOfOpeningParenthesis2 + 1, indexOfClosingParenthesis2);
+                            if (variables1.contains(args1) && variables2.contains(args2)) {
+                                identicalMethodCalls++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return identicalMethodCalls == arguments1.size() && arguments1.size() > 0;
     }
 
     /**
