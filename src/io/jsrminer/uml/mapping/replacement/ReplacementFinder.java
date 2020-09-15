@@ -86,15 +86,40 @@ public class ReplacementFinder {
         replaceVariablesWithArguments(variables1, parameterToArgumentMap);
         replaceVariablesWithArguments(variables2, parameterToArgumentMap);
 
-
         //  Argument match?
         Set<String> arguments1 = new LinkedHashSet<>(statement1.getArgumentsWithIdentifiers());
         Set<String> arguments2 = new LinkedHashSet<>(statement2.getArgumentsWithIdentifiers());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
 
+        Set<Replacement> replacementsOfArgumentsWithVariables;
         if (!argumentsWithIdenticalMethodCalls(arguments1, arguments2, variables1, variables2)) {
-            findReplacements(arguments1, variables2, ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE);
+            replacementsOfArgumentsWithVariables = findReplacements(arguments1, variables2, ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE);
+
+            Map<String, String> map = new LinkedHashMap<>();
+            Set<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
+            Set<Replacement> replacementsToBeAdded = new LinkedHashSet<>();
+
+            for (Replacement r : replacementsOfArgumentsWithVariables) {
+                map.put(r.getBefore(), r.getAfter());
+                if (statement1.getMethodInvocationMap().containsKey(r.getBefore())) {
+                    Replacement replacement = new VariableReplacementWithMethodInvocation(r.getBefore(),
+                            r.getAfter(),
+                            /*(OperationInvocation)*/ statement1.getMethodInvocationMap().get(r.getBefore()).get(0),
+                            Direction.INVOCATION_TO_VARIABLE);
+                    replacementsToBeAdded.add(replacement);
+                    replacementsToBeRemoved.add(r);
+                }
+            }
+            replacementsOfArgumentsWithVariables.removeAll(replacementsToBeRemoved);
+            replacementsOfArgumentsWithVariables.addAll(replacementsToBeAdded);
         }
+//
+//        // replace variables with the corresponding arguments in method invocations
+//        replaceVariablesWithArguments(methodInvocationMap1, methodInvocations1, parameterToArgumentMap);
+//        replaceVariablesWithArguments(methodInvocationMap2, methodInvocations2, parameterToArgumentMap);
+//
+//        replaceVariablesWithArguments(methodInvocationMap1, methodInvocations1, map);
+
 
         final List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations());
         final List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations());
@@ -112,26 +137,6 @@ public class ReplacementFinder {
         Set<String> creations2 = new LinkedHashSet<>(creationMap2.keySet());
 
 
-//        Map<String, String> map = new LinkedHashMap<String, String>();
-//        Set<Replacement> replacementsToBeRemoved = new LinkedHashSet<Replacement>();
-//        Set<Replacement> replacementsToBeAdded = new LinkedHashSet<Replacement>();
-//        for(Replacement r : replacementInfo.getReplacements()) {
-//            map.put(r.getBefore(), r.getAfter());
-//            if(methodInvocationMap1.containsKey(r.getBefore())) {
-//                Replacement replacement = new VariableReplacementWithMethodInvocation(r.getBefore(), r.getAfter(), (OperationInvocation)methodInvocationMap1.get(r.getBefore()).get(0), Direction.INVOCATION_TO_VARIABLE);
-//                replacementsToBeAdded.add(replacement);
-//                replacementsToBeRemoved.add(r);
-//            }
-//        }
-//        replacementInfo.getReplacements().removeAll(replacementsToBeRemoved);
-//        replacementInfo.getReplacements().addAll(replacementsToBeAdded);
-//
-//        // replace variables with the corresponding arguments in method invocations
-//        replaceVariablesWithArguments(methodInvocationMap1, methodInvocations1, parameterToArgumentMap);
-//        replaceVariablesWithArguments(methodInvocationMap2, methodInvocations2, parameterToArgumentMap);
-//
-//        replaceVariablesWithArguments(methodInvocationMap1, methodInvocations1, map);
-//
 //        //remove methodInvocation covering the entire statement
 //        if(invocationCoveringTheEntireStatement1 != null) {
 //            for(String methodInvocation1 : methodInvocationMap1.keySet()) {
