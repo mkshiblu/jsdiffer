@@ -31,6 +31,13 @@ public class SourceLocation {
         return file;
     }
 
+    public boolean equalsLineAndColumn(SourceLocation testLocation) {
+        return this.endColumn == testLocation.endColumn
+                && this.startLine == testLocation.startLine
+                && this.endLine == testLocation.endLine
+                && this.startColumn == testLocation.startColumn;
+    }
+
     public void setFile(String file) {
         this.file = file;
     }

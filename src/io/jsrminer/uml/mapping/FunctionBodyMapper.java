@@ -152,7 +152,7 @@ public class FunctionBodyMapper {
         unmatchedLeaves2.remove(leaf2);
         ReplacementFinder replacementFinder = new ReplacementFinder(
                 createArgumentizedString(leaf1, leaf2),
-                createArgumentizedString(leaf1, leaf2),
+                createArgumentizedString(leaf2, leaf1),
                 unmatchedLeaves1, unmatchedLeaves2);
         return replacementFinder;
     }

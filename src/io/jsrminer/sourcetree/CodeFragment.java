@@ -50,4 +50,14 @@ public abstract class CodeFragment {
     public String toString() {
         return text;
     }
+
+    public boolean equalsSourceLocation(CodeFragment test) {
+        if (this.getFile() == null) {
+            if (test.getFile() != null)
+                return false;
+        } else if (!this.getFile().equals(test.getFile()))
+            return false;
+
+        return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);
+    }
 }
