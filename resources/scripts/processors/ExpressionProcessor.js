@@ -56,7 +56,7 @@ function processCallExpression(path, expressionResult, statement) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
         name = callee.property.name;
         expressionText = path.get('callee').get('object').toString();
-        processExpression(path.get('callee').get('object'), expressionResult);
+        processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
     } else {
@@ -79,6 +79,7 @@ function processCallExpression(path, expressionResult, statement) {
         .forEach((argumentPath) => {
             processArgument(argumentPath, statement);
             result.arguments.push(argumentPath.toString());
+            processExpression(argumentPath, expressionResult, statement);
         });
 
     expressionResult.functionInvocations.push(result);
@@ -100,7 +101,7 @@ function processNewExpression(path, expressionResult, statement) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
         name = callee.property.name;
         expressionText = path.get('callee').get('object').toString();
-        processExpression(path.get('callee').get('object'), expressionResult);
+        processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
     } else {
@@ -123,7 +124,7 @@ function processNewExpression(path, expressionResult, statement) {
         .forEach((argumentPath) => {
             processArgument(argumentPath, statement);
             result.arguments.push(argumentPath.toString());
-            processExpression(argumentPath, expressionResult);
+            processExpression(argumentPath, expressionResult, statement);
             // if (t.isIdentifier(argument)) {
             //     result.arguments.push(argument.name)
             // } else if (t.isStringLiteral(argument)) {
@@ -157,14 +158,14 @@ interface BinaryExpression<: Expression {
     right: Expression;
 }
  */
-function processBinaryExpression(path, expressionResult) {
+function processBinaryExpression(path, expressionResult, statement) {
     const node = path.node;
     const left = node.left;
     const operator = node.operator;
     const right = node.right;
     expressionResult.infixOperators.push(operator);
-    processExpression(path.get('left'), expressionResult);
-    processExpression(path.get('right'), expressionResult);
+    processExpression(path.get('left'), expressionResult, statement);
+    processExpression(path.get('right'), expressionResult, statement);
 }
 
 /* interface AssignmentExpression<: Expression {
@@ -203,10 +204,10 @@ A member expression.If computed is true, the node corresponds to a computed(a[b]
  The optional flags indicates that the member expression can be called even if 
  the object is null or undefined.If this is the object value(null / undefined) 
  should be returned. */
-function processMemberExpression(path, expressionResult) {
+function processMemberExpression(path, expressionResult, statement) {
     const node = path.node;
-    processIdentifier(path.get('object'), expressionResult);
-    processIdentifier(path.get('property'), expressionResult);
+    processIdentifier(path.get('object'), expressionResult, statement);
+    processIdentifier(path.get('property'), expressionResult, statement);
 }
 
 /**

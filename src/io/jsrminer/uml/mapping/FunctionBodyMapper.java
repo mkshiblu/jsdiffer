@@ -1,10 +1,14 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.FunctionBody;
+import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementFinder;
+import io.jsrminer.uml.mapping.replacement.ReplacementInfo;
 import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
@@ -89,7 +93,7 @@ public class FunctionBodyMapper {
 
     private void matchLeavesWithVariableRenames(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
-
+        ReplacementFinder replacementFinder = new ReplacementFinder();
         for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
             SingleStatement leaf1 = iterator1.next();
             TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
@@ -97,8 +101,8 @@ public class FunctionBodyMapper {
             for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                 SingleStatement leaf2 = iterator2.next();
 
-                ReplacementFinder replacementFinder = createReplacementFinder(leaf1, leaf2, leaves1, leaves2);
-                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap);
+                ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
+                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap, replacementInfo);
                 if (replacements != null) {
                     LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
 //                    mapping.addReplacements(replacements);
@@ -144,17 +148,16 @@ public class FunctionBodyMapper {
         }
     }
 
-    private ReplacementFinder createReplacementFinder(SingleStatement leaf1, SingleStatement leaf2,
-                                                      Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
+    private ReplacementInfo createReplacementInfo(SingleStatement leaf1, SingleStatement leaf2,
+                                                  Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
         List<SingleStatement> unmatchedLeaves1 = new ArrayList<>(leaves1);
         unmatchedLeaves1.remove(leaf1);
         List<SingleStatement> unmatchedLeaves2 = new ArrayList<>(leaves2);
         unmatchedLeaves2.remove(leaf2);
-        ReplacementFinder replacementFinder = new ReplacementFinder(
+        return new ReplacementInfo(
                 createArgumentizedString(leaf1, leaf2),
                 createArgumentizedString(leaf2, leaf1),
                 unmatchedLeaves1, unmatchedLeaves2);
-        return replacementFinder;
     }
 
     // TODO: Similar to processInput without checking for abstractexpression
