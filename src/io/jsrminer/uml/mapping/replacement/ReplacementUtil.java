@@ -66,6 +66,29 @@ public class ReplacementUtil {
         return temp;
     }
 
+    public static String performReplacement(String completeString, String subString, String replacement) {
+        String temp = new String(completeString);
+        if (completeString.equals(subString)) {
+            temp = temp.replace(subString, replacement);
+            return temp;
+        }
+        boolean replacementDone = false;
+        for (String character : SPECIAL_CHARACTERS) {
+            if (completeString.contains(subString + character)) {
+                temp = temp.replace(subString + character, replacement + character);
+                replacementDone = true;
+            }
+        }
+        if (!replacementDone) {
+            for (String character : SPECIAL_CHARACTERS) {
+                if (completeString.contains(character + subString)) {
+                    temp = temp.replace(character + subString, character + replacement);
+                }
+            }
+        }
+        return temp;
+    }
+
     private static boolean compatibleCharacterBeforeMatch(String characterBefore1, String characterBefore2) {
         if (characterBefore1 != null && characterBefore2 != null) {
             if (characterBefore1.equals(characterBefore2))
@@ -122,5 +145,15 @@ public class ReplacementUtil {
         intersection.retainAll(strings2);
         strings1.removeAll(intersection);
         strings2.removeAll(intersection);
+    }
+
+    public static String performArgumentReplacement(String completeString, String subString, String replacement) {
+        String temp = new String(completeString);
+        for (String character : SPECIAL_ARGUMENT_CHARACTERS) {
+            if (completeString.contains(subString + character)) {
+                temp = temp.replace(subString + character, replacement + character);
+            }
+        }
+        return temp;
     }
 }

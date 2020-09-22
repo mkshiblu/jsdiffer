@@ -1,5 +1,6 @@
 const t = require('@babel/types');
 const literals = require("./Literals");
+const astUtil = require('../parser/AstUtil');
 
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
@@ -23,6 +24,7 @@ function processExpression(path, expressionResult, statement) {
     const node = path.node;
     const process = processes.get(path.node.type);
     if (process) {
+        expressionResult.loc = astUtil.getFormattedLocation(path.node);
         process(path, expressionResult, statement);
         return expressionResult;
     } else {
@@ -68,6 +70,7 @@ function processCallExpression(path, expressionResult, statement) {
         type: node.type,
         functionName: name,
         arguments: [],
+        loc: astUtil.getFormattedLocation(path.node)
     };
 
 
@@ -113,12 +116,12 @@ function processNewExpression(path, expressionResult, statement) {
         arguments: [],
         text: path.toString(),
         type: node.type,
+        loc: astUtil.getFormattedLocation(path.node)
     };
 
     if (expressionText) {
         result.expressionText = expressionText;
     }
-
 
     path.get('arguments')
         .forEach((argumentPath) => {

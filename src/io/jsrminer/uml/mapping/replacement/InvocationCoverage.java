@@ -59,6 +59,31 @@ public enum InvocationCoverage {
         return null;
     }
 
+    public ObjectCreation creationCoveringEntireFragment(SingleStatement statement) {
+        Map<String, List<ObjectCreation>> creationMap = statement.getCreationMap();
+        String text = statement.getText();
+        InvocationCoverageType coveregeType = null;
+        for (String objectCreation : creationMap.keySet()) {
+            List<ObjectCreation> creations = creationMap.get(objectCreation);
+            for (ObjectCreation creation : creations) {
+                if ((objectCreation + ";\n").equals(text) || objectCreation.equals(text)) {
+                    coveregeType = InvocationCoverageType.ONLY_CALL;
+                    return creation;
+                } else if (("return " + objectCreation + ";\n").equals(text)) {
+                    coveregeType = InvocationCoverageType.RETURN_CALL;
+                    return creation;
+                } else if (("throw " + objectCreation + ";\n").equals(text)) {
+                    coveregeType = InvocationCoverageType.THROW_CALL;
+                    return creation;
+                } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), objectCreation)) {
+                    coveregeType = InvocationCoverageType.VARIABLE_DECLARATION_INITIALIZER_CALL;
+                    return creation;
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * Checks if a cast expression covers the entire statement in return
      *
@@ -95,7 +120,7 @@ public enum InvocationCoverage {
         return false;
     }
 
-    public void clearCache(){
+    public void clearCache() {
         invocationCoverageTypeMap.clear();
         invocationCoveringEntireFragmentMap.clear();
     }

@@ -18,6 +18,7 @@ function processExpression(path, statement) {
         constructorInvocations: [],
         objectCreations: [],
         arguments: [],
+        loc: {}
     };
 
     const expression = expressionProcessor.processExpression(path, expressionInfo, statement);

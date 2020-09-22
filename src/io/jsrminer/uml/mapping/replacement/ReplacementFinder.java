@@ -16,11 +16,12 @@ public class ReplacementFinder {
     public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo) {
 
         // Find unmatched variables between statement1 and 2
-        Map<SingleStatement, Set<String>> unmatchedVariablesMap = filterUnmatchedVariables(statement1, statement2, replacementInfo);
+        Map<SingleStatement, Set<String>> unmatchedVariablesMap
+                = filterUnmatchedVariables(statement1, statement2, replacementInfo);
         final Set<String> unmatchedVariables1 = unmatchedVariablesMap.get(statement1);
         final Set<String> unmatchedVariables2 = unmatchedVariablesMap.get(statement2);
 
-        // replace unmatched variables with the corresponding arguments
+        // replace unmatched variables with the corresponding arguments (Argumentize?)
         replaceVariablesWithArguments(unmatchedVariables1, parameterToArgumentMap);
         replaceVariablesWithArguments(unmatchedVariables2, parameterToArgumentMap);
 
@@ -30,62 +31,34 @@ public class ReplacementFinder {
         Set<String> arguments1 = new LinkedHashSet<>(statement1.getArgumentsWithIdentifiers());
         Set<String> arguments2 = new LinkedHashSet<>(statement2.getArgumentsWithIdentifiers());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
-        final Map<String, String> argumentsReplacedWithVariablesMap = findArgumentsReplacedWithVariables(statement1, unmatchedVariables1, unmatchedVariables2
+        final Map<String, String> argumentsReplacedWithVariablesMap = findArgumentsReplacedWithVariables(
+                statement1, unmatchedVariables1, unmatchedVariables2
                 , arguments1, arguments2, replacementInfo);
 
         // 2. Replace variables with the corresponding arguments in method invocations
-        replaceVariablesWithArgumentsInMethodInvocations(statement1, statement2, parameterToArgumentMap, argumentsReplacedWithVariablesMap);
+        Map<SingleStatement, Set<String>> unmatchedFunctionInvocations
+                = replaceVariablesWithArgumentsInMethodInvocations(statement1, statement2,
+                parameterToArgumentMap, argumentsReplacedWithVariablesMap);
 
+        Set<String> methodInvocations1 = unmatchedFunctionInvocations.get(statement1);
+        Set<String> methodInvocations2 = unmatchedFunctionInvocations.get(statement2);
 
-        Set<String> variablesAndMethodInvocations1 = new LinkedHashSet<String>();
+        Set<String> variablesAndMethodInvocations1 = new LinkedHashSet<>();
         variablesAndMethodInvocations1.addAll(methodInvocations1);
         variablesAndMethodInvocations1.addAll(unmatchedVariables1);
 
-        Set<String> variablesAndMethodInvocations2 = new LinkedHashSet<String>();
+        Set<String> variablesAndMethodInvocations2 = new LinkedHashSet<>();
         variablesAndMethodInvocations2.addAll(methodInvocations2);
         variablesAndMethodInvocations2.addAll(unmatchedVariables2);
-
-        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
-        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
-        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
-
-        //3. replace variables with the corresponding arguments in object creations
-        replaceVariablesWithArguments(creationMap1, creations1, parameterToArgumentMap);
-        replaceVariablesWithArguments(creationMap2, creations2, parameterToArgumentMap);
-
-        replaceVariablesWithArguments(creationMap1, creations1, map);
-
-        ObjectCreation creationCoveringTheEntireStatement1 = statement1.creationCoveringEntireFragment();
-        ObjectCreation creationCoveringTheEntireStatement2 = statement2.creationCoveringEntireFragment();
-        //remove objectCreation covering the entire statement
-        for (String objectCreation1 : creationMap1.keySet()) {
-            for (AbstractCall creation1 : creationMap1.get(objectCreation1)) {
-                if (creationCoveringTheEntireStatement1 != null &&
-                        creationCoveringTheEntireStatement1.getLocationInfo().equals(creation1.getLocationInfo())) {
-                    creations1.remove(objectCreation1);
-                }
-                if (((ObjectCreation) creation1).getAnonymousClassDeclaration() != null) {
-                    creations1.remove(objectCreation1);
-                }
-            }
-        }
-        for (String objectCreation2 : creationMap2.keySet()) {
-            for (AbstractCall creation2 : creationMap2.get(objectCreation2)) {
-                if (creationCoveringTheEntireStatement2 != null &&
-                        creationCoveringTheEntireStatement2.getLocationInfo().equals(creation2.getLocationInfo())) {
-                    creations2.remove(objectCreation2);
-                }
-                if (((ObjectCreation) creation2).getAnonymousClassDeclaration() != null) {
-                    creations2.remove(objectCreation2);
-                }
-            }
-        }
-        Set<String> creationIntersection = new LinkedHashSet<String>(creations1);
-        creationIntersection.retainAll(creations2);
-        // remove common creations from the two sets
-        creations1.removeAll(creationIntersection);
-        creations2.removeAll(creationIntersection);
 //
+//        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
+//        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
+//        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
+//
+        //3. replace variables with the corresponding arguments in object creations
+        replaceVariableWithArgumentsInObjectCreations(statement1, statement2,
+                parameterToArgumentMap, argumentsReplacedWithVariablesMap);
+
 //        Set<String> stringLiterals1 = new LinkedHashSet<String>(statement1.getStringLiterals());
 //        Set<String> stringLiterals2 = new LinkedHashSet<String>(statement2.getStringLiterals());
 //        removeCommonElements(stringLiterals1, stringLiterals2);
@@ -109,11 +82,11 @@ public class ReplacementFinder {
 //        Set<String> prefixExpressions1 = new LinkedHashSet<String>(statement1.getPrefixExpressions());
 //        Set<String> prefixExpressions2 = new LinkedHashSet<String>(statement2.getPrefixExpressions());
 //        removeCommonElements(prefixExpressions1, prefixExpressions2);
-//
-//        //perform type replacements
-//        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
-//
-//        //perform operator replacements
+////
+////        //perform type replacements
+////        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
+////
+////        //perform operator replacements
 //        findReplacements(infixOperators1, infixOperators2, replacementInfo, ReplacementType.INFIX_OPERATOR);
 //
 //        //apply existing replacements on method invocations
@@ -913,16 +886,18 @@ public class ReplacementFinder {
         return null;
     }
 
-    private void replaceVariablesWithArgumentsInMethodInvocations(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, Map<String, String> argumentsReplacedWithVariablesMap) {
-        Map<String, List<OperationInvocation>> methodInvocationMap1 = new LinkedHashMap<>(statement1.getMethodInvocationMap());
-        Map<String, List<OperationInvocation>> methodInvocationMap2 = new LinkedHashMap<>(statement2.getMethodInvocationMap());
+    private Map<SingleStatement, Set<String>> replaceVariablesWithArgumentsInMethodInvocations(SingleStatement statement1
+            , SingleStatement statement2, Map<String, String> parameterToArgumentMap
+            , Map<String, String> argumentsReplacedWithVariablesMap) {
+        Map<String, List<? extends Invocation>> methodInvocationMap1 = new LinkedHashMap<>(statement1.getMethodInvocationMap());
+        Map<String, List<? extends Invocation>> methodInvocationMap2 = new LinkedHashMap<>(statement2.getMethodInvocationMap());
         Set<String> methodInvocations1 = new LinkedHashSet<>(methodInvocationMap1.keySet());
         Set<String> methodInvocations2 = new LinkedHashSet<>(methodInvocationMap2.keySet());
 
         // Argumentizations
-        replaceVariablesWithFunctionCallArguments(methodInvocationMap1, methodInvocations1, parameterToArgumentMap);
-        replaceVariablesWithFunctionCallArguments(methodInvocationMap2, methodInvocations2, parameterToArgumentMap);
-        replaceVariablesWithFunctionCallArguments(methodInvocationMap1, methodInvocations1, argumentsReplacedWithVariablesMap);
+        replaceVariablesWithInvocationArguments(methodInvocationMap1, methodInvocations1, parameterToArgumentMap);
+        replaceVariablesWithInvocationArguments(methodInvocationMap2, methodInvocations2, parameterToArgumentMap);
+        replaceVariablesWithInvocationArguments(methodInvocationMap1, methodInvocations1, argumentsReplacedWithVariablesMap);
 
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
@@ -966,11 +941,56 @@ public class ReplacementFinder {
         // remove common methodInvocations from the two sets
         methodInvocations1.removeAll(methodInvocationIntersection);
         methodInvocations2.removeAll(methodInvocationIntersection);
+
+        return Map.of(statement1, methodInvocations1, statement2, methodInvocations2);
+    }
+
+    private void replaceVariableWithArgumentsInObjectCreations(SingleStatement statement1, SingleStatement statement2,
+                                                               Map<String, String> parameterToArgumentMap
+            , Map<String, String> argumentsReplacedWithVariablesMap) {
+        Map<String, List<? extends Invocation>> creationMap1 = new LinkedHashMap<>(statement1.getCreationMap());
+        Map<String, List<? extends Invocation>> creationMap2 = new LinkedHashMap<>(statement2.getCreationMap());
+        Set<String> creations1 = new LinkedHashSet<>(creationMap1.keySet());
+        Set<String> creations2 = new LinkedHashSet<>(creationMap2.keySet());
+
+        replaceVariablesWithInvocationArguments(creationMap1, creations1, parameterToArgumentMap);
+        replaceVariablesWithInvocationArguments(creationMap2, creations2, parameterToArgumentMap);
+        replaceVariablesWithInvocationArguments(creationMap1, creations1, argumentsReplacedWithVariablesMap);
+
+        ObjectCreation creationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement1);
+        ObjectCreation creationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement2);
+        //remove objectCreation covering the entire statement
+        for (String objectCreation1 : creationMap1.keySet()) {
+            for (Invocation creation1 : creationMap1.get(objectCreation1)) {
+                if (creationCoveringTheEntireStatement1 != null &&
+                        creationCoveringTheEntireStatement1.equalsSourceLocation(creation1)) {
+                    creations1.remove(objectCreation1);
+                }
+//                if (((ObjectCreation) creation1).getAnonymousClassDeclaration() != null) {
+//                    creations1.remove(objectCreation1);
+//                }
+            }
+        }
+        for (String objectCreation2 : creationMap2.keySet()) {
+            for (Invocation creation2 : creationMap2.get(objectCreation2)) {
+                if (creationCoveringTheEntireStatement2 != null &&
+                        creationCoveringTheEntireStatement2.equalsSourceLocation(creation2)) {
+                    creations2.remove(objectCreation2);
+                }
+//                if (((ObjectCreation) creation2).getAnonymousClassDeclaration() != null) {
+//                    creations2.remove(objectCreation2);
+//                }
+            }
+        }
+        Set<String> creationIntersection = new LinkedHashSet<>(creations1);
+        creationIntersection.retainAll(creations2);
+        // remove common creations from the two sets
+        creations1.removeAll(creationIntersection);
+        creations2.removeAll(creationIntersection);
     }
 
     private Map<String, String> findArgumentsReplacedWithVariables(SingleStatement statement1, Set<String> unmatchedVariables1, Set<String> unmatchedVariables2,
                                                                    Set<String> arguments1, Set<String> arguments2, ReplacementInfo replacementInfo) {
-
         final Map<String, String> argumentsReplacedWithVariablesMap = new LinkedHashMap<>();
 
         if (!argumentsWithIdenticalMethodCalls(arguments1, arguments2, unmatchedVariables1, unmatchedVariables2)) {
@@ -997,23 +1017,29 @@ public class ReplacementFinder {
         return argumentsReplacedWithVariablesMap;
     }
 
-
-    public void replaceVariablesWithFunctionCallArguments(Map<String, List<OperationInvocation>> callMap, Set<String> calls,
-                                                          Map<String, String> parameterToArgumentMap) {
+    public void replaceVariablesWithInvocationArguments(Map<String, List<? extends Invocation>> callMap, Set<String> calls,
+                                                        Map<String, String> parameterToArgumentMap) {
         if (isCallChain(callMap.values())) {
             for (String parameter : parameterToArgumentMap.keySet()) {
                 String argument = parameterToArgumentMap.get(parameter);
                 if (!parameter.equals(argument)) {
-                    Set<String> toBeAdded = new LinkedHashSet<String>();
+                    Set<String> toBeAdded = new LinkedHashSet<>();
                     for (String call : calls) {
                         String afterReplacement = ReplacementUtil.performArgumentReplacement(call, parameter, argument);
                         if (!call.equals(afterReplacement)) {
                             toBeAdded.add(afterReplacement);
-                            List<? extends AbstractCall> oldCalls = callMap.get(call);
-                            List<AbstractCall> newCalls = new ArrayList<AbstractCall>();
-                            for (AbstractCall oldCall : oldCalls) {
-                                AbstractCall newCall = oldCall.update(parameter, argument);
-                                newCalls.add(newCall);
+                            List<? extends Invocation> oldCalls = callMap.get(call);
+                            List<Invocation> newCalls = new ArrayList<>();
+                            for (Invocation oldCall : oldCalls) {
+                                Invocation newCall;
+
+                                if (oldCall instanceof ObjectCreation) {
+                                    newCall = createObjectCreationWithNewExpression((ObjectCreation) oldCall, parameter, argument);
+                                } else {
+                                    newCall = createFunctionInvocationWithNewExpression((OperationInvocation) oldCall,
+                                            parameter, argument);
+                                    newCalls.add(newCall);
+                                }
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1022,20 +1048,26 @@ public class ReplacementFinder {
                 }
             }
         } else {
-            Set<String> finalNewCalls = new LinkedHashSet<String>();
+            Set<String> finalNewCalls = new LinkedHashSet<>();
             for (String parameter : parameterToArgumentMap.keySet()) {
                 String argument = parameterToArgumentMap.get(parameter);
                 if (!parameter.equals(argument)) {
-                    Set<String> toBeAdded = new LinkedHashSet<String>();
+                    Set<String> toBeAdded = new LinkedHashSet<>();
                     for (String call : calls) {
                         String afterReplacement = ReplacementUtil.performArgumentReplacement(call, parameter, argument);
                         if (!call.equals(afterReplacement)) {
                             toBeAdded.add(afterReplacement);
-                            List<? extends AbstractCall> oldCalls = callMap.get(call);
-                            List<AbstractCall> newCalls = new ArrayList<AbstractCall>();
-                            for (AbstractCall oldCall : oldCalls) {
-                                AbstractCall newCall = oldCall.update(parameter, argument);
-                                newCalls.add(newCall);
+                            List<? extends Invocation> oldCalls = callMap.get(call);
+                            List<Invocation> newCalls = new ArrayList<>();
+                            for (Invocation oldCall : oldCalls) {
+                                Invocation newCall;
+                                if (oldCall instanceof ObjectCreation) {
+                                    newCall = createObjectCreationWithNewExpression((ObjectCreation) oldCall, parameter, argument);
+                                } else {
+                                    newCall = createFunctionInvocationWithNewExpression((OperationInvocation) oldCall,
+                                            parameter, argument);
+                                    newCalls.add(newCall);
+                                }
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1047,12 +1079,12 @@ public class ReplacementFinder {
         }
     }
 
-    private boolean isCallChain(Collection<List<OperationInvocation>> calls) {
+    private boolean isCallChain(Collection<List<? extends Invocation>> calls) {
         if (calls.size() > 1) {
-            OperationInvocation previous = null;
-            OperationInvocation current = null;
+            Invocation previous = null;
+            Invocation current = null;
             int chainLength = 0;
-            for (List<? extends OperationInvocation> list : calls) {
+            for (List<? extends Invocation> list : calls) {
                 previous = current;
                 current = list.get(0);
                 if (current != null && previous != null) {
@@ -1429,5 +1461,40 @@ public class ReplacementFinder {
             }
         }
         return false;
+    }
+
+    private ObjectCreation createObjectCreationWithNewExpression(ObjectCreation objectCreation, String oldExpression, String newExpression) {
+        ObjectCreation newObjectCreation = new ObjectCreation();
+        newObjectCreation.setType(objectCreation.getType());
+        newObjectCreation.setSourceLocation(objectCreation.getSourceLocation());
+        updateCall(objectCreation, newObjectCreation, oldExpression, newExpression);
+        return newObjectCreation;
+    }
+
+    private OperationInvocation createFunctionInvocationWithNewExpression(OperationInvocation operationInvocation, String oldExpression, String newExpression) {
+        OperationInvocation newOperationInvocation = new OperationInvocation();
+        newOperationInvocation.setFunctionName(operationInvocation.getFunctionName());
+        newOperationInvocation.setSourceLocation(operationInvocation.getSourceLocation());
+        updateCall(operationInvocation, newOperationInvocation, oldExpression, newExpression);
+//        newOperationInvocation.subExpressions = new ArrayList<String>();
+//        for (String argument : this.subExpressions) {
+//            newOperationInvocation.subExpressions.add(
+//                    ReplacementUtil.performReplacement(argument, oldExpression, newExpression));
+//        }
+        return newOperationInvocation;
+    }
+
+    void updateCall(Invocation thisCall, Invocation newCall, String oldExpression, String newExpression) {
+        //newCall.typeArguments = this.typeArguments;
+        if (thisCall.getExpression() != null && thisCall.getExpression().equals(oldExpression)) {
+            newCall.setExpression(newExpression);
+        } else {
+            newCall.setExpression(thisCall.getExpression());
+        }
+        newCall.setArguments(new ArrayList<>());
+        for (String argument : thisCall.getArguments()) {
+            newCall.getArguments().add(
+                    ReplacementUtil.performReplacement(argument, oldExpression, newExpression));
+        }
     }
 }

@@ -15,17 +15,17 @@ public class JsonCompositeFactory {
         String type = invocationAny.toString("type");
         invocation.setType(CodeElementType.getFromTitleCase(type));
 
-//        //Loc
-//        invocation.setSourceLocation(invocationAny.get("loc").as(SourceLocation.class));
+        //Loc
+        invocation.setSourceLocation(createSourceLocation(invocationAny.get("loc")));
     }
 
     public static ObjectCreation createObjectCreation(Any any) {
         ObjectCreation creation = new ObjectCreation();
         populateInvocationProperties(any, creation);
-        creation.setTypeName(any.toString("typeName"));
+        creation.setFunctionName(any.toString("typeName"));
 
         if (any.keys().contains("expressionText")) {
-            creation.setExpressionText(any.toString("expressionText"));
+            creation.setExpression(any.toString("expressionText"));
         }
         return creation;
     }
@@ -172,5 +172,9 @@ public class JsonCompositeFactory {
         parseAndLoadObjectCreations(any.get("objectCreations"), expression.getCreationMap());
 
         return expression;
+    }
+
+    static SourceLocation createSourceLocation(Any sourceLocationAny) {
+        return sourceLocationAny.as(SourceLocation.class);
     }
 }
