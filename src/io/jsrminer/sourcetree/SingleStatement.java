@@ -10,9 +10,16 @@ public class SingleStatement extends Statement {
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
     private Set<String> identifierArguments = new LinkedHashSet<>();
 
+    public List<String> stringLiterals = new ArrayList<>();
+    public List<String> numberLiterals = new ArrayList<>();
+    public List<String> nullLiterals = new ArrayList<>();
+    public List<String> booleanLiterals = new ArrayList<>();
+    private List<String> infixOperators = new ArrayList<>();
+    private List<String> arrayAccesses = new ArrayList<>();
+    private List<String> prefixExpressions = new ArrayList<>();
+
     public SingleStatement() {
     }
-
 
     @Override
     public String toString() {
@@ -40,6 +47,34 @@ public class SingleStatement extends Statement {
 
     public Map<String, List<ObjectCreation>> getCreationMap() {
         return creationMap;
+    }
+
+    public List<String> getStringLiterals() {
+        return this.stringLiterals;
+    }
+
+    public List<String> getNumberLiterals() {
+        return this.numberLiterals;
+    }
+
+    public List<String> getNullLiterals() {
+        return this.nullLiterals;
+    }
+
+    public List<String> getBooleanLiterals() {
+        return this.booleanLiterals;
+    }
+
+    public List<String> getInfixOperators() {
+        return infixOperators;
+    }
+
+    public List<String> getArrayAccesses() {
+        return arrayAccesses;
+    }
+
+    public List<String> getPrefixExpressions() {
+        return prefixExpressions;
     }
 
     /**

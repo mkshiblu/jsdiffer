@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
+import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
 
@@ -31,149 +32,123 @@ public class ReplacementFinder {
         Set<String> arguments1 = new LinkedHashSet<>(statement1.getArgumentsWithIdentifiers());
         Set<String> arguments2 = new LinkedHashSet<>(statement2.getArgumentsWithIdentifiers());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
+
         final Map<String, String> argumentsReplacedWithVariablesMap = findArgumentsReplacedWithVariables(
                 statement1, unmatchedVariables1, unmatchedVariables2
                 , arguments1, arguments2, replacementInfo);
 
         // 2. Replace variables with the corresponding arguments in method invocations
-        Map<SingleStatement, Set<String>> unmatchedFunctionInvocations
-                = replaceVariablesWithArgumentsInMethodInvocations(statement1, statement2,
+        Map<String, List<? extends Invocation>> methodInvocationMap1 = new LinkedHashMap<>(statement1.getMethodInvocationMap());
+        Map<String, List<? extends Invocation>> methodInvocationMap2 = new LinkedHashMap<>(statement2.getMethodInvocationMap());
+
+        // The map is just for returning value (TODO improve)
+        Map<Integer, Set<String>> unmatchedFunctionsMap
+                = replaceVariablesWithArgumentsInMethodInvocations(methodInvocationMap1, methodInvocationMap2,
                 parameterToArgumentMap, argumentsReplacedWithVariablesMap);
 
-        Set<String> methodInvocations1 = unmatchedFunctionInvocations.get(statement1);
-        Set<String> methodInvocations2 = unmatchedFunctionInvocations.get(statement2);
+        Set<String> functionInvocations1 = unmatchedFunctionsMap.get(0);
+        Set<String> functionInvocations2 = unmatchedFunctionsMap.get(1);
 
-        Set<String> variablesAndMethodInvocations1 = new LinkedHashSet<>();
-        variablesAndMethodInvocations1.addAll(methodInvocations1);
-        variablesAndMethodInvocations1.addAll(unmatchedVariables1);
-
-        Set<String> variablesAndMethodInvocations2 = new LinkedHashSet<>();
-        variablesAndMethodInvocations2.addAll(methodInvocations2);
-        variablesAndMethodInvocations2.addAll(unmatchedVariables2);
-//
-//        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
-//        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
-//        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
-//
         //3. replace variables with the corresponding arguments in object creations
         replaceVariableWithArgumentsInObjectCreations(statement1, statement2,
                 parameterToArgumentMap, argumentsReplacedWithVariablesMap);
 
-//        Set<String> stringLiterals1 = new LinkedHashSet<String>(statement1.getStringLiterals());
-//        Set<String> stringLiterals2 = new LinkedHashSet<String>(statement2.getStringLiterals());
-//        removeCommonElements(stringLiterals1, stringLiterals2);
-//
-//        Set<String> numberLiterals1 = new LinkedHashSet<String>(statement1.getNumberLiterals());
-//        Set<String> numberLiterals2 = new LinkedHashSet<String>(statement2.getNumberLiterals());
-//        removeCommonElements(numberLiterals1, numberLiterals2);
-//
-//        Set<String> booleanLiterals1 = new LinkedHashSet<String>(statement1.getBooleanLiterals());
-//        Set<String> booleanLiterals2 = new LinkedHashSet<String>(statement2.getBooleanLiterals());
-//        removeCommonElements(booleanLiterals1, booleanLiterals2);
-//
-//        Set<String> infixOperators1 = new LinkedHashSet<String>(statement1.getInfixOperators());
-//        Set<String> infixOperators2 = new LinkedHashSet<String>(statement2.getInfixOperators());
-//        removeCommonElements(infixOperators1, infixOperators2);
-//
-//        Set<String> arrayAccesses1 = new LinkedHashSet<String>(statement1.getArrayAccesses());
-//        Set<String> arrayAccesses2 = new LinkedHashSet<String>(statement2.getArrayAccesses());
-//        removeCommonElements(arrayAccesses1, arrayAccesses2);
-//
-//        Set<String> prefixExpressions1 = new LinkedHashSet<String>(statement1.getPrefixExpressions());
-//        Set<String> prefixExpressions2 = new LinkedHashSet<String>(statement2.getPrefixExpressions());
-//        removeCommonElements(prefixExpressions1, prefixExpressions2);
-////
+        //4. Intersection of Literals
+        intersectLiterals(statement1, statement2);
+
+        // 6. Intersection of arrayAccess
+        Set<String> arrayAccesses1 = new LinkedHashSet<>(statement1.getArrayAccesses());
+        Set<String> arrayAccesses2 = new LinkedHashSet<>(statement2.getArrayAccesses());
+        ReplacementUtil.removeCommonElements(arrayAccesses1, arrayAccesses2);
+
+        // 7. Intersection of prefixExp
+        Set<String> prefixExpressions1 = new LinkedHashSet<>(statement1.getPrefixExpressions());
+        Set<String> prefixExpressions2 = new LinkedHashSet<>(statement2.getPrefixExpressions());
+        ReplacementUtil.removeCommonElements(prefixExpressions1, prefixExpressions2);
+
+//////        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
+////        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
+////        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
 ////        //perform type replacements
 ////        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
-////
-////        //perform operator replacements
-//        findReplacements(infixOperators1, infixOperators2, replacementInfo, ReplacementType.INFIX_OPERATOR);
-//
-//        //apply existing replacements on method invocations
-//        for(String methodInvocation1 : methodInvocations1) {
-//            String temp = new String(methodInvocation1);
-//            for(Replacement replacement : replacementInfo.getReplacements()) {
-//                temp = ReplacementUtil.performReplacement(temp, replacement.getBefore(), replacement.getAfter());
-//            }
-//            if(!temp.equals(methodInvocation1)) {
-//                variablesAndMethodInvocations1.add(temp);
-//                methodInvocationMap1.put(temp, methodInvocationMap1.get(methodInvocation1));
-//            }
-//        }
-//        //add updated method invocation to the original list of invocations
-//        methodInvocations1.addAll(variablesAndMethodInvocations1);
-//        variablesAndMethodInvocations1.addAll(methodInvocations1);
-//        variablesAndMethodInvocations1.addAll(variables1);
-//
-//        if (replacementInfo.getRawDistance() > 0) {
-//            for(String s1 : variablesAndMethodInvocations1) {
-//                TreeMap<Double, Replacement> replacementMap = new TreeMap<Double, Replacement>();
-//                int minDistance = replacementInfo.getRawDistance();
-//                for(String s2 : variablesAndMethodInvocations2) {
-//                    if(Thread.interrupted()) {
-//                        throw new RefactoringMinerTimedOutException();
-//                    }
-//                    String temp = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), s1, s2);
-//                    int distanceRaw = StringDistance.editDistance(temp, replacementInfo.getArgumentizedString2(), minDistance);
-//                    boolean multipleInstances = ReplacementUtil.countInstances(temp, s2) > 1;
-//                    if(distanceRaw == -1 && multipleInstances) {
-//                        distanceRaw = StringDistance.editDistance(temp, replacementInfo.getArgumentizedString2());
-//                    }
-//                    boolean multipleInstanceRule = multipleInstances && Math.abs(s1.length() - s2.length()) == Math.abs(distanceRaw - minDistance) && !s1.equals(s2);
-//                    if(distanceRaw >= 0 && (distanceRaw < replacementInfo.getRawDistance() || multipleInstanceRule)) {
-//                        minDistance = distanceRaw;
-//                        Replacement replacement = null;
-//                        if(variables1.contains(s1) && variables2.contains(s2) && variablesStartWithSameCase(s1, s2, parameterToArgumentMap)) {
-//                            replacement = new Replacement(s1, s2, ReplacementType.VARIABLE_NAME);
-//                            if(s1.startsWith("(") && s2.startsWith("(") && s1.contains(")") && s2.contains(")")) {
-//                                String prefix1 = s1.substring(0, s1.indexOf(")")+1);
-//                                String prefix2 = s2.substring(0, s2.indexOf(")")+1);
-//                                if(prefix1.equals(prefix2)) {
-//                                    String suffix1 = s1.substring(prefix1.length(), s1.length());
-//                                    String suffix2 = s2.substring(prefix2.length(), s2.length());
-//                                    replacement = new Replacement(suffix1, suffix2, ReplacementType.VARIABLE_NAME);
-//                                }
-//                            }
-//                            VariableDeclaration v1 = statement1.searchVariableDeclaration(s1);
-//                            VariableDeclaration v2 = statement2.searchVariableDeclaration(s2);
-//                            if(inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1 && operation2.loopWithVariables(v1.getVariableName(), v2.getVariableName()) == null) {
-//                                replacement = null;
-//                            }
-//                        }
-//                        else if(variables1.contains(s1) && methodInvocations2.contains(s2)) {
-//                            OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
-//                            replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationAfter, Direction.VARIABLE_TO_INVOCATION);
-//                        }
-//                        else if(methodInvocations1.contains(s1) && methodInvocations2.contains(s2)) {
-//                            OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
-//                            OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
-//                            if(invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
-//                                replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
-//                            }
-//                        }
-//                        else if(methodInvocations1.contains(s1) && variables2.contains(s2)) {
-//                            OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
-//                            replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationBefore, Direction.INVOCATION_TO_VARIABLE);
-//                        }
-//                        if(replacement != null) {
-//                            double distancenormalized = (double)distanceRaw/(double)Math.max(temp.length(), replacementInfo.getArgumentizedString2().length());
-//                            replacementMap.put(distancenormalized, replacement);
-//                        }
-//                        if(distanceRaw == 0 && !replacementInfo.getReplacements().isEmpty()) {
-//                            break;
-//                        }
-//                    }
-//                }
-//                if(!replacementMap.isEmpty()) {
-//                    Replacement replacement = replacementMap.firstEntry().getValue();
-//                    replacementInfo.addReplacement(replacement);
-//                    replacementInfo.setArgumentizedString1(ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
-//                    if(replacementMap.firstEntry().getKey() == 0) {
-//                        break;
-//                    }
-//                }
-//            }
-//        }
+
+        intersectAndReplaceInfixOperators(statement1, statement2, replacementInfo);
+
+        Map<Integer, Set<String>> variablesAndMethodInvocationsMap = applyExistingReplacementsOnFunctionInvocations(unmatchedVariables1, unmatchedVariables2,
+                methodInvocationMap1, functionInvocations1, functionInvocations2,
+                replacementInfo);
+        Set<String> variablesAndMethodInvocations1 = variablesAndMethodInvocationsMap.get(0);
+        Set<String> variablesAndMethodInvocations2 = variablesAndMethodInvocationsMap.get(1);
+
+        // If statements are not matched yet
+        if (replacementInfo.getRawEditDistance() > 0) {
+            for (String s1 : variablesAndMethodInvocations1) {
+                TreeMap<Double, Replacement> replacementMap = new TreeMap<>();
+                int minDistance = replacementInfo.getRawEditDistance();
+
+                // Try replacing?
+                for (String s2 : variablesAndMethodInvocations2) {
+
+                    String temp = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), s1, s2);
+                    int distanceRaw = StringDistance.editDistance(temp, replacementInfo.getArgumentizedString2(), minDistance);
+
+                    boolean multipleInstances = ReplacementUtil.countInstances(temp, s2) > 1;
+                    if (distanceRaw == -1 && multipleInstances) {
+                        distanceRaw = StringDistance.editDistance(temp, replacementInfo.getArgumentizedString2());
+                    }
+
+                    boolean multipleInstanceRule = multipleInstances && Math.abs(s1.length() - s2.length()) == Math.abs(distanceRaw - minDistance) && !s1.equals(s2);
+                    if (distanceRaw >= 0 && (distanceRaw < replacementInfo.getRawDistance() || multipleInstanceRule)) {
+                        minDistance = distanceRaw;
+                        Replacement replacement = null;
+                        if (variables1.contains(s1) && variables2.contains(s2) && variablesStartWithSameCase(s1, s2, parameterToArgumentMap)) {
+                            replacement = new Replacement(s1, s2, ReplacementType.VARIABLE_NAME);
+                            if (s1.startsWith("(") && s2.startsWith("(") && s1.contains(")") && s2.contains(")")) {
+                                String prefix1 = s1.substring(0, s1.indexOf(")") + 1);
+                                String prefix2 = s2.substring(0, s2.indexOf(")") + 1);
+                                if (prefix1.equals(prefix2)) {
+                                    String suffix1 = s1.substring(prefix1.length(), s1.length());
+                                    String suffix2 = s2.substring(prefix2.length(), s2.length());
+                                    replacement = new Replacement(suffix1, suffix2, ReplacementType.VARIABLE_NAME);
+                                }
+                            }
+                            VariableDeclaration v1 = statement1.searchVariableDeclaration(s1);
+                            VariableDeclaration v2 = statement2.searchVariableDeclaration(s2);
+                            if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1 && operation2.loopWithVariables(v1.getVariableName(), v2.getVariableName()) == null) {
+                                replacement = null;
+                            }
+                        } else if (variables1.contains(s1) && methodInvocations2.contains(s2)) {
+                            OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
+                            replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationAfter, Direction.VARIABLE_TO_INVOCATION);
+                        } else if (methodInvocations1.contains(s1) && methodInvocations2.contains(s2)) {
+                            OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
+                            OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
+                            if (invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
+                                replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
+                            }
+                        } else if (methodInvocations1.contains(s1) && variables2.contains(s2)) {
+                            OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
+                            replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationBefore, Direction.INVOCATION_TO_VARIABLE);
+                        }
+                        if (replacement != null) {
+                            double distancenormalized = (double) distanceRaw / (double) Math.max(temp.length(), replacementInfo.getArgumentizedString2().length());
+                            replacementMap.put(distancenormalized, replacement);
+                        }
+                        if (distanceRaw == 0 && !replacementInfo.getReplacements().isEmpty()) {
+                            break;
+                        }
+                    }
+                }
+                if (!replacementMap.isEmpty()) {
+                    Replacement replacement = replacementMap.firstEntry().getValue();
+                    replacementInfo.addReplacement(replacement);
+                    replacementInfo.setArgumentizedString1(ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
+                    if (replacementMap.firstEntry().getKey() == 0) {
+                        break;
+                    }
+                }
+            }
+        }
 //
 //        //perform creation replacements
 //        findReplacements(creations1, creations2, replacementInfo, ReplacementType.CLASS_INSTANCE_CREATION);
@@ -886,17 +861,73 @@ public class ReplacementFinder {
         return null;
     }
 
-    private Map<SingleStatement, Set<String>> replaceVariablesWithArgumentsInMethodInvocations(SingleStatement statement1
-            , SingleStatement statement2, Map<String, String> parameterToArgumentMap
+    /**
+     * Returns variablesAndMethodInvocationMaps. Modifies parameters
+     */
+    private Map<Integer, Set<String>> applyExistingReplacementsOnFunctionInvocations(Set<String> unmatchedVariables1
+            , Set<String> unmatchedVariables2
+            , Map<String, List<? extends Invocation>> methodInvocationMap1
+            , Set<String> functionInvocations1
+            , Set<String> functionInvocations2
+            , ReplacementInfo replacementInfo) {
+
+        Set<String> variablesAndMethodInvocations1 = new LinkedHashSet<>();
+        variablesAndMethodInvocations1.addAll(functionInvocations1);
+        variablesAndMethodInvocations1.addAll(unmatchedVariables1);
+
+        Set<String> variablesAndMethodInvocations2 = new LinkedHashSet<>();
+        variablesAndMethodInvocations2.addAll(functionInvocations2);
+        variablesAndMethodInvocations2.addAll(unmatchedVariables2);
+
+        //apply existing replacements on method invocations
+        for (String functionInvocation : functionInvocations1) {
+            String temp = new String(functionInvocation);
+            for (Replacement replacement : replacementInfo.getAppliedReplacements()) {
+                temp = ReplacementUtil.performReplacement(temp, replacement.getBefore(), replacement.getAfter());
+            }
+
+            if (!temp.equals(functionInvocation)) {
+                variablesAndMethodInvocations1.add(temp);
+                methodInvocationMap1.put(temp, methodInvocationMap1.get(functionInvocation));
+            }
+        }
+
+        //add updated method invocation to the original list of invocations
+        functionInvocations1.addAll(variablesAndMethodInvocations1);
+        variablesAndMethodInvocations1.addAll(functionInvocations1);
+        variablesAndMethodInvocations1.addAll(unmatchedVariables1);
+
+        return Map.of(0, variablesAndMethodInvocations1, 1, variablesAndMethodInvocations2);
+    }
+
+    private void intersectAndReplaceInfixOperators(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+        //5. Intersection of infixOps
+        Set<String> infixOperators1 = new LinkedHashSet<>(statement1.getInfixOperators());
+        Set<String> infixOperators2 = new LinkedHashSet<>(statement2.getInfixOperators());
+        ReplacementUtil.removeCommonElements(infixOperators1, infixOperators2);
+        //perform operator replacements
+        findAndPerformBestReplacements(infixOperators1, infixOperators2, ReplacementType.INFIX_OPERATOR, replacementInfo);
+    }
+
+    /**
+     * Modifies the maps
+     *
+     * @return The functioninvocations 0, 1 as key respectively
+     */
+    private Map<Integer, Set<String>> replaceVariablesWithArgumentsInMethodInvocations(
+            Map<String, List<? extends Invocation>> methodInvocationMap1
+            , Map<String, List<? extends Invocation>> methodInvocationMap2
+            , Map<String, String> parameterToArgumentMap
             , Map<String, String> argumentsReplacedWithVariablesMap) {
-        Map<String, List<? extends Invocation>> methodInvocationMap1 = new LinkedHashMap<>(statement1.getMethodInvocationMap());
-        Map<String, List<? extends Invocation>> methodInvocationMap2 = new LinkedHashMap<>(statement2.getMethodInvocationMap());
+
         Set<String> methodInvocations1 = new LinkedHashSet<>(methodInvocationMap1.keySet());
         Set<String> methodInvocations2 = new LinkedHashSet<>(methodInvocationMap2.keySet());
 
         // Argumentizations
         replaceVariablesWithInvocationArguments(methodInvocationMap1, methodInvocations1, parameterToArgumentMap);
+
         replaceVariablesWithInvocationArguments(methodInvocationMap2, methodInvocations2, parameterToArgumentMap);
+
         replaceVariablesWithInvocationArguments(methodInvocationMap1, methodInvocations1, argumentsReplacedWithVariablesMap);
 
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
@@ -922,10 +953,12 @@ public class ReplacementFinder {
                 }
             }
         }
+
         Set<String> methodInvocationIntersection = new LinkedHashSet<>(methodInvocations1);
         methodInvocationIntersection.retainAll(methodInvocations2);
         Set<String> methodInvocationsToBeRemovedFromTheIntersection = new LinkedHashSet<>();
-        for (String methodInvocation : methodInvocationIntersection) {
+        for (
+                String methodInvocation : methodInvocationIntersection) {
             if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
                     invocationCoveringTheEntireStatement1.equalsInovkedFunctionName(invocationCoveringTheEntireStatement2)) {
                 if (!invocationCoveringTheEntireStatement1.getArguments().contains(methodInvocation) &&
@@ -942,7 +975,7 @@ public class ReplacementFinder {
         methodInvocations1.removeAll(methodInvocationIntersection);
         methodInvocations2.removeAll(methodInvocationIntersection);
 
-        return Map.of(statement1, methodInvocations1, statement2, methodInvocations2);
+        return Map.of(0, methodInvocations1, 1, methodInvocations2);
     }
 
     private void replaceVariableWithArgumentsInObjectCreations(SingleStatement statement1, SingleStatement statement2,
@@ -1015,6 +1048,20 @@ public class ReplacementFinder {
             replacementInfo.addReplacements(replacementsToBeAdded);
         }
         return argumentsReplacedWithVariablesMap;
+    }
+
+    void intersectLiterals(SingleStatement statement1, SingleStatement statement2) {
+        Set<String> stringLiterals1 = new LinkedHashSet<>(statement1.getStringLiterals());
+        Set<String> stringLiterals2 = new LinkedHashSet<>(statement2.getStringLiterals());
+        ReplacementUtil.removeCommonElements(stringLiterals1, stringLiterals2);
+
+        Set<String> numberLiterals1 = new LinkedHashSet<>(statement1.getNumberLiterals());
+        Set<String> numberLiterals2 = new LinkedHashSet<>(statement2.getNumberLiterals());
+        ReplacementUtil.removeCommonElements(numberLiterals1, numberLiterals2);
+
+        Set<String> booleanLiterals1 = new LinkedHashSet<>(statement1.getBooleanLiterals());
+        Set<String> booleanLiterals2 = new LinkedHashSet<>(statement2.getBooleanLiterals());
+        ReplacementUtil.removeCommonElements(booleanLiterals1, booleanLiterals2);
     }
 
     public void replaceVariablesWithInvocationArguments(Map<String, List<? extends Invocation>> callMap, Set<String> calls,
