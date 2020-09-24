@@ -10,7 +10,8 @@ public class ReplacementUtil {
     private static final String[] SPECIAL_ARGUMENT_CHARACTERS = {";", ",", ")", "=", "+", "-", ">", "<", ".", "]", " "};
 
     /**
-     * TODO revisit and understand what's being done
+     * Replaces the subString1 with SubString2 in completeString1 if there is a common special characters
+     * after or before and the there are compatible character before and after respectively
      **/
     public static String performReplacement(String completeString1, String completeString2, String subString1, String subString2) {
         String temp = completeString1;
@@ -155,5 +156,17 @@ public class ReplacementUtil {
             }
         }
         return temp;
+    }
+
+    public static int countInstances(String completeString, String subString) {
+        for (String character : SPECIAL_CHARACTERS) {
+            int index = completeString.indexOf(subString + character);
+            if (index != -1) {
+                return (completeString.length()
+                        - completeString.replace(subString + character, "").length())
+                        / (subString.length() + 1);
+            }
+        }
+        return 0;
     }
 }

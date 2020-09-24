@@ -4,7 +4,7 @@ import java.util.*;
 
 public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
-    private Set<VariableDeclaration> variableDeclarations = new LinkedHashSet<>();
+    private Map<String, VariableDeclaration> variableDeclarations = new LinkedHashMap<>();
     private Set<String> variables = new LinkedHashSet<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
@@ -35,10 +35,6 @@ public class SingleStatement extends Statement {
 
     public void setVariables(Set<String> variables) {
         this.variables = variables;
-    }
-
-    public Set<VariableDeclaration> getVariableDeclarations() {
-        return variableDeclarations;
     }
 
     public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
@@ -80,7 +76,18 @@ public class SingleStatement extends Statement {
     /**
      * Returns arguments which are Invocations
      */
-    public Set<String> getArgumentsWithIdentifiers() {
+    public Set<String> getIdentifierArguments() {
         return identifierArguments;
+    }
+
+    /**
+     * Returns the variableName and declaration map of all the variables
+     */
+    public Map<String, VariableDeclaration> getVariableDeclarations() {
+        return this.variableDeclarations;
+    }
+
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        return this.variableDeclarations.get(variableName);
     }
 }

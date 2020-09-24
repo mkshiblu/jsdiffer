@@ -14,12 +14,14 @@ import java.util.Map;
 public enum InvocationCoverage {
     INSTANCE;
 
+    public final int CACHE_SIZE = 100;
     private final Map<OperationInvocation, InvocationCoverageType> invocationCoverageTypeMap = new HashMap<>();
     private final Map<SingleStatement, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
 
     public OperationInvocation getInvocationCoveringEntireFragment(SingleStatement statement) {
         if (!invocationCoveringEntireFragmentMap.containsKey(statement)) {
             OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(statement);
+            updateCacheSize();
             invocationCoveringEntireFragmentMap.put(statement, invocationCoveringEntireFragment);
         }
         return invocationCoveringEntireFragmentMap.get(statement);
@@ -123,5 +125,11 @@ public enum InvocationCoverage {
     public void clearCache() {
         invocationCoverageTypeMap.clear();
         invocationCoveringEntireFragmentMap.clear();
+    }
+
+    public void updateCacheSize() {
+        if (invocationCoveringEntireFragmentMap.size() >= CACHE_SIZE) {
+            clearCache();
+        }
     }
 }

@@ -69,10 +69,12 @@ public class JsonCompositeFactory {
 
         // region Variable declarations
         if (any.keys().contains("variableDeclarations")) {
-            Set<VariableDeclaration> vds = singleStatement.getVariableDeclarations();
+            // TODO check if a list should be used?
+            Map<String, VariableDeclaration> vds = singleStatement.getVariableDeclarations();
             List<Any> vdAnys = any.get("variableDeclarations").asList();
             vdAnys.forEach((variableDeclarationAny -> {
-                vds.add(createVariableDeclaration(variableDeclarationAny));
+                VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny);
+                vds.put(vd.variableName, vd);
             }));
         }
         // endregion
@@ -91,8 +93,8 @@ public class JsonCompositeFactory {
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
         if (any.keys().contains("argumentsWithIdentifier")) {
-            singleStatement.getArgumentsWithIdentifiers().addAll(any.get("argumentsWithIdentifier")
-                    .as(singleStatement.getArgumentsWithIdentifiers().getClass()));
+            singleStatement.getIdentifierArguments().addAll(any.get("argumentsWithIdentifier")
+                    .as(singleStatement.getIdentifierArguments().getClass()));
         }
 
         return singleStatement;
