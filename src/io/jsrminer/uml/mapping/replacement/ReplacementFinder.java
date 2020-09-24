@@ -15,28 +15,24 @@ public class ReplacementFinder {
 
     public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo) {
 
-        final StatementIntersection intersection = new StatementIntersection(statement1, statement2);
+        final StatementDiff diff = new StatementDiff(statement1, statement2);
 
         // Intersect variables
-        Map<SingleStatement, Set<String>> unmatchedVariablesMap
-                = intersectVariables(statement1, statement2, replacementInfo);
-
-        final Set<String> unmatchedVariables1 = unmatchedVariablesMap.get(statement1);
-        final Set<String> unmatchedVariables2 = unmatchedVariablesMap.get(statement2);
-        intersection.setUnmatchedVariables1(unmatchedVariables1);
-        intersection.setUnmatchedVariables2(unmatchedVariables2);
+        Set<String> variablesToBeAddedAsUnmatched = findCommonVariablesToBeAddedAsUnmatched(statement1, statement2, replacementInfo);
+        diff.variables1.addAll(variablesToBeAddedAsUnmatched);
+        diff.variables2.addAll(variablesToBeAddedAsUnmatched);
 
         // replace unmatched variables with the corresponding arguments (Argumentize?)
         // Add parameters to unmatched?
-        addArgumentsToVariables(unmatchedVariables1, parameterToArgumentMap);
-        addArgumentsToVariables(unmatchedVariables2, parameterToArgumentMap);
+        addArgumentsToVariables(diff.variables1, parameterToArgumentMap);
+        addArgumentsToVariables(diff.variables2, parameterToArgumentMap);
 
         // Find replacements in various rounds
 
         // 1. Argument replacement with variables
         // Perform replacements of  all the arguments in s1 with variables in s2
         final Map<String, String> variableToArgumentMap = replaceArgumentsWithVariables(
-                statement1, intersection, replacementInfo);
+                statement1, diff, replacementInfo);
 
         // 2. Replace variables with the corresponding arguments in method invocations
         Map<String, List<? extends Invocation>> methodInvocationMap1 = new LinkedHashMap<>(statement1.getMethodInvocationMap());
@@ -52,16 +48,6 @@ public class ReplacementFinder {
         Set<String> functionInvocations1 = unmatchedFunctionsMap.get(0);
         Set<String> functionInvocations2 = unmatchedFunctionsMap.get(1);
 
-        // Arr access intersaction?
-        Set<String> arrayAccesses1 = new LinkedHashSet<>(statement1.getArrayAccesses());
-        Set<String> arrayAccesses2 = new LinkedHashSet<>(statement2.getArrayAccesses());
-        ReplacementUtil.removeCommonElements(arrayAccesses1, arrayAccesses2);
-
-        // 7. Intersection of prefixExp
-        Set<String> prefixExpressions1 = new LinkedHashSet<>(statement1.getPrefixExpressions());
-        Set<String> prefixExpressions2 = new LinkedHashSet<>(statement2.getPrefixExpressions());
-        ReplacementUtil.removeCommonElements(prefixExpressions1, prefixExpressions2);
-
 //////        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
 ////        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
 ////        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
@@ -72,7 +58,7 @@ public class ReplacementFinder {
 
         // Find all variables and invocations
         Map<Integer, Set<String>> variablesAndFunctionInvocationsMap
-                = getVariablesAndFunctionInvocations(unmatchedVariables1, unmatchedVariables2,
+                = getVariablesAndFunctionInvocations(diff.variables1, diff.variables2,
                 methodInvocationMap1, functionInvocations1, functionInvocations2,
                 replacementInfo);
 
@@ -82,7 +68,7 @@ public class ReplacementFinder {
         if (replacementInfo.getRawEditDistance() > 0) {
             replaceVariablesAndFunctionInvocations(statement1, statement2
                     , parameterToArgumentMap, replacementInfo
-                    , unmatchedVariables1, unmatchedVariables2
+                    , diff.variables1, diff.variables2
                     , methodInvocationMap1, methodInvocationMap2
                     , functionInvocations1, functionInvocations2
                     , variablesAndMethodInvocations1, variablesAndMethodInvocations2);
@@ -93,55 +79,44 @@ public class ReplacementFinder {
                 parameterToArgumentMap, replacementInfo, variableToArgumentMap);
 
         // Perform literal replacements
-        Set<String> stringLiterals1 = intersection.getUnmatchedStringLiterals1();
-        Set<String> stringLiterals2 = intersection.getUnmatchedStringLiterals2();
-        findAndPerformBestReplacements(stringLiterals1, stringLiterals2, replacementInfo, ReplacementType.STRING_LITERAL);
+        replaceLiterals(statement1, statement2, replacementInfo, diff);
+        replaceArrayAccess(replacementInfo, diff, functionInvocations1, functionInvocations2);
 
-        Set<String> numberLiterals1 = intersection.getUnmatchedNumberLiterals1();
-        Set<String> numberLiterals2 = intersection.getUnmatchedNumberLiterals2();
-        findAndPerformBestReplacements(numberLiterals1, numberLiterals2, replacementInfo, ReplacementType.NUMBER_LITERAL);
+        // Replace variables With prefixExpressions and ViceVersa
+        findAndPerformBestReplacements(diff.variables1, diff.prefixExpressions2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_PREFIX_EXPRESSION);
+        findAndPerformBestReplacements(diff.prefixExpressions1, diff.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_PREFIX_EXPRESSION);
 
-        if (!statement1.containsInitializerOfVariableDeclaration(numberLiterals1) && !statement2.containsInitializerOfVariableDeclaration(variables2) &&
-                !statement1.getString().endsWith("=0;\n")) {
-            findReplacements(numberLiterals1, variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NUMBER_LITERAL);
+        // Replace stringLiterals1 with variables
+        findAndPerformBestReplacements(diff.stringLiterals1, diff.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_STRING_LITERAL);
+
+        if(statement1.getNullLiterals().isEmpty() && !statement2.getNullLiterals().isEmpty()) {
+            Set<String> nullLiterals2 = new LinkedHashSet<String>();
+            nullLiterals2.add("null");
+            findReplacements(variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
         }
-        findReplacements(variables1, arrayAccesses2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
-        findReplacements(arrayAccesses1, variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
 
-//        findReplacements(methodInvocations1, arrayAccesses2, replacementInfo, ReplacementType.ARRAY_ACCESS_REPLACED_WITH_METHOD_INVOCATION);
-//        findReplacements(arrayAccesses1, methodInvocations2, replacementInfo, ReplacementType.ARRAY_ACCESS_REPLACED_WITH_METHOD_INVOCATION);
-//
-//        findReplacements(variables1, prefixExpressions2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_PREFIX_EXPRESSION);
-//        findReplacements(prefixExpressions1, variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_PREFIX_EXPRESSION);
-//        findReplacements(stringLiterals1, variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_STRING_LITERAL);
-//        if(statement1.getNullLiterals().isEmpty() && !statement2.getNullLiterals().isEmpty()) {
-//            Set<String> nullLiterals2 = new LinkedHashSet<String>();
-//            nullLiterals2.add("null");
-//            findReplacements(variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
-//        }
-//
-//        if(statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
-//            if(!statement1.getNullLiterals().isEmpty()) {
-//                Set<String> nullLiterals1 = new LinkedHashSet<String>();
-//                nullLiterals1.add("null");
-//                Set<String> ternaryExpressions2 = new LinkedHashSet<String>();
-//                for(TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
-//                    ternaryExpressions2.add(ternary.getExpression());
-//                }
-//                findReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-//            }
-//        }
-//        else if(!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
-//            if(!statement2.getNullLiterals().isEmpty()) {
-//                Set<String> nullLiterals2 = new LinkedHashSet<String>();
-//                nullLiterals2.add("null");
-//                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
-//                for(TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
-//                    ternaryExpressions1.add(ternary.getExpression());
-//                }
-//                findReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-//            }
-//        }
+        if(statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
+            if(!statement1.getNullLiterals().isEmpty()) {
+                Set<String> nullLiterals1 = new LinkedHashSet<String>();
+                nullLiterals1.add("null");
+                Set<String> ternaryExpressions2 = new LinkedHashSet<String>();
+                for(TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
+                    ternaryExpressions2.add(ternary.getExpression());
+                }
+                findReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+            }
+        }
+        else if(!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
+            if(!statement2.getNullLiterals().isEmpty()) {
+                Set<String> nullLiterals2 = new LinkedHashSet<String>();
+                nullLiterals2.add("null");
+                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
+                for(TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
+                    ternaryExpressions1.add(ternary.getExpression());
+                }
+                findReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+            }
+        }
 //        if(!statement1.getString().endsWith("=true;\n") && !statement1.getString().endsWith("=false;\n")) {
 //            findReplacements(booleanLiterals1, variables2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_VARIABLE);
 //        }
@@ -806,40 +781,35 @@ public class ReplacementFinder {
         return null;
     }
 
-    private void intersectAndReplaceLiterals(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+    private void replaceArrayAccess(ReplacementInfo replacementInfo, StatementDiff diff, Set<String> functionInvocations1, Set<String> functionInvocations2) {
+        // Replace variables With arrayAccess and ViceVersa
+        findAndPerformBestReplacements(diff.variables1, diff.arrayAccesses2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
+        findAndPerformBestReplacements(diff.arrayAccesses1, diff.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
 
-        intersectAndReplaceStringLiterals(statement1, statement2, replacementInfo);
-        intersectAndReplaceNumberLiterals(statement1, statement2, replacementInfo);
-
-        Set<String> booleanLiterals1 = new LinkedHashSet<>(statement1.getBooleanLiterals());
-        Set<String> booleanLiterals2 = new LinkedHashSet<>(statement2.getBooleanLiterals());
-        ReplacementUtil.removeCommonElements(booleanLiterals1, booleanLiterals2);
+        // Replace functionInvocations With arrayAccess and ViceVersa
+        findAndPerformBestReplacements(functionInvocations1, diff.arrayAccesses2, replacementInfo, ReplacementType.ARRAY_ACCESS_REPLACED_WITH_METHOD_INVOCATION);
+        findAndPerformBestReplacements(diff.arrayAccesses1, functionInvocations2, replacementInfo, ReplacementType.ARRAY_ACCESS_REPLACED_WITH_METHOD_INVOCATION);
     }
 
-    private void intersectAndReplaceStringLiterals(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+    private void replaceLiterals(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo, StatementDiff intersection) {
+        findAndPerformBestReplacements(intersection.stringLiterals1, intersection.stringLiterals2
+                , replacementInfo, ReplacementType.STRING_LITERAL);
+        findAndPerformBestReplacements(intersection.numberLiterals1, intersection.numberLiterals2,
+                replacementInfo, ReplacementType.NUMBER_LITERAL);
 
-        findAndPerformBestReplacements(stringLiterals1, stringLiterals2, replacementInfo, ReplacementType.STRING_LITERAL);
+        if (!expressionsContainInitializerOfVariableDeclaration(intersection.numberLiterals1, statement1)
+                && !expressionsContainInitializerOfVariableDeclaration(intersection.variables2, statement2) &&
+                !statement1.getText().endsWith("=0;\n")) { // TODO defaultValue??
+            findAndPerformBestReplacements(intersection.numberLiterals1, intersection.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NUMBER_LITERAL);
+        }
     }
-
-//    private void inersectStringLiterals(SingleStatement statement1, SingleStatement statement2) {
-//        Set<String> stringLiterals1 = new LinkedHashSet<>(statement1.getStringLiterals());
-//        Set<String> stringLiterals2 = new LinkedHashSet<>(statement2.getStringLiterals());
-//        ReplacementUtil.removeCommonElements(stringLiterals1, stringLiterals2);
-//    }
-//
-//    private void intersectAndReplaceNumberLiterals(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
-//        Set<String> numberLiterals1 = new LinkedHashSet<>(statement1.getNumberLiterals());
-//        Set<String> numberLiterals2 = new LinkedHashSet<>(statement2.getNumberLiterals());
-//        ReplacementUtil.removeCommonElements(numberLiterals1, numberLiterals2);
-//        findAndPerformBestReplacements(numberLiterals1, numberLiterals2, replacementInfo, ReplacementType.NUMBER_LITERAL);
-//    }
 
     private void intersectAndReplaceObjectCreations(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo, Map<String, String> variableToArgumentMap) {
         Map<Integer, Set<String>> objectCreationsMap = intersectObjectCreations(statement1, statement2,
                 parameterToArgumentMap, variableToArgumentMap);
         Set<String> creations1 = objectCreationsMap.get(0);
         Set<String> creations2 = objectCreationsMap.get(1);
-        findAndPerformBestReplacements(creations1, creations2, ReplacementType.CLASS_INSTANCE_CREATION, replacementInfo);
+        findAndPerformBestReplacements(creations1, creations2, replacementInfo, ReplacementType.CLASS_INSTANCE_CREATION);
     }
 
     private void replaceVariablesAndFunctionInvocations(SingleStatement statement1, SingleStatement statement2
@@ -968,7 +938,7 @@ public class ReplacementFinder {
         Set<String> infixOperators2 = new LinkedHashSet<>(statement2.getInfixOperators());
         ReplacementUtil.removeCommonElements(infixOperators1, infixOperators2);
         //perform operator replacements
-        findAndPerformBestReplacements(infixOperators1, infixOperators2, ReplacementType.INFIX_OPERATOR, replacementInfo);
+        findAndPerformBestReplacements(infixOperators1, infixOperators2, replacementInfo, ReplacementType.INFIX_OPERATOR);
     }
 
     /**
@@ -1090,13 +1060,13 @@ public class ReplacementFinder {
     }
 
     private Map<String, String> replaceArgumentsWithVariables(SingleStatement statement1,
-                                                              StatementIntersection intersection,
+                                                              StatementDiff intersection,
                                                               ReplacementInfo replacementInfo) {
         final Map<String, String> variableToArgumentMap = new LinkedHashMap<>();
-        final Set<String> arguments1 = intersection.getUnmatchedArguments1();
-        final Set<String> arguments2 = intersection.getUnmatchedArguments2();
-        final Set<String> unmatchedVariables1 = intersection.getUnmatchedVariables1();
-        final Set<String> unmatchedVariables2 = intersection.getUnmatchedVariables2();
+        final Set<String> arguments1 = intersection.arguments1;
+        final Set<String> arguments2 = intersection.arguments2;
+        final Set<String> unmatchedVariables1 = intersection.variables1;
+        final Set<String> unmatchedVariables2 = intersection.variables2;
 
         if (!argumentsWithIdenticalMethodCalls(arguments1, arguments2, unmatchedVariables1, unmatchedVariables2)) {
             findAndPerformBestReplacements(arguments1, unmatchedVariables2, replacementInfo, ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE);
@@ -1223,7 +1193,8 @@ public class ReplacementFinder {
      * @param type
      * @return
      */
-    private Map.Entry<TreeMap<Double, Set<Replacement>>, TreeMap<Double, Set<Replacement>>> findBestReplacements(Set<String> strings1, Set<String> strings2
+    private Map.Entry<TreeMap<Double, Set<Replacement>>, TreeMap<Double, Set<Replacement>>> findBestReplacements(
+            Set<String> strings1, Set<String> strings2
             , ReplacementType type, ReplacementInfo replacementInfo) /*throws RefactoringMinerTimedOutException*/ {
         TreeMap<Double, Set<Replacement>> globalReplacementMap = new TreeMap<>();
         TreeMap<Double, Set<Replacement>> allReplacementsWithLowerEditDistance = new TreeMap<>();
@@ -1442,8 +1413,8 @@ public class ReplacementFinder {
      *
      * @return
      */
-    private Map<SingleStatement, Set<String>> intersectVariables(SingleStatement statement1, SingleStatement statement2,
-                                                                 ReplacementInfo replacementInfo) {
+    private /*Map<SingleStatement, Set<String>>*/ Set<String> findCommonVariablesToBeAddedAsUnmatched(SingleStatement statement1, SingleStatement statement2,
+                                                                                                      ReplacementInfo replacementInfo) {
         final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
         final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
 
@@ -1497,12 +1468,14 @@ public class ReplacementFinder {
             }
         }
 
-        commonVariables.removeAll(variablesToBeRemovedFromCommon);
+        //commonVariables.removeAll(variablesToBeRemovedFromCommon);
 
         // remove common variables from the two sets
-        variables1.removeAll(commonVariables);
-        variables2.removeAll(commonVariables);
-        return Map.of(statement1, variables1, statement2, variables2);
+        //variables1.removeAll(commonVariables);
+        //variables2.removeAll(commonVariables);
+        //return Map.of(statement1, variables1, statement2, variables2);
+
+        return variablesToBeRemovedFromCommon;
     }
 
     private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement, String variable, List<SingleStatement> unMatchedStatements) {
@@ -1655,4 +1628,23 @@ public class ReplacementFinder {
                     ReplacementUtil.performReplacement(argument, oldExpression, newExpression));
         }
     }
+
+    protected boolean expressionsContainInitializerOfVariableDeclaration(Set<String> expressions, SingleStatement statement) {
+        Map<String, VariableDeclaration> variableDeclarations = statement.getVariableDeclarations();
+
+        if (variableDeclarations.size() == 1) {
+            VariableDeclaration vd = variableDeclarations.entrySet().iterator().next().getValue();
+            Expression initializer = vd.getInitializer();
+            return initializer != null && expressions.contains(initializer);
+        }
+//
+//        if (variableDeclarations.size() == 1 && variableDeclarations.values().stream().findFirst().getInitializer() != null) {
+//            String initializer = variableDeclarations.get(0).getInitializer().toString();
+//            if (expressions.contains(initializer)) {
+//                return true;
+//            }
+//        }
+        return false;
+    }
+
 }
