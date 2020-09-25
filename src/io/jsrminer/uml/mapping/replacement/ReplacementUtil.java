@@ -118,6 +118,15 @@ public class ReplacementUtil {
         return false;
     }
 
+    public static boolean contains(String completeString, String subString) {
+        for (String character : SPECIAL_CHARACTERS) {
+            if (completeString.contains(subString + character)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean sameCharsBeforeAfter(String completeString1, String completeString2, String commonSubString) {
         Pattern p = Pattern.compile(Pattern.quote(commonSubString));
         Matcher m1 = p.matcher(completeString1);

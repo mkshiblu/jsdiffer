@@ -2,7 +2,6 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.PreProcessor;
 
 import java.util.*;
@@ -15,6 +14,7 @@ import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodI
 public class ReplacementFinder {
 
     private static final Pattern DOUBLE_QUOTES = Pattern.compile("\"([^\"]*)\"|(\\S+)");
+    private static final Pattern SPLIT_CONDITIONAL_PATTERN = Pattern.compile("(\\|\\|)|(&&)|(\\?)|(:)");
 
     public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2
             , Map<String, String> parameterToArgumentMap
@@ -133,40 +133,32 @@ public class ReplacementFinder {
 //        }
 // endregion
 
-        filterReplacements(statement1, statement2
+        String[] argumentizedStrings = filterReplacements(statement1, statement2
                 , replacementInfo, preProcessor
                 , diff, methodInvocationMap1, methodInvocationMap2
                 , functionInvocations1, functionInvocations2);
 
-        boolean isEqualWithReplacement = s1.equals(s2) || replacementInfo.argumentizedString1.equals(replacementInfo.argumentizedString2) || differOnlyInCastExpressionOrPrefixOperator(s1, s2, replacementInfo) || oneIsVariableDeclarationTheOtherIsVariableAssignment(s1, s2, replacementInfo) ||
-                oneIsVariableDeclarationTheOtherIsReturnStatement(s1, s2) || oneIsVariableDeclarationTheOtherIsReturnStatement(statement1.getString(), statement2.getString()) ||
-                (commonConditional(s1, s2, replacementInfo) && containsValidOperatorReplacements(replacementInfo)) ||
-                equalAfterArgumentMerge(s1, s2, replacementInfo) ||
-                equalAfterNewArgumentAdditions(s1, s2, replacementInfo) ||
-                (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo));
+        String s1 = argumentizedStrings[0];
+        String s2 = argumentizedStrings[1];
 
+        boolean isEqualWithReplacement = s1.equals(s2)
+                || replacementInfo.getArgumentizedString1().equals(replacementInfo.getArgumentizedString2())
+                || differOnlyInCastExpressionOrPrefixOperator(s1, s2, replacementInfo)
+                || oneIsVariableDeclarationTheOtherIsVariableAssignment(s1, s2, replacementInfo)
+                || oneIsVariableDeclarationTheOtherIsReturnStatement(s1, s2)
+                || oneIsVariableDeclarationTheOtherIsReturnStatement(statement1.getText(), statement2.getText())
+                || (commonConditional(s1, s2, replacementInfo) && containsValidOperatorReplacements(replacementInfo))
+                || equalAfterArgumentMerge(s1, s2, replacementInfo)
+                /*|| equalAfterNewArgumentAdditions(s1, s2, replacementInfo)*/
+                /*|| (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo))*/;
+
+        List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations().values());
+        List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations().values());
 
         if (isEqualWithReplacement) {
-            List<Replacement> typeReplacements = replacementInfo.getReplacements(ReplacementType.TYPE);
-            if (typeReplacements.size() > 0 && invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
-                for (Replacement typeReplacement : typeReplacements) {
-                    if (invocationCoveringTheEntireStatement1.getMethodName().contains(typeReplacement.getBefore()) && invocationCoveringTheEntireStatement2.getMethodName().contains(typeReplacement.getAfter())) {
-                        if (invocationCoveringTheEntireStatement1.identicalExpression(invocationCoveringTheEntireStatement2) && invocationCoveringTheEntireStatement1.equalArguments(invocationCoveringTheEntireStatement2)) {
-                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
-                                    invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
-                            replacementInfo.addReplacement(replacement);
-                        } else {
-                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
-                                    invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION);
-                            replacementInfo.addReplacement(replacement);
-                        }
-                        break;
-                    }
-                }
-            }
-            if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo) &&
-                    !statement1.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT) &&
-                    !statement2.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+            if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo)
+                    && !statement1.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)
+                    && !statement2.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
                 return null;
             }
             if (variableAssignmentWithEverythingReplaced(statement1, statement2, replacementInfo)) {
@@ -288,7 +280,15 @@ public class ReplacementFinder {
 //        }
         // endregion
 
-//        OperationInvocation assignmentInvocationCoveringTheEntireStatement1 = invocationCoveringTheEntireStatement1 == null ? statement1.assignmentInvocationCoveringEntireStatement() : invocationCoveringTheEntireStatement1;
+        // If statements cannot be matched with 1 to 1 AST replacement, apply heuristics
+        applyHeuristics();
+        return null;
+    }
+
+    private void applyHeuristics() {
+
+//        OperationInvocation assignmentInvocationCoveringTheEntireStatement1 =
+//                invocationCoveringTheEntireStatement1 == null ? statement1.assignmentInvocationCoveringEntireStatement() : invocationCoveringTheEntireStatement1;
 //        //method invocation is identical
 //        if(assignmentInvocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
 //            for(String key1 : methodInvocationMap1.keySet()) {
@@ -779,21 +779,21 @@ public class ReplacementFinder {
 //                return replacementInfo.getReplacements();
 //            }
 //        }
-        return null;
     }
 
-    private void filterReplacements(SingleStatement statement1, SingleStatement statement2
+    private String[] filterReplacements(SingleStatement statement1, SingleStatement statement2
             , ReplacementInfo replacementInfo, PreProcessor preProcessor
             , StatementDiff diff, Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2) {
+
         String s1 = preProcessor.getArgumentizedString(statement1);
         String s2 = preProcessor.getArgumentizedString(statement2);
 
         LinkedHashSet<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
         LinkedHashSet<Replacement> replacementsToBeAdded = new LinkedHashSet<>();
 
-        for (Replacement replacement : replacementInfo.getAppliedReplacements()) {
+        for (Replacement replacement : replacementInfo.getReplacements()) {
             s1 = ReplacementUtil.performReplacement(s1, s2, replacement.getBefore(), replacement.getAfter());
 
             //find variable replacements within method invocation replacements
@@ -824,6 +824,8 @@ public class ReplacementFinder {
         }
         replacementInfo.removeReplacements(replacementsToBeRemoved);
         replacementInfo.addReplacements(replacementsToBeAdded);
+
+        return new String[]{s1, s2};
     }
 
     private void replaceArrayAccess(ReplacementInfo replacementInfo, StatementDiff diff, Set<String> functionInvocations1, Set<String> functionInvocations2) {
@@ -922,7 +924,7 @@ public class ReplacementFinder {
                         double distancenormalized = (double) distanceRaw / (double) Math.max(temp.length(), replacementInfo.getArgumentizedString2().length());
                         replacementMap.put(distancenormalized, replacement);
                     }
-                    if (distanceRaw == 0 && !replacementInfo.getAppliedReplacements().isEmpty()) {
+                    if (distanceRaw == 0 && !replacementInfo.getReplacements().isEmpty()) {
                         break;
                     }
                 }
@@ -959,7 +961,7 @@ public class ReplacementFinder {
         //apply existing replacements on method invocations
         for (String functionInvocation : functionInvocations1) {
             String temp = new String(functionInvocation);
-            for (Replacement replacement : replacementInfo.getAppliedReplacements()) {
+            for (Replacement replacement : replacementInfo.getReplacements()) {
                 temp = ReplacementUtil.performReplacement(temp, replacement.getBefore(), replacement.getAfter());
             }
 
@@ -1120,7 +1122,7 @@ public class ReplacementFinder {
             Set<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
             Set<Replacement> replacementsToBeAdded = new LinkedHashSet<>();
 
-            for (Replacement r : replacementInfo.getAppliedReplacements()) {
+            for (Replacement r : replacementInfo.getReplacements()) {
                 variableToArgumentMap.put(r.getBefore(), r.getAfter());
 
                 // IF the argument which was replaced was an invocation, change it to  a subclass of the replacement
@@ -1753,5 +1755,579 @@ public class ReplacementFinder {
             }
         }
         return null;
+    }
+
+    private boolean differOnlyInCastExpressionOrPrefixOperator(String s1, String s2, ReplacementInfo info) {
+        String commonPrefix = PrefixSuffixUtils.longestCommonPrefix(s1, s2);
+        String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+
+        if (!commonPrefix.isEmpty() && !commonSuffix.isEmpty()) {
+            int beginIndexS1 = s1.indexOf(commonPrefix) + commonPrefix.length();
+            int endIndexS1 = s1.lastIndexOf(commonSuffix);
+            String diff1 = beginIndexS1 > endIndexS1 ? "" : s1.substring(beginIndexS1, endIndexS1);
+            int beginIndexS2 = s2.indexOf(commonPrefix) + commonPrefix.length();
+            int endIndexS2 = s2.lastIndexOf(commonSuffix);
+            String diff2 = beginIndexS2 > endIndexS2 ? "" : s2.substring(beginIndexS2, endIndexS2);
+            if (cast(diff1, diff2)) {
+                return true;
+            }
+            if (cast(diff2, diff1)) {
+                return true;
+            }
+            if (diff1.isEmpty() && (diff2.equals("!") || diff2.equals("~"))) {
+                Replacement r = new Replacement(s1, s2, ReplacementType.INVERT_CONDITIONAL);
+                info.addReplacement(r);
+                return true;
+            }
+            if (diff2.isEmpty() && (diff1.equals("!") || diff1.equals("~"))) {
+                Replacement r = new Replacement(s1, s2, ReplacementType.INVERT_CONDITIONAL);
+                info.addReplacement(r);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean cast(String diff1, String diff2) {
+        return (diff1.isEmpty() && diff2.startsWith("(") && diff2.endsWith(")")) || diff2.equals("(" + diff1 + ")");
+    }
+
+    private boolean containsValidOperatorReplacements(ReplacementInfo replacementInfo) {
+        List<Replacement> operatorReplacements = replacementInfo.getReplacementsOfType(ReplacementType.INFIX_OPERATOR);
+        for (Replacement replacement : operatorReplacements) {
+            if (replacement.getBefore().equals("==") && !replacement.getAfter().equals("!="))
+                return false;
+            if (replacement.getBefore().equals("!=") && !replacement.getAfter().equals("=="))
+                return false;
+            if (replacement.getBefore().equals("&&") && !replacement.getAfter().equals("||"))
+                return false;
+            if (replacement.getBefore().equals("||") && !replacement.getAfter().equals("&&"))
+                return false;
+        }
+        return true;
+    }
+
+    private boolean oneIsVariableDeclarationTheOtherIsVariableAssignment(String s1, String s2, ReplacementInfo replacementInfo) {
+        String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+        if (s1.contains("=") && s2.contains("=") && (s1.equals(commonSuffix) || s2.equals(commonSuffix))) {
+            if (replacementInfo.getReplacements().size() == 2) {
+                StringBuilder sb = new StringBuilder();
+                int counter = 0;
+                for (Replacement r : replacementInfo.getReplacements()) {
+                    sb.append(r.getAfter());
+                    if (counter == 0) {
+                        sb.append("=");
+                    } else if (counter == 1) {
+                        sb.append(";\n");
+                    }
+                    counter++;
+                }
+                if (commonSuffix.equals(sb.toString())) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean oneIsVariableDeclarationTheOtherIsReturnStatement(String s1, String s2) {
+        String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+        if (!commonSuffix.equals("null;\n") && !commonSuffix.equals("true;\n") && !commonSuffix.equals("false;\n") && !commonSuffix.equals("0;\n")) {
+            if (s1.startsWith("return ") && s1.substring(7, s1.length()).equals(commonSuffix) &&
+                    s2.contains("=") && s2.substring(s2.indexOf("=") + 1, s2.length()).equals(commonSuffix)) {
+                return true;
+            }
+            if (s2.startsWith("return ") && s2.substring(7, s2.length()).equals(commonSuffix) &&
+                    s1.contains("=") && s1.substring(s1.indexOf("=") + 1, s1.length()).equals(commonSuffix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean commonConditional(String s1, String s2, ReplacementInfo info) {
+        if (!containsMethodSignatureOfAnonymousClass(s1) && !containsMethodSignatureOfAnonymousClass(s2)) {
+            if ((s1.contains("||") || s1.contains("&&") || s2.contains("||") || s2.contains("&&"))) {
+                String conditional1 = prepareConditional(s1);
+                String conditional2 = prepareConditional(s2);
+                String[] subConditions1 = SPLIT_CONDITIONAL_PATTERN.split(conditional1);
+                String[] subConditions2 = SPLIT_CONDITIONAL_PATTERN.split(conditional2);
+                List<String> subConditionsAsList1 = new ArrayList<String>();
+                for (String s : subConditions1) {
+                    subConditionsAsList1.add(s.trim());
+                }
+                List<String> subConditionsAsList2 = new ArrayList<String>();
+                for (String s : subConditions2) {
+                    subConditionsAsList2.add(s.trim());
+                }
+                Set<String> intersection = new LinkedHashSet<String>(subConditionsAsList1);
+                intersection.retainAll(subConditionsAsList2);
+                int matches = 0;
+                if (!intersection.isEmpty()) {
+                    for (String element : intersection) {
+                        boolean replacementFound = false;
+                        for (Replacement r : info.getReplacements()) {
+                            if (element.equals(r.getAfter()) || element.equals("(" + r.getAfter()) || element.equals(r.getAfter() + ")")) {
+                                replacementFound = true;
+                                break;
+                            }
+                            if (r.getType().equals(ReplacementType.INFIX_OPERATOR) && element.contains(r.getAfter())) {
+                                replacementFound = true;
+                                break;
+                            }
+                            if (ReplacementUtil.contains(element, r.getAfter()) && element.startsWith(r.getAfter()) &&
+                                    (element.endsWith(" != null") || element.endsWith(" == null"))) {
+                                replacementFound = true;
+                                break;
+                            }
+                        }
+                        if (!replacementFound) {
+                            matches++;
+                        }
+                    }
+                }
+                if (matches > 0) {
+                    Replacement r = new IntersectionReplacement(s1, s2, intersection, ReplacementType.CONDITIONAL);
+                    info.addReplacement(r);
+                }
+                boolean invertConditionalFound = false;
+                for (String subCondition1 : subConditionsAsList1) {
+                    for (String subCondition2 : subConditionsAsList2) {
+                        if (subCondition1.equals("!" + subCondition2)) {
+                            Replacement r = new Replacement(subCondition1, subCondition2, ReplacementType.INVERT_CONDITIONAL);
+                            info.addReplacement(r);
+                            invertConditionalFound = true;
+                        }
+                        if (subCondition2.equals("!" + subCondition1)) {
+                            Replacement r = new Replacement(subCondition1, subCondition2, ReplacementType.INVERT_CONDITIONAL);
+                            info.addReplacement(r);
+                            invertConditionalFound = true;
+                        }
+                    }
+                }
+                if (invertConditionalFound || matches > 0) {
+                    return true;
+                }
+            }
+            if (s1.contains(" >= ") && s2.contains(" <= ")) {
+                Replacement r = invertConditionalDirection(s1, s2, " >= ", " <= ");
+                if (r != null) {
+                    info.addReplacement(r);
+                    return true;
+                }
+            }
+            if (s1.contains(" <= ") && s2.contains(" >= ")) {
+                Replacement r = invertConditionalDirection(s1, s2, " <= ", " >= ");
+                if (r != null) {
+                    info.addReplacement(r);
+                    return true;
+                }
+            }
+            if (s1.contains(" > ") && s2.contains(" < ")) {
+                Replacement r = invertConditionalDirection(s1, s2, " > ", " < ");
+                if (r != null) {
+                    info.addReplacement(r);
+                    return true;
+                }
+            }
+            if (s1.contains(" < ") && s2.contains(" > ")) {
+                Replacement r = invertConditionalDirection(s1, s2, " < ", " > ");
+                if (r != null) {
+                    info.addReplacement(r);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private Replacement invertConditionalDirection(String s1, String s2, String operator1, String operator2) {
+        int indexS1 = s1.indexOf(operator1);
+        int indexS2 = s2.indexOf(operator2);
+        //s1 goes right, s2 goes left
+        int i = indexS1 + operator1.length();
+        int j = indexS2 - 1;
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        while (i < s1.length() && j >= 0) {
+            sb1.append(s1.charAt(i));
+            sb2.insert(0, s2.charAt(j));
+            if (sb1.toString().equals(sb2.toString())) {
+                String subCondition1 = operator1 + sb1.toString();
+                String subCondition2 = sb2.toString() + operator2;
+                Replacement r = new Replacement(subCondition1, subCondition2, ReplacementType.INVERT_CONDITIONAL);
+                return r;
+            }
+            i++;
+            j--;
+        }
+        //s1 goes left, s2 goes right
+        i = indexS1 - 1;
+        j = indexS2 + operator2.length();
+        sb1 = new StringBuilder();
+        sb2 = new StringBuilder();
+        while (i >= 0 && j < s2.length()) {
+            sb1.insert(0, s1.charAt(i));
+            sb2.append(s2.charAt(j));
+            if (sb1.toString().equals(sb2.toString())) {
+                String subCondition1 = sb1.toString() + operator1;
+                String subCondition2 = operator2 + sb2.toString();
+                Replacement r = new Replacement(subCondition1, subCondition2, ReplacementType.INVERT_CONDITIONAL);
+                return r;
+            }
+            i--;
+            j++;
+        }
+        return null;
+    }
+
+    private String prepareConditional(String s) {
+        String conditional = s;
+        if (s.startsWith("if(") && s.endsWith(")")) {
+            conditional = s.substring(3, s.length() - 1);
+        }
+        if (s.startsWith("while(") && s.endsWith(")")) {
+            conditional = s.substring(6, s.length() - 1);
+        }
+        if (s.startsWith("return ") && s.endsWith(";\n")) {
+            conditional = s.substring(7, s.length() - 2);
+        }
+        int indexOfEquals = s.indexOf("=");
+        if (indexOfEquals > -1 && s.charAt(indexOfEquals + 1) != '=' && s.charAt(indexOfEquals - 1) != '!' && s.endsWith(";\n")) {
+            conditional = s.substring(indexOfEquals + 1, s.length() - 2);
+        }
+        return conditional;
+    }
+
+    private boolean equalAfterArgumentMerge(String s1, String s2, ReplacementInfo replacementInfo) {
+        Map<String, Set<Replacement>> commonVariableReplacementMap = new LinkedHashMap<String, Set<Replacement>>();
+        for (Replacement replacement : replacementInfo.getReplacements()) {
+            if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)) {
+                String key = replacement.getAfter();
+                if (commonVariableReplacementMap.containsKey(key)) {
+                    commonVariableReplacementMap.get(key).add(replacement);
+                    int index = s1.indexOf(key);
+                    if (index != -1) {
+                        if (s1.charAt(index + key.length()) == ',') {
+                            s1 = s1.substring(0, index) + s1.substring(index + key.length() + 1, s1.length());
+                        } else if (index > 0 && s1.charAt(index - 1) == ',') {
+                            s1 = s1.substring(0, index - 1) + s1.substring(index + key.length(), s1.length());
+                        }
+                    }
+                } else {
+                    Set<Replacement> replacements = new LinkedHashSet<Replacement>();
+                    replacements.add(replacement);
+                    commonVariableReplacementMap.put(key, replacements);
+                }
+            }
+        }
+        if (s1.equals(s2)) {
+            for (String key : commonVariableReplacementMap.keySet()) {
+                Set<Replacement> replacements = commonVariableReplacementMap.get(key);
+                if (replacements.size() > 1) {
+                    replacementInfo.getReplacements().removeAll(replacements);
+                    Set<String> mergedVariables = new LinkedHashSet<String>();
+                    for (Replacement replacement : replacements) {
+                        mergedVariables.add(replacement.getBefore());
+                    }
+                    MergeVariableReplacement merge = new MergeVariableReplacement(mergedVariables, key);
+                    replacementInfo.getReplacements().add(merge);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private boolean variableDeclarationsWithEverythingReplaced(List<VariableDeclaration> variableDeclarations1,
+                                                               List<VariableDeclaration> variableDeclarations2, ReplacementInfo replacementInfo) {
+        if (variableDeclarations1.size() == 1 && variableDeclarations2.size() == 1) {
+            boolean typeReplacement = false,
+                    variableRename = false,
+                    methodInvocationReplacement = false,
+                    nullInitializer = false,
+                    zeroArgumentClassInstantiation = false,
+                    classInstantiationArgumentReplacement = false;
+
+            //UMLType type1 = variableDeclarations1.get(0).getType();
+            //UMLType type2 = variableDeclarations2.get(0).getType();
+            Expression initializer1 = variableDeclarations1.get(0).getInitializer();
+            Expression initializer2 = variableDeclarations2.get(0).getInitializer();
+
+            if (initializer1 == null && initializer2 == null) {
+                nullInitializer = true;
+            } else if (initializer1 != null && initializer2 != null) {
+                nullInitializer = initializer1.getText().equals("null")
+                        && initializer2.getText().equals("null");
+                if (initializer1.getCreationMap().size() == 1 && initializer2.getCreationMap().size() == 1) {
+                    ObjectCreation creation1 = initializer1.getCreationMap().values().iterator().next().get(0);
+                    ObjectCreation creation2 = initializer2.getCreationMap().values().iterator().next().get(0);
+                    if (creation1.getArguments().size() == 0 && creation2.getArguments().size() == 0) {
+                        zeroArgumentClassInstantiation = true;
+                    } else if (creation1.getArguments().size() == 1 && creation2.getArguments().size() == 1) {
+                        String argument1 = creation1.getArguments().get(0);
+                        String argument2 = creation2.getArguments().get(0);
+                        for (Replacement replacement : replacementInfo.getReplacements()) {
+                            if (replacement.getBefore().equals(argument1) && replacement.getAfter().equals(argument2)) {
+                                classInstantiationArgumentReplacement = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            for (Replacement replacement : replacementInfo.getReplacements()) {
+                if (replacement.getType().equals(ReplacementType.TYPE))
+                    typeReplacement = true;
+                else if (replacement.getType().equals(ReplacementType.VARIABLE_NAME) &&
+                        variableDeclarations1.get(0).variableName.equals(replacement.getBefore()) &&
+                        variableDeclarations2.get(0).variableName.equals(replacement.getAfter()))
+                    variableRename = true;
+                else if (replacement instanceof MethodInvocationReplacement) {
+                    MethodInvocationReplacement invocationReplacement = (MethodInvocationReplacement) replacement;
+                    if (initializer1 != null && invocationReplacement.getInvokedOperationBefore().actualString()
+                            .equals(initializer1.getText()) &&
+                            initializer2 != null && invocationReplacement.getInvokedOperationAfter()
+                            .actualString().equals(initializer2.getText())) {
+                        methodInvocationReplacement = true;
+                    }
+                    if (initializer1 != null && initializer1.getText().equals(replacement.getBefore()) &&
+                            initializer2 != null && initializer2.getText().equals(replacement.getAfter())) {
+                        methodInvocationReplacement = true;
+                    }
+                } else if (replacement.getType().equals(ReplacementType.CLASS_INSTANCE_CREATION)) {
+                    if (initializer1 != null && initializer1.getText().equals(replacement.getBefore()) &&
+                            initializer2 != null && initializer2.getText().equals(replacement.getAfter())) {
+                        methodInvocationReplacement = true;
+                    }
+                }
+            }
+            if (/*typeReplacement && !type1.compatibleTypes(type2)
+                    &&*/ variableRename
+                    && (methodInvocationReplacement
+                    || nullInitializer
+                    || zeroArgumentClassInstantiation
+                    || classInstantiationArgumentReplacement)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean variableAssignmentWithEverythingReplaced(SingleStatement statement1, SingleStatement statement2,
+                                                             ReplacementInfo replacementInfo) {
+        String string1 = statement1.getText();
+        String string2 = statement2.getText();
+        if (containsMethodSignatureOfAnonymousClass(string1)) {
+            string1 = string1.substring(0, string1.indexOf("\n"));
+        }
+        if (containsMethodSignatureOfAnonymousClass(string2)) {
+            string2 = string2.substring(0, string2.indexOf("\n"));
+        }
+        if (string1.contains("=") && string1.endsWith(";\n") && string2.contains("=") && string2.endsWith(";\n")) {
+            boolean typeReplacement = false, compatibleTypes = false, variableRename = false,
+                    classInstanceCreationReplacement = false;
+            String variableName1 = string1.substring(0, string1.indexOf("="));
+            String variableName2 = string2.substring(0, string2.indexOf("="));
+            String assignment1 = string1.substring(string1.indexOf("=") + 1, string1.lastIndexOf(";\n"));
+            String assignment2 = string2.substring(string2.indexOf("=") + 1, string2.lastIndexOf(";\n"));
+//            UMLType type1 = null, type2 = null;
+//            Map<String, List<ObjectCreation>> creationMap1 = statement1.getCreationMap();
+//            for (String creation1 : creationMap1.keySet()) {
+//                if (creation1.equals(assignment1)) {
+//                    type1 = creationMap1.get(creation1).get(0).getType();
+//                }
+//            }
+//            Map<String, List<ObjectCreation>> creationMap2 = statement2.getCreationMap();
+//            for (String creation2 : creationMap2.keySet()) {
+//                if (creation2.equals(assignment2)) {
+//                    type2 = creationMap2.get(creation2).get(0).getType();
+//                }
+//            }
+//            if (type1 != null && type2 != null) {
+//                compatibleTypes = type1.compatibleTypes(type2);
+//            }
+            OperationInvocation inv1 = null, inv2 = null;
+            Map<String, List<OperationInvocation>> methodInvocationMap1 = statement1.getMethodInvocationMap();
+            for (String invocation1 : methodInvocationMap1.keySet()) {
+                if (invocation1.equals(assignment1)) {
+                    inv1 = methodInvocationMap1.get(invocation1).get(0);
+                }
+            }
+            Map<String, List<OperationInvocation>> methodInvocationMap2 = statement2.getMethodInvocationMap();
+            for (String invocation2 : methodInvocationMap2.keySet()) {
+                if (invocation2.equals(assignment2)) {
+                    inv2 = methodInvocationMap2.get(invocation2).get(0);
+                }
+            }
+            for (Replacement replacement : replacementInfo.getReplacements()) {
+                if (replacement.getType().equals(ReplacementType.TYPE)) {
+                    typeReplacement = true;
+                    if (string1.contains("new " + replacement.getBefore() + "(")
+                            && string2.contains("new " + replacement.getAfter() + "("))
+                        classInstanceCreationReplacement = true;
+                } else if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)
+                        && (variableName1.equals(replacement.getBefore())
+                        || variableName1.endsWith(" " + replacement.getBefore()))
+                        && (variableName2.equals(replacement.getAfter())
+                        || variableName2.endsWith(" " + replacement.getAfter())))
+                    variableRename = true;
+                else if (replacement.getType().equals(ReplacementType.CLASS_INSTANCE_CREATION) &&
+                        assignment1.equals(replacement.getBefore()) &&
+                        assignment2.equals(replacement.getAfter()))
+                    classInstanceCreationReplacement = true;
+            }
+            if (typeReplacement && !compatibleTypes && variableRename && classInstanceCreationReplacement) {
+                return true;
+            }
+            if (variableRename && inv1 != null && inv2 != null && inv1.differentExpressionNameAndArguments(inv2)) {
+                if (inv1.getArguments().size() > inv2.getArguments().size()) {
+                    for (String argument : inv1.getArguments()) {
+                        List<OperationInvocation> argumentInvocations = methodInvocationMap1.get(argument);
+                        if (argumentInvocations != null) {
+                            for (OperationInvocation argumentInvocation : argumentInvocations) {
+                                if (!argumentInvocation.differentExpressionNameAndArguments(inv2)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                } else if (inv1.getArguments().size() < inv2.getArguments().size()) {
+                    for (String argument : inv2.getArguments()) {
+                        List<OperationInvocation> argumentInvocations = methodInvocationMap2.get(argument);
+                        if (argumentInvocations != null) {
+                            for (OperationInvocation argumentInvocation : argumentInvocations) {
+                                if (!inv1.differentExpressionNameAndArguments(argumentInvocation)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean classInstanceCreationWithEverythingReplaced(SingleStatement statement1, SingleStatement statement2,
+                                                                ReplacementInfo replacementInfo, Map<String, String> parameterToArgumentMap) {
+        String string1 = statement1.getText();
+        String string2 = statement2.getText();
+        if (containsMethodSignatureOfAnonymousClass(string1)) {
+            string1 = string1.substring(0, string1.indexOf("\n"));
+        }
+        if (containsMethodSignatureOfAnonymousClass(string2)) {
+            string2 = string2.substring(0, string2.indexOf("\n"));
+        }
+        if (string1.contains("=") && string1.endsWith(";\n") && string2.startsWith("return ") && string2.endsWith(";\n")) {
+            boolean typeReplacement = false, compatibleTypes = false, classInstanceCreationReplacement = false;
+            String assignment1 = string1.substring(string1.indexOf("=") + 1, string1.lastIndexOf(";\n"));
+            String assignment2 = string2.substring(7, string2.lastIndexOf(";\n"));
+
+//            UMLType type1 = null, type2 = null;
+            ObjectCreation objectCreation1 = null, objectCreation2 = null;
+            Map<String, String> argumentToParameterMap = new LinkedHashMap<String, String>();
+            Map<String, List<ObjectCreation>> creationMap1 = statement1.getCreationMap();
+            for (String creation1 : creationMap1.keySet()) {
+                if (creation1.equals(assignment1)) {
+                    objectCreation1 = creationMap1.get(creation1).get(0);
+                    //                  type1 = objectCreation1.getType();
+                }
+            }
+            Map<String, List<ObjectCreation>> creationMap2 = statement2.getCreationMap();
+            for (String creation2 : creationMap2.keySet()) {
+                if (creation2.equals(assignment2)) {
+                    objectCreation2 = creationMap2.get(creation2).get(0);
+                    //                type2 = objectCreation2.getType();
+                    for (String argument : objectCreation2.getArguments()) {
+                        if (parameterToArgumentMap.containsKey(argument)) {
+                            argumentToParameterMap.put(parameterToArgumentMap.get(argument), argument);
+                        }
+                    }
+                }
+            }
+            int minArguments = 0;
+            //if (type1 != null && type2 != null) {
+            //  compatibleTypes = type1.compatibleTypes(type2);
+            minArguments = Math.min(objectCreation1.getArguments().size(), objectCreation2.getArguments().size());
+            // }
+
+            int replacedArguments = 0;
+            for (Replacement replacement : replacementInfo.getReplacements()) {
+                if (replacement.getType().equals(ReplacementType.TYPE)) {
+                    typeReplacement = true;
+                    if (string1.contains("new " + replacement.getBefore() + "(") &&
+                            string2.contains("new " + replacement.getAfter() + "("))
+                        classInstanceCreationReplacement = true;
+                } else if (objectCreation1 != null && objectCreation2 != null &&
+                        objectCreation1.getArguments().contains(replacement.getBefore()) &&
+                        (objectCreation2.getArguments().contains(replacement.getAfter())
+                                || objectCreation2.getArguments().contains(argumentToParameterMap.get(replacement.getAfter())))) {
+                    replacedArguments++;
+                } else if (replacement.getType().equals(ReplacementType.CLASS_INSTANCE_CREATION) &&
+                        assignment1.equals(replacement.getBefore()) &&
+                        assignment2.equals(replacement.getAfter()))
+                    classInstanceCreationReplacement = true;
+            }
+            if (typeReplacement && !compatibleTypes && replacedArguments == minArguments && classInstanceCreationReplacement) {
+                return true;
+            }
+        } else if (string1.startsWith("return ") && string1.endsWith(";\n") && string2.contains("=") && string2.endsWith(";\n")) {
+            boolean typeReplacement = false, compatibleTypes = false, classInstanceCreationReplacement = false;
+            String assignment1 = string1.substring(7, string1.lastIndexOf(";\n"));
+            String assignment2 = string2.substring(string2.indexOf("=") + 1, string2.lastIndexOf(";\n"));
+            //UMLType type1 = null, type2 = null;
+            ObjectCreation objectCreation1 = null, objectCreation2 = null;
+            Map<String, String> argumentToParameterMap = new LinkedHashMap<String, String>();
+            Map<String, List<ObjectCreation>> creationMap1 = statement1.getCreationMap();
+            for (String creation1 : creationMap1.keySet()) {
+                if (creation1.equals(assignment1)) {
+                    objectCreation1 = creationMap1.get(creation1).get(0);
+                    //  type1 = objectCreation1.getType();
+                }
+            }
+            Map<String, List<ObjectCreation>> creationMap2 = statement2.getCreationMap();
+            for (String creation2 : creationMap2.keySet()) {
+                if (creation2.equals(assignment2)) {
+                    objectCreation2 = creationMap2.get(creation2).get(0);
+                    //type2 = objectCreation2.getType();
+                    for (String argument : objectCreation2.getArguments()) {
+                        if (parameterToArgumentMap.containsKey(argument)) {
+                            argumentToParameterMap.put(parameterToArgumentMap.get(argument), argument);
+                        }
+                    }
+                }
+            }
+            int minArguments = 0;
+            //if (type1 != null && type2 != null) {
+            // compatibleTypes = type1.compatibleTypes(type2);
+            minArguments = Math.min(objectCreation1.getArguments().size(), objectCreation2.getArguments().size());
+            //}
+            int replacedArguments = 0;
+            for (Replacement replacement : replacementInfo.getReplacements()) {
+                if (replacement.getType().equals(ReplacementType.TYPE)) {
+                    typeReplacement = true;
+                    if (string1.contains("new " + replacement.getBefore() + "(")
+                            && string2.contains("new " + replacement.getAfter() + "("))
+                        classInstanceCreationReplacement = true;
+                } else if (objectCreation1 != null && objectCreation2 != null &&
+                        objectCreation1.getArguments().contains(replacement.getBefore()) &&
+                        (objectCreation2.getArguments().contains(replacement.getAfter())
+                                || objectCreation2.getArguments()
+                                .contains(argumentToParameterMap.get(replacement.getAfter())))) {
+                    replacedArguments++;
+                } else if (replacement.getType().equals(ReplacementType.CLASS_INSTANCE_CREATION) &&
+                        assignment1.equals(replacement.getBefore()) &&
+                        assignment2.equals(replacement.getAfter()))
+                    classInstanceCreationReplacement = true;
+            }
+            if (typeReplacement && !compatibleTypes &&
+                    replacedArguments == minArguments && classInstanceCreationReplacement) {
+                return true;
+            }
+        }
+        return false;
     }
 }

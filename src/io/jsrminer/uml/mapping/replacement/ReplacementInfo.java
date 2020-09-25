@@ -3,10 +3,7 @@ package io.jsrminer.uml.mapping.replacement;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.diff.StringDistance;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Holds metadata between two strings which are subjects to replacements
@@ -59,7 +56,7 @@ public class ReplacementInfo {
         return argumentizedString2;
     }
 
-    public Set<Replacement> getAppliedReplacements() {
+    public Set<Replacement> getReplacements() {
         return appliedReplacements;
     }
 
@@ -74,4 +71,15 @@ public class ReplacementInfo {
     public void removeReplacements(Collection<? extends Replacement> replacementsToBeRemoved) {
         this.appliedReplacements.removeAll(replacementsToBeRemoved);
     }
+
+    public List<Replacement> getReplacementsOfType(Replacement.ReplacementType replacementType) {
+        List<Replacement> replacements = new ArrayList<>();
+        for (Replacement replacement : this.getReplacements()) {
+            if (replacement.getType().equals(replacementType)) {
+                replacements.add(replacement);
+            }
+        }
+        return replacements;
+    }
 }
+

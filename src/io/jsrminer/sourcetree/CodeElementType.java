@@ -13,7 +13,8 @@ public enum CodeElementType {
     CONSTRUCTOR_INVOCATION("THIS_CONSTRUCTOR_INVOCATION"),    // TODO ReVisit type (this())
     SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
     OBJECT_CREATION("NewExpression"),
-    RETURN_STATEMENT("ReturnStatement");
+    RETURN_STATEMENT("ReturnStatement"),
+    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"); // TODO revisit
     public final String titleCase;
 
     private CodeElementType(String titleCase) {
@@ -21,6 +22,7 @@ public enum CodeElementType {
     }
 
     private static Map<String, CodeElementType> typeTitleCaseMap = new HashMap<>();
+
     static {
         for (CodeElementType type : CodeElementType.values()) {
             typeTitleCaseMap.put(type.titleCase, type);
