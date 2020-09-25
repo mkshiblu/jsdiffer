@@ -38,7 +38,7 @@ public class StatementDiff {
     private void intersectVariables() {
         variables1.addAll(statement1.getVariables());
         variables2.addAll(statement2.getVariables());
-        ReplacementUtil.removeCommonElements(variables1, variables1);
+        ReplacementUtil.removeCommonElements(variables1, variables2);
     }
 
     private void intersectStringLiterals() {
@@ -71,44 +71,8 @@ public class StatementDiff {
         ReplacementUtil.removeCommonElements(arrayAccesses1, arrayAccesses2);
     }
 
-//
-//    public Set<String> getUnmatchedStringLiterals1() {
-//        return this.unmatchedStringLiterals1;
-//    }
-//
-//    public Set<String> getUnmatchedStringLiterals2() {
-//        return this.unmatchedStringLiterals2;
-//    }
-//
-//    public Set<String> getUnmatchedNumberLiterals1() {
-//        return this.unmatchedNumberLiterals1;
-//    }
-//
-//    public Set<String> getUnmatchedNumberLiterals2() {
-//        return this.unmatchedNumberLiterals2;
-//    }
-//
-//    public Set<String> getUnmatchedArguments1() {
-//        return this.unmatchedArguments1;
-//    }
-//
-//    public Set<String> getUnmatchedArguments2() {
-//        return this.unmatchedArguments2;
-//    }
-//
-//    public Set<String> getUnmatchedVariables1() {
-//        return this.unmatchedVariables1;
-//    }
-//
-//    public Set<String> getUnmatchedVariables2() {
-//        return this.unmatchedVariables2;
-//    }
-//
-//    public void setUnmatchedVariables1(Set<String> variables1) {
-//        this.unmatchedArguments1 = variables1;
-//    }
-//
-//    public void setUnmatchedVariables2(Set<String> variables2) {
-//        this.unmatchedArguments1 = variables2;
-//    }
+    @Override
+    public String toString() {
+        return "S1: " + statement1 + System.lineSeparator() + " S2: " + statement2;
+    }
 }

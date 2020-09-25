@@ -15,7 +15,7 @@ public class Main {
         try {
             Repository repo = GitUtil.openRepository("F:\\PROJECTS_REPO\\toy_js");
             String folder = "tmp";
-            String commitId = "b58d17993cb24830373a5a640a9ca2d9bac13043";
+            String commitId = "aac0c407169dba1a393aa478e45e34de2e5b27f6";
             String parentCommitId = "e2a0d7d35cc08a6f6c9f42d289e823c3781d26f8";
             new JSRefactoringMiner().detectBetweenCommits(repo, parentCommitId, commitId);
             //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");

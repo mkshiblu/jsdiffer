@@ -1,3 +1,5 @@
+const astUtil = require('../parser/AstUtil');
+
 /* interface TryStatement<: Statement {
     type: "TryStatement";
     block: BlockStatement;
@@ -13,7 +15,7 @@ exports.processTryStatement = (path, processStatement, processExpression) => {
         type: path.node.type,
         text: 'try',
         statements: [],
-        catchClause: {}
+        catchClause: null
     };
 
     processStatement(path.get('block'), statement);
@@ -35,9 +37,12 @@ function porcessCatchClause(path, processStatement, processExpression) {
     const statement = {
         type: path.node.type,
         text: 'catch',
-        statements: []
+        statements: [],
+        loc: astUtil.getFormattedLocation(path.node),
     };
 
     processStatement(path.get('body'), statement);
     return statement;
 }
+
+exports.porcessCatchClause = porcessCatchClause;

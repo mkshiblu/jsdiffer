@@ -6,6 +6,8 @@ import io.jsrminer.parser.JsonCompositeFactory;
 
 import java.util.*;
 
+import static java.util.AbstractMap.SimpleImmutableEntry;
+
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
  * May contain other block statements or statements (i.e. composite statements)
@@ -42,7 +44,7 @@ public class BlockStatement extends Statement {
 
         //Enqueue to process
         Any any = JsonIterator.deserialize(blockStatementJson);
-        blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
+        blocksToBeProcessed.add(new SimpleImmutableEntry<>(newBlock, any));
 
         while (!blocksToBeProcessed.isEmpty()) {
             indexInParent = -1;
@@ -74,6 +76,18 @@ public class BlockStatement extends Statement {
             // Parse text
             currentBlock.text = any.toString("text");
 
+//            // Check if it's try statement and contains any catchBlock
+//            if (any.keys().contains("catchClause")) {
+//                BlockStatement catchClause = new BlockStatement();
+//                blocksToBeProcessed.add(new SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
+//
+//                // Add the catchblacue as seprate composite to the parent of the try block
+//                catchClause.positionIndexInParent = currentBlock.positionIndexInParent++;
+//                catchClause.depth = currentBlock.depth;
+//                ((BlockStatement) currentBlock.parent).statements.add(catchClause);
+//            }
+
+            // Parse childs of this block
             for (Any childAny : statements) {
                 isComposite = childAny.keys().contains("statements");
 
@@ -81,7 +95,7 @@ public class BlockStatement extends Statement {
 
                     // If composite enqueue the block and corresponding json to be processed later
                     childBlock = new BlockStatement();
-                    blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(childBlock, childAny));
+                    blocksToBeProcessed.add(new SimpleImmutableEntry<>(childBlock, childAny));
                     child = childBlock;
                 } else {
                     // A leaf statement
@@ -93,6 +107,7 @@ public class BlockStatement extends Statement {
                 child.depth = currentBlock.depth + 1;
                 currentBlock.addStatement(child);
             }
+
         }
 
         return newBlock;

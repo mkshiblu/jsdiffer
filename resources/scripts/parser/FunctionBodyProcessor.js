@@ -1,5 +1,6 @@
 const astUtil = require('./AstUtil');
 const nodeProcessor = require('../processors/AstNodeProcessor');
+const t = require('@babel/types');
 
 exports.processFunctionBody = function processFunctionBody(bodyPath) {
     const parent = {};
@@ -18,7 +19,6 @@ function processStatement(path, parent) {
     // Add children
     addStatement(parent, statement);
 }
-
 
 function addStatement(parent, childStatement) {
     if (!parent.statements) {

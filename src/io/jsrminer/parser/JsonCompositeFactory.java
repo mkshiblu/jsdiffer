@@ -70,11 +70,11 @@ public class JsonCompositeFactory {
         // region Variable declarations
         if (any.keys().contains("variableDeclarations")) {
             // TODO check if a list should be used?
-            Map<String, VariableDeclaration> vds = singleStatement.getVariableDeclarations();
+            List<VariableDeclaration> vds = singleStatement.getVariableDeclarations();
             List<Any> vdAnys = any.get("variableDeclarations").asList();
             vdAnys.forEach((variableDeclarationAny -> {
                 VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny);
-                vds.put(vd.variableName, vd);
+                vds.add(vd);
             }));
         }
         // endregion

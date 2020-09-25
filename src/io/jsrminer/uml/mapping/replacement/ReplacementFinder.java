@@ -24,9 +24,9 @@ public class ReplacementFinder {
         final StatementDiff diff = new StatementDiff(statement1, statement2);
 
         // Intersect variables
-        Set<String> variablesToBeAddedAsUnmatched = findCommonVariablesToBeAddedAsUnmatched(statement1, statement2, replacementInfo);
-        diff.variables1.addAll(variablesToBeAddedAsUnmatched);
-        diff.variables2.addAll(variablesToBeAddedAsUnmatched);
+        Set<String> unmatchedCommonVariables = findCommonVariablesToBeAddedAsUnmatched(statement1, statement2, replacementInfo);
+        diff.variables1.addAll(unmatchedCommonVariables);
+        diff.variables2.addAll(unmatchedCommonVariables);
 
         // replace unmatched variables with the corresponding arguments (Argumentize?)
         // Add parameters to unmatched?
@@ -152,8 +152,8 @@ public class ReplacementFinder {
                 /*|| equalAfterNewArgumentAdditions(s1, s2, replacementInfo)*/
                 /*|| (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo))*/;
 
-        List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations().values());
-        List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations().values());
+        List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations());
+        List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations());
 
         if (isEqualWithReplacement) {
             if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo)
@@ -1103,7 +1103,7 @@ public class ReplacementFinder {
         creations1.removeAll(creationIntersection);
         creations2.removeAll(creationIntersection);
 
-        return Map.of(0, creations1, 0, creations2);
+        return Map.of(0, creations1, 1, creations2);
     }
 
     private Map<String, String> replaceArgumentsWithVariables(SingleStatement statement1,
@@ -1677,10 +1677,10 @@ public class ReplacementFinder {
     }
 
     protected boolean expressionsContainInitializerOfVariableDeclaration(Set<String> expressions, SingleStatement statement) {
-        Map<String, VariableDeclaration> variableDeclarations = statement.getVariableDeclarations();
+        List<VariableDeclaration> variableDeclarations = statement.getVariableDeclarations();
 
         if (variableDeclarations.size() == 1) {
-            VariableDeclaration vd = variableDeclarations.entrySet().iterator().next().getValue();
+            VariableDeclaration vd = variableDeclarations.get(0);
             Expression initializer = vd.getInitializer();
             return initializer != null && expressions.contains(initializer);
         }
