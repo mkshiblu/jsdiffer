@@ -2,18 +2,24 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.uml.diff.UMLOperationDiff;
+import io.jsrminer.uml.mapping.PreProcessor;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
+import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 
 public class ReplacementFinder {
 
     private static final Pattern DOUBLE_QUOTES = Pattern.compile("\"([^\"]*)\"|(\\S+)");
 
-    public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo) {
+    public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2
+            , Map<String, String> parameterToArgumentMap
+            , ReplacementInfo replacementInfo
+            , PreProcessor preProcessor) {
 
         final StatementDiff diff = new StatementDiff(statement1, statement2);
 
@@ -89,105 +95,91 @@ public class ReplacementFinder {
         // Replace stringLiterals1 with variables
         findAndPerformBestReplacements(diff.stringLiterals1, diff.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_STRING_LITERAL);
 
-        if(statement1.getNullLiterals().isEmpty() && !statement2.getNullLiterals().isEmpty()) {
-            Set<String> nullLiterals2 = new LinkedHashSet<String>();
+        // Replace variables with Null Literals
+        if (statement1.getNullLiterals().isEmpty() && !statement2.getNullLiterals().isEmpty()) {
+            Set<String> nullLiterals2 = new LinkedHashSet<>();
             nullLiterals2.add("null");
-            findReplacements(variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
+            findAndPerformBestReplacements(diff.variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
         }
+        // region TODO ternaryOpsExp
+//
+//        if (statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
+//            if (!statement1.getNullLiterals().isEmpty()) {
+//                Set<String> nullLiterals1 = new LinkedHashSet<String>();
+//                nullLiterals1.add("null");
+//                Set<String> ternaryExpressions2 = new LinkedHashSet<String>();
+//                for (TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
+//                    ternaryExpressions2.add(ternary.getExpression());
+//                }
+//                findReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+//            }
+//        } else if (!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
+//            if (!statement2.getNullLiterals().isEmpty()) {
+//                Set<String> nullLiterals2 = new LinkedHashSet<String>();
+//                nullLiterals2.add("null");
+//                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
+//                for (TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
+//                    ternaryExpressions1.add(ternary.getExpression());
+//                }
+//                findReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+//            }
+//        }
 
-        if(statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
-            if(!statement1.getNullLiterals().isEmpty()) {
-                Set<String> nullLiterals1 = new LinkedHashSet<String>();
-                nullLiterals1.add("null");
-                Set<String> ternaryExpressions2 = new LinkedHashSet<String>();
-                for(TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
-                    ternaryExpressions2.add(ternary.getExpression());
-                }
-                findReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-            }
-        }
-        else if(!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
-            if(!statement2.getNullLiterals().isEmpty()) {
-                Set<String> nullLiterals2 = new LinkedHashSet<String>();
-                nullLiterals2.add("null");
-                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
-                for(TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
-                    ternaryExpressions1.add(ternary.getExpression());
-                }
-                findReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-            }
-        }
-//        if(!statement1.getString().endsWith("=true;\n") && !statement1.getString().endsWith("=false;\n")) {
+//        if (!statement1.getString().endsWith("=true;\n") && !statement1.getString().endsWith("=false;\n")) {
 //            findReplacements(booleanLiterals1, variables2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_VARIABLE);
 //        }
-//        if(!statement2.getString().endsWith("=true;\n") && !statement2.getString().endsWith("=false;\n")) {
+//        if (!statement2.getString().endsWith("=true;\n") && !statement2.getString().endsWith("=false;\n")) {
 //            findReplacements(arguments1, booleanLiterals2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_ARGUMENT);
 //        }
-//
-//        String s1 = preprocessInput1(statement1, statement2);
-//        String s2 = preprocessInput2(statement1, statement2);
-//        replacementsToBeRemoved = new LinkedHashSet<Replacement>();
-//        replacementsToBeAdded = new LinkedHashSet<Replacement>();
-//        for(Replacement replacement : replacementInfo.getReplacements()) {
-//            s1 = ReplacementUtil.performReplacement(s1, s2, replacement.getBefore(), replacement.getAfter());
-//            //find variable replacements within method invocation replacements
-//            Set<Replacement> set = replacementsWithinMethodInvocations(replacement.getBefore(), replacement.getAfter(), variables1, methodInvocations2, methodInvocationMap2, Direction.VARIABLE_TO_INVOCATION);
-//            set.addAll(replacementsWithinMethodInvocations(replacement.getBefore(), replacement.getAfter(), methodInvocations1, variables2, methodInvocationMap1, Direction.INVOCATION_TO_VARIABLE));
-//            if(!set.isEmpty()) {
-//                replacementsToBeRemoved.add(replacement);
-//                replacementsToBeAdded.addAll(set);
-//            }
-//            Replacement r = variableReplacementWithinMethodInvocations(replacement.getBefore(), replacement.getAfter(), variables1, variables2);
-//            if(r != null) {
-//                replacementsToBeRemoved.add(replacement);
-//                replacementsToBeAdded.add(r);
-//            }
-//            Replacement r2 = variableReplacementWithinMethodInvocations(replacement.getBefore(), replacement.getAfter(), stringLiterals1, variables2);
-//            if(r2 != null) {
-//                replacementsToBeRemoved.add(replacement);
-//                replacementsToBeAdded.add(r2);
-//            }
-//        }
-//        replacementInfo.removeReplacements(replacementsToBeRemoved);
-//        replacementInfo.addReplacements(replacementsToBeAdded);
-//        boolean isEqualWithReplacement = s1.equals(s2) || replacementInfo.argumentizedString1.equals(replacementInfo.argumentizedString2) || differOnlyInCastExpressionOrPrefixOperator(s1, s2, replacementInfo) || oneIsVariableDeclarationTheOtherIsVariableAssignment(s1, s2, replacementInfo) ||
-//                oneIsVariableDeclarationTheOtherIsReturnStatement(s1, s2) || oneIsVariableDeclarationTheOtherIsReturnStatement(statement1.getString(), statement2.getString()) ||
-//                (commonConditional(s1, s2, replacementInfo) && containsValidOperatorReplacements(replacementInfo)) ||
-//                equalAfterArgumentMerge(s1, s2, replacementInfo) ||
-//                equalAfterNewArgumentAdditions(s1, s2, replacementInfo) ||
-//                (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo));
-//        List<AnonymousClassDeclarationObject> anonymousClassDeclarations1 = statement1.getAnonymousClassDeclarations();
+// endregion
+
+        filterReplacements(statement1, statement2
+                , replacementInfo, preProcessor
+                , diff, methodInvocationMap1, methodInvocationMap2
+                , functionInvocations1, functionInvocations2);
+
+        boolean isEqualWithReplacement = s1.equals(s2) || replacementInfo.argumentizedString1.equals(replacementInfo.argumentizedString2) || differOnlyInCastExpressionOrPrefixOperator(s1, s2, replacementInfo) || oneIsVariableDeclarationTheOtherIsVariableAssignment(s1, s2, replacementInfo) ||
+                oneIsVariableDeclarationTheOtherIsReturnStatement(s1, s2) || oneIsVariableDeclarationTheOtherIsReturnStatement(statement1.getString(), statement2.getString()) ||
+                (commonConditional(s1, s2, replacementInfo) && containsValidOperatorReplacements(replacementInfo)) ||
+                equalAfterArgumentMerge(s1, s2, replacementInfo) ||
+                equalAfterNewArgumentAdditions(s1, s2, replacementInfo) ||
+                (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo));
+
+
+        if (isEqualWithReplacement) {
+            List<Replacement> typeReplacements = replacementInfo.getReplacements(ReplacementType.TYPE);
+            if (typeReplacements.size() > 0 && invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
+                for (Replacement typeReplacement : typeReplacements) {
+                    if (invocationCoveringTheEntireStatement1.getMethodName().contains(typeReplacement.getBefore()) && invocationCoveringTheEntireStatement2.getMethodName().contains(typeReplacement.getAfter())) {
+                        if (invocationCoveringTheEntireStatement1.identicalExpression(invocationCoveringTheEntireStatement2) && invocationCoveringTheEntireStatement1.equalArguments(invocationCoveringTheEntireStatement2)) {
+                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
+                                    invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
+                            replacementInfo.addReplacement(replacement);
+                        } else {
+                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+                                    invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION);
+                            replacementInfo.addReplacement(replacement);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo) &&
+                    !statement1.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT) &&
+                    !statement2.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+                return null;
+            }
+            if (variableAssignmentWithEverythingReplaced(statement1, statement2, replacementInfo)) {
+                return null;
+            }
+            if (classInstanceCreationWithEverythingReplaced(statement1, statement2, replacementInfo, parameterToArgumentMap)) {
+                return null;
+            }
+
+            // region TODO annynomous class
+            //        List<AnonymousClassDeclarationObject> anonymousClassDeclarations1 = statement1.getAnonymousClassDeclarations();
 //        List<AnonymousClassDeclarationObject> anonymousClassDeclarations2 = statement2.getAnonymousClassDeclarations();
-//        if(isEqualWithReplacement) {
-//            List<Replacement> typeReplacements = replacementInfo.getReplacements(ReplacementType.TYPE);
-//            if(typeReplacements.size() > 0 && invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
-//                for(Replacement typeReplacement : typeReplacements) {
-//                    if(invocationCoveringTheEntireStatement1.getMethodName().contains(typeReplacement.getBefore()) && invocationCoveringTheEntireStatement2.getMethodName().contains(typeReplacement.getAfter())) {
-//                        if(invocationCoveringTheEntireStatement1.identicalExpression(invocationCoveringTheEntireStatement2) && invocationCoveringTheEntireStatement1.equalArguments(invocationCoveringTheEntireStatement2)) {
-//                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
-//                                    invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
-//                            replacementInfo.addReplacement(replacement);
-//                        }
-//                        else {
-//                            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
-//                                    invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION);
-//                            replacementInfo.addReplacement(replacement);
-//                        }
-//                        break;
-//                    }
-//                }
-//            }
-//            if(variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo) &&
-//                    !statement1.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT) &&
-//                    !statement2.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
-//                return null;
-//            }
-//            if(variableAssignmentWithEverythingReplaced(statement1, statement2, replacementInfo)) {
-//                return null;
-//            }
-//            if(classInstanceCreationWithEverythingReplaced(statement1, statement2, replacementInfo, parameterToArgumentMap)) {
-//                return null;
-//            }
+
 //            if(!anonymousClassDeclarations1.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
 //                Set<Replacement> replacementsInsideAnonymous = new LinkedHashSet<Replacement>();
 //                for(Replacement replacement : replacementInfo.getReplacements()) {
@@ -212,16 +204,20 @@ public class ReplacementFinder {
 //                    equalAfterNewArgumentAdditions(replacement.getBefore(), replacement.getAfter(), replacementInfo);
 //                }
 //            }
-//            return replacementInfo.getReplacements();
-//        }
-//        if(!anonymousClassDeclarations1.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
-//            for(int i=0; i<anonymousClassDeclarations1.size(); i++) {
-//                for(int j=0; j<anonymousClassDeclarations2.size(); j++) {
+            // endregion
+
+            return replacementInfo.getReplacements();
+        }
+
+        // region annonymous
+//        if (!anonymousClassDeclarations1.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
+//            for (int i = 0; i < anonymousClassDeclarations1.size(); i++) {
+//                for (int j = 0; j < anonymousClassDeclarations2.size(); j++) {
 //                    AnonymousClassDeclarationObject anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
 //                    AnonymousClassDeclarationObject anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
 //                    String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, operation1);
 //                    String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, operation2);
-//                    if(statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
+//                    if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
 //                            identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacementInfo.getReplacements()) ||
 //                            (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
 //                                    (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()) ||
@@ -229,15 +225,15 @@ public class ReplacementFinder {
 //                        UMLAnonymousClass anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, operation1);
 //                        UMLAnonymousClass anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, operation2);
 //                        int matchedOperations = 0;
-//                        for(UMLOperation operation1 : anonymousClass1.getOperations()) {
-//                            for(UMLOperation operation2 : anonymousClass2.getOperations()) {
-//                                if(operation1.equals(operation2) || operation1.equalSignature(operation2) || operation1.equalSignatureWithIdenticalNameIgnoringChangedTypes(operation2)) {
+//                        for (UMLOperation operation1 : anonymousClass1.getOperations()) {
+//                            for (UMLOperation operation2 : anonymousClass2.getOperations()) {
+//                                if (operation1.equals(operation2) || operation1.equalSignature(operation2) || operation1.equalSignatureWithIdenticalNameIgnoringChangedTypes(operation2)) {
 //                                    UMLOperationBodyMapper mapper = new UMLOperationBodyMapper(operation1, operation2, classDiff);
 //                                    int mappings = mapper.mappingsWithoutBlocks();
-//                                    if(mappings > 0) {
+//                                    if (mappings > 0) {
 //                                        int nonMappedElementsT1 = mapper.nonMappedElementsT1();
 //                                        int nonMappedElementsT2 = mapper.nonMappedElementsT2();
-//                                        if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
+//                                        if (mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
 //                                            this.mappings.addAll(mapper.mappings);
 //                                            this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
 //                                            this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
@@ -252,7 +248,7 @@ public class ReplacementFinder {
 //                                }
 //                            }
 //                        }
-//                        if(matchedOperations > 0) {
+//                        if (matchedOperations > 0) {
 //                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
 //                            replacementInfo.addReplacement(replacement);
 //                            return replacementInfo.getReplacements();
@@ -261,6 +257,9 @@ public class ReplacementFinder {
 //                }
 //            }
 //        }
+        // endregion
+
+        // region lambda
 //        List<LambdaExpressionObject> lambdas1 = statement1.getLambdas();
 //        List<LambdaExpressionObject> lambdas2 = statement2.getLambdas();
 //        List<UMLOperationBodyMapper> lambdaMappers = new ArrayList<UMLOperationBodyMapper>();
@@ -287,6 +286,8 @@ public class ReplacementFinder {
 //                }
 //            }
 //        }
+        // endregion
+
 //        OperationInvocation assignmentInvocationCoveringTheEntireStatement1 = invocationCoveringTheEntireStatement1 == null ? statement1.assignmentInvocationCoveringEntireStatement() : invocationCoveringTheEntireStatement1;
 //        //method invocation is identical
 //        if(assignmentInvocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
@@ -779,6 +780,50 @@ public class ReplacementFinder {
 //            }
 //        }
         return null;
+    }
+
+    private void filterReplacements(SingleStatement statement1, SingleStatement statement2
+            , ReplacementInfo replacementInfo, PreProcessor preProcessor
+            , StatementDiff diff, Map<String, List<? extends Invocation>> methodInvocationMap1
+            , Map<String, List<? extends Invocation>> methodInvocationMap2
+            , Set<String> functionInvocations1, Set<String> functionInvocations2) {
+        String s1 = preProcessor.getArgumentizedString(statement1);
+        String s2 = preProcessor.getArgumentizedString(statement2);
+
+        LinkedHashSet<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
+        LinkedHashSet<Replacement> replacementsToBeAdded = new LinkedHashSet<>();
+
+        for (Replacement replacement : replacementInfo.getAppliedReplacements()) {
+            s1 = ReplacementUtil.performReplacement(s1, s2, replacement.getBefore(), replacement.getAfter());
+
+            //find variable replacements within method invocation replacements
+            Set<Replacement> set = replacementsWithinMethodInvocations(replacement.getBefore(), replacement.getAfter(),
+                    diff.variables1, functionInvocations2,
+                    methodInvocationMap2, Direction.VARIABLE_TO_INVOCATION);
+
+            set.addAll(replacementsWithinMethodInvocations(replacement.getBefore(), replacement.getAfter()
+                    , functionInvocations1, diff.variables2
+                    , methodInvocationMap1, Direction.INVOCATION_TO_VARIABLE));
+
+            if (!set.isEmpty()) {
+                replacementsToBeRemoved.add(replacement);
+                replacementsToBeAdded.addAll(set);
+            }
+            Replacement r = variableReplacementWithinMethodInvocations(replacement.getBefore(), replacement.getAfter()
+                    , diff.variables1, diff.variables2);
+            if (r != null) {
+                replacementsToBeRemoved.add(replacement);
+                replacementsToBeAdded.add(r);
+            }
+            Replacement r2 = variableReplacementWithinMethodInvocations(replacement.getBefore(), replacement.getAfter()
+                    , diff.stringLiterals1, diff.variables2);
+            if (r2 != null) {
+                replacementsToBeRemoved.add(replacement);
+                replacementsToBeAdded.add(r2);
+            }
+        }
+        replacementInfo.removeReplacements(replacementsToBeRemoved);
+        replacementInfo.addReplacements(replacementsToBeAdded);
     }
 
     private void replaceArrayAccess(ReplacementInfo replacementInfo, StatementDiff diff, Set<String> functionInvocations1, Set<String> functionInvocations2) {
@@ -1647,4 +1692,66 @@ public class ReplacementFinder {
         return false;
     }
 
+    private Set<Replacement> replacementsWithinMethodInvocations(String s1, String s2
+            , Set<String> set1, Set<String> set2
+            , Map<String, List<? extends Invocation>> methodInvocationMap
+            , Direction direction) {
+        Set<Replacement> replacements = new LinkedHashSet<>();
+        for (String element1 : set1) {
+            if (s1.contains(element1) && !s1.equals(element1) && !s1.equals("this." + element1) && !s1.equals("_" + element1)) {
+                int startIndex1 = s1.indexOf(element1);
+                String substringBeforeIndex1 = s1.substring(0, startIndex1);
+                String substringAfterIndex1 = s1.substring(startIndex1 + element1.length(), s1.length());
+                for (String element2 : set2) {
+                    if (element2.endsWith(substringAfterIndex1) && substringAfterIndex1.length() > 1) {
+                        element2 = element2.substring(0, element2.indexOf(substringAfterIndex1));
+                    }
+                    if (s2.contains(element2) && !s2.equals(element2)) {
+                        int startIndex2 = s2.indexOf(element2);
+                        String substringBeforeIndex2 = s2.substring(0, startIndex2);
+                        String substringAfterIndex2 = s2.substring(startIndex2 + element2.length(), s2.length());
+                        List<? extends Invocation> methodInvocationList = null;
+                        if (direction.equals(Direction.VARIABLE_TO_INVOCATION))
+                            methodInvocationList = methodInvocationMap.get(element2);
+                        else if (direction.equals(Direction.INVOCATION_TO_VARIABLE))
+                            methodInvocationList = methodInvocationMap.get(element1);
+                        if (substringBeforeIndex1.equals(substringBeforeIndex2) && !substringAfterIndex1.isEmpty() && !substringAfterIndex2.isEmpty() && methodInvocationList != null) {
+                            Replacement r = new VariableReplacementWithMethodInvocation(element1, element2, (OperationInvocation) methodInvocationList.get(0), direction);
+                            replacements.add(r);
+                        } else if (substringAfterIndex1.equals(substringAfterIndex2) && !substringBeforeIndex1.isEmpty() && !substringBeforeIndex2.isEmpty() && methodInvocationList != null) {
+                            Replacement r = new VariableReplacementWithMethodInvocation(element1, element2, (OperationInvocation) methodInvocationList.get(0), direction);
+                            replacements.add(r);
+                        }
+                    }
+                }
+            }
+        }
+        return replacements;
+    }
+
+    private Replacement variableReplacementWithinMethodInvocations(String s1, String s2
+            , Set<String> variables1, Set<String> variables2) {
+        for (String variable1 : variables1) {
+            if (s1.contains(variable1) && !s1.equals(variable1) && !s1.equals("this." + variable1) && !s1.equals("_" + variable1)) {
+                int startIndex1 = s1.indexOf(variable1);
+                String substringBeforeIndex1 = s1.substring(0, startIndex1);
+                String substringAfterIndex1 = s1.substring(startIndex1 + variable1.length(), s1.length());
+
+                for (String variable2 : variables2) {
+                    if (variable2.endsWith(substringAfterIndex1) && substringAfterIndex1.length() > 1) {
+                        variable2 = variable2.substring(0, variable2.indexOf(substringAfterIndex1));
+                    }
+                    if (s2.contains(variable2) && !s2.equals(variable2)) {
+                        int startIndex2 = s2.indexOf(variable2);
+                        String substringBeforeIndex2 = s2.substring(0, startIndex2);
+                        String substringAfterIndex2 = s2.substring(startIndex2 + variable2.length(), s2.length());
+                        if (substringBeforeIndex1.equals(substringBeforeIndex2) && substringAfterIndex1.equals(substringAfterIndex2)) {
+                            return new Replacement(variable1, variable2, ReplacementType.VARIABLE_NAME);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

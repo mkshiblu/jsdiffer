@@ -102,7 +102,11 @@ public class FunctionBodyMapper {
                 SingleStatement leaf2 = iterator2.next();
 
                 ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
-                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1, leaf2, parameterToArgumentMap, replacementInfo);
+                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
+                        , leaf2
+                        , parameterToArgumentMap
+                        , replacementInfo,
+                        preProcessor);
                 if (replacements != null) {
                     LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
 //                    mapping.addReplacements(replacements);
