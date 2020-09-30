@@ -613,32 +613,11 @@ public class ReplacementFinder {
 //                return replacementInfo.getReplacements();
 //            }
 //        }
-//        //check if array creation is replaced with data structure creation
-//        if(creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
-//                variableDeclarations1.size() == 1 && variableDeclarations2.size() == 1) {
-//            VariableDeclaration v1 = variableDeclarations1.get(0);
-//            VariableDeclaration v2 = variableDeclarations2.get(0);
-//            String initializer1 = v1.getInitializer() != null ? v1.getInitializer().getString() : null;
-//            String initializer2 = v2.getInitializer() != null ? v2.getInitializer().getString() : null;
-//            if(v1.getType().getArrayDimension() == 1 && v2.getType().containsTypeArgument(v1.getType().getClassType()) &&
-//                    creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray() &&
-//                    initializer1 != null && initializer2 != null &&
-//                    initializer1.substring(initializer1.indexOf("[")+1, initializer1.lastIndexOf("]")).equals(initializer2.substring(initializer2.indexOf("(")+1, initializer2.lastIndexOf(")")))) {
-//                r = new ObjectCreationReplacement(initializer1, initializer2,
-//                        creationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2, ReplacementType.ARRAY_CREATION_REPLACED_WITH_DATA_STRUCTURE_CREATION);
-//                replacementInfo.addReplacement(r);
-//                return replacementInfo.getReplacements();
-//            }
-//            if(v2.getType().getArrayDimension() == 1 && v1.getType().containsTypeArgument(v2.getType().getClassType()) &&
-//                    !creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray() &&
-//                    initializer1 != null && initializer2 != null &&
-//                    initializer1.substring(initializer1.indexOf("(")+1, initializer1.lastIndexOf(")")).equals(initializer2.substring(initializer2.indexOf("[")+1, initializer2.lastIndexOf("]")))) {
-//                r = new ObjectCreationReplacement(initializer1, initializer2,
-//                        creationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2, ReplacementType.ARRAY_CREATION_REPLACED_WITH_DATA_STRUCTURE_CREATION);
-//                replacementInfo.addReplacement(r);
-//                return replacementInfo.getReplacements();
-//            }
-//        }
+
+        //check if array creation is replaced with data structure creation
+        isArrayCreationReplacedWithObjectCreation();
+
+
 //        if(!creations1.isEmpty() && creationCoveringTheEntireStatement2 != null) {
 //            for(String creation1 : creations1) {
 //                for(AbstractCall objectCreation1 : creationMap1.get(creation1)) {
@@ -788,6 +767,47 @@ public class ReplacementFinder {
 //                return replacementInfo.getReplacements();
 //            }
 //        }
+    }
+
+    private void isArrayCreationReplacedWithObjectCreation(ObjectCreation creationCoveringTheEntireStatement1,
+                                                           ObjectCreation creationCoveringTheEntireStatement2,
+                                                           List<VariableDeclaration> variableDeclarations1,
+                                                           List<VariableDeclaration> variableDeclarations2) {
+        //check if array creation is replaced with data structure creation
+        if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
+                variableDeclarations1.size() == 1 && variableDeclarations2.size() == 1) {
+
+            VariableDeclaration v1 = variableDeclarations1.get(0);
+            VariableDeclaration v2 = variableDeclarations2.get(0);
+
+            String initializer1 = v1.getInitializer() != null ? v1.getInitializer().getText() : null;
+            String initializer2 = v2.getInitializer() != null ? v2.getInitializer().getText() : null;
+
+            Replacement r;
+//
+//            if (v1.getType().equals(COde)v1.getType().getArrayDimension() == 1
+//                    && v2.getType().containsTypeArgument(v1.getType().getClassType())
+//                    && creationCoveringTheEntireStatement1.isArray()
+//                    && !creationCoveringTheEntireStatement2.isArray()
+//                    && initializer1 != null && initializer2 != null
+//                    && initializer1.substring(initializer1.indexOf("[") + 1, initializer1.lastIndexOf("]"))
+//                    .equals(initializer2.substring(initializer2.indexOf("(") + 1, initializer2.lastIndexOf(")")))) {
+//                r = new ObjectCreationReplacement(initializer1, initializer2,
+//                        creationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2, ReplacementType.ARRAY_CREATION_REPLACED_WITH_DATA_STRUCTURE_CREATION);
+//                replacementInfo.addReplacement(r);
+//                return replacementInfo.getReplacements();
+//            }
+//
+//            if (v2.getType().getArrayDimension() == 1 && v1.getType().containsTypeArgument(v2.getType().getClassType()) &&
+//                    !creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray() &&
+//                    initializer1 != null && initializer2 != null &&
+//                    initializer1.substring(initializer1.indexOf("(") + 1, initializer1.lastIndexOf(")")).equals(initializer2.substring(initializer2.indexOf("[") + 1, initializer2.lastIndexOf("]")))) {
+//                r = new ObjectCreationReplacement(initializer1, initializer2,
+//                        creationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2, ReplacementType.ARRAY_CREATION_REPLACED_WITH_DATA_STRUCTURE_CREATION);
+//                replacementInfo.addReplacement(r);
+//                return replacementInfo.getReplacements();
+//            }
+        }
     }
 
     private String[] filterReplacements(SingleStatement statement1, SingleStatement statement2
@@ -2050,7 +2070,8 @@ public class ReplacementFinder {
     }
 
     private boolean variableDeclarationsWithEverythingReplaced(List<VariableDeclaration> variableDeclarations1,
-                                                               List<VariableDeclaration> variableDeclarations2, ReplacementInfo replacementInfo) {
+                                                               List<VariableDeclaration> variableDeclarations2,
+                                                               ReplacementInfo replacementInfo) {
         if (variableDeclarations1.size() == 1 && variableDeclarations2.size() == 1) {
             boolean typeReplacement = false,
                     variableRename = false,
