@@ -615,7 +615,7 @@ public class ReplacementFinder {
 //        }
 
         //check if array creation is replaced with data structure creation
-        isArrayCreationReplacedWithObjectCreation();
+        isArrayCreationReplacedWithObjectCreation(statement1, statement2);
 
 
 //        if(!creations1.isEmpty() && creationCoveringTheEntireStatement2 != null) {
@@ -769,10 +769,12 @@ public class ReplacementFinder {
 //        }
     }
 
-    private void isArrayCreationReplacedWithObjectCreation(ObjectCreation creationCoveringTheEntireStatement1,
-                                                           ObjectCreation creationCoveringTheEntireStatement2,
-                                                           List<VariableDeclaration> variableDeclarations1,
-                                                           List<VariableDeclaration> variableDeclarations2) {
+    private void isArrayCreationReplacedWithObjectCreation(SingleStatement statement1, SingleStatement statement2) {
+        final ObjectCreation creationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement1);
+        final ObjectCreation creationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement2);
+        final List<VariableDeclaration> variableDeclarations1 = statement1.getVariableDeclarations();
+        final List<VariableDeclaration> variableDeclarations2 = statement2.getVariableDeclarations();
+
         //check if array creation is replaced with data structure creation
         if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
                 variableDeclarations1.size() == 1 && variableDeclarations2.size() == 1) {
