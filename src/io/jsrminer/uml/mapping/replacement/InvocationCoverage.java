@@ -3,10 +3,7 @@ package io.jsrminer.uml.mapping.replacement;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Caches invocation coverages as singleton
@@ -54,6 +51,19 @@ public enum InvocationCoverage {
 
                 if (coveregeType != null) {
                     this.invocationCoverageTypeMap.put(invocation, coveregeType);
+                    return invocation;
+                }
+            }
+        }
+        return null;
+    }
+
+    public OperationInvocation assignmentInvocationCoveringEntireStatement(SingleStatement statement) {
+        Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
+        for (String methodInvocation : methodInvocationMap.keySet()) {
+            List<OperationInvocation> invocations = methodInvocationMap.get(methodInvocation);
+            for (OperationInvocation invocation : invocations) {
+                if (expressionIsTheRightHandSideOfAssignment(methodInvocation, statement)) {
                     return invocation;
                 }
             }
@@ -122,6 +132,20 @@ public enum InvocationCoverage {
         return false;
     }
 
+    private boolean expressionIsTheRightHandSideOfAssignment(String expression, SingleStatement statement) {
+        String statementText = statement.getText();
+        if (statementText.contains("=")) {
+            Set<String> variables = statement.getVariables();
+            if (variables.size() > 0) {
+                String s = variables.stream().findFirst().get() + " = " + expression + ";\n";
+                if (statementText.equals(s)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void clearCache() {
         invocationCoverageTypeMap.clear();
         invocationCoveringEntireFragmentMap.clear();
@@ -132,4 +156,6 @@ public enum InvocationCoverage {
             clearCache();
         }
     }
+
+
 }
