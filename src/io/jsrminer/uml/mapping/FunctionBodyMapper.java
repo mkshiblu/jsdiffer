@@ -40,22 +40,36 @@ public class FunctionBodyMapper {
             Set<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
             Set<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
             replaceParametersWithArguments(operationDiff, leaves1, leaves2);
-            // Reset leaves
-            matchLeaves(leaves1, leaves2);
+
+            if (leaves1.size() > 0 && leaves2.size() > 0)
+                matchLeaves(leaves1, leaves2);
         }
     }
 
     void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
+        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
+        Set<SingleStatement> unmatchedLeavesB = new LinkedHashSet<>();
+
         if (leaves1.size() <= leaves2.size()) {
-            // Exact string+depth matching - leaf nodes
-            matchLeavesWithIdenticalText(leaves1, leaves2, false);
-
-            // Exact string any depth
-            matchLeavesWithIdenticalText(leaves1, leaves2, true);
-
-            //
-            matchLeavesWithVariableRenames(leaves1, leaves2);
+            unmatchedLeavesA.addAll(leaves1);
+            unmatchedLeavesB.addAll(leaves2);
+        } else {
+            unmatchedLeavesA.addAll(leaves2);
+            unmatchedLeavesB.addAll(leaves1);
         }
+
+        // Exact string+depth matching - leaf nodes
+        matchLeavesWithIdenticalText(unmatchedLeavesA, unmatchedLeavesB, false);
+
+        if (unmatchedLeavesA.size() == 0 || unmatchedLeavesB.size() == 0)
+            return;
+
+        // Exact string any depth
+        matchLeavesWithIdenticalText(unmatchedLeavesA, unmatchedLeavesB, true);
+
+        if (unmatchedLeavesA.size() == 0 || unmatchedLeavesB.size() == 0)
+            return;
+        matchLeavesWithVariableRenames(unmatchedLeavesA, unmatchedLeavesB);
     }
 
     void matchLeavesWithIdenticalText(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2, boolean ignoreNestingDepth) {

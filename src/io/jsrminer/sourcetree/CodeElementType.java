@@ -16,7 +16,9 @@ public enum CodeElementType {
     RETURN_STATEMENT("ReturnStatement"),
     TRY_STATEMENT("TryStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
-    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"); // TODO revisit
+    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"), // TODO revisit
+    FOR_STATEMENT("ForStatement");
+
     public final String titleCase;
 
     private CodeElementType(String titleCase) {
@@ -34,4 +36,4 @@ public enum CodeElementType {
     public static CodeElementType getFromTitleCase(String typeInTitleCase) {
         return typeTitleCaseMap.get(typeInTitleCase);
     }
-}
+    }
