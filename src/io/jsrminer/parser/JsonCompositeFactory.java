@@ -17,6 +17,10 @@ public class JsonCompositeFactory {
 
         //Loc
         invocation.setSourceLocation(createSourceLocation(invocationAny.get("loc")));
+
+        // Arguments
+        List<Any> argumentAnys = invocationAny.get("arguments").asList();
+        argumentAnys.forEach(argumentAny -> invocation.getArguments().add(argumentAny.toString()));
     }
 
     public static ObjectCreation createObjectCreation(Any any) {
@@ -27,6 +31,8 @@ public class JsonCompositeFactory {
         if (any.keys().contains("expressionText")) {
             creation.setExpression(any.toString("expressionText"));
         }
+
+//        any.keys().contains("isArray")
         return creation;
     }
 

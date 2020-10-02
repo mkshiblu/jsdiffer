@@ -77,11 +77,9 @@ public class SourceFileModelDiffer {
             if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
                     && !sourceDiff.isRemovedOperation(function1.name)) {
 // TODO
+
             }
         }
-        // TODO for now mapping
-        FunctionBodyMapper mapper = new FunctionBodyMapper(functionMap1.get("x"), functionMap2.get("x2"));
-        mapper.map();
     }
 
     // Adds the added and removed ops in the model diff

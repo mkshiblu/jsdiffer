@@ -14,7 +14,8 @@ public enum CodeElementType {
     SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
     OBJECT_CREATION("NewExpression"),
     RETURN_STATEMENT("ReturnStatement"),
-    TRY_STATEMENT("TRY_STATEMENT"),
+    TRY_STATEMENT("TryStatement"),
+    ARRAY_EXPRESSION("ArrayExpression"),
     ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"); // TODO revisit
     public final String titleCase;
 

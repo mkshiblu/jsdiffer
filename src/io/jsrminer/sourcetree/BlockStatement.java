@@ -76,16 +76,16 @@ public class BlockStatement extends Statement {
             // Parse text
             currentBlock.text = any.toString("text");
 
-//            // Check if it's try statement and contains any catchBlock
-//            if (any.keys().contains("catchClause")) {
-//                BlockStatement catchClause = new BlockStatement();
-//                blocksToBeProcessed.add(new SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
-//
-//                // Add the catchblacue as seprate composite to the parent of the try block
-//                catchClause.positionIndexInParent = currentBlock.positionIndexInParent++;
-//                catchClause.depth = currentBlock.depth;
-//                ((BlockStatement) currentBlock.parent).statements.add(catchClause);
-//            }
+            // Check if it's try statement and contains any catchBlock
+            if (any.keys().contains("catchClause")) {
+                BlockStatement catchClause = new BlockStatement();
+                blocksToBeProcessed.add(new SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
+
+                // Add the catchblacue as seprate composite to the parent of the try block
+                catchClause.positionIndexInParent = currentBlock.positionIndexInParent++;
+                catchClause.depth = currentBlock.depth;
+                ((BlockStatement) currentBlock.parent).statements.add(catchClause);
+            }
 
             // Parse childs of this block
             for (Any childAny : statements) {

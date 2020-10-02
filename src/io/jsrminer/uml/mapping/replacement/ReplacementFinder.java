@@ -24,6 +24,7 @@ public class ReplacementFinder {
         final StatementDiff diff = new StatementDiff(statement1, statement2);
 
         // Intersect variables
+
         Set<String> unmatchedCommonVariables = findCommonVariablesToBeAddedAsUnmatched(statement1, statement2, replacementInfo);
         diff.variables1.addAll(unmatchedCommonVariables);
         diff.variables2.addAll(unmatchedCommonVariables);
@@ -1700,7 +1701,7 @@ public class ReplacementFinder {
         } else {
             newCall.setExpression(thisCall.getExpression());
         }
-        newCall.setArguments(new ArrayList<>());
+
         for (String argument : thisCall.getArguments()) {
             newCall.getArguments().add(
                     ReplacementUtil.performReplacement(argument, oldExpression, newExpression));

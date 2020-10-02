@@ -1,5 +1,6 @@
 package io.jsrminer.sourcetree;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Invocation extends CodeFragment {
@@ -8,7 +9,7 @@ public abstract class Invocation extends CodeFragment {
     }
 
     protected String expression;
-    protected List<String> arguments;
+    protected List<String> arguments = new ArrayList<>();
     private String functionName;
 
     public String getExpression() {
@@ -57,10 +58,6 @@ public abstract class Invocation extends CodeFragment {
 
     public List<String> getArguments() {
         return arguments;
-    }
-
-    public void setArguments(List<String> arguments) {
-        this.arguments = arguments;
     }
 
     public String actualString() {
