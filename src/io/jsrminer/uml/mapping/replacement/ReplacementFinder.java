@@ -7,6 +7,7 @@ import io.jsrminer.uml.mapping.PreProcessor;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
@@ -55,12 +56,8 @@ public class ReplacementFinder {
         Set<String> functionInvocations1 = unmatchedFunctionsMap.get(0);
         Set<String> functionInvocations2 = unmatchedFunctionsMap.get(1);
 
-//////        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
-////        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
-////        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
-////        //perform type replacements
-////        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
-
+        // Similar to java type replacements, do kind replacmentss (i.e. let, var)
+        intersectAndReplaceVariableDeclarationsKind(statement1, statement2, replacementInfo);
         intersectAndReplaceInfixOperators(statement1, statement2, replacementInfo);
 
         // Find all variables and invocations
@@ -987,6 +984,62 @@ public class ReplacementFinder {
                 }
             }
         }
+    }
+
+    private void intersectAndReplaceVariableDeclarationsKind(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+
+//////        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
+////        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
+////        removeCommonTypes(types1, types2, statement1.getTypes(), statement2.getTypes());
+////        //perform type replacements
+////        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
+        // Intersect
+        Map<SingleStatement, Set<String>> unmatchedKinds = intersectVariableDeclarationsKind(statement1, statement2);
+        Set<String> kinds1 = unmatchedKinds.get(statement1);
+        Set<String> kinds2 = unmatchedKinds.get(statement2);
+
+        //perform kind replacements
+        findAndPerformBestReplacements(kinds1, kinds2, replacementInfo, ReplacementType.KIND);
+    }
+
+    private Map<SingleStatement, Set<String>> intersectVariableDeclarationsKind(SingleStatement statement1, SingleStatement statement2) {
+        List<String> kindList1 = statement1.getVariableDeclarations()
+                .stream()
+                .map(vd -> vd.getKind().keywordName)
+                .collect(Collectors.toList());
+
+        List<String> kindsList2 = statement2.getVariableDeclarations()
+                .stream()
+                .map(vd -> vd.getKind().keywordName)
+                .collect(Collectors.toList());
+
+
+        Set<String> kinds1 = new LinkedHashSet<>(kindList1);
+        Set<String> kinds2 = new LinkedHashSet<>(kindsList2);
+
+        // If number of kinds are same, then keep the unequal kinds of same position
+        // as unmatched and therefore available for replacement
+        if (kindList1.size() == kindsList2.size()) {
+            Set<String> unequalKindsInSamePositionIndex = new LinkedHashSet<>();
+            for (int i = 0; i < kindList1.size(); i++) {
+                String kind1 = kindList1.get(i);
+                String kind2 = kindsList2.get(i);
+                if (!kind1.equals(kind2)) {
+                    unequalKindsInSamePositionIndex.add(kind1);
+                    unequalKindsInSamePositionIndex.add(kind2);
+                }
+            }
+
+            Set<String> intersection = new LinkedHashSet<>(kinds1);
+            intersection.retainAll(kinds2);
+            intersection.removeAll(unequalKindsInSamePositionIndex);
+            kinds1.removeAll(intersection);
+            kinds2.removeAll(intersection);
+        } else {
+            ReplacementUtil.removeCommonElements(kinds1, kinds2);
+        }
+
+        return Map.of(statement1, kinds1, statement2, kinds2);
     }
 
     /**

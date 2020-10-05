@@ -36,4 +36,4 @@ public enum CodeElementType {
     public static CodeElementType getFromTitleCase(String typeInTitleCase) {
         return typeTitleCaseMap.get(typeInTitleCase);
     }
-    }
+}
