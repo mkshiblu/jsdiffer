@@ -47,29 +47,30 @@ public class FunctionBodyMapper {
     }
 
     void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
-        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
-        Set<SingleStatement> unmatchedLeavesB = new LinkedHashSet<>();
-
-        if (leaves1.size() <= leaves2.size()) {
-            unmatchedLeavesA.addAll(leaves1);
-            unmatchedLeavesB.addAll(leaves2);
-        } else {
-            unmatchedLeavesA.addAll(leaves2);
-            unmatchedLeavesB.addAll(leaves1);
-        }
+//        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
+//        Set<SingleStatement> unmatchedLeavesB = new LinkedHashSet<>();
+//
+//        if (leaves1.size() <= leaves2.size()) {
+//            unmatchedLeavesA.addAll(leaves1);
+//            unmatchedLeavesB.addAll(leaves2);
+//        } else {
+//            //unmatchedLeavesA.addAll(leaves2);
+//            //unmatchedLeavesB.addAll(leaves1);
+//        }
 
         // Exact string+depth matching - leaf nodes
-        matchLeavesWithIdenticalText(unmatchedLeavesA, unmatchedLeavesB, false);
+        matchLeavesWithIdenticalText(leaves1, leaves2, false);
 
-        if (unmatchedLeavesA.size() == 0 || unmatchedLeavesB.size() == 0)
+        if (leaves1.size() == 0 || leaves2.size() == 0)
             return;
 
         // Exact string any depth
-        matchLeavesWithIdenticalText(unmatchedLeavesA, unmatchedLeavesB, true);
+        matchLeavesWithIdenticalText(leaves1, leaves2, true);
 
-        if (unmatchedLeavesA.size() == 0 || unmatchedLeavesB.size() == 0)
+        if (leaves1.size() == 0 || leaves2.size() == 0)
             return;
-        matchLeavesWithVariableRenames(unmatchedLeavesA, unmatchedLeavesB);
+
+        matchLeavesWithVariableRenames(leaves1, leaves2);
     }
 
     void matchLeavesWithIdenticalText(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2, boolean ignoreNestingDepth) {
@@ -108,22 +109,85 @@ public class FunctionBodyMapper {
     private void matchLeavesWithVariableRenames(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         ReplacementFinder replacementFinder = new ReplacementFinder();
-        for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
-            SingleStatement leaf1 = iterator1.next();
-            TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
 
+        // TODO refactor duplicateed code, extract inner for loop to seprate method
+        if (leaves1.size() <= leaves2.size()) {
+            for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+                SingleStatement leaf1 = iterator1.next();
+                TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+
+                for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                    SingleStatement leaf2 = iterator2.next();
+
+                    LeafStatementMapping mapping = mapLeavesWithReplacement(leaves1, leaves2, parameterToArgumentMap, replacementFinder, leaf1, leaf2);
+                    if (mapping != null) {
+                        mappingSet.add(mapping);
+                    }
+                }
+                if (!mappingSet.isEmpty()) {
+                    LeafStatementMapping minStatementMapping = mappingSet.first();
+                    this.mappings.add(minStatementMapping);
+                    leaves2.remove(minStatementMapping.statement2);
+                    iterator1.remove();
+                }
+            }
+        } else {
             for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                 SingleStatement leaf2 = iterator2.next();
+                TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
 
-                ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
-                Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
-                        , leaf2
-                        , parameterToArgumentMap
-                        , replacementInfo,
-                        preProcessor);
-                if (replacements != null) {
-                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
-                    mapping.addReplacements(replacements);
+                for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+                    SingleStatement leaf1 = iterator1.next();
+                    LeafStatementMapping mapping = mapLeavesWithReplacement(leaves1, leaves2, parameterToArgumentMap, replacementFinder, leaf1, leaf2);
+                    if (mapping != null) {
+                        mappingSet.add(mapping);
+                    }
+                }
+
+                // Take the best mapping
+                if (!mappingSet.isEmpty()) {
+//                    AbstractMap.SimpleEntry<CompositeStatementObject, CompositeStatementObject> switchParentEntry = null;
+//                    if(variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
+//                        //postpone mapping
+//                        postponedMappingSets.add(mappingSet);
+//                    }
+//                    else if((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
+//                        LeafMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
+//                        mappings.add(bestMapping);
+//                        leaves1.remove(bestMapping.getFragment1());
+//                        leafIterator2.remove();
+//                    }
+//                    else {
+//                        LeafMapping minStatementMapping = mappingSet.first();
+//                        mappings.add(minStatementMapping);
+//                        leaves1.remove(minStatementMapping.getFragment1());
+//                        leafIterator2.remove();
+//                    }
+                    LeafStatementMapping minStatementMapping = mappingSet.first();
+                    this.mappings.add(minStatementMapping);
+
+                    // Remove the matched statmetns
+                    leaves1.remove(minStatementMapping.statement1);
+                    iterator2.remove();
+                }
+            }
+        }
+    }
+
+    private LeafStatementMapping mapLeavesWithReplacement(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2
+            , Map<String, String> parameterToArgumentMap
+            , ReplacementFinder replacementFinder
+            , SingleStatement leaf1
+            , SingleStatement leaf2) {
+        ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
+        Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
+                , leaf2
+                , parameterToArgumentMap
+                , replacementInfo,
+                preProcessor);
+        if (replacements != null) {
+            LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+            mapping.addReplacements(replacements);
 //                    for (AbstractCodeFragment leaf : leaves2) {
 //                        if (leaf.equals(leaf2)) {
 //                            break;
@@ -143,27 +207,10 @@ public class FunctionBodyMapper {
 //                            break;
 //                        }
 //                    }
-                    mappingSet.add(mapping);
-                }
-            }
-            if (!mappingSet.isEmpty()) {
-//                AbstractMap.SimpleEntry<CompositeStatementObject, CompositeStatementObject> switchParentEntry = null;
-//                if (variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
-//                    //postpone mapping
-//                    postponedMappingSets.add(mappingSet);
-//                } else if ((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
-//                    LeafMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
-//                    mappings.add(bestMapping);
-//                    leaves2.remove(bestMapping.getFragment1());
-//                    iterator1.remove();
-//                } else {
-//                    LeafMapping minStatementMapping = mappingSet.first();
-//                    mappings.add(minStatementMapping);
-//                    leaves2.remove(minStatementMapping.getFragment2());
-//                    iterator1.remove();
-//                }
-            }
+            return mapping;
         }
+
+        return null;
     }
 
     private ReplacementInfo createReplacementInfo(SingleStatement leaf1, SingleStatement leaf2,
