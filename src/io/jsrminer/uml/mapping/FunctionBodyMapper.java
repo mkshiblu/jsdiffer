@@ -123,7 +123,7 @@ public class FunctionBodyMapper {
                         preProcessor);
                 if (replacements != null) {
                     LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
-//                    mapping.addReplacements(replacements);
+                    mapping.addReplacements(replacements);
 //                    for (AbstractCodeFragment leaf : leaves2) {
 //                        if (leaf.equals(leaf2)) {
 //                            break;
@@ -143,7 +143,7 @@ public class FunctionBodyMapper {
 //                            break;
 //                        }
 //                    }
-//                    mappingSet.add(mapping);
+                    mappingSet.add(mapping);
                 }
             }
             if (!mappingSet.isEmpty()) {
