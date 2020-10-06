@@ -8,7 +8,16 @@ public enum CodeElementType {
     IF_STATEMENT("IfStatement"),
     BLOCK_STATEMENT("BlockStatement"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
-    RETURN_STATEMENT("ReturnStatement");
+    EMPTY_STATEMENT("EmptyStatement"),
+    FUNCTION_INVOCATION("CallExpression"),
+    CONSTRUCTOR_INVOCATION("THIS_CONSTRUCTOR_INVOCATION"),    // TODO ReVisit type (this())
+    SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
+    OBJECT_CREATION("NewExpression"),
+    RETURN_STATEMENT("ReturnStatement"),
+    TRY_STATEMENT("TryStatement"),
+    ARRAY_EXPRESSION("ArrayExpression"),
+    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"), // TODO revisit
+    FOR_STATEMENT("ForStatement");
 
     public final String titleCase;
 
@@ -17,6 +26,7 @@ public enum CodeElementType {
     }
 
     private static Map<String, CodeElementType> typeTitleCaseMap = new HashMap<>();
+
     static {
         for (CodeElementType type : CodeElementType.values()) {
             typeTitleCaseMap.put(type.titleCase, type);

@@ -3,15 +3,15 @@ package io.jsrminer.sourcetree;
 /**
  * Base class for all the code elements
  */
-public abstract class CodeElement {
+public abstract class CodeFragment {
     protected SourceLocation sourceLocation;
     protected String text;
     protected CodeElementType type;
 
-    public CodeElement() {
+    public CodeFragment() {
     }
 
-    public CodeElement(String text) {
+    public CodeFragment(String text) {
         this.text = text;
     }
 
@@ -39,7 +39,25 @@ public abstract class CodeElement {
         this.type = type;
     }
 
-    public CodeElementType getType(){
+    /**
+     * Returns the Code Element type of this fragment
+     */
+    public CodeElementType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return text;
+    }
+
+    public boolean equalsSourceLocation(CodeFragment test) {
+        if (this.getFile() == null) {
+            if (test.getFile() != null)
+                return false;
+        } else if (!this.getFile().equals(test.getFile()))
+            return false;
+
+        return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);
     }
 }

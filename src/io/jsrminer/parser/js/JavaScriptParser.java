@@ -2,21 +2,22 @@ package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
-import com.jsoniter.JsonIterator;
-import com.jsoniter.any.Any;
 import io.jsrminer.api.IParser;
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.FunctionBody;
+import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.SourceFileModel;
+import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
+import io.jsrminer.uml.UMLParameter;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
-        final HashMap<String, FunctionDeclaration[]> fds = new HashMap<>();
+        final HashMap<String, SourceFileModel> sourceModels = new HashMap<>();
         final UMLModel umlModel = new UMLModel();
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
@@ -25,14 +26,19 @@ public class JavaScriptParser implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
                 final V8Array fdsArray = processScript(content, jsEngine);
-                final FunctionDeclaration[] fd = convert(fdsArray, filepath);
-                fds.put(filepath, fd);
+                final FunctionDeclaration[] fds = convert(fdsArray, filepath);
+
+                // Create source model
+                final SourceFileModel source = new SourceFileModel();
+                source.setFunctionDeclarations(fds);
+
+                sourceModels.put(filepath, source);
                 fdsArray.release();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        umlModel.setFunctionDeclarations(fds);
+        umlModel.setSourceFileModels(sourceModels);
         return umlModel;
     }
 
@@ -56,8 +62,8 @@ public class JavaScriptParser implements IParser {
             v8ParamsArray = v8Fd.getArray("params");
 
             // Create java object
-            fd = new FunctionDeclaration(qualifiedName);
-            fd.setParameters(JV8.toStringArray(v8ParamsArray));
+            fd = new FunctionDeclaration(qualifiedName, true);
+            fd.setParameters(convertToUMLParameters(v8ParamsArray));
 
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
@@ -74,31 +80,15 @@ public class JavaScriptParser implements IParser {
         return fds;
     }
 
-    //@JsonCreator
-    public static BlockStatement fromJson(String blockStatementJson) {
-        BlockStatement block = new BlockStatement();
-        Any any = JsonIterator.deserialize(blockStatementJson);
-
-        // Parse source location
-        SourceLocation location = any.get("loc").as(SourceLocation.class);
-        block.setSourceLocation(location);
-
-        // Parse the nested statements
-        List<Any> statements = any.get("statements").asList();
-        for (Any statement: statements) {
-            String type = statement.get("type").toString();
-            boolean isComposite =  "BlockStatement".equals(type);
-
-            if (isComposite) {
-                // TO Do a block statement again
-            }else {
-                // A leaf statement
-                SingleStatement singleStatement = SingleStatement.fromJson(statement.toString());
-                block.addStatement(singleStatement);
-            }
+    UMLParameter[] convertToUMLParameters(final V8Array v8ParamsArray) {
+        final UMLParameter[] params = new UMLParameter[v8ParamsArray.length()];
+        String name;
+        for (int i = 0; i < params.length; i++) {
+            name = v8ParamsArray.getString(i);
+            params[i] = new UMLParameter(name);
         }
-
-        return block;
+        v8ParamsArray.release();
+        return params;
     }
 
     private V8Array processScript(String script, JavaScriptEngine jsEngine) {

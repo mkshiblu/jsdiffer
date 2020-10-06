@@ -1,8 +1,17 @@
 package io.jsrminer.sourcetree;
 
-public class FunctionDeclaration extends CodeElement {
-    private String[] parameters;
+import io.jsrminer.uml.UMLParameter;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class FunctionDeclaration extends CodeFragment {
+
+    /**
+     * Name parameter map
+     */
+    private Map<String, UMLParameter> nameParameterMap = new HashMap<>();
     /**
      * The name of the function.
      */
@@ -22,15 +31,24 @@ public class FunctionDeclaration extends CodeElement {
      */
     private String fullyQualifiedName;
 
+    /**
+     * Holds the body of the function
+     */
     private FunctionBody body;
-
 
     /**
      * Stores whether the body of the function is empty or not
      */
     private boolean isEmptyBody;
 
-    public FunctionDeclaration(String qualifiedName) {
+    /**
+     * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
+     * file and not nested
+     */
+    public final boolean isTopLevel;
+
+    public FunctionDeclaration(String qualifiedName, boolean isTopLevel) {
+        this.isTopLevel = isTopLevel;
         this.qualifiedName = qualifiedName;
         int idx = qualifiedName.lastIndexOf('.');
         if (idx != -1) {
@@ -57,17 +75,24 @@ public class FunctionDeclaration extends CodeElement {
         return this.body.equals(fd.body);
     }
 
-    // region Setters & getters
-    public String[] getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(String[] parameters) {
-        this.parameters = parameters;
-    }
-
     public String getFullyQualifiedName() {
         return fullyQualifiedName;
+    }
+
+    // region Setters & getters
+    public Map<String, UMLParameter> getParameters() {
+        return nameParameterMap;
+    }
+
+    public void setParameters(UMLParameter[] parameters) {
+        this.nameParameterMap.clear();
+        LinkedHashMap<String, String> x;
+        UMLParameter parameter;
+        for (int i = 0; i < parameters.length; i++) {
+            parameter = parameters[i];
+            parameter.setIndexPositionInParent(i);
+            nameParameterMap.put(parameter.name, parameter);
+        }
     }
 
     public void setBody(FunctionBody body) {
@@ -82,4 +107,20 @@ public class FunctionDeclaration extends CodeElement {
         this.isEmptyBody = isEmptyBody;
     }
     //endregion
+
+    public boolean hasParameterOfName(String name) {
+        return nameParameterMap.containsKey(name);
+    }
+
+    public UMLParameter getParameter(String parameterName) {
+        return nameParameterMap.get(parameterName);
+    }
+
+    public boolean nameEquals(FunctionDeclaration function) {
+        return this.name != null && this.name.equals(function.name);
+    }
+
+    public int parameterCount(){
+        return this.nameParameterMap.size();
+    }
 }

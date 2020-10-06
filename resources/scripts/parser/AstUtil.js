@@ -37,7 +37,7 @@ exports.getFunctionQualifiedName = (functionDeclarationPath) => {
     return namespace == null ? name : namespace + '.' + name;
 }
 
-exports.getFormattedLocation = (node) => {
+function getFormattedLocation(node) {
     const sourceLocation = node.loc;
     return {
         start: node.start,
@@ -49,4 +49,18 @@ exports.getFormattedLocation = (node) => {
     }
 }
 
+exports.getFormattedObjectCreation = (path) => {
+    const objectCreation = {
+        typeName: null,
+        isInitializerEmptyArray: false,
+        arguments: [],
+        text: path.toString(),
+        type: path.node.type,
+        loc: getFormattedLocation(path.node)//getgetFormattedLocation(path.node)
+    };
+
+    return objectCreation;
+}
+
+exports.getFormattedLocation = getFormattedLocation;
 exports.getFunctionNamespace = getFunctionNamespace;

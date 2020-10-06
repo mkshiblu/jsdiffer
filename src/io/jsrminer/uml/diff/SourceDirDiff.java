@@ -1,4 +1,4 @@
-package io.jsrminer.diff;
+package io.jsrminer.uml.diff;
 
 import io.jsrminer.io.SourceFile;
 

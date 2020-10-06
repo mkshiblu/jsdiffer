@@ -1,4 +1,5 @@
 const { expressionStatement } = require("@babel/types");
+const astProcessor = require("../processors/AstNodeProcessor");
 
 exports.processBlockStatement = (blockStatementPath, processStatement) => {
     const statement = {
@@ -15,7 +16,8 @@ exports.processBlockStatement = (blockStatementPath, processStatement) => {
 
 exports.processEmptyStatement = (emptyStatementPath) => {
     return {
-        type: emptyStatementPath.node.type
+        type: emptyStatementPath.node.type,
+        text: emptyStatementPath.toString()
     }
 }
 
@@ -24,9 +26,12 @@ exports.processEmptyStatement = (emptyStatementPath) => {
 //     type: "ExpressionStatement";
 //     expression: Expression;
 // }
-exports.processExpressionStatement = (expressionStatementPath) => {
-    return {
-        type: expressionStatementPath.node.type,
-        text: expressionStatementPath.toString()
-    }
+exports.processExpressionStatement = (path) => {
+
+    const statement = {
+        type: path.node.type,
+        text: path.toString()
+    };
+    const expression = astProcessor.processExpression(path.get('expression'), statement);
+    return Object.assign(expression, statement);
 }

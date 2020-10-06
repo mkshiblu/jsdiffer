@@ -1,22 +1,49 @@
 const declarationProcessor = require('./DeclarationProcessor');
 const controlFlowProcessor = require('./ControlFlowProcessor');
+const choice = require("./Choice");
 const statementProcessor = require('./StatementProcessor');
+const expressionProcessor = require('./ExpressionProcessor');
+const loopsProcessor = require('./LoopsProcessor');
+const exceptions = require('./Exceptions');
+
+function processExpression(path, statement) {
+    const expressionInfo = {
+        text: path.toString(),
+        identifiers: [],
+        numericLiterals: [],
+        stringLiterals: [],
+        variableDeclarations: [],
+        infixOperators: [],
+        functionInvocations: [],
+        constructorInvocations: [],
+        objectCreations: [],
+        arguments: [],
+        loc: {}
+    };
+
+    const expression = expressionProcessor.processExpression(path, expressionInfo, statement);
+    return expression;
+}
 
 const processNodePath = (function () {
+    const visitor = require('../parser/Visitor');
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
-        ['IfStatement', controlFlowProcessor.processIfStatement],
+        ['IfStatement', choice.processIfStatement],
         ['BlockStatement', statementProcessor.processBlockStatement],
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
+        ['ForStatement', loopsProcessor.processForStatement],
+        ['TryStatement', exceptions.processTryStatement],
     ]);
 
     return function (nodePath, processStatement) {
         const process = nodePathProcesses.get(nodePath.node.type);
         if (process) {
-            const rt = process(nodePath, processStatement);
+            // TODO, type, text, location etc.
+            const rt = process(nodePath, processStatement, processExpression);
             return rt;
         }
 
@@ -26,3 +53,4 @@ const processNodePath = (function () {
 })();
 
 exports.processNodePath = processNodePath;
+exports.processExpression = processExpression;

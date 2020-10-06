@@ -1,3 +1,5 @@
+const astProcessor = require("../processors/AstNodeProcessor");
+
 /** Process for a AST functionDeclarationNodePath */
 exports.processFunctionDeclaration = (functionDeclarationPath, processStatement) => {
     const node = functionDeclarationPath.node;
@@ -11,36 +13,67 @@ exports.processFunctionDeclaration = (functionDeclarationPath, processStatement)
         params: node.params.map(id => id.name)
     };
     processStatement(functionDeclarationPath.get('body'), statement);
-
-    // return {
-    //     statement: {
-    //         type: node.type,
-    //         //qualifiedName,
-    //         name,
-    //         params: node.params.map(id => id.name)
-    //     },
-    //     bodyPaths = functionDeclarationPath.get('body')
-    // };
     return statement;
 }
 
-exports.processVariableDeclaration = (variableDeclarationPath) => {
-    const variableDeclaration = variableDeclarationPath.node;
-    // const declarationNodes = variableDeclaration.declarations;
-    // let temp = [];
-    // for (let i = 0; i < declarationNodes.length; i++) {
-    //     const declaration = declarationNodes[i];
-    //     switch (declaration.type) {
+/**
+* 
+* interface VariableDeclaration <: Declaration {
+*     type: "VariableDeclaration";
+*    declarations: [ VariableDeclarator ];
+*    kind: "var" | "let" | "const";
+* }
 
-    //         case 'VariableDeclarator':
-    //             temp.push(variableDeclaratorProcessor.toStatement(declaration));
-    //             break;
-    //     }
-    // }
+interface VariableDeclarator <: Node {
+  type: "VariableDeclarator";
+  id: Pattern;
+  init: Expression | null;
+}
+ * @param {*} path variableDeclaration path
+ */
+exports.processVariableDeclaration = (path) => {
+    const node = path.node;
+    const kind = node.kind;
+    let initializer;
 
-    // //return temp;
-    return {
-        type: variableDeclaration.type,
-        text: variableDeclarationPath.toString(),
+    // Extract initilaizer which is an expression
+    const declarators = path.get("declarations");
+
+    // TODO remove if no such things found
+    if (declarators.length > 1) {
+        throw "not supported yet multi-length initializers" + variableDeclarationPath;
+    }
+
+    const declaratorPath = declarators[0];
+    const declaratorNode = declaratorPath.node;
+    const variableName = declaratorNode.id.name;
+    
+    const variableDeclaration = {
+        text: path.toString(),
+        variableName,
+        kind,
     };
+
+    const statement = {
+        type: node.type,
+        text: path.toString(),
+        identifiers: [variableName],
+        // functionInvocations: [],
+        // objectCreations: []
+        variableDeclarations: [variableDeclaration]
+    };
+
+    if (declaratorNode.init) {
+        initializer = astProcessor.processExpression(declaratorPath.get("init"), statement);
+    }
+
+    if (initializer) {
+        variableDeclaration.initializer = initializer;
+        statement.variableDeclarations
+        statement.identifiers.push(...initializer.identifiers);
+        statement.functionInvocations = initializer.functionInvocations;
+        statement.objectCreations = initializer.objectCreations;
+    }
+
+    return statement;
 }

@@ -5,9 +5,8 @@ const astUtil = require('./AstUtil');
 
 const functionDeclarations = [];
 
-// A visitor for FunctionDeclaration
-function FunctionDeclarationVisitor(/*namespace*/) {
 
+function Visitor() {
     this.FunctionDeclaration = (path) => {
         const fd = path.node;
         const statements = fd.body;
@@ -15,7 +14,6 @@ function FunctionDeclarationVisitor(/*namespace*/) {
         const namespace = concatScopes(path);
         const qualifiedName = namespace == null ? name : namespace + '.' + name;
 
-        // Pass the path instead of the body because path has the string repreentation?
         const processedBody = processor.processFunctionBody(path.get('body'));
         saveFunctionDeclaration(fd, qualifiedName, processedBody);
         path.skip();
@@ -24,7 +22,7 @@ function FunctionDeclarationVisitor(/*namespace*/) {
     this.FunctionExpression = (path) => {
         const fe = path.node;
 
-        // If it's a named functionExpression process it as declaration since it is subject to rename
+        // If it's a named functionExpression process it as declaration since it is subject to rename?
         if (fe.id != null) {
             const body = fe.body;
             const name = fe.id.name;
@@ -41,7 +39,23 @@ function FunctionDeclarationVisitor(/*namespace*/) {
     this.Function = (path) => {
 
     }
-};
+
+    this.VariableDeclaration = (path) => {
+        const variableDeclaration = path.node;
+
+        // If variable declarations are passed as state
+        if (this && this.variableDeclarations) {
+
+            // Add the variable declaration to the passed state
+            this.variableDeclarations.push({
+                // name: 
+                // scope: 
+            });
+        }
+    }
+
+    
+}
 
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     functionDeclarations.push({
@@ -87,5 +101,5 @@ function concatScopes(path) {
     return namespace == '' ? null : namespace;
 }
 
-exports.FunctionDeclarationVisitor = FunctionDeclarationVisitor;
+exports.Visitor = new Visitor();
 exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));

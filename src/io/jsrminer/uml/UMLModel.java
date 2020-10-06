@@ -1,5 +1,10 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.api.Diffable;
+import io.jsrminer.sourcetree.SourceFileModel;
+import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.SourceFileModelDiffer;
+import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 
 import java.util.HashMap;
@@ -8,70 +13,50 @@ import java.util.Map;
 /**
  * Abstracts the source code
  */
-public class UMLModel {
+public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
-    private HashMap<String, FunctionDeclaration[]> functionDeclarations;
+    private HashMap<String, SourceFileModel> sourceModelMap;
 
+    @Override
     public UMLModelDiff diff(UMLModel umlModel) {
+        final UMLModelDiff modelDiff = new UMLModelDiff(this, umlModel);
 
-        UMLModelDiff diff = new UMLModelDiff();
-        for (Map.Entry<String, FunctionDeclaration[]> entry : functionDeclarations.entrySet()) {
-
+        // Diff on common files and functions
+        for (Map.Entry<String, SourceFileModel> entry : sourceModelMap.entrySet()) {
             final String file = entry.getKey();
-            final FunctionDeclaration[] fds1 = entry.getValue();
+            final SourceFileModel sourceFileModel2 = umlModel.getSourceFileModel(file);
 
-            FunctionDeclaration[] fds2 = umlModel.functionDeclarations.get(file);
-
-            if (fds2 != null) {
-
-                // Convert to hashmap
-                HashMap<String, FunctionDeclaration> fdMap1 = new HashMap<>();
-                for (FunctionDeclaration fd : fds1) {
-                    fdMap1.put(fd.getFullyQualifiedName(), fd);
-                }
-
-                HashMap<String, FunctionDeclaration> fdMap2 = new HashMap<>();
-                for (FunctionDeclaration fd : fds2) {
-                    fdMap2.put(fd.getFullyQualifiedName(), fd);
-                }
-
-
-                HashMap<String, FunctionDeclaration> uncommon1 = new HashMap<>();
-                HashMap<String, FunctionDeclaration> uncommon2 = new HashMap<>();
-                for (FunctionDeclaration fd1 : fds1) {
-                    if (!fdMap2.containsKey(fd1.getFullyQualifiedName())) {
-                        uncommon1.put(fd1.getFullyQualifiedName(), fd1);
-                    }
-                }
-
-                for (FunctionDeclaration fd2 : fds2) {
-                    if (!fdMap1.containsKey(fd2.getFullyQualifiedName())) {
-                        uncommon2.put(fd2.getFullyQualifiedName(), fd2);
-                    }
-                }
-
-                for (FunctionDeclaration fd1 : uncommon1.values()) {
-
-                    for (FunctionDeclaration fd2 : uncommon2.values()) {
-                        if (fd1.hasIdenticalBody(fd2) &&
-                                ((fd1.namespace != null && fd1.namespace.equals(fd2.namespace))
-                                        || fd1.namespace == fd2.namespace)) {
-                            // fd1 has renamved to fd2
-                           // diff.addRefactoring(fd1.getFullyQualifiedName() + " renamed to " + fd2.getFullyQualifiedName());
-                        }
-                    }
-                }
+            // Check if model2 contains the same file
+            if (sourceFileModel2 != null) {
+                SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2);
+                SourceFileModelDiff sourceDiff = sourceDiffer.diff();
             }
         }
 
-        return diff;
+        return modelDiff;
     }
 
-    public void setFunctionDeclarations(final HashMap<String, FunctionDeclaration[]> functionDeclarations) {
-        this.functionDeclarations = functionDeclarations;
+    public FunctionDeclaration[] getFunctionDeclarationsInSource(String file) {
+        SourceFileModel sourceFileModel;
+        if ((sourceFileModel = sourceModelMap.get(file)) != null) {
+            return sourceFileModel.getFunctionDeclarations();
+        }
+        return null;
     }
 
-    public HashMap<String, FunctionDeclaration[]> getFunctionDeclarations() {
-        return functionDeclarations;
+    public boolean containsSourceFileModel(String file) {
+        return sourceModelMap.containsKey(file);
+    }
+
+    public SourceFileModel getSourceFileModel(String file) {
+        return sourceModelMap.get(file);
+    }
+
+    public Map<String, SourceFileModel> getSourceFileModels() {
+        return sourceModelMap;
+    }
+
+    public void setSourceFileModels(final HashMap<String, SourceFileModel> sourceModelMap) {
+        this.sourceModelMap = sourceModelMap;
     }
 }
