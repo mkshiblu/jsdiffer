@@ -10,4 +10,6 @@ public abstract class StatementMapping {
         this.statement1 = statement1;
         this.statement2 = statement2;
     }
+
+    public abstract boolean isExactMatch();
 }

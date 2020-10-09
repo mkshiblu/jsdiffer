@@ -17,6 +17,16 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
     }
 
     @Override
+    public boolean isExactMatch() {
+        // TODO revisit
+//        return *(statement1.getArgumentizedString().equals(fragment2.getArgumentizedString()) ||
+//        statement1.getText().equals(fragment2.getString())
+//                || isExactAfterAbstraction()
+//                || containsIdenticalOrCompositeReplacement()) &&!isKeyword();*/
+        return this.normalizedTextualDistance() == 0;
+    }
+
+    @Override
     public int compareTo(LeafStatementMapping o) {
         double distance1 = this.normalizedTextualDistance();
         double distance2 = o.normalizedTextualDistance();

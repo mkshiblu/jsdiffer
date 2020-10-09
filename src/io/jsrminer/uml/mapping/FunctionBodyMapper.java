@@ -110,6 +110,11 @@ public class FunctionBodyMapper {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         ReplacementFinder replacementFinder = new ReplacementFinder();
 
+
+        Iterator<SingleStatement> it1 = leaves1.iterator();
+        Iterator<SingleStatement> it2 = leaves2.iterator();
+
+
         // TODO refactor duplicateed code, extract inner for loop to seprate method
         if (leaves1.size() <= leaves2.size()) {
             for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
@@ -119,7 +124,7 @@ public class FunctionBodyMapper {
                 for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                     SingleStatement leaf2 = iterator2.next();
 
-                    LeafStatementMapping mapping = mapLeavesWithReplacement(leaves1, leaves2, parameterToArgumentMap, replacementFinder, leaf1, leaf2);
+                    LeafStatementMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
                         mappingSet.add(mapping);
                     }
@@ -138,7 +143,7 @@ public class FunctionBodyMapper {
 
                 for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
                     SingleStatement leaf1 = iterator1.next();
-                    LeafStatementMapping mapping = mapLeavesWithReplacement(leaves1, leaves2, parameterToArgumentMap, replacementFinder, leaf1, leaf2);
+                    LeafStatementMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
                         mappingSet.add(mapping);
                     }
@@ -174,17 +179,19 @@ public class FunctionBodyMapper {
         }
     }
 
-    private LeafStatementMapping mapLeavesWithReplacement(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2
+    private LeafStatementMapping getLeafMappingUsingReplacements(SingleStatement leaf1
+            , SingleStatement leaf2
+            , Set<SingleStatement> leaves1
+            , Set<SingleStatement> leaves2
             , Map<String, String> parameterToArgumentMap
-            , ReplacementFinder replacementFinder
-            , SingleStatement leaf1
-            , SingleStatement leaf2) {
+            , ReplacementFinder replacementFinder) {
         ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
         Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
                 , leaf2
                 , parameterToArgumentMap
                 , replacementInfo,
-                preProcessor);
+                preProcessor,
+                mappings);
         if (replacements != null) {
             LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);

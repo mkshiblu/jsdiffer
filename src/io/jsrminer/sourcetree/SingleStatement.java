@@ -94,4 +94,14 @@ public class SingleStatement extends Statement {
         }
         return null;
     }
+
+    public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
+        VariableDeclaration vd = this.getVariableDeclaration(varibleName);
+        if (vd != null) {
+            return vd;
+        } else if (parent != null) {
+            // TODO PullUp    return parent.findVariableDeclarationIncludingParent(varibleName);
+        }
+        return null;
+    }
 }

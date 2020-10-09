@@ -5,6 +5,8 @@ import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
 import java.util.*;
 
+import static io.jsrminer.sourcetree.JsConfig.SINGLE_STATEMENT_TERMINATOR_CHAR;
+
 /**
  * Caches invocation coverages as singleton
  */
@@ -36,9 +38,9 @@ public enum InvocationCoverage {
             List<OperationInvocation> invocations = methodInvocationMap.get(invocationText);
 
             for (OperationInvocation invocation : invocations) {
-                if (invocationText.equals(statementText) || (invocationText + ";\n").equals(statementText)) {
+                if (invocationText.equals(statementText) || (invocationText + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
-                } else if (("return " + invocationText + ";\n").equals(statementText)) {
+                } else if (("return " + invocationText + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                 } else if (isCastExpressionCoveringEntireFragment(statementText, invocationText)) {
                     coveregeType = InvocationCoverageType.CAST_CALL;
@@ -78,13 +80,13 @@ public enum InvocationCoverage {
         for (String objectCreation : creationMap.keySet()) {
             List<ObjectCreation> creations = creationMap.get(objectCreation);
             for (ObjectCreation creation : creations) {
-                if ((objectCreation + ";\n").equals(text) || objectCreation.equals(text)) {
+                if ((objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text) || objectCreation.equals(text)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                     return creation;
-                } else if (("return " + objectCreation + ";\n").equals(text)) {
+                } else if (("return " + objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                     return creation;
-                } else if (("throw " + objectCreation + ";\n").equals(text)) {
+                } else if (("throw " + objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.THROW_CALL;
                     return creation;
                 } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), objectCreation)) {

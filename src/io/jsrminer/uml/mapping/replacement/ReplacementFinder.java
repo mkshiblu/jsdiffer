@@ -2,7 +2,9 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.uml.mapping.LeafStatementMapping;
 import io.jsrminer.uml.mapping.PreProcessor;
+import io.jsrminer.uml.mapping.StatementMapping;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -17,10 +19,12 @@ public class ReplacementFinder {
     private static final Pattern DOUBLE_QUOTES = Pattern.compile("\"([^\"]*)\"|(\\S+)");
     private static final Pattern SPLIT_CONDITIONAL_PATTERN = Pattern.compile("(\\|\\|)|(&&)|(\\?)|(:)");
 
-    public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2
+    public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1
+            , SingleStatement statement2
             , Map<String, String> parameterToArgumentMap
             , ReplacementInfo replacementInfo
-            , PreProcessor preProcessor) {
+            , PreProcessor preProcessor
+            , Set<StatementMapping> mappings) {
 
         final StatementDiff diff = new StatementDiff(statement1, statement2);
 
@@ -75,9 +79,8 @@ public class ReplacementFinder {
                     , diff.variables1, diff.variables2
                     , methodInvocationMap1, methodInvocationMap2
                     , functionInvocations1, functionInvocations2
-                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2);
+                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2, mappings);
         }
-
         //3. replace variables with the corresponding arguments in object creations
         intersectAndReplaceObjectCreations(statement1, statement2,
                 parameterToArgumentMap, replacementInfo, variableToArgumentMap);
@@ -854,7 +857,8 @@ public class ReplacementFinder {
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2
-            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2) {
+            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2
+            , Set<StatementMapping> mappings) {
 
         // If statements are not matched yet
 
@@ -889,11 +893,14 @@ public class ReplacementFinder {
                                 replacement = new Replacement(suffix1, suffix2, ReplacementType.VARIABLE_NAME);
                             }
                         }
-                        VariableDeclaration v1 = statement1.getVariableDeclaration(s1);
-                        VariableDeclaration v2 = statement2.getVariableDeclaration(s2);
-//                            if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1 && operation2.loopWithVariables(v1.getVariableName(), v2.getVariableName()) == null) {
-//                                replacement = null;
-//                            }
+                        VariableDeclaration v1 = statement1.findVariableDeclarationIncludingParent(s1);
+                        VariableDeclaration v2 = statement2.findVariableDeclarationIncludingParent(s2);
+                        if (inconsistentVariableMappingCount(statement1, statement2, v1, v2, mappings) > 1
+                        /** TODO && operation2.loopWithVariables
+                         (v1.variableName, v2.variableName) == null**/) {
+                            replacement = null;
+                        }
+
                     } else if (unmatchedVariables1.contains(s1) && functionInvocations2.contains(s2)) {
                         OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
                         replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationAfter, VariableReplacementWithMethodInvocation.Direction.VARIABLE_TO_INVOCATION);
@@ -1616,36 +1623,42 @@ public class ReplacementFinder {
         return null;
     }
 
-    private int inconsistentVariableMappingCount(SingleStatement statement1, SingleStatement statement2, VariableDeclaration v1, VariableDeclaration v2) {
+    private int inconsistentVariableMappingCount(SingleStatement statement1, SingleStatement statement2
+            , VariableDeclaration v1, VariableDeclaration v2, Set<StatementMapping> mappings) {
         int count = 0;
-//        if (v1 != null && v2 != null) {
-//            for (AbstractCodeMapping mapping : mappings) {
-//                List<VariableDeclaration> variableDeclarations1 = mapping.getFragment1().getVariableDeclarations();
-//                List<VariableDeclaration> variableDeclarations2 = mapping.getFragment2().getVariableDeclarations();
-//                if (variableDeclarations1.contains(v1) &&
-//                        variableDeclarations2.size() > 0 &&
-//                        !variableDeclarations2.contains(v2)) {
-//                    count++;
-//                }
-//                if (variableDeclarations2.contains(v2) &&
-//                        variableDeclarations1.size() > 0 &&
-//                        !variableDeclarations1.contains(v1)) {
-//                    count++;
-//                }
-//                if (mapping.isExact()) {
-//                    boolean containsMapping = true;
-//                    if (statement1 instanceof CompositeStatementObject && statement2 instanceof CompositeStatementObject &&
+        if (v1 != null && v2 != null) {
+            for (StatementMapping mapping : mappings) {
+                List<VariableDeclaration> variableDeclarations1 = ((SingleStatement) mapping.statement1).getVariableDeclarations();
+                List<VariableDeclaration> variableDeclarations2 = ((SingleStatement) mapping.statement2).getVariableDeclarations();
+                if (variableDeclarations1.contains(v1) &&
+                        variableDeclarations2.size() > 0 &&
+                        !variableDeclarations2.contains(v2)) {
+                    count++;
+                }
+                if (variableDeclarations2.contains(v2) &&
+                        variableDeclarations1.size() > 0 &&
+                        !variableDeclarations1.contains(v1)) {
+                    count++;
+                }
+                if (mapping.isExactMatch()) {
+                    boolean containsMapping = true;
+//                    if (statement1 instanceof BlockStatement
+//                            && statement2 instanceof BlockStatement &&
 //                            statement1.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
 //                        CompositeStatementObject comp1 = (CompositeStatementObject) statement1;
 //                        CompositeStatementObject comp2 = (CompositeStatementObject) statement2;
 //                        containsMapping = comp1.contains(mapping.getFragment1()) && comp2.contains(mapping.getFragment2());
 //                    }
-//                    if (containsMapping && (VariableReplacementAnalysis.bothFragmentsUseVariable(v1, mapping) || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, mapping))) {
-//                        count++;
-//                    }
-//                }
-//            }
-//        }
+
+                    // TODO revisit
+                    if (containsMapping && (
+                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, (LeafStatementMapping) mapping)
+                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, (LeafStatementMapping) mapping))) {
+                        count++;
+                    }
+                }
+            }
+        }
         return count;
     }
 
