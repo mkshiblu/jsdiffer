@@ -143,4 +143,21 @@ public class BlockStatement extends Statement {
 //        }
 //        return sb.toString();
 //    }
+
+    /**
+     * Similar to getInnerNodes of RM
+     *
+     * @return
+     */
+    public Set<BlockStatement> getAllBlockStatementsIncludingNested() {
+        final Set<BlockStatement> innerNodes = new LinkedHashSet<>();
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                innerNodes.addAll(composite.getAllBlockStatementsIncludingNested());
+            }
+        }
+       // innerNodes.add(this);
+        return innerNodes;
+    }
 }

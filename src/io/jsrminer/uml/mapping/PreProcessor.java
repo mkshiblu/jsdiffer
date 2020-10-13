@@ -1,6 +1,7 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.Statement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,9 +10,9 @@ import java.util.regex.Pattern;
 
 public class PreProcessor {
 
-    private Map<SingleStatement, String> afterReplacementsMap = new HashMap<>();
+    private Map<Statement, String> afterReplacementsMap = new HashMap<>();
 
-    public String replaceParametersWithArguments(SingleStatement statement, Map<String, String> parameterToArgumentMap) {
+    public String replaceParametersWithArguments(Statement statement, Map<String, String> parameterToArgumentMap) {
         if (afterReplacementsMap.containsKey(statement))
             return afterReplacementsMap.get(statement);
 

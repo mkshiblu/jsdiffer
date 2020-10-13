@@ -1,9 +1,6 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.FunctionBody;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -20,6 +17,8 @@ public class FunctionBodyMapper {
     protected final PreProcessor preProcessor;
 
     private Set<StatementMapping> mappings = new LinkedHashSet<>();
+    Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
+    Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 
     public FunctionBodyMapper(@NonNull FunctionDeclaration function1, @NonNull FunctionDeclaration function2) {
         this.function1 = function1;
@@ -33,17 +32,33 @@ public class FunctionBodyMapper {
 
         if (body1 != null && body2 != null) {
             final UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
+            mapParametersToArguments(operationDiff.getAddedParameters(), operationDiff.getRemovedParameters());
 
             BlockStatement block1 = body1.blockStatement;
             BlockStatement block2 = body2.blockStatement;
 
+            // match leaves
             Set<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
             Set<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
-            replaceParametersWithArguments(operationDiff, leaves1, leaves2);
+            replaceParametersWithArguments(leaves1, leaves2);
 
             if (leaves1.size() > 0 && leaves2.size() > 0)
                 matchLeaves(leaves1, leaves2);
+
+            // Match composites
+            Set<BlockStatement> innerNodes1 = block1.getAllBlockStatementsIncludingNested();
+            Set<BlockStatement> innerNodes2 = block2.getAllBlockStatementsIncludingNested();
+            replaceParametersWithArguments(innerNodes1, innerNodes2);
+
+            if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
+                matchNestedBlockStatements(innerNodes1, innerNodes2);
         }
+    }
+
+    /**
+     * Match the block statements inside of the body of a function
+     */
+    void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2) {
     }
 
     void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
@@ -110,10 +125,8 @@ public class FunctionBodyMapper {
         final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         ReplacementFinder replacementFinder = new ReplacementFinder();
 
-
         Iterator<SingleStatement> it1 = leaves1.iterator();
         Iterator<SingleStatement> it2 = leaves2.iterator();
-
 
         // TODO refactor duplicateed code, extract inner for loop to seprate method
         if (leaves1.size() <= leaves2.size()) {
@@ -272,20 +285,23 @@ public class FunctionBodyMapper {
 
     }
 
-    void replaceParametersWithArguments(UMLOperationDiff operationDiff, Set<SingleStatement> leaves1,
-                                        Set<SingleStatement> leaves2) {
-        Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
-        Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
+    void replaceParametersWithArguments(Set<? extends Statement> statements1,
+                                        Set<? extends Statement> statements2) {
 
-        mapParametersToArgument(operationDiff, parameterToArgumentMap1, parameterToArgumentMap2);
-        leaves1.forEach(leaf -> preProcessor.replaceParametersWithArguments(leaf, parameterToArgumentMap1));
-        leaves2.forEach(leaf -> preProcessor.replaceParametersWithArguments(leaf, parameterToArgumentMap2));
+        //mapParametersToArgument(operationDiff, parameterToArgumentMap1, parameterToArgumentMap2);
+        statements1.forEach(statement -> preProcessor.replaceParametersWithArguments(statement, parameterToArgumentMap1));
+        statements2.forEach(statement -> preProcessor.replaceParametersWithArguments(statement, parameterToArgumentMap2));
     }
 
-    void mapParametersToArgument(UMLOperationDiff operationDiff, Map<String, String> parameterToArgumentMap1,
-                                 Map<String, String> parameterToArgumentMap2) {
-        final Map<String, UMLParameter> addedParameters = operationDiff.getAddedParameters();
-        final Map<String, UMLParameter> removedParameters = operationDiff.getRemovedParameters();
+    /**
+     * Populate parameters to argument maps (1 and 2)
+     */
+
+    public void mapParametersToArguments(final Map<String, UMLParameter> addedParameters,
+                                         final Map<String, UMLParameter> removedParameters) {
+
+        this.parameterToArgumentMap1.clear();
+        this.parameterToArgumentMap2.clear();
         // TODO revisit since js does not have types
         if (addedParameters.size() == 1) {
             UMLParameter addedParameter = addedParameters.values().iterator().next();
