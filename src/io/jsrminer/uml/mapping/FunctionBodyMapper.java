@@ -14,7 +14,7 @@ public class FunctionBodyMapper {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
-    protected final PreProcessor preProcessor;
+    protected final Argumentizer argumentizer;
 
     private Set<StatementMapping> mappings = new LinkedHashSet<>();
     Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
@@ -23,7 +23,7 @@ public class FunctionBodyMapper {
     public FunctionBodyMapper(@NonNull FunctionDeclaration function1, @NonNull FunctionDeclaration function2) {
         this.function1 = function1;
         this.function2 = function2;
-        this.preProcessor = new PreProcessor();
+        this.argumentizer = new Argumentizer();
     }
 
     public void map() {
@@ -38,6 +38,7 @@ public class FunctionBodyMapper {
             BlockStatement block2 = body2.blockStatement;
 
             // match leaves
+            argumentizer.clearCache();
             Set<SingleStatement> leaves1 = block1.getAllLeafStatementsIncludingNested();
             Set<SingleStatement> leaves2 = block2.getAllLeafStatementsIncludingNested();
             replaceParametersWithArguments(leaves1, leaves2);
@@ -46,8 +47,14 @@ public class FunctionBodyMapper {
                 matchLeaves(leaves1, leaves2);
 
             // Match composites
-            Set<BlockStatement> innerNodes1 = block1.getAllBlockStatementsIncludingNested();
-            Set<BlockStatement> innerNodes2 = block2.getAllBlockStatementsIncludingNested();
+            argumentizer.clearCache();
+            Set<BlockStatement> innerNodes1 = new LinkedHashSet<>(block1.getAllBlockStatementsIncludingNested());
+            Set<BlockStatement> innerNodes2 = new LinkedHashSet<>(block2.getAllBlockStatementsIncludingNested());
+
+            // TODO improve recirson of innerNodes by preventing adding itself
+            innerNodes1.remove(block1);
+            innerNodes2.remove(block2);
+
             replaceParametersWithArguments(innerNodes1, innerNodes2);
 
             if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
@@ -55,11 +62,6 @@ public class FunctionBodyMapper {
         }
     }
 
-    /**
-     * Match the block statements inside of the body of a function
-     */
-    void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2) {
-    }
 
     void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
 //        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
@@ -192,6 +194,103 @@ public class FunctionBodyMapper {
         }
     }
 
+    void matchInnerNodesWithIdenticalText(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, boolean ignoreNestingDepth) {
+        //exact string+depth matching - inner nodes
+        for (Iterator<BlockStatement> iterator2 = innerNodes2.iterator(); iterator2.hasNext(); ) {
+            BlockStatement statement2 = iterator2.next();
+            TreeSet<BlockStatementMapping> sortedMappingSet = new TreeSet<>();
+
+            for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
+                BlockStatement statement1 = iterator1.next();
+                double score = computeScore(statement1, statement2, removedOperations, addedOperations);
+                String argumentizedString1 = createArgumentizedString(statement1, statement2);
+                String argumentizedString2 = createArgumentizedString(statement1, statement2);
+
+                // Check if strings are identical and they are in same depth (or not)
+                if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth()
+                        && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0))
+                        && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
+                    BlockStatementMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
+                    sortedMappingSet.add(mapping);
+                }
+            }
+            if (!sortedMappingSet.isEmpty()) {
+                BlockStatementMapping minStatementMapping = sortedMappingSet.first();
+                mappings.add(minStatementMapping);
+                innerNodes1.remove(minStatementMapping.getFragment1());
+                iterator2.remove();
+            }
+        }
+    }
+
+    /**
+     * Match the block statements inside of the body of a function
+     */
+    void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2) {
+
+        if (innerNodes1.size() <= innerNodes2.size()) {
+            // TODO
+        } else {
+            //exact string+depth matching - inner nodes
+            matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, false);
+            matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, true);
+
+            //exact string matching - inner nodes - finds moves to another level
+            for (ListIterator<CompositeStatementObject> innerNodeIterator2 = innerNodes2.listIterator(); innerNodeIterator2.hasNext(); ) {
+                CompositeStatementObject statement2 = innerNodeIterator2.next();
+                TreeSet<CompositeStatementObjectMapping> mappingSet = new TreeSet<CompositeStatementObjectMapping>();
+                for (ListIterator<CompositeStatementObject> innerNodeIterator1 = innerNodes1.listIterator(); innerNodeIterator1.hasNext(); ) {
+                    CompositeStatementObject statement1 = innerNodeIterator1.next();
+                    double score = computeScore(statement1, statement2, removedOperations, addedOperations);
+                    if ((statement1.getString().equals(statement2.getString()) || statement1.getArgumentizedString().equals(statement2.getArgumentizedString())) &&
+                            (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
+                        CompositeStatementObjectMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
+                        mappingSet.add(mapping);
+                    }
+                }
+                if (!mappingSet.isEmpty()) {
+                    CompositeStatementObjectMapping minStatementMapping = mappingSet.first();
+                    mappings.add(minStatementMapping);
+                    innerNodes1.remove(minStatementMapping.getFragment1());
+                    innerNodeIterator2.remove();
+                }
+            }
+
+            // exact matching - inner nodes - with variable renames
+            for (ListIterator<CompositeStatementObject> innerNodeIterator2 = innerNodes2.listIterator(); innerNodeIterator2.hasNext(); ) {
+                CompositeStatementObject statement2 = innerNodeIterator2.next();
+                TreeSet<CompositeStatementObjectMapping> mappingSet = new TreeSet<CompositeStatementObjectMapping>();
+                for (ListIterator<CompositeStatementObject> innerNodeIterator1 = innerNodes1.listIterator(); innerNodeIterator1.hasNext(); ) {
+                    CompositeStatementObject statement1 = innerNodeIterator1.next();
+
+                    ReplacementInfo replacementInfo = initializeReplacementInfo(statement1, statement2, innerNodes1, innerNodes2);
+                    Set<Replacement> replacements = findReplacementsWithExactMatching(statement1, statement2, parameterToArgumentMap, replacementInfo);
+
+                    double score = computeScore(statement1, statement2, removedOperations, addedOperations);
+                    if (score == 0 && replacements != null && replacements.size() == 1 &&
+                            (replacements.iterator().next().getType().equals(ReplacementType.INFIX_OPERATOR) || replacements.iterator().next().getType().equals(ReplacementType.INVERT_CONDITIONAL))) {
+                        //special handling when there is only an infix operator or invert conditional replacement, but no children mapped
+                        score = 1;
+                    }
+                    if (replacements != null &&
+                            (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
+                        CompositeStatementObjectMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
+                        mapping.addReplacements(replacements);
+                        mappingSet.add(mapping);
+                    }
+                }
+                if (!mappingSet.isEmpty()) {
+                    CompositeStatementObjectMapping minStatementMapping = mappingSet.first();
+                    mappings.add(minStatementMapping);
+                    innerNodes1.remove(minStatementMapping.getFragment1());
+                    innerNodeIterator2.remove();
+                }
+            }
+        }
+    }
+
+}
+
     private LeafStatementMapping getLeafMappingUsingReplacements(SingleStatement leaf1
             , SingleStatement leaf2
             , Set<SingleStatement> leaves1
@@ -203,7 +302,7 @@ public class FunctionBodyMapper {
                 , leaf2
                 , parameterToArgumentMap
                 , replacementInfo,
-                preProcessor,
+                argumentizer,
                 mappings);
         if (replacements != null) {
             LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
@@ -246,11 +345,11 @@ public class FunctionBodyMapper {
     }
 
     // TODO: Similar to processInput without checking for abstractexpression
-    private String createArgumentizedString(SingleStatement statement1, SingleStatement statement2) {
-        String argumentizedString = preProcessor.getArgumentizedString(statement1);
+    private String createArgumentizedString(Statement statement1, Statement statement2) {
+        String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
         // TODO replace return value with the argumentaized string
-//        if (leaf1 instanceof StatementObject && leaf2 instanceof AbstractExpression) {
+//        if (statement1 instanceof SingleStatement && statement2 instanceof Expression) {
 //            if (argumentizedString.startsWith("return ") && argumentizedString.endsWith(";\n")) {
 //                argumentizedString = argumentizedString.substring("return ".length(),
 //                        argumentizedString.lastIndexOf(";\n"));
@@ -289,8 +388,8 @@ public class FunctionBodyMapper {
                                         Set<? extends Statement> statements2) {
 
         //mapParametersToArgument(operationDiff, parameterToArgumentMap1, parameterToArgumentMap2);
-        statements1.forEach(statement -> preProcessor.replaceParametersWithArguments(statement, parameterToArgumentMap1));
-        statements2.forEach(statement -> preProcessor.replaceParametersWithArguments(statement, parameterToArgumentMap2));
+        statements1.forEach(statement -> argumentizer.replaceParametersWithArguments(statement, parameterToArgumentMap1));
+        statements2.forEach(statement -> argumentizer.replaceParametersWithArguments(statement, parameterToArgumentMap2));
     }
 
     /**
@@ -322,4 +421,5 @@ public class FunctionBodyMapper {
 //            }
         }
     }
+
 }

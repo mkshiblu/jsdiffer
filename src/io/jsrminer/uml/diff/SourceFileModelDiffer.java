@@ -5,6 +5,7 @@ import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SourceFileModelDiffer {
@@ -29,12 +30,12 @@ public class SourceFileModelDiffer {
         // Check if the common file has some fds
         if (functions2 != null) {
             // region Convert common file's fds to hashmap
-            final HashMap<String, FunctionDeclaration> functionMap1 = new HashMap<>();
+            final HashMap<String, FunctionDeclaration> functionMap1 = new LinkedHashMap<>();
             for (FunctionDeclaration function1 : functions1) {
                 functionMap1.put(function1.qualifiedName, function1);
             }
 
-            final HashMap<String, FunctionDeclaration> functionMap2 = new HashMap<>();
+            final HashMap<String, FunctionDeclaration> functionMap2 = new LinkedHashMap<>();
             for (FunctionDeclaration function2 : functions2) {
                 functionMap2.put(function2.qualifiedName, function2);
             }

@@ -85,6 +85,7 @@ public class BlockStatement extends Statement {
                 catchClause.positionIndexInParent = currentBlock.positionIndexInParent++;
                 catchClause.depth = currentBlock.depth;
                 ((BlockStatement) currentBlock.parent).statements.add(catchClause);
+                catchClause.parent = currentBlock.parent;
             }
 
             // Parse childs of this block
@@ -128,7 +129,7 @@ public class BlockStatement extends Statement {
         }
         return leaves;
     }
-//
+
 //    @Override
 //    public String toString() {
 //        StringBuilder sb = new StringBuilder();
@@ -144,6 +145,20 @@ public class BlockStatement extends Statement {
 //        return sb.toString();
 //    }
 
+    public String getTextWithExpressions() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.type.titleCase);
+        if (expressions.size() > 0) {
+            sb.append("(");
+            for (int i = 0; i < expressions.size() - 1; i++) {
+                sb.append(expressions.get(i).text).append("; ");
+            }
+            sb.append(expressions.get(expressions.size() - 1).toString());
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
     /**
      * Similar to getInnerNodes of RM
      *
@@ -157,7 +172,11 @@ public class BlockStatement extends Statement {
                 innerNodes.addAll(composite.getAllBlockStatementsIncludingNested());
             }
         }
-       // innerNodes.add(this);
+        innerNodes.add(this);
         return innerNodes;
+    }
+
+    public List<Statement> getStatements() {
+        return this.statements;
     }
 }

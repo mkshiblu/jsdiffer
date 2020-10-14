@@ -3,7 +3,7 @@ package io.jsrminer.uml.mapping.replacement;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.mapping.LeafStatementMapping;
-import io.jsrminer.uml.mapping.PreProcessor;
+import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.StatementMapping;
 
 import java.util.*;
@@ -23,7 +23,7 @@ public class ReplacementFinder {
             , SingleStatement statement2
             , Map<String, String> parameterToArgumentMap
             , ReplacementInfo replacementInfo
-            , PreProcessor preProcessor
+            , Argumentizer argumentizer
             , Set<StatementMapping> mappings) {
 
         final StatementDiff diff = new StatementDiff(statement1, statement2);
@@ -135,7 +135,7 @@ public class ReplacementFinder {
 // endregion
 
         String[] argumentizedStrings = filterReplacements(statement1, statement2
-                , replacementInfo, preProcessor
+                , replacementInfo, argumentizer
                 , diff, methodInvocationMap1, methodInvocationMap2
                 , functionInvocations1, functionInvocations2);
 
@@ -774,13 +774,13 @@ public class ReplacementFinder {
     }
 
     private String[] filterReplacements(SingleStatement statement1, SingleStatement statement2
-            , ReplacementInfo replacementInfo, PreProcessor preProcessor
+            , ReplacementInfo replacementInfo, Argumentizer argumentizer
             , StatementDiff diff, Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2) {
 
-        String s1 = preProcessor.getArgumentizedString(statement1);
-        String s2 = preProcessor.getArgumentizedString(statement2);
+        String s1 = argumentizer.getArgumentizedString(statement1);
+        String s2 = argumentizer.getArgumentizedString(statement2);
 
         LinkedHashSet<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
         LinkedHashSet<Replacement> replacementsToBeAdded = new LinkedHashSet<>();

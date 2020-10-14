@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PreProcessor {
+public class Argumentizer {
 
     private Map<Statement, String> afterReplacementsMap = new HashMap<>();
 
@@ -58,7 +58,7 @@ public class PreProcessor {
         return afterReplacements;
     }
 
-    public String getArgumentizedString(SingleStatement statement) {
+    public String getArgumentizedString(Statement statement) {
         return this.afterReplacementsMap.get(statement);
     }
 
@@ -94,5 +94,9 @@ public class PreProcessor {
             }
         }
         return false;
+    }
+
+    public void clearCache() {
+        afterReplacementsMap.clear();
     }
 }
