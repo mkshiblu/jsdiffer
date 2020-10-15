@@ -1,7 +1,6 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.diff.StringDistance;
 
 public class BlockStatementMapping extends StatementMapping implements Comparable<BlockStatementMapping> {
@@ -32,11 +31,11 @@ public class BlockStatementMapping extends StatementMapping implements Comparabl
             distance1 = (double) distance / (double) Math.max(s1.length(), s2.length());
         }
 
-        if (o.getFragment1().getString().equals(o.getFragment2().getString())) {
+        if (o.block1.getTextWithExpressions().equals(o.block2.getTextWithExpressions())) {
             distance2 = 0;
         } else {
-            String s1 = o.getFragment1().getString().toLowerCase();
-            String s2 = o.getFragment2().getString().toLowerCase();
+            String s1 = o.block1.getTextWithExpressions().toLowerCase();
+            String s2 = o.block2.getTextWithExpressions().toLowerCase();
             int distance = StringDistance.editDistance(s1, s2);
             distance2 = (double) distance / (double) Math.max(s1.length(), s2.length());
         }
@@ -47,17 +46,24 @@ public class BlockStatementMapping extends StatementMapping implements Comparabl
             if (this.compositeChildMatchingScore != o.compositeChildMatchingScore) {
                 return -Double.compare(this.compositeChildMatchingScore, o.compositeChildMatchingScore);
             } else {
-                int depthDiff1 = Math.abs(this.getFragment1().getDepth() - this.getFragment2().getDepth());
-                int depthDiff2 = Math.abs(o.getFragment1().getDepth() - o.getFragment2().getDepth());
+                int depthDiff1 = Math.abs(this.statement1.getDepth() - this.statement2.getDepth());
+                int depthDiff2 = Math.abs(o.statement1.getDepth() - o.statement2.getDepth());
 
                 if (depthDiff1 != depthDiff2) {
                     return Integer.valueOf(depthDiff1).compareTo(Integer.valueOf(depthDiff2));
                 } else {
-                    int indexDiff1 = Math.abs(this.getFragment1().getIndex() - this.getFragment2().getIndex());
-                    int indexDiff2 = Math.abs(o.getFragment1().getIndex() - o.getFragment2().getIndex());
+                    int indexDiff1 = Math.abs(this.statement1.getPositionIndexInParent()
+                            - this.statement2.getPositionIndexInParent());
+                    int indexDiff2 = Math.abs(o.statement1.getPositionIndexInParent()
+                            - o.statement2.getPositionIndexInParent());
                     return Integer.valueOf(indexDiff1).compareTo(Integer.valueOf(indexDiff2));
                 }
             }
         }
+    }
+
+    @Override
+    public boolean isExactMatch() {
+        return false;
     }
 }

@@ -8,6 +8,95 @@ import java.util.*;
 
 public class JsonCompositeFactory {
 
+    public static BlockStatement createBlockStatement(final String blockStatementJson) {
+        // Helper variables
+        BlockStatement currentBlock, childBlock;
+        Statement child;
+        boolean isComposite;
+        int indexInParent;
+        List<Any> statements;
+        Map.Entry<BlockStatement, Any> currentEntry;
+
+        final Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed = new LinkedList<>();
+        final BlockStatement newBlock = new BlockStatement();
+        newBlock.setDepth(0);
+
+        //Enqueue to process
+        Any any = JsonIterator.deserialize(blockStatementJson);
+        blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
+
+        while (!blocksToBeProcessed.isEmpty()) {
+            indexInParent = -1;
+
+            // Extract the block and the corresponding json stored as any
+            currentEntry = blocksToBeProcessed.remove();
+            currentBlock = currentEntry.getKey();
+            any = currentEntry.getValue();
+
+            // Parse source location
+            final SourceLocation location = any.get("loc").as(SourceLocation.class);
+            currentBlock.setSourceLocation(location);
+
+            // Parse the nested statements
+            statements = any.get("statements").asList();
+
+            // Parse Type
+            currentBlock.setCodeElementType(CodeElementType.getFromTitleCase(any.toString("type")));
+
+            // Parse Expressions (Todo optimize
+            if (any.keys().contains("expressions")) {
+                for (Any expressionAny : any.get("expressions").asList()) {
+                    Expression expression = Expression.fromJSON(expressionAny.toString());
+                    currentBlock.addExpression(expression);
+                }
+            }
+
+            // Parse text
+            currentBlock.setText(any.toString("text"));
+
+            // Check if it's try statement and contains any catchBlock
+            if (any.keys().contains("catchClause")) {
+                BlockStatement catchClause = new BlockStatement();
+                blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
+
+                // Add the catchblacue as seprate composite to the parent of the try block
+                catchClause.setPositionIndexInParent(currentBlock.getPositionIndexInParent() + 1);
+                catchClause.setDepth(currentBlock.getDepth());
+                ((BlockStatement) currentBlock.getParent()).getStatements().add(catchClause);
+                catchClause.setParent(currentBlock.getParent());
+
+                // Add the catchclause to the try block
+                ((TryStatement) currentBlock).getCatchClauses().add(catchClause);
+            }
+
+            // Parse childs of this block
+            for (Any childAny : statements) {
+                isComposite = childAny.keys().contains("statements");
+
+                if (isComposite) {
+
+                    // If composite enqueue the block and corresponding json to be processed later
+                    boolean isTry = childAny.toString("type")
+                            .equals(CodeElementType.TRY_STATEMENT.titleCase);
+
+                    childBlock = isTry ? new TryStatement() : new BlockStatement();
+                    blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(childBlock, childAny));
+                    child = childBlock;
+                } else {
+                    // A leaf statement
+                    child = JsonCompositeFactory.createSingleStatement(childAny);
+                }
+
+                child.setParent(currentBlock);
+                child.setPositionIndexInParent(++indexInParent);
+                child.setDepth(currentBlock.getDepth() + 1);
+                currentBlock.addStatement(child);
+            }
+        }
+
+        return newBlock;
+    }
+
     private static void populateInvocationProperties(Any invocationAny, Invocation invocation) {
         invocation.setText(invocationAny.toString("text"));
 

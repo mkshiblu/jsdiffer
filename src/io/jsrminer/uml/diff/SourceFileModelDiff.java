@@ -13,6 +13,9 @@ public class SourceFileModelDiff {
     public final SourceFileModel sourceFileModel1;
     public final SourceFileModel sourceFileModel2;
 
+    /**
+     * Name map
+     */
     private final Map<String, FunctionDeclaration> addedOperations = new HashMap<>();
     private final Map<String, FunctionDeclaration> removedOperations = new HashMap<>();
 
@@ -31,5 +34,13 @@ public class SourceFileModelDiff {
 
     public boolean isRemovedOperation(String functionName) {
         return this.removedOperations.containsKey(functionName);
+    }
+
+    public Map<String, FunctionDeclaration> getAddedOperations() {
+        return addedOperations;
+    }
+
+    public Map<String, FunctionDeclaration> getRemovedOperations() {
+        return removedOperations;
     }
 }

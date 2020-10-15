@@ -24,4 +24,16 @@ public abstract class Statement extends CodeFragment {
     public Statement getParent() {
         return parent;
     }
+
+    public void setParent(Statement parent) {
+        this.parent = parent;
+    }
+
+    public void setPositionIndexInParent(int positionIndexInParent) {
+        this.positionIndexInParent = positionIndexInParent;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
 }

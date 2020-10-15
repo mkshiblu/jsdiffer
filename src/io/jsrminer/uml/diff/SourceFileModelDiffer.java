@@ -61,14 +61,18 @@ public class SourceFileModelDiffer {
 //        checkForExtractedOperations();
     }
 
-    protected void createBodyMappers(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
+    protected void createBodyMappers(SourceFileModelDiff sourceDiff
+            , final HashMap<String, FunctionDeclaration> functionMap1
+            , final HashMap<String, FunctionDeclaration> functionMap2) {
 
         // First map by fully qualified name? TODO revisit
         for (FunctionDeclaration function1 : functionMap1.values()) {
             final FunctionDeclaration function2 = functionMap2.get(function1.qualifiedName);
             // If function exists in both file
             if (function2 != null) {
-                FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
+                FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2,
+                        sourceDiff.getAddedOperations(),
+                        sourceDiff.getRemovedOperations());
                 mapper.map();
             }
         }
