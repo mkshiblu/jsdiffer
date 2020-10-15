@@ -12,4 +12,9 @@ public abstract class StatementMapping {
     }
 
     public abstract boolean isExactMatch();
+
+    @Override
+    public String toString() {
+        return statement1.toString() + statement2.toString();
+    }
 }

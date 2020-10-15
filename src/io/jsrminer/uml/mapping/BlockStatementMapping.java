@@ -6,39 +6,21 @@ import io.jsrminer.uml.diff.StringDistance;
 public class BlockStatementMapping extends StatementMapping implements Comparable<BlockStatementMapping> {
 
     private double compositeChildMatchingScore;
-    private BlockStatement block1;
-    private BlockStatement block2;
 
     public BlockStatementMapping(BlockStatement statement1, BlockStatement statement2, double childMatchScore
             /*,FunctionDeclaration operation1, FunctionDeclaration operation2*/) {
         super(statement1, statement2/*, operation1, operation2*/);
         this.compositeChildMatchingScore = childMatchScore;
-        this.block1 = statement1;
-        this.block2 = statement2;
     }
+
 
     @Override
     public int compareTo(BlockStatementMapping o) {
-        double distance1;
-        double distance2;
+        double distance1 = this.getNormalizedTextualDistance();
+        double distance2 = o.getNormalizedTextualDistance();
 
-        if (this.block1.getTextWithExpressions().equals(this.block2.getTextWithExpressions())) {
-            distance1 = 0;
-        } else {
-            String s1 = this.statement1.getText().toLowerCase();
-            String s2 = this.statement2.getText().toLowerCase();
-            int distance = StringDistance.editDistance(s1, s2);
-            distance1 = (double) distance / (double) Math.max(s1.length(), s2.length());
-        }
-
-        if (o.block1.getTextWithExpressions().equals(o.block2.getTextWithExpressions())) {
-            distance2 = 0;
-        } else {
-            String s1 = o.block1.getTextWithExpressions().toLowerCase();
-            String s2 = o.block2.getTextWithExpressions().toLowerCase();
-            int distance = StringDistance.editDistance(s1, s2);
-            distance2 = (double) distance / (double) Math.max(s1.length(), s2.length());
-        }
+        final BlockStatement block1 = (BlockStatement) this.statement1;
+        final BlockStatement block2 = (BlockStatement) this.statement2;
 
         if (distance1 != distance2) {
             return Double.compare(distance1, distance2);
@@ -59,6 +41,20 @@ public class BlockStatementMapping extends StatementMapping implements Comparabl
                     return Integer.valueOf(indexDiff1).compareTo(Integer.valueOf(indexDiff2));
                 }
             }
+        }
+    }
+
+    double getNormalizedTextualDistance() {
+        final BlockStatement block1 = (BlockStatement) this.statement1;
+        final BlockStatement block2 = (BlockStatement) this.statement2;
+
+        if (block1.getTextWithExpressions().equals(block2.getTextWithExpressions())) {
+            return 0;
+        } else {
+            String s1 = this.statement1.getText().toLowerCase();
+            String s2 = this.statement2.getText().toLowerCase();
+            int distance = StringDistance.editDistance(s1, s2);
+            return (double) distance / (double) Math.max(s1.length(), s2.length());
         }
     }
 
