@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FunctionDeclaration extends CodeFragment {
+public class FunctionDeclaration extends CodeEntity {
 
     /**
      * Name parameter map
@@ -120,7 +120,7 @@ public class FunctionDeclaration extends CodeFragment {
         return this.name != null && this.name.equals(function.name);
     }
 
-    public int parameterCount(){
+    public int parameterCount() {
         return this.nameParameterMap.size();
     }
 }

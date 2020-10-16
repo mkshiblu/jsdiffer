@@ -278,6 +278,7 @@ public class FunctionBodyMapper {
                 innerNodeIterator2.remove();
             }
         }
+        mappings.getClass();
     }
 
     private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2

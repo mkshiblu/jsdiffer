@@ -5,15 +5,14 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Base class for all the code elements
+ * Base class for all the code elements that has apis  to provide all the variables, identifiers appeared in the code
  */
-public abstract class CodeFragment {
-    protected SourceLocation sourceLocation;
-    protected String text;
-    protected CodeElementType type;
+public abstract class CodeFragment extends CodeEntity {
+    //    protected SourceLocation sourceLocation;
+//    protected String text;
+//    protected CodeElementType type;
     protected int positionIndexInParent = -1;
     protected int depth = -1;
-    protected Statement parent;
 
     public CodeFragment() {
     }
@@ -24,17 +23,9 @@ public abstract class CodeFragment {
 
     @Override
     public String toString() {
+        if (text == null)
+            return super.toString();
         return text;
-    }
-
-    public boolean equalsSourceLocation(CodeFragment test) {
-        if (this.getFile() == null) {
-            if (test.getFile() != null)
-                return false;
-        } else if (!this.getFile().equals(test.getFile()))
-            return false;
-
-        return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);
     }
 
     /**
@@ -48,14 +39,6 @@ public abstract class CodeFragment {
         return positionIndexInParent;
     }
 
-    public Statement getParent() {
-        return parent;
-    }
-
-    public void setParent(Statement parent) {
-        this.parent = parent;
-    }
-
     public void setPositionIndexInParent(int positionIndexInParent) {
         this.positionIndexInParent = positionIndexInParent;
     }
@@ -64,39 +47,39 @@ public abstract class CodeFragment {
         this.depth = depth;
     }
 
-    public SourceLocation getSourceLocation() {
-        return sourceLocation;
-    }
-
-    public void setSourceLocation(SourceLocation sourceLocation) {
-        this.sourceLocation = sourceLocation;
-    }
-
-    public String getFile() {
-        return sourceLocation.getFile();
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setType(CodeElementType type) {
-        this.type = type;
-    }
-
-    /**
-     * Returns the Code Element type of this fragment
-     */
-    public CodeElementType getType() {
-        return type;
-    }
+//    public SourceLocation getSourceLocation() {
+//        return sourceLocation;
+//    }
+//
+//    public void setSourceLocation(SourceLocation sourceLocation) {
+//        this.sourceLocation = sourceLocation;
+//    }
+//
+//    public String getFile() {
+//        return sourceLocation.getFile();
+//    }
+//
+//    public String getText() {
+//        return text;
+//    }
+//
+//    public void setText(String text) {
+//        this.text = text;
+//    }
+//
+//    public void setType(CodeElementType type) {
+//        this.type = type;
+//    }
+//
+//    /**
+//     * Returns the Code Element type of this fragment
+//     */
+//    public CodeElementType getType() {
+//        return type;
+//    }
 
     // region API
-    public abstract Set<String> getVariables();
+    public abstract List<String> getVariables();
 
     public abstract Map<String, List<OperationInvocation>> getMethodInvocationMap();
 
@@ -116,7 +99,7 @@ public abstract class CodeFragment {
 
     public abstract List<String> getPrefixExpressions();
 
-    public abstract Set<String> getIdentifierArguments();
+    public abstract List<String> getIdentifierArguments();
 
     public abstract List<VariableDeclaration> getVariableDeclarations();
 

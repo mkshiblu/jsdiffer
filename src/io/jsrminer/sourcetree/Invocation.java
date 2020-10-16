@@ -3,7 +3,7 @@ package io.jsrminer.sourcetree;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class Invocation extends CodeFragment {
+public abstract class Invocation extends CodeEntity {
     public enum InvocationCoverageType {
         NONE, ONLY_CALL, RETURN_CALL, THROW_CALL, CAST_CALL, VARIABLE_DECLARATION_INITIALIZER_CALL;
     }

@@ -5,10 +5,10 @@ import java.util.*;
 public class SingleStatement extends Statement {
     // private List<AbstractExpression> expressionList;
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
-    private Set<String> variables = new LinkedHashSet<>();
+    private List<String> variables = new ArrayList<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
-    private Set<String> identifierArguments = new LinkedHashSet<>();
+    private List<String> identifierArguments = new ArrayList<>();
 
     public List<String> stringLiterals = new ArrayList<>();
     public List<String> numberLiterals = new ArrayList<>();
@@ -21,16 +21,11 @@ public class SingleStatement extends Statement {
     public SingleStatement() {
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-    }
-
     /**
      * Returns the identifiers involved in this statement
      */
     @Override
-    public Set<String> getVariables() {
+    public List<String> getVariables() {
         return this.variables;
     }
 
@@ -83,7 +78,7 @@ public class SingleStatement extends Statement {
      * Returns arguments which are Invocations
      */
     @Override
-    public Set<String> getIdentifierArguments() {
+    public List<String> getIdentifierArguments() {
         return identifierArguments;
     }
 

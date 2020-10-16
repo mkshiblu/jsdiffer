@@ -3,6 +3,7 @@ package io.jsrminer.parser;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
+import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
 
@@ -46,7 +47,7 @@ public class JsonCompositeFactory {
             // Parse Expressions (Todo optimize
             if (any.keys().contains("expressions")) {
                 for (Any expressionAny : any.get("expressions").asList()) {
-                    Expression expression = Expression.fromJSON(expressionAny.toString());
+                    Expression expression = createExpression(expressionAny);
                     currentBlock.addExpression(expression);
                 }
             }
@@ -157,8 +158,7 @@ public class JsonCompositeFactory {
         // region
         // Identifiers
         if (any.keys().contains("identifiers")) {
-            Set<String> variables = any.get("identifiers").as(singleStatement.getVariables().getClass());
-            singleStatement.setVariables(variables);
+            populateStringListFromAny(any.get("identifiers"), singleStatement.getVariables());
         }
         //endregion
 
@@ -188,8 +188,7 @@ public class JsonCompositeFactory {
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
         if (any.keys().contains("argumentsWithIdentifier")) {
-            singleStatement.getIdentifierArguments().addAll(any.get("argumentsWithIdentifier")
-                    .as(singleStatement.getIdentifierArguments().getClass()));
+            populateStringListFromAny(any.get("argumentsWithIdentifier"), singleStatement.getIdentifierArguments());
         }
 
         return singleStatement;
@@ -228,7 +227,7 @@ public class JsonCompositeFactory {
 
     public static VariableDeclaration createVariableDeclaration(Any any) {
         VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"));
-        vd.setText(any.toString("text"));
+        //vd.setText(any.toString("text"));
         VariableDeclarationKind kind = VariableDeclarationKind.fromName(any.toString("kind"));
         vd.setKind(kind);
 
@@ -245,9 +244,9 @@ public class JsonCompositeFactory {
         expression.setText(any.toString("text"));
 
         // Info
-        expression.setVariables(any.get("identifiers").as(String[].class));
-        expression.setNumericLiterals(any.get("numericLiterals").as(String[].class));
-        expression.setInfixOperators(any.get("infixOperators").as(String[].class));
+        populateStringListFromAny(any.get("identifiers"), expression.getVariables());
+        populateStringListFromAny(any.get("numericLiterals"), expression.getNumberLiterals());
+        populateStringListFromAny(any.get("infixOperators"), expression.getInfixOperators());
 
         final List<Any> anys = any.get("variableDeclarations").asList();
 
@@ -261,17 +260,19 @@ public class JsonCompositeFactory {
         // region
         // Identifiers
         if (any.keys().contains("identifiers")) {
-            String[] variables = any.get("identifiers").as(expression.getVariables().getClass());
-            expression.setVariables(variables);
+            populateStringListFromAny(any.get("identifiers"), expression.getVariables());
         }
         //endregion
         parseAndLoadFunctionInvocations(any.get("functionInvocations"), expression.getMethodInvocationMap());
         parseAndLoadObjectCreations(any.get("objectCreations"), expression.getCreationMap());
-
         return expression;
     }
 
     static SourceLocation createSourceLocation(Any sourceLocationAny) {
         return sourceLocationAny.as(SourceLocation.class);
+    }
+
+    static void populateStringListFromAny(Any any, @NonNull List<String> listToBePopulated) {
+        any.asList().forEach(item -> listToBePopulated.add(item.toString()));
     }
 }

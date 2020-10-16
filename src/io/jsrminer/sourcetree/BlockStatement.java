@@ -1,9 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
@@ -12,6 +9,7 @@ import java.util.Set;
 public class BlockStatement extends Statement {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
+    private List<VariableDeclaration> variableDeclarations;
     // exp
     // vd
 
@@ -82,9 +80,134 @@ public class BlockStatement extends Statement {
         this.type = type;
     }
 
+    /***
+     * Returns the text with Expressions
+     * @return
+     */
     @Override
     public String getText() {
         return getTextWithExpressions();
+    }
+
+    @Override
+    public List<String> getVariables() {
+        List<String> variables = new ArrayList<>();
+        for (Expression expression : this.getExpressions()) {
+            variables.addAll(expression.getVariables());
+        }
+        return variables;
+    }
+
+    @Override
+    public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
+        Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
+        for (Expression expression : this.expressions) {
+            Map<String, List<OperationInvocation>> expressionMap = expression.getMethodInvocationMap();
+            for (String key : expressionMap.keySet()) {
+                if (map.containsKey(key)) {
+                    map.get(key).addAll(expressionMap.get(key));
+                } else {
+                    List<OperationInvocation> list = new ArrayList<>();
+                    list.addAll(expressionMap.get(key));
+                    map.put(key, list);
+                }
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, List<ObjectCreation>> getCreationMap() {
+        return null;
+    }
+
+    @Override
+    public List<String> getStringLiterals() {
+        List<String> stringLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            stringLiterals.addAll(expression.getStringLiterals());
+        }
+        return stringLiterals;
+    }
+
+    @Override
+    public List<String> getNumberLiterals() {
+        List<String> numberLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            numberLiterals.addAll(expression.getNumberLiterals());
+        }
+        return numberLiterals;
+    }
+
+    @Override
+    public List<String> getNullLiterals() {
+        List<String> nullLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            nullLiterals.addAll(expression.getNullLiterals());
+        }
+        return nullLiterals;
+    }
+
+    @Override
+    public List<String> getBooleanLiterals() {
+        List<String> booleanLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            booleanLiterals.addAll(expression.getBooleanLiterals());
+        }
+        return booleanLiterals;
+    }
+
+    @Override
+    public List<String> getInfixOperators() {
+        List<String> infixOperators = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            infixOperators.addAll(expression.getInfixOperators());
+        }
+        return infixOperators;
+    }
+
+    @Override
+    public List<String> getArrayAccesses() {
+        List<String> arrayAccesses = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            arrayAccesses.addAll(expression.getArrayAccesses());
+        }
+        return arrayAccesses;
+    }
+
+    @Override
+    public List<String> getPrefixExpressions() {
+        List<String> prefixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            prefixExpressions.addAll(expression.getPrefixExpressions());
+        }
+        return prefixExpressions;
+    }
+
+    @Override
+    public List<String> getIdentifierArguments() {
+        return null;
+    }
+
+    @Override
+    public List<VariableDeclaration> getVariableDeclarations() {
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+        //special handling for enhanced-for formal parameter
+        variableDeclarations.addAll(this.variableDeclarations);
+        for (Expression expression : this.getExpressions()) {
+            variableDeclarations.addAll(expression.getVariableDeclarations());
+        }
+        return variableDeclarations;
+    }
+
+    @Override
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        return null;
+    }
+
+    @Override
+    public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
+        return null;
     }
 
     public List<Expression> getExpressions() {

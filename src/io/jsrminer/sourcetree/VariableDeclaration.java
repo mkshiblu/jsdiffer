@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-public class VariableDeclaration {
+public class VariableDeclaration extends CodeEntity {
     private Expression initializer;
     private VariableDeclarationKind kind;
     public final String variableName;

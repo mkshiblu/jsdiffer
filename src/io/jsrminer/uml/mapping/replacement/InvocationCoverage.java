@@ -137,9 +137,9 @@ public enum InvocationCoverage {
     private boolean expressionIsTheRightHandSideOfAssignment(String expression, CodeFragment statement) {
         String statementText = statement.getText();
         if (statementText.contains("=")) {
-            Set<String> variables = statement.getVariables();
+            List<String> variables = statement.getVariables();
             if (variables.size() > 0) {
-                String s = variables.stream().findFirst().get() + " = " + expression + ";\n";
+                String s = variables.get(0) + " = " + expression + SINGLE_STATEMENT_TERMINATOR_CHAR;
                 if (statementText.equals(s)) {
                     return true;
                 }
