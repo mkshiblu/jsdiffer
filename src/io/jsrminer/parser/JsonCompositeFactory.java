@@ -247,21 +247,18 @@ public class JsonCompositeFactory {
         populateStringListFromAny(any.get("identifiers"), expression.getVariables());
         populateStringListFromAny(any.get("numericLiterals"), expression.getNumberLiterals());
         populateStringListFromAny(any.get("infixOperators"), expression.getInfixOperators());
+        populateStringListFromAny(any.get("postfixOperators"), expression.getPostfixExpressions());
+        populateStringListFromAny(any.get("prefixOperators"), expression.getPrefixExpressions());
 
         final List<Any> anys = any.get("variableDeclarations").asList();
 
         // Vds
         for (Any variableDeclarationAny : anys) {
-            VariableDeclaration declaration = new VariableDeclaration(variableDeclarationAny.toString("name"));
+            VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny);
             expression.getVariableDeclarations().add(declaration);
         }
 
         // Additional info if present
-        // region
-        // Identifiers
-        if (any.keys().contains("identifiers")) {
-            populateStringListFromAny(any.get("identifiers"), expression.getVariables());
-        }
         //endregion
         parseAndLoadFunctionInvocations(any.get("functionInvocations"), expression.getMethodInvocationMap());
         parseAndLoadObjectCreations(any.get("objectCreations"), expression.getCreationMap());

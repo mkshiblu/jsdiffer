@@ -17,7 +17,8 @@ public class Expression extends CodeFragment {
     public List<String> booleanLiterals = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
-    private List<String> prefixExpressions = new ArrayList<>();
+    private List<String> prefixExpressions = new ArrayList<>();;
+    private List<String> postfixExpressions = new ArrayList<>();
 
     private BlockStatement ownerBlock;
 
@@ -121,5 +122,9 @@ public class Expression extends CodeFragment {
 
     public void setOwnerBlock(BlockStatement ownerBlock) {
         this.ownerBlock = ownerBlock;
+    }
+
+    public List<String> getPostfixExpressions() {
+        return postfixExpressions;
     }
 }

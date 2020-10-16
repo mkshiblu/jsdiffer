@@ -12,6 +12,7 @@ const processes = new Map([
     ['AssignmentExpression', processAssignmentExpression],
     ['MemberExpression', processMemberExpression],
     ['ArrayExpression', processArrayExpression],
+    ['UpdateExpression', processUpdateExpression],
 ]);
 
 /**
@@ -233,6 +234,27 @@ An identifier. Note that an identifier may be an expression or a destructuring p
 function processIdentifier(path, { identifiers = [] }) {
     const name = path.node.name;
     identifiers.push(name);
+}
+
+/** An ++ or -- after or befor and expression */
+// interface UpdateExpression <: Expression {
+//     type: "UpdateExpression";
+//     operator: UpdateOperator;
+//     argument: Expression;
+//     prefix: boolean;
+//   }
+
+function processUpdateExpression(path, expressionResult, statement) {
+
+    const node = path.node;
+    
+    // Extract operator (++/ --)
+    if (node.prefix) {
+        expressionResult.prefixOperators.push(node.operator);
+    } else {
+        expressionResult.postfixOperators.push(node.operator);
+    }
+    processExpression(path.get('argument'), expressionResult, statement);
 }
 
 exports.processExpression = processExpression;
