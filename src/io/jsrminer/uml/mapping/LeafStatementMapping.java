@@ -10,8 +10,6 @@ import java.util.Set;
 
 public class LeafStatementMapping extends StatementMapping implements Comparable<LeafStatementMapping> {
 
-    private Set<Replacement> replacements = new LinkedHashSet<>();
-
     public LeafStatementMapping(Statement statement1, Statement statement2) {
         super(statement1, statement2);
     }
@@ -114,13 +112,5 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
         int distance = StringDistance.editDistance(s1, s2);
         double normalized = (double) distance / Math.max(s1.length(), s2.length());
         return normalized;
-    }
-
-    public void addReplacements(Set<Replacement> replacements) {
-        this.replacements.addAll(replacements);
-    }
-
-    public Set<Replacement> getReplacements() {
-        return replacements;
     }
 }
