@@ -1,6 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
 
 import java.util.*;
@@ -11,8 +11,8 @@ import java.util.*;
 public class ReplacementInfo {
     public final String originalString1;
     public final String originalString2;
-    final List<SingleStatement> unMatchedStatements1;
-    final List<SingleStatement> unMatchedStatements2;
+    final List<? extends Statement> unMatchedStatements1;
+    final List<? extends Statement> unMatchedStatements2;
 
     private String argumentizedString1;
     private String argumentizedString2;
@@ -29,7 +29,8 @@ public class ReplacementInfo {
 //        this.replacements = new LinkedHashSet<Replacement>();
 //    }
     public ReplacementInfo(String argumentizedString1, String argumentizedString2,
-                           List<SingleStatement> unMatchedStatements1, List<SingleStatement> unMatchedStatements2) {
+                           List<? extends Statement> unMatchedStatements1
+            , List<? extends Statement> unMatchedStatements2) {
         this.originalString1 = argumentizedString1;
         this.originalString2 = argumentizedString2;
         this.argumentizedString2 = argumentizedString2;

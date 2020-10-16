@@ -1545,8 +1545,9 @@ public class ReplacementFinder {
                 // invocation 2 contains, but not invocation 1
                 if (!invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
                         invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
-                    if (invocationCoveringEntireStatementUsesVariableInArgument(invocationCoveringTheEntireStatement1,
-                            commonVariable, replacementInfo.unMatchedStatements1)) {
+                    if (invocationCoveringEntireStatementUsesVariableInArgument
+                            (invocationCoveringTheEntireStatement1,
+                                    commonVariable, replacementInfo.unMatchedStatements1)) {
                         variablesToBeRemovedFromCommon.add(commonVariable);
                     }
                 } else if (invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
@@ -1577,7 +1578,8 @@ public class ReplacementFinder {
         return variablesToBeRemovedFromCommon;
     }
 
-    private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement, String variable, List<SingleStatement> unMatchedStatements) {
+    private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement
+            , String variable, List<? extends Statement> unMatchedStatements) {
         for (String argument : invocationCoveringTheEntireStatement.getArguments()) {
             String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
             if (argument.contains(variable) && !argument.equals(variable)
@@ -1591,9 +1593,10 @@ public class ReplacementFinder {
         return false;
     }
 
-    private boolean nonMatchedStatementUsesVariableInArgument(List<SingleStatement> statements, String variable, String otherArgument) {
-        for (SingleStatement statement : statements) {
-            OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
+    private boolean nonMatchedStatementUsesVariableInArgument(List<? extends Statement> statements, String variable, String otherArgument) {
+        for (Statement statement : statements) {
+            OperationInvocation invocation = InvocationCoverage.INSTANCE
+                    .getInvocationCoveringEntireFragment(statement);
             if (invocation != null) {
                 for (String argument : invocation.getArguments()) {
                     String argumentNoWhiteSpace = argument.replaceAll("\\s", "");

@@ -96,4 +96,9 @@ public class BlockStatement extends Statement {
     public void setCodeElementType(CodeElementType type) {
         this.type = type;
     }
+
+    @Override
+    public String getText() {
+        return getTextWithExpressions();
+    }
 }

@@ -248,38 +248,62 @@ public class FunctionBodyMapper {
             //exact string+depth matching - inner nodes
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, /*parameterToArgumentMap,*/ false);
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, /*parameterToArgumentMap,*/ true);
-
-//            // exact matching - inner nodes - with variable renames
-//            for (ListIterator<CompositeStatementObject> innerNodeIterator2 = innerNodes2.listIterator(); innerNodeIterator2.hasNext(); ) {
-//                CompositeStatementObject statement2 = innerNodeIterator2.next();
-//                TreeSet<CompositeStatementObjectMapping> mappingSet = new TreeSet<CompositeStatementObjectMapping>();
-//                for (ListIterator<CompositeStatementObject> innerNodeIterator1 = innerNodes1.listIterator(); innerNodeIterator1.hasNext(); ) {
-//                    CompositeStatementObject statement1 = innerNodeIterator1.next();
-//
-//                    ReplacementInfo replacementInfo = initializeReplacementInfo(statement1, statement2, innerNodes1, innerNodes2);
-//                    Set<Replacement> replacements = findReplacementsWithExactMatching(statement1, statement2, parameterToArgumentMap, replacementInfo);
-//
-//                    double score = computeScore(statement1, statement2, removedOperations, addedOperations);
-//                    if (score == 0 && replacements != null && replacements.size() == 1 &&
-//                            (replacements.iterator().next().getType().equals(ReplacementType.INFIX_OPERATOR) || replacements.iterator().next().getType().equals(ReplacementType.INVERT_CONDITIONAL))) {
-//                        //special handling when there is only an infix operator or invert conditional replacement, but no children mapped
-//                        score = 1;
-//                    }
-//                    if (replacements != null &&
-//                            (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
-//                        CompositeStatementObjectMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
-//                        mapping.addReplacements(replacements);
-//                        mappingSet.add(mapping);
-//                    }
-//                }
-//                if (!mappingSet.isEmpty()) {
-//                    CompositeStatementObjectMapping minStatementMapping = mappingSet.first();
-//                    mappings.add(minStatementMapping);
-//                    innerNodes1.remove(minStatementMapping.getFragment1());
-//                    innerNodeIterator2.remove();
-//                }
-//            }
+            matchInnerNodersWithVariableRenames(innerNodes1, innerNodes2);
         }
+    }
+
+    private void matchInnerNodersWithVariableRenames(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2) {
+        // exact matching - inner nodes - with variable renames
+        ReplacementFinder replacementFinder = new ReplacementFinder();
+        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
+
+        for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
+            BlockStatement statement2 = innerNodeIterator2.next();
+            TreeSet<BlockStatementMapping> mappingSet = new TreeSet<>();
+
+            for (Iterator<BlockStatement> innerNodeIterator1 = innerNodes1.iterator();
+                 innerNodeIterator1.hasNext(); ) {
+                BlockStatement statement1 = innerNodeIterator1.next();
+
+                BlockStatementMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2, innerNodes1, innerNodes2
+                        , parameterToArgumentMap, replacementFinder);
+
+            //    if (mapping != null) {
+              //      mappingSet.add(mapping);
+               // }
+
+//                ReplacementInfo replacementInfo = createReplacementInfo(statement1,
+//                        statement2, innerNodes1, innerNodes2);
+//                Set<Replacement> replacements = findReplacementsWithExactMatching(statement1, statement2, parameterToArgumentMap, replacementInfo);
+
+                double score = ChildCountMatcher.computeScore(statement1, statement2
+                        , removedOperations, addedOperations
+                        , this.mappings, false);
+
+                if (score == 0 && replacements != null && replacements.size() == 1 &&
+                        (replacements.iterator().next().getType().equals(ReplacementType.INFIX_OPERATOR) || replacements.iterator().next().getType().equals(ReplacementType.INVERT_CONDITIONAL))) {
+                    //special handling when there is only an infix operator or invert conditional replacement, but no children mapped
+                    score = 1;
+                }
+                if (replacements != null && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
+                    CompositeStatementObjectMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
+                    mapping.addReplacements(replacements);
+                    mappingSet.add(mapping);
+                }
+            }
+
+            if (!mappingSet.isEmpty()) {
+                BlockStatementMapping minStatementMapping = mappingSet.first();
+                mappings.add(minStatementMapping);
+                innerNodes1.remove(minStatementMapping.statement1);
+                innerNodeIterator2.remove();
+            }
+        }
+
+    }
+
+    private BlockStatementMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2, Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
+
     }
 
     private LeafStatementMapping getLeafMappingUsingReplacements(SingleStatement leaf1
@@ -323,16 +347,18 @@ public class FunctionBodyMapper {
         return null;
     }
 
-    private ReplacementInfo createReplacementInfo(SingleStatement leaf1, SingleStatement leaf2,
-                                                  Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
-        List<SingleStatement> unmatchedLeaves1 = new ArrayList<>(leaves1);
-        unmatchedLeaves1.remove(leaf1);
-        List<SingleStatement> unmatchedLeaves2 = new ArrayList<>(leaves2);
-        unmatchedLeaves2.remove(leaf2);
+    private ReplacementInfo createReplacementInfo(Statement statement1
+            , Statement statement2
+            , Set<? extends Statement> statements1
+            , Set<? extends Statement> statements2) {
+        List<? extends Statement> unmatchedStatments1 = new ArrayList<>(statements1);
+        unmatchedStatments1.remove(statement1);
+        List<? extends Statement> unmatchedStatements2 = new ArrayList<>(statements2);
+        unmatchedStatements2.remove(statement2);
         return new ReplacementInfo(
-                createArgumentizedString(leaf1, leaf2),
-                createArgumentizedString(leaf2, leaf1),
-                unmatchedLeaves1, unmatchedLeaves2);
+                createArgumentizedString(statement1, statement2),
+                createArgumentizedString(statement2, statement1),
+                unmatchedStatments1, unmatchedStatements2);
     }
 
     // TODO: Similar to processInput without checking for abstractexpression

@@ -15,9 +15,9 @@ public enum InvocationCoverage {
 
     public final int CACHE_SIZE = 100;
     private final Map<OperationInvocation, InvocationCoverageType> invocationCoverageTypeMap = new HashMap<>();
-    private final Map<SingleStatement, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
+    private final Map<Statement, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
 
-    public OperationInvocation getInvocationCoveringEntireFragment(SingleStatement statement) {
+    public OperationInvocation getInvocationCoveringEntireFragment(Statement statement) {
         if (!invocationCoveringEntireFragmentMap.containsKey(statement)) {
             OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(statement);
             updateCacheSize();
@@ -29,7 +29,7 @@ public enum InvocationCoverage {
     /**
      * Checks if the statement contains method invocation which text covers the entire statement's text
      */
-    private OperationInvocation findInvocationCoveringEntireFragment(SingleStatement statement) {
+    private OperationInvocation findInvocationCoveringEntireFragment(Statement statement) {
         Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
         String statementText = statement.getText();
         InvocationCoverageType coveregeType = null;
