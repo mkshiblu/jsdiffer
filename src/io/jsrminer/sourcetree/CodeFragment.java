@@ -1,5 +1,9 @@
 package io.jsrminer.sourcetree;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Base class for all the code elements
  */
@@ -7,12 +11,57 @@ public abstract class CodeFragment {
     protected SourceLocation sourceLocation;
     protected String text;
     protected CodeElementType type;
+    protected int positionIndexInParent = -1;
+    protected int depth = -1;
+    protected Statement parent;
 
     public CodeFragment() {
     }
 
     public CodeFragment(String text) {
         this.text = text;
+    }
+
+    @Override
+    public String toString() {
+        return text;
+    }
+
+    public boolean equalsSourceLocation(CodeFragment test) {
+        if (this.getFile() == null) {
+            if (test.getFile() != null)
+                return false;
+        } else if (!this.getFile().equals(test.getFile()))
+            return false;
+
+        return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);
+    }
+
+    /**
+     * Returns the nesting depth from the original declaring scope such as function body
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    public int getPositionIndexInParent() {
+        return positionIndexInParent;
+    }
+
+    public Statement getParent() {
+        return parent;
+    }
+
+    public void setParent(Statement parent) {
+        this.parent = parent;
+    }
+
+    public void setPositionIndexInParent(int positionIndexInParent) {
+        this.positionIndexInParent = positionIndexInParent;
+    }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
     }
 
     public SourceLocation getSourceLocation() {
@@ -46,18 +95,34 @@ public abstract class CodeFragment {
         return type;
     }
 
-    @Override
-    public String toString() {
-        return text;
-    }
+    // region API
+    public abstract Set<String> getVariables();
 
-    public boolean equalsSourceLocation(CodeFragment test) {
-        if (this.getFile() == null) {
-            if (test.getFile() != null)
-                return false;
-        } else if (!this.getFile().equals(test.getFile()))
-            return false;
+    public abstract Map<String, List<OperationInvocation>> getMethodInvocationMap();
 
-        return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);
-    }
+    public abstract Map<String, List<ObjectCreation>> getCreationMap();
+
+    public abstract List<String> getStringLiterals();
+
+    public abstract List<String> getNumberLiterals();
+
+    public abstract List<String> getNullLiterals();
+
+    public abstract List<String> getBooleanLiterals();
+
+    public abstract List<String> getInfixOperators();
+
+    public abstract List<String> getArrayAccesses();
+
+    public abstract List<String> getPrefixExpressions();
+
+    public abstract Set<String> getIdentifierArguments();
+
+    public abstract List<VariableDeclaration> getVariableDeclarations();
+
+    public abstract VariableDeclaration getVariableDeclaration(String variableName);
+
+    public abstract VariableDeclaration findVariableDeclarationIncludingParent(String varibleName);
+
+    //endregion
 }

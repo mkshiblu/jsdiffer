@@ -3,14 +3,10 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.mapping.replacement.Replacement;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comparable<LeafCodeFragmentMapping> {
 
-public class LeafStatementMapping extends StatementMapping implements Comparable<LeafStatementMapping> {
-
-    public LeafStatementMapping(Statement statement1, Statement statement2) {
+    public LeafCodeFragmentMapping(Statement statement1, Statement statement2) {
         super(statement1, statement2);
     }
 
@@ -25,7 +21,7 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
     }
 
     @Override
-    public int compareTo(LeafStatementMapping o) {
+    public int compareTo(LeafCodeFragmentMapping o) {
         double distance1 = this.normalizedTextualDistance();
         double distance2 = o.normalizedTextualDistance();
 

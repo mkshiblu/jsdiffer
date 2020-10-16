@@ -10,15 +10,13 @@ import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
 
-import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
-
 public class FunctionBodyMapper {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
     protected final Argumentizer argumentizer;
 
-    private Set<StatementMapping> mappings = new LinkedHashSet<>();
+    private Set<CodeFragmentMapping> mappings = new LinkedHashSet<>();
     Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
     Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 
@@ -106,7 +104,7 @@ public class FunctionBodyMapper {
         for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
 
             SingleStatement leaf1 = iterator1.next();
-            TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+            TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
             for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                 SingleStatement leaf2 = iterator2.next();
@@ -117,13 +115,13 @@ public class FunctionBodyMapper {
                 // Check if strings are identical and they are in same depth
                 if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
                         && (leaf1.getText().equals(leaf2.getText()) || argumentizedString1.equals(argumentizedString2))) {
-                    LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+                    LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
                     mappingSet.add(mapping);
                 }
             }
 
             if (!mappingSet.isEmpty()) {
-                LeafStatementMapping minStatementMapping = mappingSet.first();
+                LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
                 mappings.add(minStatementMapping);
 
                 leaves2.remove(minStatementMapping.statement2);
@@ -143,18 +141,18 @@ public class FunctionBodyMapper {
         if (leaves1.size() <= leaves2.size()) {
             for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
                 SingleStatement leaf1 = iterator1.next();
-                TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+                TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
                 for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                     SingleStatement leaf2 = iterator2.next();
 
-                    LeafStatementMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
+                    LeafCodeFragmentMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
                         mappingSet.add(mapping);
                     }
                 }
                 if (!mappingSet.isEmpty()) {
-                    LeafStatementMapping minStatementMapping = mappingSet.first();
+                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
                     this.mappings.add(minStatementMapping);
                     leaves2.remove(minStatementMapping.statement2);
                     iterator1.remove();
@@ -163,11 +161,11 @@ public class FunctionBodyMapper {
         } else {
             for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
                 SingleStatement leaf2 = iterator2.next();
-                TreeSet<LeafStatementMapping> mappingSet = new TreeSet<>();
+                TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
                 for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
                     SingleStatement leaf1 = iterator1.next();
-                    LeafStatementMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
+                    LeafCodeFragmentMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
                         mappingSet.add(mapping);
                     }
@@ -192,7 +190,7 @@ public class FunctionBodyMapper {
 //                        leaves1.remove(minStatementMapping.getFragment1());
 //                        leafIterator2.remove();
 //                    }
-                    LeafStatementMapping minStatementMapping = mappingSet.first();
+                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
                     this.mappings.add(minStatementMapping);
 
                     // Remove the matched statmetns
@@ -209,7 +207,7 @@ public class FunctionBodyMapper {
         //exact string+depth matching - inner nodes
         for (Iterator<BlockStatement> iterator2 = innerNodes2.iterator(); iterator2.hasNext(); ) {
             BlockStatement statement2 = iterator2.next();
-            TreeSet<BlockStatementMapping> sortedMappingSet = new TreeSet<>();
+            TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
 
             for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                 BlockStatement statement1 = iterator1.next();
@@ -223,13 +221,13 @@ public class FunctionBodyMapper {
                 if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth()
                         && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0))
                         && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                    BlockStatementMapping mapping = createCompositeMapping(statement1, statement2
+                    BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
                             , parameterToArgumentMap, score);
                     sortedMappingSet.add(mapping);
                 }
             }
             if (!sortedMappingSet.isEmpty()) {
-                BlockStatementMapping minStatementMapping = sortedMappingSet.first();
+                BlockCodeFragmentMapping minStatementMapping = sortedMappingSet.first();
                 mappings.add(minStatementMapping);
                 innerNodes1.remove(minStatementMapping.statement1);
                 iterator2.remove();
@@ -259,13 +257,13 @@ public class FunctionBodyMapper {
 
         for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
             BlockStatement statement2 = innerNodeIterator2.next();
-            TreeSet<BlockStatementMapping> mappingSet = new TreeSet<>();
+            TreeSet<BlockCodeFragmentMapping> mappingSet = new TreeSet<>();
 
             for (Iterator<BlockStatement> innerNodeIterator1 = innerNodes1.iterator();
                  innerNodeIterator1.hasNext(); ) {
                 BlockStatement statement1 = innerNodeIterator1.next();
 
-                BlockStatementMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2,
+                BlockCodeFragmentMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2,
                         innerNodes1, innerNodes2
                         , parameterToArgumentMap, replacementFinder);
 
@@ -274,7 +272,7 @@ public class FunctionBodyMapper {
             }
 
             if (!mappingSet.isEmpty()) {
-                BlockStatementMapping minStatementMapping = mappingSet.first();
+                BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
                 mappings.add(minStatementMapping);
                 innerNodes1.remove(minStatementMapping.statement1);
                 innerNodeIterator2.remove();
@@ -282,7 +280,7 @@ public class FunctionBodyMapper {
         }
     }
 
-    private BlockStatementMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2
+    private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
@@ -306,7 +304,7 @@ public class FunctionBodyMapper {
                 score = 1;
             }
             if (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0) {
-                BlockStatementMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
+                BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2, parameterToArgumentMap, score);
                 mapping.addReplacements(replacements);
                 return mapping;
             }
@@ -314,7 +312,7 @@ public class FunctionBodyMapper {
         return null;
     }
 
-    private LeafStatementMapping getLeafMappingUsingReplacements(SingleStatement leaf1
+    private LeafCodeFragmentMapping getLeafMappingUsingReplacements(SingleStatement leaf1
             , SingleStatement leaf2
             , Set<SingleStatement> leaves1
             , Set<SingleStatement> leaves2
@@ -328,7 +326,7 @@ public class FunctionBodyMapper {
                 argumentizer,
                 mappings);
         if (replacements != null) {
-            LeafStatementMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+            LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);
 //                    for (AbstractCodeFragment leaf : leaves2) {
 //                        if (leaf.equals(leaf2)) {
@@ -383,10 +381,10 @@ public class FunctionBodyMapper {
         return argumentizedString;
     }
 
-    private LeafStatementMapping createLeafMapping(SingleStatement leaf1, SingleStatement leaf2, Map<String, String> parameterToArgumentMap) {
+    private LeafCodeFragmentMapping createLeafMapping(SingleStatement leaf1, SingleStatement leaf2, Map<String, String> parameterToArgumentMap) {
 //        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
 //        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
-        LeafStatementMapping mapping = new LeafStatementMapping(leaf1, leaf2);
+        LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2);
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
 //            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
@@ -396,15 +394,15 @@ public class FunctionBodyMapper {
         return mapping;
     }
 
-    private BlockStatementMapping createCompositeMapping(BlockStatement statement1,
-                                                         BlockStatement statement2
+    private BlockCodeFragmentMapping createCompositeMapping(BlockStatement statement1,
+                                                            BlockStatement statement2
             , Map<String, String> parameterToArgumentMap, double score) {
 //        FunctionDeclaration operation1 = /*codeFragmentOperationMap1.containsKey(statement1)
 //                ? codeFragmentOperationMap1.get(statement1) :*/ this.function1;
 //        FunctionDeclaration operation2 = /*codeFragmentOperationMap2.containsKey(statement2)
 //                ? codeFragmentOperationMap2.get(statement2) :*/ this.function2;
 
-        BlockStatementMapping mapping = new BlockStatementMapping(statement1, statement2
+        BlockCodeFragmentMapping mapping = new BlockCodeFragmentMapping(statement1, statement2
                 /*, operation1, operation2*/, score);
 //        for (String key : parameterToArgumentMap.keySet()) {
 //            String value = parameterToArgumentMap.get(key);

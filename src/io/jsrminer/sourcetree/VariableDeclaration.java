@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-public class VariableDeclaration extends CodeFragment {
+public class VariableDeclaration {
     private Expression initializer;
     private VariableDeclarationKind kind;
     public final String variableName;

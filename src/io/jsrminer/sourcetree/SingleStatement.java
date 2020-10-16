@@ -29,46 +29,52 @@ public class SingleStatement extends Statement {
     /**
      * Returns the identifiers involved in this statement
      */
+    @Override
     public Set<String> getVariables() {
         return this.variables;
     }
 
-    public void setVariables(Set<String> variables) {
-        this.variables = variables;
-    }
-
+    @Override
     public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
         return methodInvocationMap;
     }
 
+    @Override
     public Map<String, List<ObjectCreation>> getCreationMap() {
         return creationMap;
     }
 
+    @Override
     public List<String> getStringLiterals() {
         return this.stringLiterals;
     }
 
+    @Override
     public List<String> getNumberLiterals() {
         return this.numberLiterals;
     }
 
+    @Override
     public List<String> getNullLiterals() {
         return this.nullLiterals;
     }
 
+    @Override
     public List<String> getBooleanLiterals() {
         return this.booleanLiterals;
     }
 
+    @Override
     public List<String> getInfixOperators() {
         return infixOperators;
     }
 
+    @Override
     public List<String> getArrayAccesses() {
         return arrayAccesses;
     }
 
+    @Override
     public List<String> getPrefixExpressions() {
         return prefixExpressions;
     }
@@ -76,6 +82,7 @@ public class SingleStatement extends Statement {
     /**
      * Returns arguments which are Invocations
      */
+    @Override
     public Set<String> getIdentifierArguments() {
         return identifierArguments;
     }
@@ -83,10 +90,12 @@ public class SingleStatement extends Statement {
     /**
      * Returns the variableName and declaration map of all the variables
      */
+    @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
     }
 
+    @Override
     public VariableDeclaration getVariableDeclaration(String variableName) {
         for (VariableDeclaration vd : this.getVariableDeclarations()) {
             if (vd.variableName.equals(variableName))
@@ -95,11 +104,12 @@ public class SingleStatement extends Statement {
         return null;
     }
 
+    @Override
     public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
         VariableDeclaration vd = this.getVariableDeclaration(varibleName);
         if (vd != null) {
             return vd;
-        } else if (parent != null) {
+        } else if (getParent() != null) {
             // TODO PullUp    return parent.findVariableDeclarationIncludingParent(varibleName);
         }
         return null;

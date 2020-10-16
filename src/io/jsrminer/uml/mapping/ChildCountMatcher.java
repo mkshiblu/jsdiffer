@@ -14,7 +14,7 @@ public class ChildCountMatcher {
             , BlockStatement statement2
             , Map<String, FunctionDeclaration> removedOperations
             , Map<String, FunctionDeclaration> addedOperations,
-                               Set<StatementMapping> mappings, boolean hasParentMapper) {
+                               Set<CodeFragmentMapping> mappings, boolean hasParentMapper) {
 
         if (statement1.getType() == CodeElementType.TRY_STATEMENT
                 && statement2.getType() == CodeElementType.TRY_STATEMENT) {
@@ -28,7 +28,7 @@ public class ChildCountMatcher {
 
     static double tryStatementsChildMatchingScore(TryStatement try1,
                                                   TryStatement try2
-            , Set<StatementMapping> mappings
+            , Set<CodeFragmentMapping> mappings
             , Map<String, FunctionDeclaration> removedOperations
             , Map<String, FunctionDeclaration> addedOperations,
                                                   boolean hasParentMapper) {
@@ -58,7 +58,7 @@ public class ChildCountMatcher {
 
     static double compositeChildMatchingScore(BlockStatement comp1
             , BlockStatement comp2
-            , Set<StatementMapping> mappings
+            , Set<CodeFragmentMapping> mappings
             , Map<String, FunctionDeclaration> removedOperations
             , Map<String, FunctionDeclaration> addedOperations
             , boolean hasParentMapper) {
@@ -87,7 +87,7 @@ public class ChildCountMatcher {
         }
 
         int mappedChildrenSize = 0;
-        for (StatementMapping mapping : mappings) {
+        for (CodeFragmentMapping mapping : mappings) {
             if (statements1.contains(mapping.statement1)
                     && statements2.contains(mapping.statement2)) {
                 mappedChildrenSize++;
@@ -102,7 +102,7 @@ public class ChildCountMatcher {
             int leaveSize2 = leaves2.size();
             int mappedLeavesSize = 0;
 
-            for (StatementMapping mapping : mappings) {
+            for (CodeFragmentMapping mapping : mappings) {
                 if (leaves1.contains(mapping.statement1) && leaves2.contains(mapping.statement2)) {
                     mappedLeavesSize++;
                 }

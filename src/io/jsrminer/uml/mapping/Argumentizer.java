@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping;
 
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.sourcetree.Statement;
 
@@ -10,13 +11,13 @@ import java.util.regex.Pattern;
 
 public class Argumentizer {
 
-    private Map<Statement, String> afterReplacementsMap = new HashMap<>();
+    private Map<CodeFragment, String> afterReplacementsMap = new HashMap<>();
 
-    public String replaceParametersWithArguments(Statement statement, Map<String, String> parameterToArgumentMap) {
-        if (afterReplacementsMap.containsKey(statement))
-            return afterReplacementsMap.get(statement);
+    public String replaceParametersWithArguments(CodeFragment fragment, Map<String, String> parameterToArgumentMap) {
+        if (afterReplacementsMap.containsKey(fragment))
+            return afterReplacementsMap.get(fragment);
 
-        String afterReplacements = statement.getText();
+        String afterReplacements = fragment.getText();
 
         for (String parameter : parameterToArgumentMap.keySet()) {
             String argument = parameterToArgumentMap.get(parameter);
@@ -53,12 +54,12 @@ public class Argumentizer {
                 afterReplacements = sb.toString();
             }
         }
-        afterReplacementsMap.put(statement, afterReplacements);
+        afterReplacementsMap.put(fragment, afterReplacements);
         //.codeFragmentAfterReplacingParametersWithArguments = afterReplacements;
         return afterReplacements;
     }
 
-    public String getArgumentizedString(Statement statement) {
+    public String getArgumentizedString(CodeFragment statement) {
         return this.afterReplacementsMap.get(statement);
     }
 

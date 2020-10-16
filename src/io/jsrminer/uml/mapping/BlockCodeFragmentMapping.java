@@ -3,11 +3,11 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.uml.diff.StringDistance;
 
-public class BlockStatementMapping extends StatementMapping implements Comparable<BlockStatementMapping> {
+public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Comparable<BlockCodeFragmentMapping> {
 
     private double compositeChildMatchingScore;
 
-    public BlockStatementMapping(BlockStatement statement1, BlockStatement statement2, double childMatchScore
+    public BlockCodeFragmentMapping(BlockStatement statement1, BlockStatement statement2, double childMatchScore
             /*,FunctionDeclaration operation1, FunctionDeclaration operation2*/) {
         super(statement1, statement2/*, operation1, operation2*/);
         this.compositeChildMatchingScore = childMatchScore;
@@ -15,7 +15,7 @@ public class BlockStatementMapping extends StatementMapping implements Comparabl
 
 
     @Override
-    public int compareTo(BlockStatementMapping o) {
+    public int compareTo(BlockCodeFragmentMapping o) {
         double distance1 = this.getNormalizedTextualDistance();
         double distance2 = o.getNormalizedTextualDistance();
 

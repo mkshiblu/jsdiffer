@@ -15,23 +15,23 @@ public enum InvocationCoverage {
 
     public final int CACHE_SIZE = 100;
     private final Map<OperationInvocation, InvocationCoverageType> invocationCoverageTypeMap = new HashMap<>();
-    private final Map<Statement, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
+    private final Map<CodeFragment, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
 
-    public OperationInvocation getInvocationCoveringEntireFragment(Statement statement) {
-        if (!invocationCoveringEntireFragmentMap.containsKey(statement)) {
-            OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(statement);
+    public OperationInvocation getInvocationCoveringEntireFragment(CodeFragment fragment) {
+        if (!invocationCoveringEntireFragmentMap.containsKey(fragment)) {
+            OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(fragment);
             updateCacheSize();
-            invocationCoveringEntireFragmentMap.put(statement, invocationCoveringEntireFragment);
+            invocationCoveringEntireFragmentMap.put(fragment, invocationCoveringEntireFragment);
         }
-        return invocationCoveringEntireFragmentMap.get(statement);
+        return invocationCoveringEntireFragmentMap.get(fragment);
     }
 
     /**
-     * Checks if the statement contains method invocation which text covers the entire statement's text
+     * Checks if the fragment contains method invocation which text covers the entire fragment's text
      */
-    private OperationInvocation findInvocationCoveringEntireFragment(Statement statement) {
-        Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
-        String statementText = statement.getText();
+    private OperationInvocation findInvocationCoveringEntireFragment(CodeFragment fragment) {
+        Map<String, List<OperationInvocation>> methodInvocationMap = fragment.getMethodInvocationMap();
+        String statementText = fragment.getText();
         InvocationCoverageType coveregeType = null;
 
         for (String invocationText : methodInvocationMap.keySet()) {
@@ -44,7 +44,7 @@ public enum InvocationCoverage {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                 } else if (isCastExpressionCoveringEntireFragment(statementText, invocationText)) {
                     coveregeType = InvocationCoverageType.CAST_CALL;
-                } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), invocationText)) {
+                } else if (expressionIsTheInitializerOfVariableDeclaration(fragment.getVariableDeclarations(), invocationText)) {
                     coveregeType = InvocationCoverageType.VARIABLE_DECLARATION_INITIALIZER_CALL;
                 } else if (invocation.getType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
                         invocation.getType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
@@ -60,7 +60,7 @@ public enum InvocationCoverage {
         return null;
     }
 
-    public OperationInvocation assignmentInvocationCoveringEntireStatement(SingleStatement statement) {
+    public OperationInvocation assignmentInvocationCoveringEntireStatement(CodeFragment statement) {
         Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
         for (String methodInvocation : methodInvocationMap.keySet()) {
             List<OperationInvocation> invocations = methodInvocationMap.get(methodInvocation);
@@ -73,7 +73,7 @@ public enum InvocationCoverage {
         return null;
     }
 
-    public ObjectCreation creationCoveringEntireFragment(SingleStatement statement) {
+    public ObjectCreation creationCoveringEntireFragment(CodeFragment statement) {
         Map<String, List<ObjectCreation>> creationMap = statement.getCreationMap();
         String text = statement.getText();
         InvocationCoverageType coveregeType = null;
@@ -134,7 +134,7 @@ public enum InvocationCoverage {
         return false;
     }
 
-    private boolean expressionIsTheRightHandSideOfAssignment(String expression, SingleStatement statement) {
+    private boolean expressionIsTheRightHandSideOfAssignment(String expression, CodeFragment statement) {
         String statementText = statement.getText();
         if (statementText.contains("=")) {
             Set<String> variables = statement.getVariables();
@@ -158,6 +158,4 @@ public enum InvocationCoverage {
             clearCache();
         }
     }
-
-
 }

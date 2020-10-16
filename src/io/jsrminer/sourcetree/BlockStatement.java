@@ -43,21 +43,6 @@ public class BlockStatement extends Statement {
         return leaves;
     }
 
-//    @Override
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(this.type.titleCase);
-//        if (expressions.size() > 0) {
-//            sb.append("(");
-//            for (int i = 0; i < expressions.size() - 1; i++) {
-//                sb.append(expressions.get(i).toString()).append("; ");
-//            }
-//            sb.append(expressions.get(expressions.size() - 1).toString());
-//            sb.append(")");
-//        }
-//        return sb.toString();
-//    }
-
     public String getTextWithExpressions() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.type.titleCase);
@@ -100,5 +85,26 @@ public class BlockStatement extends Statement {
     @Override
     public String getText() {
         return getTextWithExpressions();
+    }
+
+    public List<Expression> getExpressions() {
+        return expressions;
+    }
+
+    /**
+     * Check if this fragment contains the supplied fragment as its children or itself
+     */
+    public boolean containsFragment(CodeFragment fragment) {
+        if (fragment == this)
+            return true;
+
+        if (fragment instanceof SingleStatement) {
+            return getAllLeafStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof BlockStatement) {
+            return getAllBlockStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof Expression) {
+            return this.getExpressions().contains(fragment);
+        }
+        return false;
     }
 }
