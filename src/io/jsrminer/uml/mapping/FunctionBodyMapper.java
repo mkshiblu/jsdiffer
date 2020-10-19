@@ -6,7 +6,6 @@ import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementFinder;
 import io.jsrminer.uml.mapping.replacement.ReplacementInfo;
-import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
 
@@ -14,6 +13,8 @@ public class FunctionBodyMapper {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
+    public final UMLOperationDiff operationDiff;
+
     protected final Argumentizer argumentizer;
 
     private Set<CodeFragmentMapping> mappings = new LinkedHashSet<>();
@@ -23,12 +24,17 @@ public class FunctionBodyMapper {
     final Map<String, FunctionDeclaration> addedOperations;
     final Map<String, FunctionDeclaration> removedOperations;
 
-    public FunctionBodyMapper(@NonNull FunctionDeclaration function1
-            , @NonNull FunctionDeclaration function2
+    private Set<SingleStatement> nonMappedLeavesT1;
+    private Set<SingleStatement> nonMappedLeavesT2;
+    private Set<BlockStatement> nonMappedInnerNodesT1;
+    private Set<BlockStatement> nonMappedInnerNodesT2;
+
+    public FunctionBodyMapper(UMLOperationDiff operationDiff
             , Map<String, FunctionDeclaration> addedOperations
             , Map<String, FunctionDeclaration> removedOperations) {
-        this.function1 = function1;
-        this.function2 = function2;
+        this.operationDiff = operationDiff;
+        this.function1 = operationDiff.function1;
+        this.function2 = operationDiff.function2;
         this.addedOperations = addedOperations;
         this.removedOperations = removedOperations;
         this.argumentizer = new Argumentizer();
@@ -39,8 +45,8 @@ public class FunctionBodyMapper {
         FunctionBody body2 = function2.getBody();
 
         if (body1 != null && body2 != null) {
-            final UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
-            mapParametersToArguments(operationDiff.getAddedParameters(), operationDiff.getRemovedParameters());
+
+            mapParametersToArguments(this.operationDiff.getAddedParameters(), this.operationDiff.getRemovedParameters());
 
             BlockStatement block1 = body1.blockStatement;
             BlockStatement block2 = body2.blockStatement;
@@ -54,6 +60,9 @@ public class FunctionBodyMapper {
             if (leaves1.size() > 0 && leaves2.size() > 0)
                 matchLeaves(leaves1, leaves2);
 
+            this.nonMappedLeavesT1 = leaves1;
+            this.nonMappedLeavesT2 = leaves2;
+
             // Match composites
             argumentizer.clearCache();
             Set<BlockStatement> innerNodes1 = new LinkedHashSet<>(block1.getAllBlockStatementsIncludingNested());
@@ -66,6 +75,12 @@ public class FunctionBodyMapper {
             replaceParametersWithArguments(innerNodes1, innerNodes2);
             if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
                 matchNestedBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
+
+            this.nonMappedInnerNodesT1 = innerNodes1;
+            this.nonMappedInnerNodesT2 = innerNodes2;
+
+            // Set mappings
+            this.operationDiff.setMappings(this.mappings);
         }
     }
 
@@ -273,12 +288,11 @@ public class FunctionBodyMapper {
 
             if (!mappingSet.isEmpty()) {
                 BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
-                mappings.add(minStatementMapping);
+                this.mappings.add(minStatementMapping);
                 innerNodes1.remove(minStatementMapping.statement1);
                 innerNodeIterator2.remove();
             }
         }
-        mappings.getClass();
     }
 
     private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2
@@ -290,8 +304,8 @@ public class FunctionBodyMapper {
                 , statement2
                 , parameterToArgumentMap
                 , replacementInfo,
-                argumentizer,
-                mappings);
+                this.argumentizer,
+                this.mappings);
 
         if (replacements != null) {
             double score = ChildCountMatcher.computeScore(statement1, statement2

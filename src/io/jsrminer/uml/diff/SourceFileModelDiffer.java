@@ -1,12 +1,11 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SourceFileModelDiffer {
 
@@ -14,6 +13,8 @@ public class SourceFileModelDiffer {
     public final SourceFileModel source2;
 
     private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
+    protected List<IRefactoring> refactorings = new ArrayList<>();
+    private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
 
     public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2) {
         this.source1 = source1;
@@ -68,12 +69,17 @@ public class SourceFileModelDiffer {
         // First map by fully qualified name? TODO revisit
         for (FunctionDeclaration function1 : functionMap1.values()) {
             final FunctionDeclaration function2 = functionMap2.get(function1.qualifiedName);
-            // If function exists in both file
+            // If function exists in both file, try to match their statements
             if (function2 != null) {
-                FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2,
+
+                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
+
+                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff,
                         sourceDiff.getAddedOperations(),
                         sourceDiff.getRemovedOperations());
                 mapper.map();
+
+                this.refactorings.addAll(operationDiff.getRefactorings());
             }
         }
 
