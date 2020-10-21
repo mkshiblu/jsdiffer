@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.SourceFileModelDiff;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.*;
 
@@ -13,31 +14,50 @@ public class FunctionBodyMapper {
     public final FunctionDeclaration function2;
     public final UMLOperationDiff operationDiff;
 
-    protected final Argumentizer argumentizer;
+    protected static final Argumentizer argumentizer = new Argumentizer();
 
     private Set<CodeFragmentMapping> mappings = new LinkedHashSet<>();
     Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
     Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
-
-    final Map<String, FunctionDeclaration> addedOperations;
-    final Map<String, FunctionDeclaration> removedOperations;
 
     private Set<SingleStatement> nonMappedLeavesT1;
     private Set<SingleStatement> nonMappedLeavesT2;
     private Set<BlockStatement> nonMappedInnerNodesT1;
     private Set<BlockStatement> nonMappedInnerNodesT2;
 
+    private FunctionDeclaration callerFunctionOfAddedOperation;
+    private final SourceFileModelDiff sourceFileModelDiff;
+
+    private FunctionBodyMapper parentMapper;
+
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , Map<String, FunctionDeclaration> addedOperations
-            , Map<String, FunctionDeclaration> removedOperations) {
+            , SourceFileModelDiff sourceFileModelDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
-        this.addedOperations = addedOperations;
-        this.removedOperations = removedOperations;
-        this.argumentizer = new Argumentizer();
+        this.sourceFileModelDiff = sourceFileModelDiff;
     }
 
+    /**
+     * Tries to mapp the function1 of the mapper with the added operation
+     */
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, SourceFileModelDiff sourceFileModelDiff
+
+            , Map<String, String> parameterToArgumentMap1
+            , Map<String, String> parameterToArgumentMap2) {
+        this.function1 = mapper.function1;
+        this.function2 = addedOperation;
+        this.callerFunctionOfAddedOperation = mapper.function2;
+        this.sourceFileModelDiff = sourceFileModelDiff;
+        this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
+        this.parentMapper = mapper;
+        this.parameterToArgumentMap1 = parameterToArgumentMap1;
+        this.parameterToArgumentMap2 = parameterToArgumentMap2;
+    }
+
+    /**
+     * Maps funciton1 with funciton2
+     */
     public void map() {
         FunctionBody body1 = function1.getBody();
         FunctionBody body2 = function2.getBody();
@@ -56,7 +76,7 @@ public class FunctionBodyMapper {
             replaceParametersWithArguments(leaves1, leaves2);
 
             if (leaves1.size() > 0 && leaves2.size() > 0)
-                matchLeaves(leaves1, leaves2);
+                matchLeaves(leaves1, leaves2, new LinkedHashMap<>());
 
             this.nonMappedLeavesT1 = leaves1;
             this.nonMappedLeavesT2 = leaves2;
@@ -82,8 +102,110 @@ public class FunctionBodyMapper {
         }
     }
 
+    /**
+     * Maps added operation to function1
+     */
+    public void mapAddedOperation() {
 
-    void matchLeaves(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
+        FunctionBody addedOperationBody = function2.getBody();
+        if (addedOperationBody != null) {
+            BlockStatement addedOperationBodyBlock = addedOperationBody.blockStatement;
+
+//            //adding leaves that were mapped with replacements
+//            Set<SingleStatement> addedLeaves1 = new LinkedHashSet<StatementObject>();
+//            Set<CompositeStatementObject> addedInnerNodes1 = new LinkedHashSet<CompositeStatementObject>();
+//            for (StatementObject nonMappedLeaf1 : new ArrayList<>(operationBodyMapper.getNonMappedLeavesT1())) {
+//                expandAnonymousAndLambdas(nonMappedLeaf1, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, operationBodyMapper);
+//            }
+//            for (AbstractCodeMapping mapping : operationBodyMapper.getMappings()) {
+//                if (!returnWithVariableReplacement(mapping) && !nullLiteralReplacements(mapping) && (!mapping.getReplacements().isEmpty() || !mapping.getFragment1().equalFragment(mapping.getFragment2()))) {
+//                    AbstractCodeFragment fragment = mapping.getFragment1();
+//                    expandAnonymousAndLambdas(fragment, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, operationBodyMapper);
+//                }
+//            }
+
+            // TODO add /expand  lambdas
+            Set<SingleStatement> leaves1 = this.parentMapper.getNonMappedLeavesT1();
+            Set<SingleStatement> leaves2 = new LinkedHashSet<>(addedOperationBodyBlock.getAllLeafStatementsIncludingNested());
+            argumentizer.clearCache();
+            replaceParametersWithArguments(leaves1, leaves2);
+            matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
+
+            Set<BlockStatement> innerNodes1 = this.parentMapper.getNonMappedInnerNodesT1();
+            Set<BlockStatement> innerNodes2 = addedOperationBodyBlock.getAllBlockStatementsIncludingNested();
+            Set<BlockStatement> addedInnerNodes1 = new LinkedHashSet<>();
+
+            //adding innerNodes that were mapped with replacements
+            for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
+                CodeFragment fragment = mapping.statement1;
+                if (fragment instanceof BlockStatement) {
+                    String text1 = mapping.statement1.getText();
+                    String text2 = mapping.statement2.getText();
+
+                    boolean containsOrEqualText = text1.contains(text2) || text2.contains(text1);
+                    boolean equalTextWithArgumentization = argumentizer.getArgumentizedString(mapping.statement1)
+                            .equals(mapping.statement2.getText())
+                            || argumentizer.getArgumentizedString(mapping.statement2)
+                            .equals(mapping.statement1.getText());
+
+                    if (!mapping.getReplacements().isEmpty() || !(containsOrEqualText || equalTextWithArgumentization)) {
+                        BlockStatement statement = (BlockStatement) fragment;
+                        if (!innerNodes1.contains(statement)) {
+                            innerNodes1.add(statement);
+                            addedInnerNodes1.add(statement);
+                        }
+                    }
+                }
+            }
+
+            // Remove itself
+            innerNodes2.remove(addedOperationBodyBlock);
+            //innerNodes2.addAll(addedInnerNodes2);
+
+            argumentizer.clearCache();
+            replaceParametersWithArguments(innerNodes1, innerNodes2);
+            //compare inner nodes from T1 with inner nodes from T2
+            matchNestedBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap2);
+
+            //match expressions in inner nodes from T1 with leaves from T2
+            Set<Expression> expressionsT1 = new LinkedHashSet<>();
+            for (BlockStatement composite : this.parentMapper.getNonMappedInnerNodesT1()) {
+                for (Expression expression : composite.getExpressions()) {
+                    argumentizer.replaceParametersWithArguments(expression, parameterToArgumentMap1);
+                    expressionsT1.add(expression);
+                }
+            }
+
+            int numberOfMappings = mappings.size();
+            matchLeaves(expressionsT1, leaves2, parameterToArgumentMap2);
+
+//            List<CodeFragmentMapping> mappings = new ArrayList<>(this.mappings);
+//            for (int i = numberOfMappings; i < mappings.size(); i++) {
+//                mappings.get(i).temporaryVariableAssignment(refactorings);
+//            }
+            // TODO remove non-mapped inner nodes from T1 corresponding to mapped expressions
+
+            //remove the leaves that were mapped with replacement, if they are not mapped again for a second time
+            //leaves1.removeAll(addedLeaves1);
+            //leaves2.removeAll(addedLeaves2);
+            //remove the innerNodes that were mapped with replacement, if they are not mapped again for a second time
+            innerNodes1.removeAll(addedInnerNodes1);
+            //innerNodes2.removeAll(addedInnerNodes2);
+            nonMappedLeavesT1.addAll(leaves1);
+            nonMappedLeavesT2.addAll(leaves2);
+            nonMappedInnerNodesT1.addAll(innerNodes1);
+            nonMappedInnerNodesT2.addAll(innerNodes2);
+//
+//            for (StatementObject statement : getNonMappedLeavesT2()) {
+//                temporaryVariableAssignment(statement, nonMappedLeavesT2);
+//            }
+//            for (StatementObject statement : getNonMappedLeavesT1()) {
+//                inlinedVariableAssignment(statement, nonMappedLeavesT2);
+//            }
+        }
+    }
+
+    void matchLeaves(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
 //        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
 //        Set<SingleStatement> unmatchedLeavesB = new LinkedHashSet<>();
 //
@@ -96,31 +218,30 @@ public class FunctionBodyMapper {
 //        }
 
         // Exact string+depth matching - leaf nodes
-        matchLeavesWithIdenticalText(leaves1, leaves2, false);
+        matchLeavesWithIdenticalText(leaves1, leaves2, false, parameterToArgumentMap);
 
         if (leaves1.size() == 0 || leaves2.size() == 0)
             return;
 
         // Exact string any depth
-        matchLeavesWithIdenticalText(leaves1, leaves2, true);
+        matchLeavesWithIdenticalText(leaves1, leaves2, true, parameterToArgumentMap);
 
         if (leaves1.size() == 0 || leaves2.size() == 0)
             return;
 
-        matchLeavesWithVariableRenames(leaves1, leaves2);
+        matchLeavesWithVariableRenames(leaves1, leaves2, parameterToArgumentMap);
     }
 
-    void matchLeavesWithIdenticalText(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2, boolean ignoreNestingDepth) {
-        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
-
+    void matchLeavesWithIdenticalText(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2,
+                                      boolean ignoreNestingDepth, Map<String, String> parameterToArgumentMap) {
         //exact string matching
-        for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+        for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
 
-            SingleStatement leaf1 = iterator1.next();
+            CodeFragment leaf1 = iterator1.next();
             TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
-            for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
-                SingleStatement leaf2 = iterator2.next();
+            for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                CodeFragment leaf2 = iterator2.next();
 
                 String argumentizedString1 = createArgumentizedString(leaf1, leaf2);
                 String argumentizedString2 = createArgumentizedString(leaf2, leaf1);
@@ -143,21 +264,20 @@ public class FunctionBodyMapper {
         }
     }
 
-    private void matchLeavesWithVariableRenames(Set<SingleStatement> leaves1, Set<SingleStatement> leaves2) {
-        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
+    private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
         ReplacementFinder replacementFinder = new ReplacementFinder();
 
-        Iterator<SingleStatement> it1 = leaves1.iterator();
-        Iterator<SingleStatement> it2 = leaves2.iterator();
+        Iterator<? extends CodeFragment> it1 = leaves1.iterator();
+        Iterator<? extends CodeFragment> it2 = leaves2.iterator();
 
         // TODO refactor duplicateed code, extract inner for loop to seprate method
         if (leaves1.size() <= leaves2.size()) {
-            for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
-                SingleStatement leaf1 = iterator1.next();
+            for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+                CodeFragment leaf1 = iterator1.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
-                for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
-                    SingleStatement leaf2 = iterator2.next();
+                for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                    CodeFragment leaf2 = iterator2.next();
 
                     LeafCodeFragmentMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
@@ -172,12 +292,12 @@ public class FunctionBodyMapper {
                 }
             }
         } else {
-            for (Iterator<SingleStatement> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
-                SingleStatement leaf2 = iterator2.next();
+            for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                CodeFragment leaf2 = iterator2.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
-                for (Iterator<SingleStatement> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
-                    SingleStatement leaf1 = iterator1.next();
+                for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+                    CodeFragment leaf1 = iterator1.next();
                     LeafCodeFragmentMapping mapping = getLeafMappingUsingReplacements(leaf1, leaf2, leaves1, leaves2, parameterToArgumentMap, replacementFinder);
                     if (mapping != null) {
                         mappingSet.add(mapping);
@@ -225,7 +345,8 @@ public class FunctionBodyMapper {
             for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                 BlockStatement statement1 = iterator1.next();
                 double score = ChildCountMatcher.computeScore(statement1, statement2
-                        , removedOperations, addedOperations, this.mappings, false);
+                        , this.sourceFileModelDiff.getRemovedOperations(), this.sourceFileModelDiff.getAddedOperations()
+                        , this.mappings, this.parentMapper != null);
 
                 String argumentizedString1 = createArgumentizedString(statement1, statement2);
                 String argumentizedString2 = createArgumentizedString(statement1, statement2);
@@ -259,14 +380,14 @@ public class FunctionBodyMapper {
             //exact string+depth matching - inner nodes
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, false);
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, true);
-            matchInnerNodersWithVariableRenames(innerNodes1, innerNodes2);
+            matchInnerNodersWithVariableRenames(innerNodes1, innerNodes2, parameterToArgumentMap);
         }
     }
 
-    private void matchInnerNodersWithVariableRenames(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2) {
+    private void matchInnerNodersWithVariableRenames
+            (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
         ReplacementFinder replacementFinder = new ReplacementFinder();
-        final Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
 
         for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
             BlockStatement statement2 = innerNodeIterator2.next();
@@ -293,7 +414,8 @@ public class FunctionBodyMapper {
         }
     }
 
-    private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement statement2
+    private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement
+            statement2
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
@@ -307,8 +429,8 @@ public class FunctionBodyMapper {
 
         if (replacements != null) {
             double score = ChildCountMatcher.computeScore(statement1, statement2
-                    , removedOperations, addedOperations
-                    , this.mappings, false);
+                    , this.sourceFileModelDiff.getRemovedOperations(), this.sourceFileModelDiff.getAddedOperations()
+                    , this.mappings, this.parentMapper != null);
 
             if (score == 0 && replacements.size() == 1 &&
                     (replacements.iterator().next().getType().equals(Replacement.ReplacementType.INFIX_OPERATOR)
@@ -325,10 +447,10 @@ public class FunctionBodyMapper {
         return null;
     }
 
-    private LeafCodeFragmentMapping getLeafMappingUsingReplacements(SingleStatement leaf1
-            , SingleStatement leaf2
-            , Set<SingleStatement> leaves1
-            , Set<SingleStatement> leaves2
+    private LeafCodeFragmentMapping getLeafMappingUsingReplacements(CodeFragment leaf1
+            , CodeFragment leaf2
+            , Set<? extends CodeFragment> leaves1
+            , Set<? extends CodeFragment> leaves2
             , Map<String, String> parameterToArgumentMap
             , ReplacementFinder replacementFinder) {
         ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
@@ -366,13 +488,13 @@ public class FunctionBodyMapper {
         return null;
     }
 
-    private ReplacementInfo createReplacementInfo(Statement statement1
-            , Statement statement2
-            , Set<? extends Statement> statements1
-            , Set<? extends Statement> statements2) {
-        List<? extends Statement> unmatchedStatments1 = new ArrayList<>(statements1);
+    private ReplacementInfo createReplacementInfo(CodeFragment statement1
+            , CodeFragment statement2
+            , Set<? extends CodeFragment> statements1
+            , Set<? extends CodeFragment> statements2) {
+        List<? extends CodeFragment> unmatchedStatments1 = new ArrayList<>(statements1);
         unmatchedStatments1.remove(statement1);
-        List<? extends Statement> unmatchedStatements2 = new ArrayList<>(statements2);
+        List<? extends CodeFragment> unmatchedStatements2 = new ArrayList<>(statements2);
         unmatchedStatements2.remove(statement2);
         return new ReplacementInfo(
                 createArgumentizedString(statement1, statement2),
@@ -381,7 +503,7 @@ public class FunctionBodyMapper {
     }
 
     // TODO: Similar to processInput without checking for abstractexpression
-    private String createArgumentizedString(Statement statement1, Statement statement2) {
+    private String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
         String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
         // TODO replace return value with the argumentaized string
@@ -394,7 +516,8 @@ public class FunctionBodyMapper {
         return argumentizedString;
     }
 
-    private LeafCodeFragmentMapping createLeafMapping(SingleStatement leaf1, SingleStatement leaf2, Map<String, String> parameterToArgumentMap) {
+    private LeafCodeFragmentMapping createLeafMapping(CodeFragment leaf1, CodeFragment
+            leaf2, Map<String, String> parameterToArgumentMap) {
 //        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
 //        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
         LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2);

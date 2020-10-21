@@ -1,12 +1,13 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
 
 public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comparable<LeafCodeFragmentMapping> {
 
-    public LeafCodeFragmentMapping(Statement statement1, Statement statement2) {
+    public LeafCodeFragmentMapping(CodeFragment statement1, CodeFragment statement2) {
         super(statement1, statement2);
     }
 
@@ -81,11 +82,11 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
 
     double normalizedParentEditDistance() {
         Statement parent1 = statement1.getParent();
-        while (parent1 != null && parent1.getType().equals(CodeElementType.BLOCK_STATEMENT)) {
+        while (parent1 != null && parent1.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent1 = parent1.getParent();
         }
         Statement parent2 = statement2.getParent();
-        while (parent2 != null && parent2.getType().equals(CodeElementType.BLOCK_STATEMENT)) {
+        while (parent2 != null && parent2.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent2 = parent2.getParent();
         }
 

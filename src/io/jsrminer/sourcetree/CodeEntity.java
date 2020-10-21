@@ -24,7 +24,7 @@ public class CodeEntity {
         this.text = text;
     }
 
-    public CodeElementType getType() {
+    public CodeElementType getCodeElementType() {
         return type;
     }
 

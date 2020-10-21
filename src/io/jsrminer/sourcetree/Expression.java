@@ -22,6 +22,11 @@ public class Expression extends CodeFragment {
 
     private BlockStatement ownerBlock;
 
+    @Override
+    public BlockStatement getParent() {
+        return ownerBlock;
+    }
+
     /**
      * Returns the identifiers involved in this statement
      */

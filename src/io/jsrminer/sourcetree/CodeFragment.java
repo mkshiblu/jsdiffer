@@ -47,9 +47,7 @@ public abstract class CodeFragment extends CodeEntity {
         this.depth = depth;
     }
 
-//    public SourceLocation getSourceLocation() {
-//        return sourceLocation;
-//    }
+    public abstract BlockStatement getParent();
 //
 //    public void setSourceLocation(SourceLocation sourceLocation) {
 //        this.sourceLocation = sourceLocation;

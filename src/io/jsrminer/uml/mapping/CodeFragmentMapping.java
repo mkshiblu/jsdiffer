@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping;
 
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 
@@ -7,12 +8,12 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public abstract class CodeFragmentMapping {
-    public final Statement statement1;
-    public final Statement statement2;
+    public final CodeFragment statement1;
+    public final CodeFragment statement2;
 
     private Set<Replacement> replacements = new LinkedHashSet<>();
 
-    public CodeFragmentMapping(Statement statement1, Statement statement2) {
+    public CodeFragmentMapping(CodeFragment statement1, CodeFragment statement2) {
         this.statement1 = statement1;
         this.statement2 = statement2;
     }

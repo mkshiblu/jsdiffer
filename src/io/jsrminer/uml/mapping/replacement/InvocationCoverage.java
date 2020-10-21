@@ -46,8 +46,8 @@ public enum InvocationCoverage {
                     coveregeType = InvocationCoverageType.CAST_CALL;
                 } else if (expressionIsTheInitializerOfVariableDeclaration(fragment.getVariableDeclarations(), invocationText)) {
                     coveregeType = InvocationCoverageType.VARIABLE_DECLARATION_INITIALIZER_CALL;
-                } else if (invocation.getType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
-                        invocation.getType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
+                } else if (invocation.getCodeElementType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
+                        invocation.getCodeElementType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                 }
 

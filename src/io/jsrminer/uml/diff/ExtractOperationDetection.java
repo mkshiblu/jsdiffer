@@ -85,7 +85,7 @@ public class ExtractOperationDetection {
 
             for (int i = 1; i < nodesInBreadthFirstOrder.size(); i++) {
                 CallTreeNode node = nodesInBreadthFirstOrder.get(i);
-                if (matchingInvocations(node.getInvokedOperation(), operationInvocations).size() == 0) {
+                if (matchingInvocations(node.getInvokedOperation(), this.operationInvocations).size() == 0) {
                     FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper, node.getOriginalOperation(), node.getInvokedOperation(), node.getInvocation());
                     if (nestedMapper != null) {
                         additionalExactMatches.addAll(nestedMapper.getExactMatches());
@@ -194,18 +194,28 @@ public class ExtractOperationDetection {
             , FunctionDeclaration addedOperation, OperationInvocation addedOperationInvocation) {
 
         //Map<String, UMLParameter> originalMethodParameters = originalOperation.getParameters();
-        //Map<UMLParameter, UMLParameter> originalMethodParametersPassedAsArgumentsMappedToCalledMethodParameters
-        //      = new LinkedHashMap<>();
+        //    Map<UMLParameter, UMLParameter> originalMethodParametersPassedAsArgumentsMappedToCalledMethodParameters
+        //        = new LinkedHashMap<>();
 
         List<String> invocationArguments = addedOperationInvocation.getArguments();
-        Map<String, UMLParameter> addedOperationParameters = addedOperation.getParameters();
-
+        List<UMLParameter> addedOperationParameters = new ArrayList<>(addedOperation.getParameters().values());
         Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
+        int size = Math.min(invocationArguments.size(), addedOperationParameters.size());
+        for (int i = 0; i < size; i++) {
+            String argumentName = invocationArguments.get(i);
+            String parameterName = addedOperationParameters.get(i).name;
+
+            parameterToArgumentMap.put(parameterName, argumentName);
+//            for (UMLParameter originalMethodParameter : originalMethodParameters) {
+//                if (originalMethodParameter.getName().equals(argumentName)) {
+//                    originalMethodParametersPassedAsArgumentsMappedToCalledMethodParameters.put(originalMethodParameter, parameters.get(i));
+//                }
+//            }
+        }
 
         boolean sameParameterCount = invocationArguments.size() == addedOperationParameters.size();
-
         if (sameParameterCount) {
-            return new FunctionBodyMapper(mapper, addedOperation, parameterToArgumentMap, classDiff);
+            return new FunctionBodyMapper(mapper, addedOperation, classDiff, new LinkedHashMap<>(), parameterToArgumentMap);
         }
         return null;
     }

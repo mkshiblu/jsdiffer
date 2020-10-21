@@ -47,7 +47,7 @@ public class JsonCompositeFactory {
             // Parse Expressions (Todo optimize
             if (any.keys().contains("expressions")) {
                 for (Any expressionAny : any.get("expressions").asList()) {
-                    Expression expression = createExpression(expressionAny);
+                    Expression expression = createExpression(expressionAny, currentBlock);
                     currentBlock.addExpression(expression);
                 }
             }
@@ -85,7 +85,7 @@ public class JsonCompositeFactory {
                     child = childBlock;
                 } else {
                     // A leaf statement
-                    child = JsonCompositeFactory.createSingleStatement(childAny);
+                    child = JsonCompositeFactory.createSingleStatement(childAny, currentBlock);
                 }
 
                 child.setParent(currentBlock);
@@ -142,7 +142,7 @@ public class JsonCompositeFactory {
     /**
      * @param any SingleStatement any node
      */
-    public static SingleStatement createSingleStatement(Any any) {
+    public static SingleStatement createSingleStatement(Any any, BlockStatement parent) {
         SingleStatement singleStatement = new SingleStatement();
         // Text
         singleStatement.setText(any.toString("text"));
@@ -168,7 +168,7 @@ public class JsonCompositeFactory {
             List<VariableDeclaration> vds = singleStatement.getVariableDeclarations();
             List<Any> vdAnys = any.get("variableDeclarations").asList();
             vdAnys.forEach((variableDeclarationAny -> {
-                VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny);
+                VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny, parent);
                 vds.add(vd);
             }));
         }
@@ -221,24 +221,20 @@ public class JsonCompositeFactory {
         }
     }
 
-    public static SingleStatement createSingleStatement(String singleStatementJson) {
-        return createSingleStatement(JsonIterator.deserialize(singleStatementJson));
-    }
-
-    public static VariableDeclaration createVariableDeclaration(Any any) {
+    public static VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner) {
         VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"));
         //vd.setText(any.toString("text"));
         VariableDeclarationKind kind = VariableDeclarationKind.fromName(any.toString("kind"));
         vd.setKind(kind);
 
         if (any.keys().contains("initializer")) {
-            Expression expression = createExpression(any.get("initializer"));
+            Expression expression = createExpression(any.get("initializer"), owner);
             vd.setInitializer(expression);
         }
         return vd;
     }
 
-    public static Expression createExpression(Any any) {
+    public static Expression createExpression(Any any, BlockStatement ownerBlock) {
         Expression expression = new Expression();
         //Text
         expression.setText(any.toString("text"));
@@ -254,7 +250,7 @@ public class JsonCompositeFactory {
 
         // Vds
         for (Any variableDeclarationAny : anys) {
-            VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny);
+            VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny, ownerBlock);
             expression.getVariableDeclarations().add(declaration);
         }
 
@@ -262,6 +258,8 @@ public class JsonCompositeFactory {
         //endregion
         parseAndLoadFunctionInvocations(any.get("functionInvocations"), expression.getMethodInvocationMap());
         parseAndLoadObjectCreations(any.get("objectCreations"), expression.getCreationMap());
+
+        expression.setOwnerBlock(ownerBlock);
         return expression;
     }
 

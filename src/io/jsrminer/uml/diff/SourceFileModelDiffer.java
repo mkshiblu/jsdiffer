@@ -82,9 +82,7 @@ public class SourceFileModelDiffer {
 
                 UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
 
-                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff,
-                        sourceDiff.getAddedOperations(),
-                        sourceDiff.getRemovedOperations());
+                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, sourceDiff);
                 mapper.map();
 
                 this.refactorings.addAll(operationDiff.getRefactorings());

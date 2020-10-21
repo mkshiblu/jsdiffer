@@ -16,8 +16,8 @@ public class ChildCountMatcher {
             , Map<String, FunctionDeclaration> addedOperations,
                                Set<CodeFragmentMapping> mappings, boolean hasParentMapper) {
 
-        if (statement1.getType() == CodeElementType.TRY_STATEMENT
-                && statement2.getType() == CodeElementType.TRY_STATEMENT) {
+        if (statement1.getCodeElementType() == CodeElementType.TRY_STATEMENT
+                && statement2.getCodeElementType() == CodeElementType.TRY_STATEMENT) {
             return tryStatementsChildMatchingScore((TryStatement) statement1
                     , (TryStatement) statement2, mappings, removedOperations, addedOperations, hasParentMapper);
         }
@@ -69,11 +69,10 @@ public class ChildCountMatcher {
         int childrenSize2 = statements2.size();
 
         if (hasParentMapper
-                && comp1.getType().equals(comp2.getType())
+                && comp1.getCodeElementType().equals(comp2.getCodeElementType())
                 && childrenSize1 == 1 && childrenSize2 == 1
                 && !comp1.getText().equals("{")
                 && !comp2.getText().equals("{")) {
-
 
             if (statements1.get(0).getText().equals("{")
                     && !statements2.get(0).getText().equals("{")) {

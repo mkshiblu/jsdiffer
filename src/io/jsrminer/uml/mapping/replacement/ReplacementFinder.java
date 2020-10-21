@@ -158,8 +158,8 @@ public class ReplacementFinder {
 
         if (isEqualWithReplacement) {
             if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo)
-                    && !statement1.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)
-                    && !statement2.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+                    && !statement1.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)
+                    && !statement2.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
                 return null;
             }
             if (variableAssignmentWithEverythingReplaced(statement1, statement2, replacementInfo)) {
@@ -1647,7 +1647,7 @@ public class ReplacementFinder {
                     boolean containsMapping = true;
                     if (statement1 instanceof BlockStatement
                             && statement2 instanceof BlockStatement &&
-                            statement1.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+                            statement1.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
                         BlockStatement comp1 = (BlockStatement) statement1;
                         BlockStatement comp2 = (BlockStatement) statement2;
                         containsMapping = comp1.containsFragment(mapping.statement1) && comp2.containsFragment(mapping.statement2);
@@ -1704,7 +1704,7 @@ public class ReplacementFinder {
 
     private ObjectCreation createObjectCreationWithExpression(ObjectCreation objectCreation, String oldExpression, String newExpression) {
         ObjectCreation newObjectCreation = new ObjectCreation();
-        newObjectCreation.setType(objectCreation.getType());
+        newObjectCreation.setType(objectCreation.getCodeElementType());
         newObjectCreation.setSourceLocation(objectCreation.getSourceLocation());
         updateCall(objectCreation, newObjectCreation, oldExpression, newExpression);
         return newObjectCreation;
