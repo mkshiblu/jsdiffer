@@ -2,6 +2,8 @@ package io.jsrminer.refactorings;
 
 public enum RefactoringType {
 
+    EXTRACT_OPERATION("Extract Method", "Extract Method (.+) extracted from (.+) in class (.+)"/*, 2*/),
+    EXTRACT_AND_MOVE_OPERATION("Extract And Move Method", "Extract And Move Method (.+) extracted from (.+) in class (.+) & moved to class (.+)"),
     ADD_PARAMETER("Add Parameter", "Add Parameter (.+) in method (.+) from class (.+)"),
     REMOVE_PARAMETER("Remove Parameter", "Remove Parameter (.+) in method (.+) from class (.+)");
 

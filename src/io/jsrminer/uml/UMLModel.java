@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Abstracts the source code
+ * Abstracts the source code of the whole code base
  */
 public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
@@ -28,7 +28,7 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
             // Check if model2 contains the same file
             if (sourceFileModel2 != null) {
-                SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2);
+                SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2, modelDiff);
                 SourceFileModelDiff sourceDiff = sourceDiffer.diff();
             }
         }

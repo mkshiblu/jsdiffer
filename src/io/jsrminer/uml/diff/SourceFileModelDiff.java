@@ -3,7 +3,7 @@ package io.jsrminer.uml.diff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -16,8 +16,8 @@ public class SourceFileModelDiff {
     /**
      * Name map
      */
-    private final Map<String, FunctionDeclaration> addedOperations = new HashMap<>();
-    private final Map<String, FunctionDeclaration> removedOperations = new HashMap<>();
+    private final Map<String, FunctionDeclaration> addedOperations = new LinkedHashMap<>();
+    private final Map<String, FunctionDeclaration> removedOperations = new LinkedHashMap<>();
 
     public SourceFileModelDiff(SourceFileModel sourceFileModel1, SourceFileModel sourceFileModel2) {
         this.sourceFileModel1 = sourceFileModel1;
@@ -25,10 +25,14 @@ public class SourceFileModelDiff {
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {
+        if (addedOperations.containsKey(addedOperation.name))
+            throw new RuntimeException("Duplicate names for removed operations" + addedOperation);
         addedOperations.put(addedOperation.name, addedOperation);
     }
 
     public void reportRemovedOperation(FunctionDeclaration removedOperation) {
+        if (removedOperations.containsKey(removedOperation.name))
+            throw new RuntimeException("Duplicate names for removed operations" + removedOperation);
         removedOperations.put(removedOperation.name, removedOperation);
     }
 

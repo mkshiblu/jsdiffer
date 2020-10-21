@@ -230,4 +230,49 @@ public class BlockStatement extends Statement {
         }
         return false;
     }
+
+    public Map<String, List<OperationInvocation>> getAllMethodInvocationsIncludingNested() {
+        Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
+        map.putAll(getMethodInvocationMap());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+
+                Map<String, List<OperationInvocation>> compositeMap = composite.getAllMethodInvocationsIncludingNested();
+                for (String key : compositeMap.keySet()) {
+                    map.computeIfAbsent(key, call -> new ArrayList<>()).addAll(compositeMap.get(key));
+
+//                    if (map.containsKey(key)) {
+//                        map.get(key).addAll(compositeMap.get(key));
+//                    } else {
+//                        List<OperationInvocation> list = new ArrayList<>();
+//                        list.addAll(compositeMap.get(key));
+//                        map.put(key, list);
+//                    }
+                }
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                Map<String, List<OperationInvocation>> statementMap = statementObject.getMethodInvocationMap();
+                for (String key : statementMap.keySet()) {
+                    map.computeIfAbsent(key, call -> new ArrayList<>()).addAll(statementMap.get(key));
+                }
+//
+//                for (LambdaExpressionObject lambda : statementObject.getLambdas()) {
+//                    if (lambda.getBody() != null) {
+//                        Map<String, List<OperationInvocation>> lambdaMap = lambda.getBody().getCompositeStatement().getAllMethodInvocations();
+//                        for (String key : lambdaMap.keySet()) {
+//                            if (map.containsKey(key)) {
+//                                map.get(key).addAll(lambdaMap.get(key));
+//                            } else {
+//                                List<OperationInvocation> list = new ArrayList<OperationInvocation>();
+//                                list.addAll(lambdaMap.get(key));
+//                                map.put(key, list);
+//                            }
+//                        }
+//                    }
+//                }
+            }
+        }
+        return map;
+    }
 }

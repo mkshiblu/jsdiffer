@@ -1,28 +1,36 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class SourceFileModelDiffer {
 
     public final SourceFileModel source1;
     public final SourceFileModel source2;
+    public final SourceFileModelDiff sourceDiff;
+    public final UMLModelDiff modelDiff;
 
-    private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
+    //private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
 
-    public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2) {
+
+    public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
         this.source2 = source2;
+        sourceDiff = new SourceFileModelDiff(source1, source2);
+        this.modelDiff = modelDiff;
     }
 
     public SourceFileModelDiff diff() {
-        final SourceFileModelDiff sourceDiff = new SourceFileModelDiff(source1, source2);
 
         // Find functiondeclarations
         final FunctionDeclaration[] functions1 = source1.getFunctionDeclarations();
@@ -41,9 +49,9 @@ public class SourceFileModelDiffer {
                 functionMap2.put(function2.qualifiedName, function2);
             }
 
-            diffOperations(sourceDiff, functionMap1, functionMap2);
+            diffOperations(this.sourceDiff, functionMap1, functionMap2);
         }
-        return sourceDiff;
+        return this.sourceDiff;
     }
 
     /**
@@ -59,7 +67,7 @@ public class SourceFileModelDiffer {
 //        processAnonymousClasses();
 //        checkForOperationSignatureChanges();
 //        checkForInlinedOperations();
-//        checkForExtractedOperations();
+        checkForExtractedOperations();
     }
 
     protected void createBodyMappers(SourceFileModelDiff sourceDiff
@@ -80,16 +88,64 @@ public class SourceFileModelDiffer {
                 mapper.map();
 
                 this.refactorings.addAll(operationDiff.getRefactorings());
+
+                // save the mapper TODO
+                this.bodyMappers.add(mapper);
             }
         }
 
         for (FunctionDeclaration function1 : functionMap1.values()) {
             // Not qualified but contains the function in the same index?
-            if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
-                    && !sourceDiff.isRemovedOperation(function1.name)) {
-// TODO
+//            if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
+//                    && !sourceDiff.isRemovedOperation(function1.name)) {
+//// TODO
+//
+//            }
+        }
+    }
 
+    /**
+     * Extract is detected by Checking if the already mapped operations contains any calls to
+     * any addedOperations.
+     */
+    private void checkForExtractedOperations() {
+        List<FunctionDeclaration> addedOperations = new ArrayList<>(sourceDiff.getAddedOperations().values());
+        List<String> operationsToBeRemoved = new ArrayList<>();
+
+        for (FunctionDeclaration addedOperation : addedOperations) {
+            for (FunctionBodyMapper mapper : this.bodyMappers) {
+                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceDiff, modelDiff);
+                List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
+                for (ExtractOperationRefactoring refactoring : refs) {
+                    refactorings.add(refactoring);
+                    FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+                    processMapperRefactorings(operationBodyMapper, refactorings);
+                    mapper.addChildMapper(operationBodyMapper);
+                    operationsToBeRemoved.add(addedOperation);
+                }
+                checkForInconsistentVariableRenames(mapper);
             }
+        }
+//
+//        for (Iterator<FunctionDeclaration> addedOperationIterator = addedOperations.iterator();
+//             addedOperationIterator.hasNext(); ) {
+//            FunctionDeclaration addedOperation = addedOperationIterator.next();
+//
+//            for (FunctionBodyMapper mapper : this.bodyMappers) {
+//                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, this, sourceDiff);
+//                List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
+//                for (ExtractOperationRefactoring refactoring : refs) {
+//                    refactorings.add(refactoring);
+//                    UMLOperationBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+//                    processMapperRefactorings(operationBodyMapper, refactorings);
+//                    mapper.addChildMapper(operationBodyMapper);
+//                    operationsToBeRemoved.add(addedOperation);
+//                }
+//                checkForInconsistentVariableRenames(mapper);
+//            }
+//        }
+        for (String key : operationsToBeRemoved) {
+            sourceDiff.getAddedOperations().remove(key);
         }
     }
 

@@ -3,9 +3,7 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
-import io.jsrminer.uml.mapping.replacement.Replacement;
-import io.jsrminer.uml.mapping.replacement.ReplacementFinder;
-import io.jsrminer.uml.mapping.replacement.ReplacementInfo;
+import io.jsrminer.uml.mapping.replacement.*;
 
 import java.util.*;
 
@@ -479,4 +477,47 @@ public class FunctionBodyMapper {
         }
     }
 
+    public Set<SingleStatement> getNonMappedLeavesT1() {
+        return nonMappedLeavesT1;
+    }
+
+    public Set<SingleStatement> getNonMappedLeavesT2() {
+        return nonMappedLeavesT2;
+    }
+
+    public Set<BlockStatement> getNonMappedInnerNodesT1() {
+        return nonMappedInnerNodesT1;
+    }
+
+    public Set<BlockStatement> getNonMappedInnerNodesT2() {
+        return nonMappedInnerNodesT2;
+    }
+
+    public Set<CodeFragmentMapping> getMappings() {
+        return mappings;
+    }
+
+    public Set<Replacement> getReplacementsInvolvingMethodInvocation() {
+        Set<Replacement> replacements = new LinkedHashSet<>();
+        for (CodeFragmentMapping mapping : getMappings()) {
+            for (Replacement replacement : mapping.getReplacements()) {
+                if (replacement instanceof MethodInvocationReplacement ||
+                        replacement instanceof VariableReplacementWithMethodInvocation ||
+                        //replacement instanceof ClassInstanceCreationWithMethodInvocationReplacement ||
+                        replacement.getType().equals(Replacement.ReplacementType
+                                .ARGUMENT_REPLACED_WITH_RIGHT_HAND_SIDE_OF_ASSIGNMENT_EXPRESSION)) {
+                    replacements.add(replacement);
+                }
+            }
+        }
+        return replacements;
+    }
+
+    public Set<Replacement> getReplacements() {
+        Set<Replacement> replacements = new LinkedHashSet<Replacement>();
+        for (CodeFragmentMapping mapping : getMappings()) {
+            replacements.addAll(mapping.getReplacements());
+        }
+        return replacements;
+    }
 }
