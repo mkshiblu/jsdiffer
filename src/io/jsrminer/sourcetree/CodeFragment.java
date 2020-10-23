@@ -2,7 +2,6 @@ package io.jsrminer.sourcetree;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Base class for all the code elements that has apis  to provide all the variables, identifiers appeared in the code
@@ -105,5 +104,20 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract VariableDeclaration findVariableDeclarationIncludingParent(String varibleName);
 
+
     //endregion
+    public boolean countableStatement() {
+        String statement = getText();
+        //covers the cases of lambda expressions having an expression as their body
+        if (this instanceof Expression) {
+            return true;
+        }
+        //covers the cases of methods with only one statement in their body
+        if (this instanceof Statement && this.getParent() != null &&
+                this.getParent().statementCount() == 1 && this.getParent().getParent() == null) {
+            return true;
+        }
+        return !statement.equals("{") && !statement.startsWith("catch(") && !statement.startsWith("case ") && !statement.startsWith("default :") &&
+                !statement.startsWith("return true;") && !statement.startsWith("return false;") && !statement.startsWith("return this;") && !statement.startsWith("return null;") && !statement.startsWith("return;");
+    }
 }

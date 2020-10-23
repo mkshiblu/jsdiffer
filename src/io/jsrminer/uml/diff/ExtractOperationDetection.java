@@ -1,11 +1,9 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.OperationInvocation;
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -20,12 +18,15 @@ public class ExtractOperationDetection {
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
+    Argumentizer argumentizer;
+
     public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, SourceFileModelDiff classDiff, UMLModelDiff modelDiff) {
         this.mapper = mapper;
         this.addedOperations = addedOperations;
         this.classDiff = classDiff;
         this.modelDiff = modelDiff;
         this.operationInvocations = getInvocationsInSourceOperationAfterExtraction(mapper);
+        this.argumentizer = FunctionBodyMapper.argumentizer;
     }
 
     public List<ExtractOperationRefactoring> check(FunctionDeclaration addedOperation) {
@@ -89,25 +90,27 @@ public class ExtractOperationDetection {
                     FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper, node.getOriginalOperation(), node.getInvokedOperation(), node.getInvocation());
                     if (nestedMapper != null) {
                         additionalExactMatches.addAll(nestedMapper.getExactMatches());
-                        if (extractMatchCondition(nestedMapper, new ArrayList<>()) && extractMatchCondition(operationBodyMapper, additionalExactMatches)) {
+                        if (extractMatchCondition(nestedMapper, new ArrayList<>())
+                                && extractMatchCondition(operationBodyMapper, additionalExactMatches)) {
                             List<OperationInvocation> nestedMatchingInvocations
                                     = matchingInvocations(node.getInvokedOperation()
                                     , node.getOriginalOperation().getBody().getAllOperationInvocations());
-                            ExtractOperationRefactoring nestedRefactoring = new ExtractOperationRefactoring(nestedMapper, mapper.function2);
+                            ExtractOperationRefactoring nestedRefactoring =
+                                    new ExtractOperationRefactoring(nestedMapper, mapper.function2, nestedMatchingInvocations);
                             refactorings.add(nestedRefactoring);
                             operationBodyMapper.addChildMapper(nestedMapper);
                         }
                         //add back to mapper non-exact matches
-                        for (AbstractCodeMapping mapping : nestedMapper.getMappings()) {
-                            if (!mapping.isExact() || mapping.getFragment1().getString().equals("{")) {
-                                AbstractCodeFragment fragment1 = mapping.getFragment1();
-                                if (fragment1 instanceof StatementObject) {
+                        for (CodeFragmentMapping mapping : nestedMapper.getMappings()) {
+                            if (!mapping.isExact(argumentizer) || mapping.fragment1.getText().equals("{")) {
+                                CodeFragment fragment1 = mapping.fragment1;
+                                if (fragment1 instanceof SingleStatement) {
                                     if (!mapper.getNonMappedLeavesT1().contains(fragment1)) {
-                                        mapper.getNonMappedLeavesT1().add((StatementObject) fragment1);
+                                        mapper.getNonMappedLeavesT1().add((SingleStatement) fragment1);
                                     }
-                                } else if (fragment1 instanceof CompositeStatementObject) {
+                                } else if (fragment1 instanceof BlockStatement) {
                                     if (!mapper.getNonMappedInnerNodesT1().contains(fragment1)) {
-                                        mapper.getNonMappedInnerNodesT1().add((CompositeStatementObject) fragment1);
+                                        mapper.getNonMappedInnerNodesT1().add((BlockStatement) fragment1);
                                     }
                                 }
                             }
@@ -224,28 +227,29 @@ public class ExtractOperationDetection {
         int mappings = operationBodyMapper.mappingsWithoutBlocks();
         int nonMappedElementsT1 = operationBodyMapper.nonMappedElementsT1();
         int nonMappedElementsT2 = operationBodyMapper.nonMappedElementsT2();
-        List<CodeFragmentMapping> exactMatchList = new ArrayList<AbstractCodeMapping>(operationBodyMapper.getExactMatches());
+        List<CodeFragmentMapping> exactMatchList = new ArrayList<>(operationBodyMapper.getExactMatches());
         boolean exceptionHandlingExactMatch = false;
-        boolean throwsNewExceptionExactMatch = false;
+        // boolean throwsNewExceptionExactMatch = false;
         if (exactMatchList.size() == 1) {
-            AbstractCodeMapping mapping = exactMatchList.get(0);
-            if (mapping.getFragment1() instanceof StatementObject && mapping.getFragment2() instanceof StatementObject) {
-                StatementObject statement1 = (StatementObject) mapping.getFragment1();
-                StatementObject statement2 = (StatementObject) mapping.getFragment2();
-                if (statement1.getParent().getString().startsWith("catch(") &&
-                        statement2.getParent().getString().startsWith("catch(")) {
+            CodeFragmentMapping mapping = exactMatchList.get(0);
+            if (mapping.fragment1 instanceof SingleStatement && mapping.fragment2 instanceof SingleStatement) {
+                SingleStatement statement1 = (SingleStatement) mapping.fragment1;
+                SingleStatement statement2 = (SingleStatement) mapping.fragment2;
+
+                if (statement1.getParent().getText().startsWith("catch(") &&
+                        statement2.getParent().getText().startsWith("catch(")) {
                     exceptionHandlingExactMatch = true;
                 }
             }
-            if (mapping.getFragment1().throwsNewException() && mapping.getFragment2().throwsNewException()) {
-                throwsNewExceptionExactMatch = true;
-            }
+            //   if (mapping.fragment1.throwsNewException() && mapping.fragment2.throwsNewException()) {
+            //     throwsNewExceptionExactMatch = true;
+            // }
         }
         exactMatchList.addAll(additionalExactMatches);
         int exactMatches = exactMatchList.size();
         return mappings > 0 && (mappings > nonMappedElementsT2 || (mappings > 1 && mappings >= nonMappedElementsT2) ||
                 (exactMatches >= mappings && nonMappedElementsT1 == 0) ||
-                (exactMatches == 1 && !throwsNewExceptionExactMatch && nonMappedElementsT2 - exactMatches <= 10) ||
+                (exactMatches == 1 /*&& !throwsNewExceptionExactMatch*/ && nonMappedElementsT2 - exactMatches <= 10) ||
                 (!exceptionHandlingExactMatch && exactMatches > 1 && additionalExactMatches.size() < exactMatches && nonMappedElementsT2 - exactMatches < 20) ||
                 (mappings == 1 && mappings > operationBodyMapper.nonMappedLeafElementsT2())) ||
                 argumentExtractedWithDefaultReturnAdded(operationBodyMapper);

@@ -39,14 +39,14 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
 //            }
             return Double.compare(distance1, distance2);
         } else {
-            int depthDiff1 = Math.abs(this.statement1.getDepth() - this.statement2.getDepth());
-            int depthDiff2 = Math.abs(o.statement1.getDepth() - o.statement2.getDepth());
+            int depthDiff1 = Math.abs(this.fragment1.getDepth() - this.fragment2.getDepth());
+            int depthDiff2 = Math.abs(o.fragment1.getDepth() - o.fragment2.getDepth());
 
             if (depthDiff1 != depthDiff2) {
                 return Integer.valueOf(depthDiff1).compareTo(Integer.valueOf(depthDiff2));
             } else {
-                int indexDiff1 = Math.abs(this.statement1.getPositionIndexInParent() - this.statement2.getPositionIndexInParent());
-                int indexDiff2 = Math.abs(o.statement1.getPositionIndexInParent() - o.statement2.getPositionIndexInParent());
+                int indexDiff1 = Math.abs(this.fragment1.getPositionIndexInParent() - this.fragment2.getPositionIndexInParent());
+                int indexDiff2 = Math.abs(o.fragment1.getPositionIndexInParent() - o.fragment2.getPositionIndexInParent());
                 if (indexDiff1 != indexDiff2) {
                     return Integer.valueOf(indexDiff1).compareTo(Integer.valueOf(indexDiff2));
                 } else {
@@ -66,8 +66,8 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
      * the two statement
      */
     double normalizedTextualDistance() {
-        final String text1 = statement1.getText();
-        final String text2 = statement2.getText();
+        final String text1 = fragment1.getText();
+        final String text2 = fragment2.getText();
         final double distance;
         if (text1.equals(text2)) {
             distance = 0;
@@ -81,11 +81,11 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
     }
 
     double normalizedParentEditDistance() {
-        Statement parent1 = statement1.getParent();
+        Statement parent1 = fragment1.getParent();
         while (parent1 != null && parent1.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent1 = parent1.getParent();
         }
-        Statement parent2 = statement2.getParent();
+        Statement parent2 = fragment2.getParent();
         while (parent2 != null && parent2.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent2 = parent2.getParent();
         }

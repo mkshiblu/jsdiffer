@@ -19,8 +19,8 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
         double distance1 = this.getNormalizedTextualDistance();
         double distance2 = o.getNormalizedTextualDistance();
 
-        final BlockStatement block1 = (BlockStatement) this.statement1;
-        final BlockStatement block2 = (BlockStatement) this.statement2;
+        final BlockStatement block1 = (BlockStatement) this.fragment1;
+        final BlockStatement block2 = (BlockStatement) this.fragment2;
 
         if (distance1 != distance2) {
             return Double.compare(distance1, distance2);
@@ -28,16 +28,16 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
             if (this.compositeChildMatchingScore != o.compositeChildMatchingScore) {
                 return -Double.compare(this.compositeChildMatchingScore, o.compositeChildMatchingScore);
             } else {
-                int depthDiff1 = Math.abs(this.statement1.getDepth() - this.statement2.getDepth());
-                int depthDiff2 = Math.abs(o.statement1.getDepth() - o.statement2.getDepth());
+                int depthDiff1 = Math.abs(this.fragment1.getDepth() - this.fragment2.getDepth());
+                int depthDiff2 = Math.abs(o.fragment1.getDepth() - o.fragment2.getDepth());
 
                 if (depthDiff1 != depthDiff2) {
                     return Integer.valueOf(depthDiff1).compareTo(Integer.valueOf(depthDiff2));
                 } else {
-                    int indexDiff1 = Math.abs(this.statement1.getPositionIndexInParent()
-                            - this.statement2.getPositionIndexInParent());
-                    int indexDiff2 = Math.abs(o.statement1.getPositionIndexInParent()
-                            - o.statement2.getPositionIndexInParent());
+                    int indexDiff1 = Math.abs(this.fragment1.getPositionIndexInParent()
+                            - this.fragment2.getPositionIndexInParent());
+                    int indexDiff2 = Math.abs(o.fragment1.getPositionIndexInParent()
+                            - o.fragment2.getPositionIndexInParent());
                     return Integer.valueOf(indexDiff1).compareTo(Integer.valueOf(indexDiff2));
                 }
             }
@@ -45,14 +45,14 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
     }
 
     double getNormalizedTextualDistance() {
-        final BlockStatement block1 = (BlockStatement) this.statement1;
-        final BlockStatement block2 = (BlockStatement) this.statement2;
+        final BlockStatement block1 = (BlockStatement) this.fragment1;
+        final BlockStatement block2 = (BlockStatement) this.fragment2;
 
         if (block1.getTextWithExpressions().equals(block2.getTextWithExpressions())) {
             return 0;
         } else {
-            String s1 = this.statement1.getText().toLowerCase();
-            String s2 = this.statement2.getText().toLowerCase();
+            String s1 = this.fragment1.getText().toLowerCase();
+            String s2 = this.fragment2.getText().toLowerCase();
             int distance = StringDistance.editDistance(s1, s2);
             return (double) distance / (double) Math.max(s1.length(), s2.length());
         }

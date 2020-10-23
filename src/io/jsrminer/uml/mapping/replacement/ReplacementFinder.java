@@ -1579,7 +1579,7 @@ public class ReplacementFinder {
     }
 
     private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement
-            , String variable, List<? extends Statement> unMatchedStatements) {
+            , String variable, List<? extends CodeFragment> unMatchedStatements) {
         for (String argument : invocationCoveringTheEntireStatement.getArguments()) {
             String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
             if (argument.contains(variable) && !argument.equals(variable)
@@ -1593,8 +1593,8 @@ public class ReplacementFinder {
         return false;
     }
 
-    private boolean nonMatchedStatementUsesVariableInArgument(List<? extends Statement> statements, String variable, String otherArgument) {
-        for (Statement statement : statements) {
+    private boolean nonMatchedStatementUsesVariableInArgument(List<? extends CodeFragment> statements, String variable, String otherArgument) {
+        for (CodeFragment statement : statements) {
             OperationInvocation invocation = InvocationCoverage.INSTANCE
                     .getInvocationCoveringEntireFragment(statement);
             if (invocation != null) {
@@ -1631,8 +1631,8 @@ public class ReplacementFinder {
         int count = 0;
         if (v1 != null && v2 != null) {
             for (CodeFragmentMapping mapping : mappings) {
-                List<VariableDeclaration> variableDeclarations1 = mapping.statement1.getVariableDeclarations();
-                List<VariableDeclaration> variableDeclarations2 = mapping.statement2.getVariableDeclarations();
+                List<VariableDeclaration> variableDeclarations1 = mapping.fragment1.getVariableDeclarations();
+                List<VariableDeclaration> variableDeclarations2 = mapping.fragment2.getVariableDeclarations();
                 if (variableDeclarations1.contains(v1) &&
                         variableDeclarations2.size() > 0 &&
                         !variableDeclarations2.contains(v2)) {
@@ -1650,7 +1650,7 @@ public class ReplacementFinder {
                             statement1.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
                         BlockStatement comp1 = (BlockStatement) statement1;
                         BlockStatement comp2 = (BlockStatement) statement2;
-                        containsMapping = comp1.containsFragment(mapping.statement1) && comp2.containsFragment(mapping.statement2);
+                        containsMapping = comp1.containsFragment(mapping.fragment1) && comp2.containsFragment(mapping.fragment2);
                     }
 
                     // TODO revisit

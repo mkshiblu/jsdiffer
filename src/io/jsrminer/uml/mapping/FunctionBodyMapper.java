@@ -14,7 +14,7 @@ public class FunctionBodyMapper {
     public final FunctionDeclaration function2;
     public final UMLOperationDiff operationDiff;
 
-    protected static final Argumentizer argumentizer = new Argumentizer();
+    public static final Argumentizer argumentizer = new Argumentizer();
 
     private Set<CodeFragmentMapping> mappings = new LinkedHashSet<>();
     Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
@@ -27,7 +27,7 @@ public class FunctionBodyMapper {
 
     private FunctionDeclaration callerFunctionOfAddedOperation;
     private final SourceFileModelDiff sourceFileModelDiff;
-
+    private List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
@@ -137,16 +137,16 @@ public class FunctionBodyMapper {
 
             //adding innerNodes that were mapped with replacements
             for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
-                CodeFragment fragment = mapping.statement1;
+                CodeFragment fragment = mapping.fragment1;
                 if (fragment instanceof BlockStatement) {
-                    String text1 = mapping.statement1.getText();
-                    String text2 = mapping.statement2.getText();
+                    String text1 = mapping.fragment1.getText();
+                    String text2 = mapping.fragment2.getText();
 
                     boolean containsOrEqualText = text1.contains(text2) || text2.contains(text1);
-                    boolean equalTextWithArgumentization = argumentizer.getArgumentizedString(mapping.statement1)
-                            .equals(mapping.statement2.getText())
-                            || argumentizer.getArgumentizedString(mapping.statement2)
-                            .equals(mapping.statement1.getText());
+                    boolean equalTextWithArgumentization = argumentizer.getArgumentizedString(mapping.fragment1)
+                            .equals(mapping.fragment2.getText())
+                            || argumentizer.getArgumentizedString(mapping.fragment2)
+                            .equals(mapping.fragment1.getText());
 
                     if (!mapping.getReplacements().isEmpty() || !(containsOrEqualText || equalTextWithArgumentization)) {
                         BlockStatement statement = (BlockStatement) fragment;
@@ -258,7 +258,7 @@ public class FunctionBodyMapper {
                 LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
                 mappings.add(minStatementMapping);
 
-                leaves2.remove(minStatementMapping.statement2);
+                leaves2.remove(minStatementMapping.fragment2);
                 iterator1.remove();
             }
         }
@@ -287,7 +287,7 @@ public class FunctionBodyMapper {
                 if (!mappingSet.isEmpty()) {
                     LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
                     this.mappings.add(minStatementMapping);
-                    leaves2.remove(minStatementMapping.statement2);
+                    leaves2.remove(minStatementMapping.fragment2);
                     iterator1.remove();
                 }
             }
@@ -327,7 +327,7 @@ public class FunctionBodyMapper {
                     this.mappings.add(minStatementMapping);
 
                     // Remove the matched statmetns
-                    leaves1.remove(minStatementMapping.statement1);
+                    leaves1.remove(minStatementMapping.fragment1);
                     iterator2.remove();
                 }
             }
@@ -363,7 +363,7 @@ public class FunctionBodyMapper {
             if (!sortedMappingSet.isEmpty()) {
                 BlockCodeFragmentMapping minStatementMapping = sortedMappingSet.first();
                 mappings.add(minStatementMapping);
-                innerNodes1.remove(minStatementMapping.statement1);
+                innerNodes1.remove(minStatementMapping.fragment1);
                 iterator2.remove();
             }
         }
@@ -408,7 +408,7 @@ public class FunctionBodyMapper {
             if (!mappingSet.isEmpty()) {
                 BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
                 this.mappings.add(minStatementMapping);
-                innerNodes1.remove(minStatementMapping.statement1);
+                innerNodes1.remove(minStatementMapping.fragment1);
                 innerNodeIterator2.remove();
             }
         }
@@ -637,10 +637,146 @@ public class FunctionBodyMapper {
     }
 
     public Set<Replacement> getReplacements() {
-        Set<Replacement> replacements = new LinkedHashSet<Replacement>();
+        Set<Replacement> replacements = new LinkedHashSet<>();
         for (CodeFragmentMapping mapping : getMappings()) {
             replacements.addAll(mapping.getReplacements());
         }
         return replacements;
+    }
+
+    public List<CodeFragmentMapping> getExactMatches() {
+        List<CodeFragmentMapping> exactMatches = new ArrayList<>();
+        for (CodeFragmentMapping mapping : getMappings()) {
+            if (mapping.isExact(argumentizer) && mapping.fragment1.countableStatement()
+                    && mapping.fragment2.countableStatement() &&
+                    !mapping.fragment1.getText().equals("try"))
+                exactMatches.add(mapping);
+        }
+        return exactMatches;
+    }
+
+    public int nonMappedLeafElementsT2() {
+        int nonMappedLeafCount = 0;
+        for (SingleStatement statement : getNonMappedLeavesT2()) {
+            if (statement.countableStatement() /*&& !isTemporaryVariableAssignment(statement)*/)
+                nonMappedLeafCount++;
+        }
+        return nonMappedLeafCount;
+    }
+
+    public int mappingsWithoutBlocks() {
+        int count = 0;
+        for (CodeFragmentMapping mapping : getMappings()) {
+            if (mapping.fragment1.countableStatement() && mapping.fragment2.countableStatement())
+                count++;
+        }
+        return count;
+    }
+
+    public void addChildMapper(FunctionBodyMapper mapper) {
+        this.childMappers.add(mapper);
+        //TODO add logic to remove the mappings from "this" mapper,
+        //which are less similar than the mappings of the mapper passed as parameter
+    }
+
+
+    public int nonMappedElementsT1() {
+        int nonMappedInnerNodeCount = 0;
+        for (BlockStatement composite : getNonMappedInnerNodesT1()) {
+            if (composite.countableStatement())
+                nonMappedInnerNodeCount++;
+        }
+        int nonMappedLeafCount = 0;
+        for (SingleStatement statement : getNonMappedLeavesT1()) {
+            if (statement.countableStatement())
+                nonMappedLeafCount++;
+        }
+        return nonMappedLeafCount + nonMappedInnerNodeCount;
+    }
+
+    public int nonMappedElementsT2() {
+        int nonMappedInnerNodeCount = 0;
+        for (BlockStatement composite : getNonMappedInnerNodesT2()) {
+            if (composite.countableStatement())
+                nonMappedInnerNodeCount++;
+        }
+        int nonMappedLeafCount = 0;
+        for (SingleStatement statement : getNonMappedLeavesT2()) {
+            if (statement.countableStatement() /*(&& !isTemporaryVariableAssignment(statement)*/)
+                nonMappedLeafCount++;
+        }
+        return nonMappedLeafCount + nonMappedInnerNodeCount;
+    }
+
+    public int nonMappedElementsT2CallingAddedOperation(List<FunctionDeclaration> addedOperations) {
+        int nonMappedInnerNodeCount = 0;
+        for (BlockStatement composite : getNonMappedInnerNodesT2()) {
+            if (composite.countableStatement()) {
+                Map<String, List<OperationInvocation>> methodInvocationMap = composite.getMethodInvocationMap();
+                for (String key : methodInvocationMap.keySet()) {
+                    for (OperationInvocation invocation : methodInvocationMap.get(key)) {
+                        for (FunctionDeclaration operation : addedOperations) {
+                            if (invocation.matchesOperation(operation/*, operation2.variableTypeMap(), modelDiff*/)) {
+                                nonMappedInnerNodeCount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int nonMappedLeafCount = 0;
+        for (SingleStatement statement : getNonMappedLeavesT2()) {
+            if (statement.countableStatement()) {
+                Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
+                for (String key : methodInvocationMap.keySet()) {
+                    for (OperationInvocation invocation : methodInvocationMap.get(key)) {
+                        for (FunctionDeclaration operation : addedOperations) {
+                            if (invocation.matchesOperation(operation/*, operation2.variableTypeMap(), modelDiff*/)) {
+                                nonMappedLeafCount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return nonMappedLeafCount + nonMappedInnerNodeCount;
+    }
+
+    public int nonMappedElementsT1CallingRemovedOperation(List<FunctionDeclaration> removedOperations) {
+        int nonMappedInnerNodeCount = 0;
+        for (BlockStatement composite : getNonMappedInnerNodesT1()) {
+            if (composite.countableStatement()) {
+                Map<String, List<OperationInvocation>> methodInvocationMap = composite.getMethodInvocationMap();
+                for (String key : methodInvocationMap.keySet()) {
+                    for (OperationInvocation invocation : methodInvocationMap.get(key)) {
+                        for (FunctionDeclaration operation : removedOperations) {
+                            if (invocation.matchesOperation(operation/*, function1.variableTypeMap(), modelDiff*/)) {
+                                nonMappedInnerNodeCount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int nonMappedLeafCount = 0;
+        for (SingleStatement statement : getNonMappedLeavesT1()) {
+            if (statement.countableStatement()) {
+                Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
+                for (String key : methodInvocationMap.keySet()) {
+                    for (OperationInvocation invocation : methodInvocationMap.get(key)) {
+                        for (FunctionDeclaration operation : removedOperations) {
+                            if (invocation.matchesOperation(operation/*, operation1.variableTypeMap(), modelDiff*/)) {
+                                nonMappedLeafCount++;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return nonMappedLeafCount + nonMappedInnerNodeCount;
     }
 }

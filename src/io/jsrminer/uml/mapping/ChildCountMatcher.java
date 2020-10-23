@@ -87,8 +87,8 @@ public class ChildCountMatcher {
 
         int mappedChildrenSize = 0;
         for (CodeFragmentMapping mapping : mappings) {
-            if (statements1.contains(mapping.statement1)
-                    && statements2.contains(mapping.statement2)) {
+            if (statements1.contains(mapping.fragment1)
+                    && statements2.contains(mapping.fragment2)) {
                 mappedChildrenSize++;
             }
         }
@@ -102,7 +102,7 @@ public class ChildCountMatcher {
             int mappedLeavesSize = 0;
 
             for (CodeFragmentMapping mapping : mappings) {
-                if (leaves1.contains(mapping.statement1) && leaves2.contains(mapping.statement2)) {
+                if (leaves1.contains(mapping.fragment1) && leaves2.contains(mapping.fragment2)) {
                     mappedLeavesSize++;
                 }
             }

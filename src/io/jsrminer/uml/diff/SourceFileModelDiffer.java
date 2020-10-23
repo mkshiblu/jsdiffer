@@ -117,11 +117,11 @@ public class SourceFileModelDiffer {
                 for (ExtractOperationRefactoring refactoring : refs) {
                     refactorings.add(refactoring);
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-                    processMapperRefactorings(operationBodyMapper, refactorings);
+                    //  processMapperRefactorings(operationBodyMapper, refactorings);
                     mapper.addChildMapper(operationBodyMapper);
-                    operationsToBeRemoved.add(addedOperation);
+                    operationsToBeRemoved.add(addedOperation.getFullyQualifiedName());
                 }
-                checkForInconsistentVariableRenames(mapper);
+                //checkForInconsistentVariableRenames(mapper);
             }
         }
 //

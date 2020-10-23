@@ -21,6 +21,11 @@ public class SingleStatement extends Statement {
     public SingleStatement() {
     }
 
+    @Override
+    public int statementCount() {
+        return 1;
+    }
+
     /**
      * Returns the identifiers involved in this statement
      */

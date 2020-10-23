@@ -33,8 +33,8 @@ public class ExtractOperationRefactoring extends Refactoring {
         this.extractedCodeFragmentsFromSourceOperation = new LinkedHashSet<>();
         this.extractedCodeFragmentsToExtractedOperation = new LinkedHashSet<>();
         for (CodeFragmentMapping mapping : bodyMapper.getMappings()) {
-            this.extractedCodeFragmentsFromSourceOperation.add(mapping.statement1);
-            this.extractedCodeFragmentsToExtractedOperation.add(mapping.statement2);
+            this.extractedCodeFragmentsFromSourceOperation.add(mapping.fragment1);
+            this.extractedCodeFragmentsToExtractedOperation.add(mapping.fragment2);
         }
     }
 
@@ -53,8 +53,8 @@ public class ExtractOperationRefactoring extends Refactoring {
         this.extractedCodeFragmentsFromSourceOperation = new LinkedHashSet<>();
         this.extractedCodeFragmentsToExtractedOperation = new LinkedHashSet<>();
         for (CodeFragmentMapping mapping : bodyMapper.getMappings()) {
-            this.extractedCodeFragmentsFromSourceOperation.add(mapping.statement1);
-            this.extractedCodeFragmentsToExtractedOperation.add(mapping.statement2);
+            this.extractedCodeFragmentsFromSourceOperation.add(mapping.fragment1);
+            this.extractedCodeFragmentsToExtractedOperation.add(mapping.fragment2);
         }
     }
 
@@ -165,4 +165,5 @@ public class ExtractOperationRefactoring extends Refactoring {
 //            return RefactoringType.EXTRACT_AND_MOVE_OPERATION;
 //        return RefactoringType.EXTRACT_OPERATION;
 //    }
+
 }

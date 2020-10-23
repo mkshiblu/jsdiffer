@@ -275,4 +275,14 @@ public class BlockStatement extends Statement {
         }
         return map;
     }
+
+    public int statementCount() {
+        int count = 0;
+        if (!this.getText().equals("{"))
+            count++;
+        for (Statement statement : this.statements) {
+            count += statement.statementCount();
+        }
+        return count;
+    }
 }
