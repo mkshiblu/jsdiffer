@@ -63,6 +63,7 @@ public class ExtractOperationDetection {
                                               FunctionDeclaration invokedAddedOperation, FunctionBodyMapper mapper) {
         FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper
                 , mapper.function1, invokedAddedOperation, operationInvocation);
+        nestedMapper.mapAddedOperation();
     }
 
     private void processAddedOperation(FunctionBodyMapper mapper, FunctionDeclaration addedOperation,

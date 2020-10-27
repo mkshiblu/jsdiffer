@@ -110,22 +110,23 @@ public class FunctionBodyMapper {
         FunctionBody addedOperationBody = function2.getBody();
         if (addedOperationBody != null) {
             BlockStatement addedOperationBodyBlock = addedOperationBody.blockStatement;
+            //Set<BlockStatement> addedInnerNodes1 = new LinkedHashSet<>();
+            //Set<SingleStatement> addedLeaves1 = new LinkedHashSet<>();
 
-//            //adding leaves that were mapped with replacements
-//            Set<SingleStatement> addedLeaves1 = new LinkedHashSet<StatementObject>();
-//            Set<CompositeStatementObject> addedInnerNodes1 = new LinkedHashSet<CompositeStatementObject>();
-//            for (StatementObject nonMappedLeaf1 : new ArrayList<>(operationBodyMapper.getNonMappedLeavesT1())) {
-//                expandAnonymousAndLambdas(nonMappedLeaf1, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, operationBodyMapper);
-//            }
-//            for (AbstractCodeMapping mapping : operationBodyMapper.getMappings()) {
-//                if (!returnWithVariableReplacement(mapping) && !nullLiteralReplacements(mapping) && (!mapping.getReplacements().isEmpty() || !mapping.getFragment1().equalFragment(mapping.getFragment2()))) {
-//                    AbstractCodeFragment fragment = mapping.getFragment1();
-//                    expandAnonymousAndLambdas(fragment, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, operationBodyMapper);
-//                }
-//            }
+            Set<SingleStatement> leaves1 = this.parentMapper.getNonMappedLeavesT1();
+            for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
+                if ((mapping.fragment1 instanceof SingleStatement)
+                        && !returnWithVariableReplacement(mapping)
+                        && !nullLiteralReplacements(mapping)
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragment(argumentizer))) {
+
+                    // Add the statement to be matched again.
+                    leaves1.add((SingleStatement) mapping.fragment1);
+                }
+            }
 
             // TODO add /expand  lambdas
-            Set<SingleStatement> leaves1 = this.parentMapper.getNonMappedLeavesT1();
+
             Set<SingleStatement> leaves2 = new LinkedHashSet<>(addedOperationBodyBlock.getAllLeafStatementsIncludingNested());
             argumentizer.clearCache();
             replaceParametersWithArguments(leaves1, leaves2);
@@ -143,8 +144,9 @@ public class FunctionBodyMapper {
                     String text2 = mapping.fragment2.getText();
 
                     boolean containsOrEqualText = text1.contains(text2) || text2.contains(text1);
-                    boolean equalTextWithArgumentization = argumentizer.getArgumentizedString(mapping.fragment1)
-                            .equals(mapping.fragment2.getText())
+                    String argumentizedText1 = argumentizer.getArgumentizedString(mapping.fragment1);
+                    boolean equalTextWithArgumentization = argumentizedText1 != null
+                            && argumentizedText1.equals(mapping.fragment2.getText())
                             || argumentizer.getArgumentizedString(mapping.fragment2)
                             .equals(mapping.fragment1.getText());
 
@@ -203,6 +205,7 @@ public class FunctionBodyMapper {
 //                inlinedVariableAssignment(statement, nonMappedLeavesT2);
 //            }
         }
+
     }
 
     void matchLeaves(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
@@ -778,5 +781,45 @@ public class FunctionBodyMapper {
             }
         }
         return nonMappedLeafCount + nonMappedInnerNodeCount;
+    }
+
+    private boolean returnWithVariableReplacement(CodeFragmentMapping mapping) {
+        if (mapping.getReplacements().size() == 1) {
+            Replacement r = mapping.getReplacements().iterator().next();
+            if (r.getType().equals(Replacement.ReplacementType.VARIABLE_NAME)) {
+                String fragment1 = mapping.fragment1.getText();
+                String fragment2 = mapping.fragment2.getText();
+                if (fragment1.equals("return " + r.getBefore() + JsConfig.STATEMENT_TERMINATOR_CHAR)
+                        && fragment2.equals("return " + r.getAfter() + JsConfig.STATEMENT_TERMINATOR_CHAR)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean nullLiteralReplacements(CodeFragmentMapping mapping) {
+        int numberOfReplacements = mapping.getReplacements().size();
+        int nullLiteralReplacements = 0;
+        int methodInvocationReplacementsToIgnore = 0;
+        int variableNameReplacementsToIgnore = 0;
+        for (Replacement replacement : mapping.getReplacements()) {
+            if (replacement.getType().equals(Replacement.ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION) ||
+                    replacement.getType().equals(Replacement.ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL) ||
+                    (replacement.getType().equals(Replacement.ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE) && (replacement.getBefore().equals("null") || replacement.getAfter().equals("null")))) {
+                nullLiteralReplacements++;
+            } else if (replacement instanceof MethodInvocationReplacement) {
+                MethodInvocationReplacement invocationReplacement = (MethodInvocationReplacement) replacement;
+                OperationInvocation invokedOperationBefore = invocationReplacement.getInvokedOperationBefore();
+                OperationInvocation invokedOperationAfter = invocationReplacement.getInvokedOperationAfter();
+                if (invokedOperationBefore.getFunctionName().equals(invokedOperationAfter.getFunctionName()) &&
+                        invokedOperationBefore.getArguments().size() == invokedOperationAfter.getArguments().size()) {
+                    methodInvocationReplacementsToIgnore++;
+                }
+            } else if (replacement.getType().equals(Replacement.ReplacementType.VARIABLE_NAME)) {
+                variableNameReplacementsToIgnore++;
+            }
+        }
+        return nullLiteralReplacements > 0 && numberOfReplacements == nullLiteralReplacements + methodInvocationReplacementsToIgnore + variableNameReplacementsToIgnore;
     }
 }

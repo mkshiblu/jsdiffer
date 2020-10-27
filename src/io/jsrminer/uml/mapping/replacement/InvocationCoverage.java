@@ -5,7 +5,7 @@ import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
 import java.util.*;
 
-import static io.jsrminer.sourcetree.JsConfig.SINGLE_STATEMENT_TERMINATOR_CHAR;
+import static io.jsrminer.sourcetree.JsConfig.STATEMENT_TERMINATOR_CHAR;
 
 /**
  * Caches invocation coverages as singleton
@@ -38,9 +38,9 @@ public enum InvocationCoverage {
             List<OperationInvocation> invocations = methodInvocationMap.get(invocationText);
 
             for (OperationInvocation invocation : invocations) {
-                if (invocationText.equals(statementText) || (invocationText + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
+                if (invocationText.equals(statementText) || (invocationText + STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
-                } else if (("return " + invocationText + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
+                } else if (("return " + invocationText + STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                 } else if (isCastExpressionCoveringEntireFragment(statementText, invocationText)) {
                     coveregeType = InvocationCoverageType.CAST_CALL;
@@ -80,13 +80,13 @@ public enum InvocationCoverage {
         for (String objectCreation : creationMap.keySet()) {
             List<ObjectCreation> creations = creationMap.get(objectCreation);
             for (ObjectCreation creation : creations) {
-                if ((objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text) || objectCreation.equals(text)) {
+                if ((objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text) || objectCreation.equals(text)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                     return creation;
-                } else if (("return " + objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text)) {
+                } else if (("return " + objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                     return creation;
-                } else if (("throw " + objectCreation + SINGLE_STATEMENT_TERMINATOR_CHAR).equals(text)) {
+                } else if (("throw " + objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.THROW_CALL;
                     return creation;
                 } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), objectCreation)) {
@@ -139,7 +139,7 @@ public enum InvocationCoverage {
         if (statementText.contains("=")) {
             List<String> variables = statement.getVariables();
             if (variables.size() > 0) {
-                String s = variables.get(0) + " = " + expression + SINGLE_STATEMENT_TERMINATOR_CHAR;
+                String s = variables.get(0) + " = " + expression + STATEMENT_TERMINATOR_CHAR;
                 if (statementText.equals(s)) {
                     return true;
                 }

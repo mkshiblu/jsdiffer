@@ -81,4 +81,15 @@ public abstract class CodeFragmentMapping {
         }
         return false;
     }
+
+    public boolean equalFragment(Argumentizer argumentizer) {
+        if (this.fragment1.getText().contains(this.fragment2.getText())) {
+            return true;
+        } else if (this.fragment2.getText().contains(this.fragment1.getText())) {
+            return true;
+        } else if (argumentizer.getArgumentizedString(fragment1).equals(argumentizer.getArgumentizedString(fragment2))) {
+            return true;
+        }
+        return false;
+    }
 }
