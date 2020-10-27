@@ -26,7 +26,7 @@ public class ExtractOperationDetection {
         this.classDiff = classDiff;
         this.modelDiff = modelDiff;
         this.operationInvocations = getInvocationsInSourceOperationAfterExtraction(mapper);
-        this.argumentizer = FunctionBodyMapper.argumentizer;
+        this.argumentizer = mapper.argumentizer;
     }
 
     public List<ExtractOperationRefactoring> check(FunctionDeclaration addedOperation) {

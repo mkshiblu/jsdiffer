@@ -118,7 +118,7 @@ public class FunctionBodyMapper {
                 if ((mapping.fragment1 instanceof SingleStatement)
                         && !returnWithVariableReplacement(mapping)
                         && !nullLiteralReplacements(mapping)
-                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragment(argumentizer))) {
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer))) {
 
                     // Add the statement to be matched again.
                     leaves1.add((SingleStatement) mapping.fragment1);
@@ -139,23 +139,11 @@ public class FunctionBodyMapper {
             //adding innerNodes that were mapped with replacements
             for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
                 CodeFragment fragment = mapping.fragment1;
-                if (fragment instanceof BlockStatement) {
-                    String text1 = mapping.fragment1.getText();
-                    String text2 = mapping.fragment2.getText();
-
-                    boolean containsOrEqualText = text1.contains(text2) || text2.contains(text1);
-                    String argumentizedText1 = argumentizer.getArgumentizedString(mapping.fragment1);
-                    boolean equalTextWithArgumentization = argumentizedText1 != null
-                            && argumentizedText1.equals(mapping.fragment2.getText())
-                            || argumentizer.getArgumentizedString(mapping.fragment2)
-                            .equals(mapping.fragment1.getText());
-
-                    if (!mapping.getReplacements().isEmpty() || !(containsOrEqualText || equalTextWithArgumentization)) {
+                if (!innerNodes1.contains(fragment) && fragment instanceof BlockStatement) {
+                    if (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer)) {
                         BlockStatement statement = (BlockStatement) fragment;
-                        if (!innerNodes1.contains(statement)) {
-                            innerNodes1.add(statement);
-                            addedInnerNodes1.add(statement);
-                        }
+                        innerNodes1.add(statement);
+                        addedInnerNodes1.add(statement);
                     }
                 }
             }

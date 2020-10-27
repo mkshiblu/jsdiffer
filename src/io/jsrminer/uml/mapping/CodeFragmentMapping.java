@@ -82,14 +82,19 @@ public abstract class CodeFragmentMapping {
         return false;
     }
 
-    public boolean equalFragment(Argumentizer argumentizer) {
-        if (this.fragment1.getText().contains(this.fragment2.getText())) {
+    public boolean equalFragmentText(Argumentizer argumentizer) {
+        String text1 = fragment1.getText();
+        String text2 = fragment2.getText();
+
+        boolean containsOrEqualText = text1.contains(text2) || text2.contains(text1);
+        if (containsOrEqualText)
             return true;
-        } else if (this.fragment2.getText().contains(this.fragment1.getText())) {
-            return true;
-        } else if (argumentizer.getArgumentizedString(fragment1).equals(argumentizer.getArgumentizedString(fragment2))) {
-            return true;
-        }
-        return false;
+
+        String argumentizedText1 = argumentizer.getArgumentizedString(fragment1);
+        String argumentizedText2 = argumentizer.getArgumentizedString(fragment2);
+        boolean equalTextWithArgumentization = (argumentizedText1 != null && argumentizedText1.equals(text2))
+                || (argumentizedText2 != null && argumentizedText2.equals(text1));
+
+        return equalTextWithArgumentization;
     }
 }

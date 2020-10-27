@@ -11,7 +11,7 @@ public class FunctionDeclaration extends CodeEntity {
     /**
      * Name parameter map
      */
-    private Map<String, UMLParameter> nameParameterMap = new HashMap<>();
+    private Map<String, UMLParameter> nameParameterMap = new LinkedHashMap<>();
     /**
      * The name of the function.
      */

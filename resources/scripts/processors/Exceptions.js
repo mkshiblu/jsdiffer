@@ -7,10 +7,7 @@ const astUtil = require('../parser/AstUtil');
     finalizer: BlockStatement | null;
 }
 A try statement.If handler is null then finalizer must be a BlockStatement. */
-
-const { processExpression } = require("./ExpressionProcessor");
-
-exports.processTryStatement = (path, processStatement, processExpression) => {
+exports.processTryStatement = (path, processStatement) => {
     const statement = {
         type: path.node.type,
         text: 'try',
@@ -22,7 +19,7 @@ exports.processTryStatement = (path, processStatement, processExpression) => {
     const catchClause = path.get('handler');
 
     if (catchClause) {
-        const catchStatement = porcessCatchClause(catchClause, processStatement, processExpression);
+        const catchStatement = porcessCatchClause(catchClause, processStatement);
         statement.catchClause = catchStatement;
     }
     return statement;
@@ -33,7 +30,7 @@ exports.processTryStatement = (path, processStatement, processExpression) => {
 //     param: Pattern | null;
 //     body: BlockStatement;
 // }
-function porcessCatchClause(path, processStatement, processExpression) {
+function porcessCatchClause(path, processStatement) {
     const statement = {
         type: path.node.type,
         text: 'catch',
