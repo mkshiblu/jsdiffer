@@ -167,7 +167,9 @@ public class FunctionBodyMapper {
             }
 
             int numberOfMappings = mappings.size();
-            matchLeaves(expressionsT1, leaves2, parameterToArgumentMap2);
+
+            if (expressionsT1.size() > 0 && leaves2.size() > 0)
+                matchLeaves(expressionsT1, leaves2, parameterToArgumentMap2);
 
 //            List<CodeFragmentMapping> mappings = new ArrayList<>(this.mappings);
 //            for (int i = numberOfMappings; i < mappings.size(); i++) {

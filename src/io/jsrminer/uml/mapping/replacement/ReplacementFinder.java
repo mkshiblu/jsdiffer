@@ -1214,8 +1214,8 @@ public class ReplacementFinder {
                                 } else {
                                     newCall = createFunctionInvocationWithExpression((OperationInvocation) oldCall,
                                             parameter, argument);
-                                    newCalls.add(newCall);
                                 }
+                                newCalls.add(newCall);
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1242,8 +1242,8 @@ public class ReplacementFinder {
                                 } else {
                                     newCall = createFunctionInvocationWithExpression((OperationInvocation) oldCall,
                                             parameter, argument);
-                                    newCalls.add(newCall);
                                 }
+                                newCalls.add(newCall);
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1894,13 +1894,15 @@ public class ReplacementFinder {
 
     private boolean oneIsVariableDeclarationTheOtherIsReturnStatement(String s1, String s2) {
         String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+        commonSuffix = commonSuffix.trim();
+
         if (!commonSuffix.equals("null;\n") && !commonSuffix.equals("true;\n") && !commonSuffix.equals("false;\n") && !commonSuffix.equals("0;\n")) {
-            if (s1.startsWith("return ") && s1.substring(7, s1.length()).equals(commonSuffix) &&
-                    s2.contains("=") && s2.substring(s2.indexOf("=") + 1, s2.length()).equals(commonSuffix)) {
+            if (s1.startsWith("return ") && s1.substring("return ".length()).equals(commonSuffix) &&
+                    s2.contains("=") && s2.substring(s2.indexOf("=") + 2).equals(commonSuffix)) {
                 return true;
             }
-            if (s2.startsWith("return ") && s2.substring(7, s2.length()).equals(commonSuffix) &&
-                    s1.contains("=") && s1.substring(s1.indexOf("=") + 1, s1.length()).equals(commonSuffix)) {
+            if (s2.startsWith("return ") && s2.substring("return ".length()).equals(commonSuffix) &&
+                    s1.contains("=") && s1.substring(s1.indexOf("=") + 2).equals(commonSuffix)) {
                 return true;
             }
         }
