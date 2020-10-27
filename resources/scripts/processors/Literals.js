@@ -6,9 +6,10 @@
  * @param {*} path
  */
 function processNumericLiteral(path, { numericLiterals = [] }) {
-    numericLiterals.push(path.toString());
+  numericLiterals.push(path.toString());
 }
-exports.processNumericLiteral = processNumericLiteral;
+
+
 /**
  * interface NumericLiteral <: Literal {
   type: "NumericLiteral";
@@ -17,6 +18,18 @@ exports.processNumericLiteral = processNumericLiteral;
  * @param {*} path
  */
 function processStringLiteral(path, { stringLiterals = [] }) {
-    stringLiterals.push(path.toString());
+  stringLiterals.push(path.toString());
 }
+
+// interface NullLiteral <: Literal {
+//   type: "NullLiteral";
+// }
+//  * @param {*} path
+//  */
+function processNullLiteral(path, { nullLiterals = [] }) {
+  nullLiterals.push(path.toString());
+}
+
 exports.processStringLiteral = processStringLiteral;
+exports.processNumericLiteral = processNumericLiteral;
+exports.processNullLiteral = processNullLiteral;

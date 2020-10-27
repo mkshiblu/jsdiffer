@@ -7,6 +7,7 @@ const processes = new Map([
     ['Identifier', processIdentifier],
     ['NumericLiteral', literals.processNumericLiteral],
     ['StringLiteral', literals.processStringLiteral],
+    ['NullLiteral', literals.processNullLiteral],
     ['NewExpression', processNewExpression],
     ['CallExpression', processCallExpression],
     ['AssignmentExpression', processAssignmentExpression],
@@ -247,7 +248,7 @@ function processIdentifier(path, { identifiers = [] }) {
 function processUpdateExpression(path, expressionResult, statement) {
 
     const node = path.node;
-    
+
     // Extract operator (++/ --)
     if (node.prefix) {
         expressionResult.prefixOperators.push(node.operator);

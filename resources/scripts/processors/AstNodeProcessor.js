@@ -12,6 +12,7 @@ function createBaseExpressionInfo(path) {
         identifiers: [],
         numericLiterals: [],
         stringLiterals: [],
+        nullLiterals: [],
         infixOperators: [],
         prefixOperators: [],
         postfixOperators: [],
