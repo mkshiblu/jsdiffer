@@ -341,7 +341,7 @@ public class FunctionBodyMapper {
                         , this.mappings, this.parentMapper != null);
 
                 String argumentizedString1 = createArgumentizedString(statement1, statement2);
-                String argumentizedString2 = createArgumentizedString(statement1, statement2);
+                String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                 // Check if strings are identical and they are in same depth (or not)
                 if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth()
