@@ -31,12 +31,13 @@ public class ExtractOperationDetection {
 
     public List<ExtractOperationRefactoring> check(FunctionDeclaration addedOperation) {
         List<ExtractOperationRefactoring> refactorings = new ArrayList<>();
+
         if (!mapper.getNonMappedLeavesT1().isEmpty()
                 || !mapper.getNonMappedInnerNodesT1().isEmpty() ||
                 !mapper.getReplacementsInvolvingMethodInvocation().isEmpty()) {
 
             List<OperationInvocation> addedOperationInvocations = matchingInvocations(addedOperation, operationInvocations);
-            processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper);
+            processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
 //            if (addedOperationInvocations.size() > 0) {
 //                int otherAddedMethodsCalled = 0;
 //                for (FunctionDeclaration addedOperation2 : this.addedOperations) {
@@ -59,11 +60,25 @@ public class ExtractOperationDetection {
         return refactorings;
     }
 
-    private void processInvokedAddedOperation(OperationInvocation operationInvocation,
-                                              FunctionDeclaration invokedAddedOperation, FunctionBodyMapper mapper) {
-        FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper
+    private void processInvokedAddedOperation(OperationInvocation operationInvocation
+            , FunctionDeclaration invokedAddedOperation
+            , FunctionBodyMapper mapper
+            , List<OperationInvocation> addedOperationInvocations
+            , List<ExtractOperationRefactoring> refactorings) {
+        FunctionBodyMapper operationBodyMapper = createMapperForExtractedMethod(mapper
                 , mapper.function1, invokedAddedOperation, operationInvocation);
-        nestedMapper.mapAddedOperation();
+
+        operationBodyMapper.mapAddedOperation();
+        List<CodeFragmentMapping> additionalExactMatches = new ArrayList<>();
+        FunctionDeclaration delegateMethod = findDelegateMethod(mapper.function1, invokedAddedOperation, operationInvocation);
+        if (extractMatchCondition(operationBodyMapper, additionalExactMatches)) {
+            if (delegateMethod == null) {
+                refactorings.add(new ExtractOperationRefactoring(operationBodyMapper, mapper.function2, addedOperationInvocations));
+            } else {
+                refactorings.add(new ExtractOperationRefactoring(operationBodyMapper, invokedAddedOperation,
+                        mapper.function1, mapper.function2, addedOperationInvocations));
+            }
+        }
     }
 
     private void processAddedOperation(FunctionBodyMapper mapper, FunctionDeclaration addedOperation,

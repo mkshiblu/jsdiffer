@@ -70,9 +70,9 @@ public class FunctionBodyMapper {
             BlockStatement block2 = body2.blockStatement;
 
             // match leaves
-            argumentizer.clearCache();
             Set<SingleStatement> leaves1 = new LinkedHashSet<>(block1.getAllLeafStatementsIncludingNested());
             Set<SingleStatement> leaves2 = new LinkedHashSet<>(block2.getAllLeafStatementsIncludingNested());
+            argumentizer.clearCache(leaves1, leaves2);
             replaceParametersWithArguments(leaves1, leaves2);
 
             if (leaves1.size() > 0 && leaves2.size() > 0)
@@ -82,7 +82,7 @@ public class FunctionBodyMapper {
             this.nonMappedLeavesT2 = leaves2;
 
             // Match composites
-            argumentizer.clearCache();
+
             Set<BlockStatement> innerNodes1 = new LinkedHashSet<>(block1.getAllBlockStatementsIncludingNested());
             Set<BlockStatement> innerNodes2 = new LinkedHashSet<>(block2.getAllBlockStatementsIncludingNested());
 
@@ -90,6 +90,7 @@ public class FunctionBodyMapper {
             innerNodes1.remove(block1);
             innerNodes2.remove(block2);
 
+            argumentizer.clearCache(innerNodes1, innerNodes2);
             replaceParametersWithArguments(innerNodes1, innerNodes2);
             if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
                 matchNestedBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
@@ -128,7 +129,7 @@ public class FunctionBodyMapper {
             // TODO add /expand  lambdas
 
             Set<SingleStatement> leaves2 = new LinkedHashSet<>(addedOperationBodyBlock.getAllLeafStatementsIncludingNested());
-            argumentizer.clearCache();
+            argumentizer.clearCache(leaves1, leaves2);
             replaceParametersWithArguments(leaves1, leaves2);
             matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
 
@@ -152,7 +153,7 @@ public class FunctionBodyMapper {
             innerNodes2.remove(addedOperationBodyBlock);
             //innerNodes2.addAll(addedInnerNodes2);
 
-            argumentizer.clearCache();
+            argumentizer.clearCache(innerNodes1, innerNodes2);
             replaceParametersWithArguments(innerNodes1, innerNodes2);
             //compare inner nodes from T1 with inner nodes from T2
             matchNestedBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap2);
@@ -183,10 +184,18 @@ public class FunctionBodyMapper {
             //remove the innerNodes that were mapped with replacement, if they are not mapped again for a second time
             innerNodes1.removeAll(addedInnerNodes1);
             //innerNodes2.removeAll(addedInnerNodes2);
-            nonMappedLeavesT1.addAll(leaves1);
-            nonMappedLeavesT2.addAll(leaves2);
-            nonMappedInnerNodesT1.addAll(innerNodes1);
-            nonMappedInnerNodesT2.addAll(innerNodes2);
+
+
+            this.nonMappedLeavesT1 = leaves1;
+            this.nonMappedLeavesT2 = leaves2;
+
+            this.nonMappedInnerNodesT1 = innerNodes1;
+            this.nonMappedInnerNodesT2 = innerNodes2;
+
+//            nonMappedLeavesT1.addAll(leaves1);
+//            nonMappedLeavesT2.addAll(leaves2);
+//            nonMappedInnerNodesT1.addAll(innerNodes1);
+//            nonMappedInnerNodesT2.addAll(innerNodes2);
 //
 //            for (StatementObject statement : getNonMappedLeavesT2()) {
 //                temporaryVariableAssignment(statement, nonMappedLeavesT2);
@@ -199,16 +208,6 @@ public class FunctionBodyMapper {
     }
 
     void matchLeaves(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
-//        Set<SingleStatement> unmatchedLeavesA = new LinkedHashSet<>();
-//        Set<SingleStatement> unmatchedLeavesB = new LinkedHashSet<>();
-//
-//        if (leaves1.size() <= leaves2.size()) {
-//            unmatchedLeavesA.addAll(leaves1);
-//            unmatchedLeavesB.addAll(leaves2);
-//        } else {
-//            //unmatchedLeavesA.addAll(leaves2);
-//            //unmatchedLeavesB.addAll(leaves1);
-//        }
 
         // Exact string+depth matching - leaf nodes
         matchLeavesWithIdenticalText(leaves1, leaves2, false, parameterToArgumentMap);
@@ -367,9 +366,10 @@ public class FunctionBodyMapper {
      */
     void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap) {
-        if (innerNodes1.size() <= innerNodes2.size()) {
+       /* if (innerNodes1.size() <= innerNodes2.size()) {
             // TODO
-        } else {
+        } else */
+        {
             //exact string+depth matching - inner nodes
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, false);
             matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, true);

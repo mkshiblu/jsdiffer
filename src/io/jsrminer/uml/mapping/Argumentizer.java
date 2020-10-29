@@ -1,9 +1,8 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.SingleStatement;
-import io.jsrminer.sourcetree.Statement;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -97,7 +96,8 @@ public class Argumentizer {
         return false;
     }
 
-    public void clearCache() {
-        afterReplacementsMap.clear();
+    public void clearCache(Collection<? extends CodeFragment> fragments1, Collection<? extends CodeFragment> fragments2) {
+        fragments1.forEach(fragment -> afterReplacementsMap.remove(fragment));
+        fragments2.forEach(fragment -> afterReplacementsMap.remove(fragment));
     }
 }

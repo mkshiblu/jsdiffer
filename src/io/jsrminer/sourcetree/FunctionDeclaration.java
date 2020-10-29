@@ -2,7 +2,6 @@ package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

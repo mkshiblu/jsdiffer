@@ -58,20 +58,20 @@ public class ExtractOperationRefactoring extends Refactoring {
         }
     }
 
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(getName()).append("\t");
-//        sb.append(extractedOperation);
-//        sb.append(" extracted from ");
-//        sb.append(sourceOperationBeforeExtraction);
-//        sb.append(" in class ");
-//        sb.append(getClassName());
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName()).append("\t");
+        sb.append(extractedOperation);
+        sb.append(" extracted from ");
+        sb.append(sourceOperationBeforeExtraction);
+        sb.append(" in class ");
+        //sb.append(getClassName());
 //        if (getRefactoringType().equals(RefactoringType.EXTRACT_AND_MOVE_OPERATION)) {
 //            sb.append(" & moved to class ");
 //            sb.append(extractedOperation.getClassName());
 //        }
-//        return sb.toString();
-//    }
+        return sb.toString();
+    }
 //
 //    private String getClassName() {
 //        if (getRefactoringType().equals(RefactoringType.EXTRACT_AND_MOVE_OPERATION)) {

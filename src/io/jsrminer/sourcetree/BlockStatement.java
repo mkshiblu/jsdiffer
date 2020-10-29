@@ -43,7 +43,7 @@ public class BlockStatement extends Statement {
 
     public String getTextWithExpressions() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.type.titleCase);
+        sb.append(this.text);
         if (expressions.size() > 0) {
             sb.append("(");
             for (int i = 0; i < expressions.size() - 1; i++) {
