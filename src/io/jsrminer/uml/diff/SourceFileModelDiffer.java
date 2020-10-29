@@ -2,6 +2,7 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.refactorings.Refactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -21,7 +22,6 @@ public class SourceFileModelDiffer {
     //private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
-
 
     public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
@@ -166,4 +166,8 @@ public class SourceFileModelDiffer {
         // endregion
     }
 
+
+    public List<IRefactoring> getRefactorings() {
+        return this.refactorings;
+    }
 }
