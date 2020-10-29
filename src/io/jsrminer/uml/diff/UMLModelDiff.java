@@ -1,13 +1,12 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.Refactoring;
-import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.uml.UMLModel;
 
 import java.util.*;
 
 public class UMLModelDiff extends Diff {
-    private List<Refactoring> refactorings = new ArrayList<>();
+    private List<IRefactoring> refactorings = new ArrayList<>();
 
     public final UMLModel model1;
     public final UMLModel model2;
@@ -18,11 +17,11 @@ public class UMLModelDiff extends Diff {
     }
 
 
-    public void addRefactoring(Refactoring ref) {
+    public void addRefactoring(IRefactoring ref) {
         refactorings.add(ref);
     }
 
-    public List<Refactoring> getRefactorings() {
+    public List<IRefactoring> getRefactorings() {
         return refactorings;
     }
 }

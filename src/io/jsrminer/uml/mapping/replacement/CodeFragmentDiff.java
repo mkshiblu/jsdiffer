@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.SingleStatement;
 
 import java.util.LinkedHashSet;
@@ -8,9 +9,9 @@ import java.util.Set;
 /**
  * Contains all the unmatched arguments, literals, variables etc.
  */
-public class StatementDiff {
-    public final SingleStatement statement1;
-    public final SingleStatement statement2;
+public class CodeFragmentDiff {
+    public final CodeFragment statement1;
+    public final CodeFragment statement2;
     public final Set<String> stringLiterals1 = new LinkedHashSet<>();
     public final Set<String> stringLiterals2 = new LinkedHashSet<>();
     public final Set<String> numberLiterals1 = new LinkedHashSet<>();
@@ -24,7 +25,7 @@ public class StatementDiff {
     public final Set<String> prefixExpressions1 = new LinkedHashSet<>();
     public final Set<String> prefixExpressions2 = new LinkedHashSet<>();
 
-    public StatementDiff(SingleStatement statement1, SingleStatement statement2) {
+    public CodeFragmentDiff(CodeFragment statement1, CodeFragment statement2) {
         this.statement1 = statement1;
         this.statement2 = statement2;
         intersectVariables();

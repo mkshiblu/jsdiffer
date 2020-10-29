@@ -15,6 +15,7 @@ public enum CodeElementType {
     OBJECT_CREATION("NewExpression"),
     RETURN_STATEMENT("ReturnStatement"),
     TRY_STATEMENT("TryStatement"),
+    CATCH_CLAUSE("CatchClause"),
     ARRAY_EXPRESSION("ArrayExpression"),
     ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"), // TODO revisit
     FOR_STATEMENT("ForStatement");

@@ -2,16 +2,15 @@ package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FunctionDeclaration extends CodeFragment {
+public class FunctionDeclaration extends CodeEntity {
 
     /**
      * Name parameter map
      */
-    private Map<String, UMLParameter> nameParameterMap = new HashMap<>();
+    private Map<String, UMLParameter> nameParameterMap = new LinkedHashMap<>();
     /**
      * The name of the function.
      */
@@ -120,7 +119,7 @@ public class FunctionDeclaration extends CodeFragment {
         return this.name != null && this.name.equals(function.name);
     }
 
-    public int parameterCount(){
+    public int parameterCount() {
         return this.nameParameterMap.size();
     }
 }

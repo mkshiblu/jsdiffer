@@ -1,5 +1,6 @@
 package io.jsrminer;
 
+import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
@@ -59,7 +60,7 @@ public class JSRefactoringMiner {
         while (i.hasNext()) {
             RevCommit currentCommit = i.next();
             try {
-                List<Refactoring> refactoringsAtRevision = detectRefactorings(repository, currentCommit, handler);
+                List<IRefactoring> refactoringsAtRevision = detectRefactorings(repository, currentCommit, handler);
                 refactoringsCount += refactoringsAtRevision.size();
 
             } catch (Exception e) {
@@ -80,9 +81,9 @@ public class JSRefactoringMiner {
         log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
     }
 
-    protected List<Refactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
+    protected List<IRefactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
         RevCommit parentCommit = currentCommit.getParent(0);
-        List<Refactoring> refactoringsAtRevision = null;
+        List<IRefactoring> refactoringsAtRevision = null;
         String commitId = currentCommit.getId().getName();
 
         List<String> filePathsBefore = new ArrayList<String>();

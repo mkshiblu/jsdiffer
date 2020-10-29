@@ -1,21 +1,22 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.CodeFragment;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PreProcessor {
+public class Argumentizer {
 
-    private Map<SingleStatement, String> afterReplacementsMap = new HashMap<>();
+    private Map<CodeFragment, String> afterReplacementsMap = new HashMap<>();
 
-    public String replaceParametersWithArguments(SingleStatement statement, Map<String, String> parameterToArgumentMap) {
-        if (afterReplacementsMap.containsKey(statement))
-            return afterReplacementsMap.get(statement);
+    public String replaceParametersWithArguments(CodeFragment fragment, Map<String, String> parameterToArgumentMap) {
+        if (afterReplacementsMap.containsKey(fragment))
+            return afterReplacementsMap.get(fragment);
 
-        String afterReplacements = statement.getText();
+        String afterReplacements = fragment.getText();
 
         for (String parameter : parameterToArgumentMap.keySet()) {
             String argument = parameterToArgumentMap.get(parameter);
@@ -52,12 +53,12 @@ public class PreProcessor {
                 afterReplacements = sb.toString();
             }
         }
-        afterReplacementsMap.put(statement, afterReplacements);
+        afterReplacementsMap.put(fragment, afterReplacements);
         //.codeFragmentAfterReplacingParametersWithArguments = afterReplacements;
         return afterReplacements;
     }
 
-    public String getArgumentizedString(SingleStatement statement) {
+    public String getArgumentizedString(CodeFragment statement) {
         return this.afterReplacementsMap.get(statement);
     }
 
@@ -93,5 +94,10 @@ public class PreProcessor {
             }
         }
         return false;
+    }
+
+    public void clearCache(Collection<? extends CodeFragment> fragments1, Collection<? extends CodeFragment> fragments2) {
+        fragments1.forEach(fragment -> afterReplacementsMap.remove(fragment));
+        fragments2.forEach(fragment -> afterReplacementsMap.remove(fragment));
     }
 }

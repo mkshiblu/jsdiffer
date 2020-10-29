@@ -1,20 +1,15 @@
 package io.jsrminer.sourcetree;
 
-import com.jsoniter.JsonIterator;
-import com.jsoniter.any.Any;
-import io.jsrminer.parser.JsonCompositeFactory;
-
 import java.util.*;
-
-import static java.util.AbstractMap.SimpleImmutableEntry;
 
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
  * May contain other block statements or statements (i.e. composite statements)
  */
 public class BlockStatement extends Statement {
-    protected List<Statement> statements;
+    protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
+    private List<VariableDeclaration> variableDeclarations;
     // exp
     // vd
 
@@ -25,100 +20,17 @@ public class BlockStatement extends Statement {
         this.statements.add(statement);
     }
 
-    void addExpression(Expression expression) {
+    public void addExpression(Expression expression) {
         this.expressions.add(expression);
     }
 
-    public static BlockStatement fromJson(final String blockStatementJson) {
-        // Helper variables
-        BlockStatement currentBlock, childBlock;
-        Statement child;
-        boolean isComposite;
-        int indexInParent;
-        List<Any> statements;
-        Map.Entry<BlockStatement, Any> currentEntry;
-
-        final Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed = new LinkedList<>();
-        final BlockStatement newBlock = new BlockStatement();
-        newBlock.depth = 0;
-
-        //Enqueue to process
-        Any any = JsonIterator.deserialize(blockStatementJson);
-        blocksToBeProcessed.add(new SimpleImmutableEntry<>(newBlock, any));
-
-        while (!blocksToBeProcessed.isEmpty()) {
-            indexInParent = -1;
-
-            // Extract the block and the corresponding json stored as any
-            currentEntry = blocksToBeProcessed.remove();
-            currentBlock = currentEntry.getKey();
-            any = currentEntry.getValue();
-
-            // Parse source location
-            final SourceLocation location = any.get("loc").as(SourceLocation.class);
-            currentBlock.setSourceLocation(location);
-
-            // Parse the nested statements
-            statements = any.get("statements").asList();
-            currentBlock.statements = new ArrayList<>(statements.size());
-
-            // Parse Type
-            currentBlock.type = CodeElementType.getFromTitleCase(any.toString("type"));
-
-            // Parse Expressions (Todo optimize
-            if (any.keys().contains("expressions")) {
-                for (Any expressionAny : any.get("expressions").asList()) {
-                    Expression expression = Expression.fromJSON(expressionAny.toString());
-                    currentBlock.addExpression(expression);
-                }
-            }
-
-            // Parse text
-            currentBlock.text = any.toString("text");
-
-            // Check if it's try statement and contains any catchBlock
-            if (any.keys().contains("catchClause")) {
-                BlockStatement catchClause = new BlockStatement();
-                blocksToBeProcessed.add(new SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
-
-                // Add the catchblacue as seprate composite to the parent of the try block
-                catchClause.positionIndexInParent = currentBlock.positionIndexInParent++;
-                catchClause.depth = currentBlock.depth;
-                ((BlockStatement) currentBlock.parent).statements.add(catchClause);
-            }
-
-            // Parse childs of this block
-            for (Any childAny : statements) {
-                isComposite = childAny.keys().contains("statements");
-
-                if (isComposite) {
-
-                    // If composite enqueue the block and corresponding json to be processed later
-                    childBlock = new BlockStatement();
-                    blocksToBeProcessed.add(new SimpleImmutableEntry<>(childBlock, childAny));
-                    child = childBlock;
-                } else {
-                    // A leaf statement
-                    child = JsonCompositeFactory.createSingleStatement(childAny);
-                }
-
-                child.parent = currentBlock;
-                child.positionIndexInParent = ++indexInParent;
-                child.depth = currentBlock.depth + 1;
-                currentBlock.addStatement(child);
-            }
-
-        }
-
-        return newBlock;
-    }
 
     /**
      * Returns all the single statements including children's of children in a bottom up fashion
      * (i.e. lowest level children will be the first elements of the list sorted by their index position in parent)
      */
-    public Set<SingleStatement> getAllLeafStatementsIncludingNested() {
-        final Set<SingleStatement> leaves = new LinkedHashSet<>();
+    public List<SingleStatement> getAllLeafStatementsIncludingNested() {
+        final List<SingleStatement> leaves = new ArrayList<>();
         for (Statement statement : this.statements) {
             if (statement instanceof BlockStatement) {
                 leaves.addAll(((BlockStatement) statement).getAllLeafStatementsIncludingNested());
@@ -128,19 +40,249 @@ public class BlockStatement extends Statement {
         }
         return leaves;
     }
+
+    public String getTextWithExpressions() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.text);
+        if (expressions.size() > 0) {
+            sb.append("(");
+            for (int i = 0; i < expressions.size() - 1; i++) {
+                sb.append(expressions.get(i).text).append("; ");
+            }
+            sb.append(expressions.get(expressions.size() - 1).toString());
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Similar to getInnerNodes of RM
+     *
+     * @return
+     */
+    public Set<BlockStatement> getAllBlockStatementsIncludingNested() {
+        final Set<BlockStatement> innerNodes = new LinkedHashSet<>();
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                innerNodes.addAll(composite.getAllBlockStatementsIncludingNested());
+            }
+        }
+        innerNodes.add(this);
+        return innerNodes;
+    }
+
+    public List<Statement> getStatements() {
+        return this.statements;
+    }
+
+    public void setCodeElementType(CodeElementType type) {
+        this.type = type;
+    }
+
+    /***
+     * Returns the text with Expressions
+     * @return
+     */
+    @Override
+    public String getText() {
+        return getTextWithExpressions();
+    }
+
+    @Override
+    public List<String> getVariables() {
+        List<String> variables = new ArrayList<>();
+        for (Expression expression : this.getExpressions()) {
+            variables.addAll(expression.getVariables());
+        }
+        return variables;
+    }
+
+    @Override
+    public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
+        Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
+        for (Expression expression : this.expressions) {
+            Map<String, List<OperationInvocation>> expressionMap = expression.getMethodInvocationMap();
+            for (String key : expressionMap.keySet()) {
+                if (map.containsKey(key)) {
+                    map.get(key).addAll(expressionMap.get(key));
+                } else {
+                    List<OperationInvocation> list = new ArrayList<>();
+                    list.addAll(expressionMap.get(key));
+                    map.put(key, list);
+                }
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, List<ObjectCreation>> getCreationMap() {
+        return null;
+    }
+
+    @Override
+    public List<String> getStringLiterals() {
+        List<String> stringLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            stringLiterals.addAll(expression.getStringLiterals());
+        }
+        return stringLiterals;
+    }
+
+    @Override
+    public List<String> getNumberLiterals() {
+        List<String> numberLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            numberLiterals.addAll(expression.getNumberLiterals());
+        }
+        return numberLiterals;
+    }
+
+    @Override
+    public List<String> getNullLiterals() {
+        List<String> nullLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            nullLiterals.addAll(expression.getNullLiterals());
+        }
+        return nullLiterals;
+    }
+
+    @Override
+    public List<String> getBooleanLiterals() {
+        List<String> booleanLiterals = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            booleanLiterals.addAll(expression.getBooleanLiterals());
+        }
+        return booleanLiterals;
+    }
+
+    @Override
+    public List<String> getInfixOperators() {
+        List<String> infixOperators = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            infixOperators.addAll(expression.getInfixOperators());
+        }
+        return infixOperators;
+    }
+
+    @Override
+    public List<String> getArrayAccesses() {
+        List<String> arrayAccesses = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            arrayAccesses.addAll(expression.getArrayAccesses());
+        }
+        return arrayAccesses;
+    }
+
+    @Override
+    public List<String> getPrefixExpressions() {
+        List<String> prefixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            prefixExpressions.addAll(expression.getPrefixExpressions());
+        }
+        return prefixExpressions;
+    }
+
+    @Override
+    public List<String> getIdentifierArguments() {
+        return null;
+    }
+
+    @Override
+    public List<VariableDeclaration> getVariableDeclarations() {
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+        //special handling for enhanced-for formal parameter
+        variableDeclarations.addAll(this.variableDeclarations);
+        for (Expression expression : this.getExpressions()) {
+            variableDeclarations.addAll(expression.getVariableDeclarations());
+        }
+        return variableDeclarations;
+    }
+
+    @Override
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        return null;
+    }
+
+    @Override
+    public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
+        return null;
+    }
+
+    public List<Expression> getExpressions() {
+        return expressions;
+    }
+
+    /**
+     * Check if this fragment contains the supplied fragment as its children or itself
+     */
+    public boolean containsFragment(CodeFragment fragment) {
+        if (fragment == this)
+            return true;
+
+        if (fragment instanceof SingleStatement) {
+            return getAllLeafStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof BlockStatement) {
+            return getAllBlockStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof Expression) {
+            return this.getExpressions().contains(fragment);
+        }
+        return false;
+    }
+
+    public Map<String, List<OperationInvocation>> getAllMethodInvocationsIncludingNested() {
+        Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
+        map.putAll(getMethodInvocationMap());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+
+                Map<String, List<OperationInvocation>> compositeMap = composite.getAllMethodInvocationsIncludingNested();
+                for (String key : compositeMap.keySet()) {
+                    map.computeIfAbsent(key, call -> new ArrayList<>()).addAll(compositeMap.get(key));
+
+//                    if (map.containsKey(key)) {
+//                        map.get(key).addAll(compositeMap.get(key));
+//                    } else {
+//                        List<OperationInvocation> list = new ArrayList<>();
+//                        list.addAll(compositeMap.get(key));
+//                        map.put(key, list);
+//                    }
+                }
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                Map<String, List<OperationInvocation>> statementMap = statementObject.getMethodInvocationMap();
+                for (String key : statementMap.keySet()) {
+                    map.computeIfAbsent(key, call -> new ArrayList<>()).addAll(statementMap.get(key));
+                }
 //
-//    @Override
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(this.type.titleCase);
-//        if (expressions.size() > 0) {
-//            sb.append("(");
-//            for (int i = 0; i < expressions.size() - 1; i++) {
-//                sb.append(expressions.get(i).toString()).append("; ");
-//            }
-//            sb.append(expressions.get(expressions.size() - 1).toString());
-//            sb.append(")");
-//        }
-//        return sb.toString();
-//    }
+//                for (LambdaExpressionObject lambda : statementObject.getLambdas()) {
+//                    if (lambda.getBody() != null) {
+//                        Map<String, List<OperationInvocation>> lambdaMap = lambda.getBody().getCompositeStatement().getAllMethodInvocations();
+//                        for (String key : lambdaMap.keySet()) {
+//                            if (map.containsKey(key)) {
+//                                map.get(key).addAll(lambdaMap.get(key));
+//                            } else {
+//                                List<OperationInvocation> list = new ArrayList<OperationInvocation>();
+//                                list.addAll(lambdaMap.get(key));
+//                                map.put(key, list);
+//                            }
+//                        }
+//                    }
+//                }
+            }
+        }
+        return map;
+    }
+
+    public int statementCount() {
+        int count = 0;
+        if (!this.getText().equals("{"))
+            count++;
+        for (Statement statement : this.statements) {
+            count += statement.statementCount();
+        }
+        return count;
+    }
 }

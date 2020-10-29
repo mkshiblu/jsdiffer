@@ -3,10 +3,100 @@ package io.jsrminer.parser;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
+import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
 
 public class JsonCompositeFactory {
+
+    public static BlockStatement createBlockStatement(final String blockStatementJson) {
+        // Helper variables
+        BlockStatement currentBlock, childBlock;
+        Statement child;
+        boolean isComposite;
+        int indexInParent;
+        List<Any> statements;
+        Map.Entry<BlockStatement, Any> currentEntry;
+
+        final Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed = new LinkedList<>();
+        final BlockStatement newBlock = new BlockStatement();
+        newBlock.setDepth(0);
+
+        //Enqueue to process
+        Any any = JsonIterator.deserialize(blockStatementJson);
+        blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
+
+        while (!blocksToBeProcessed.isEmpty()) {
+            indexInParent = -1;
+
+            // Extract the block and the corresponding json stored as any
+            currentEntry = blocksToBeProcessed.remove();
+            currentBlock = currentEntry.getKey();
+            any = currentEntry.getValue();
+
+            // Parse source location
+            final SourceLocation location = any.get("loc").as(SourceLocation.class);
+            currentBlock.setSourceLocation(location);
+
+            // Parse the nested statements
+            statements = any.get("statements").asList();
+
+            // Parse Type
+            currentBlock.setCodeElementType(CodeElementType.getFromTitleCase(any.toString("type")));
+
+            // Parse Expressions (Todo optimize
+            if (any.keys().contains("expressions")) {
+                for (Any expressionAny : any.get("expressions").asList()) {
+                    Expression expression = createExpression(expressionAny, currentBlock);
+                    currentBlock.addExpression(expression);
+                }
+            }
+
+            // Parse text
+            currentBlock.setText(any.toString("text"));
+
+            // Check if it's try statement and contains any catchBlock
+            if (any.keys().contains("catchClause")) {
+                BlockStatement catchClause = new BlockStatement();
+                blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
+
+                // Add the catchblacue as seprate composite to the parent of the try block
+                catchClause.setPositionIndexInParent(currentBlock.getPositionIndexInParent() + 1);
+                catchClause.setDepth(currentBlock.getDepth());
+                ((BlockStatement) currentBlock.getParent()).getStatements().add(catchClause);
+                catchClause.setParent(currentBlock.getParent());
+
+                // Add the catchclause to the try block
+                ((TryStatement) currentBlock).getCatchClauses().add(catchClause);
+            }
+
+            // Parse childs of this block
+            for (Any childAny : statements) {
+                isComposite = childAny.keys().contains("statements");
+
+                if (isComposite) {
+
+                    // If composite enqueue the block and corresponding json to be processed later
+                    boolean isTry = childAny.toString("type")
+                            .equals(CodeElementType.TRY_STATEMENT.titleCase);
+
+                    childBlock = isTry ? new TryStatement() : new BlockStatement();
+                    blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(childBlock, childAny));
+                    child = childBlock;
+                } else {
+                    // A leaf statement
+                    child = JsonCompositeFactory.createSingleStatement(childAny, currentBlock);
+                }
+
+                child.setParent(currentBlock);
+                child.setPositionIndexInParent(++indexInParent);
+                child.setDepth(currentBlock.getDepth() + 1);
+                currentBlock.addStatement(child);
+            }
+        }
+
+        return newBlock;
+    }
 
     private static void populateInvocationProperties(Any invocationAny, Invocation invocation) {
         invocation.setText(invocationAny.toString("text"));
@@ -52,7 +142,7 @@ public class JsonCompositeFactory {
     /**
      * @param any SingleStatement any node
      */
-    public static SingleStatement createSingleStatement(Any any) {
+    public static SingleStatement createSingleStatement(Any any, BlockStatement parent) {
         SingleStatement singleStatement = new SingleStatement();
         // Text
         singleStatement.setText(any.toString("text"));
@@ -68,8 +158,7 @@ public class JsonCompositeFactory {
         // region
         // Identifiers
         if (any.keys().contains("identifiers")) {
-            Set<String> variables = any.get("identifiers").as(singleStatement.getVariables().getClass());
-            singleStatement.setVariables(variables);
+            populateStringListFromAny(any.get("identifiers"), singleStatement.getVariables());
         }
         //endregion
 
@@ -79,7 +168,7 @@ public class JsonCompositeFactory {
             List<VariableDeclaration> vds = singleStatement.getVariableDeclarations();
             List<Any> vdAnys = any.get("variableDeclarations").asList();
             vdAnys.forEach((variableDeclarationAny -> {
-                VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny);
+                VariableDeclaration vd = createVariableDeclaration(variableDeclarationAny, parent);
                 vds.add(vd);
             }));
         }
@@ -99,8 +188,7 @@ public class JsonCompositeFactory {
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
         if (any.keys().contains("argumentsWithIdentifier")) {
-            singleStatement.getIdentifierArguments().addAll(any.get("argumentsWithIdentifier")
-                    .as(singleStatement.getIdentifierArguments().getClass()));
+            populateStringListFromAny(any.get("argumentsWithIdentifier"), singleStatement.getIdentifierArguments());
         }
 
         return singleStatement;
@@ -133,56 +221,53 @@ public class JsonCompositeFactory {
         }
     }
 
-    public static SingleStatement createSingleStatement(String singleStatementJson) {
-        return createSingleStatement(JsonIterator.deserialize(singleStatementJson));
-    }
-
-    public static VariableDeclaration createVariableDeclaration(Any any) {
+    public static VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner) {
         VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"));
-        vd.setText(any.toString("text"));
+        //vd.setText(any.toString("text"));
         VariableDeclarationKind kind = VariableDeclarationKind.fromName(any.toString("kind"));
         vd.setKind(kind);
 
         if (any.keys().contains("initializer")) {
-            Expression expression = createExpression(any.get("initializer"));
+            Expression expression = createExpression(any.get("initializer"), owner);
             vd.setInitializer(expression);
         }
         return vd;
     }
 
-    public static Expression createExpression(Any any) {
+    public static Expression createExpression(Any any, BlockStatement ownerBlock) {
         Expression expression = new Expression();
         //Text
         expression.setText(any.toString("text"));
 
         // Info
-        expression.setVariables(any.get("identifiers").as(String[].class));
-        expression.setNumericLiterals(any.get("numericLiterals").as(String[].class));
-        expression.setInfixOperators(any.get("infixOperators").as(String[].class));
+        populateStringListFromAny(any.get("identifiers"), expression.getVariables());
+        populateStringListFromAny(any.get("numericLiterals"), expression.getNumberLiterals());
+        populateStringListFromAny(any.get("infixOperators"), expression.getInfixOperators());
+        populateStringListFromAny(any.get("postfixOperators"), expression.getPostfixExpressions());
+        populateStringListFromAny(any.get("prefixOperators"), expression.getPrefixExpressions());
 
         final List<Any> anys = any.get("variableDeclarations").asList();
 
         // Vds
         for (Any variableDeclarationAny : anys) {
-            VariableDeclaration declaration = new VariableDeclaration(variableDeclarationAny.toString("name"));
+            VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny, ownerBlock);
             expression.getVariableDeclarations().add(declaration);
         }
 
         // Additional info if present
-        // region
-        // Identifiers
-        if (any.keys().contains("identifiers")) {
-            String[] variables = any.get("identifiers").as(expression.getVariables().getClass());
-            expression.setVariables(variables);
-        }
         //endregion
         parseAndLoadFunctionInvocations(any.get("functionInvocations"), expression.getMethodInvocationMap());
         parseAndLoadObjectCreations(any.get("objectCreations"), expression.getCreationMap());
 
+        expression.setOwnerBlock(ownerBlock);
         return expression;
     }
 
     static SourceLocation createSourceLocation(Any sourceLocationAny) {
         return sourceLocationAny.as(SourceLocation.class);
+    }
+
+    static void populateStringListFromAny(Any any, @NonNull List<String> listToBePopulated) {
+        any.asList().forEach(item -> listToBePopulated.add(item.toString()));
     }
 }

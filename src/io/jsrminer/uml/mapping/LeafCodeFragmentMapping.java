@@ -1,23 +1,28 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.mapping.replacement.Replacement;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comparable<LeafCodeFragmentMapping> {
 
-public class LeafStatementMapping extends StatementMapping implements Comparable<LeafStatementMapping> {
-
-    private Set<Replacement> replacements = new LinkedHashSet<>();
-
-    public LeafStatementMapping(Statement statement1, Statement statement2) {
+    public LeafCodeFragmentMapping(CodeFragment statement1, CodeFragment statement2) {
         super(statement1, statement2);
     }
 
     @Override
-    public int compareTo(LeafStatementMapping o) {
+    public boolean isExactMatch() {
+        // TODO revisit
+//        return *(statement1.getArgumentizedString().equals(fragment2.getArgumentizedString()) ||
+//        statement1.getText().equals(fragment2.getString())
+//                || isExactAfterAbstraction()
+//                || containsIdenticalOrCompositeReplacement()) &&!isKeyword();*/
+        return this.normalizedTextualDistance() == 0;
+    }
+
+    @Override
+    public int compareTo(LeafCodeFragmentMapping o) {
         double distance1 = this.normalizedTextualDistance();
         double distance2 = o.normalizedTextualDistance();
 
@@ -34,14 +39,14 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
 //            }
             return Double.compare(distance1, distance2);
         } else {
-            int depthDiff1 = Math.abs(this.statement1.getDepth() - this.statement2.getDepth());
-            int depthDiff2 = Math.abs(o.statement1.getDepth() - o.statement2.getDepth());
+            int depthDiff1 = Math.abs(this.fragment1.getDepth() - this.fragment2.getDepth());
+            int depthDiff2 = Math.abs(o.fragment1.getDepth() - o.fragment2.getDepth());
 
             if (depthDiff1 != depthDiff2) {
                 return Integer.valueOf(depthDiff1).compareTo(Integer.valueOf(depthDiff2));
             } else {
-                int indexDiff1 = Math.abs(this.statement1.getPositionIndexInParent() - this.statement2.getPositionIndexInParent());
-                int indexDiff2 = Math.abs(o.statement1.getPositionIndexInParent() - o.statement2.getPositionIndexInParent());
+                int indexDiff1 = Math.abs(this.fragment1.getPositionIndexInParent() - this.fragment2.getPositionIndexInParent());
+                int indexDiff2 = Math.abs(o.fragment1.getPositionIndexInParent() - o.fragment2.getPositionIndexInParent());
                 if (indexDiff1 != indexDiff2) {
                     return Integer.valueOf(indexDiff1).compareTo(Integer.valueOf(indexDiff2));
                 } else {
@@ -61,8 +66,8 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
      * the two statement
      */
     double normalizedTextualDistance() {
-        final String text1 = statement1.getText();
-        final String text2 = statement2.getText();
+        final String text1 = fragment1.getText();
+        final String text2 = fragment2.getText();
         final double distance;
         if (text1.equals(text2)) {
             distance = 0;
@@ -76,12 +81,12 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
     }
 
     double normalizedParentEditDistance() {
-        Statement parent1 = statement1.getParent();
-        while (parent1 != null && parent1.getType().equals(CodeElementType.BLOCK_STATEMENT)) {
+        Statement parent1 = fragment1.getParent();
+        while (parent1 != null && parent1.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent1 = parent1.getParent();
         }
-        Statement parent2 = statement2.getParent();
-        while (parent2 != null && parent2.getType().equals(CodeElementType.BLOCK_STATEMENT)) {
+        Statement parent2 = fragment2.getParent();
+        while (parent2 != null && parent2.getCodeElementType().equals(CodeElementType.BLOCK_STATEMENT)) {
             parent2 = parent2.getParent();
         }
 
@@ -104,13 +109,5 @@ public class LeafStatementMapping extends StatementMapping implements Comparable
         int distance = StringDistance.editDistance(s1, s2);
         double normalized = (double) distance / Math.max(s1.length(), s2.length());
         return normalized;
-    }
-
-    public void addReplacements(Set<Replacement> replacements) {
-        this.replacements.addAll(replacements);
-    }
-
-    public Set<Replacement> getReplacements() {
-        return replacements;
     }
 }

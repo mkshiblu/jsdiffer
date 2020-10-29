@@ -6,21 +6,27 @@ const expressionProcessor = require('./ExpressionProcessor');
 const loopsProcessor = require('./LoopsProcessor');
 const exceptions = require('./Exceptions');
 
-function processExpression(path, statement) {
-    const expressionInfo = {
+function createBaseExpressionInfo(path) {
+    return {
         text: path.toString(),
         identifiers: [],
         numericLiterals: [],
         stringLiterals: [],
-        variableDeclarations: [],
+        nullLiterals: [],
         infixOperators: [],
+        prefixOperators: [],
+        postfixOperators: [],
+        variableDeclarations: [],
         functionInvocations: [],
         constructorInvocations: [],
         objectCreations: [],
         arguments: [],
         loc: {}
     };
+}
 
+function processExpression(path, statement) {
+    const expressionInfo = createBaseExpressionInfo(path);
     const expression = expressionProcessor.processExpression(path, expressionInfo, statement);
     return expression;
 }
@@ -54,3 +60,4 @@ const processNodePath = (function () {
 
 exports.processNodePath = processNodePath;
 exports.processExpression = processExpression;
+exports.createBaseExpressionInfo = createBaseExpressionInfo;

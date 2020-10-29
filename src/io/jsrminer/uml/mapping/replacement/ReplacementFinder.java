@@ -2,7 +2,9 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.mapping.PreProcessor;
+import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
+import io.jsrminer.uml.mapping.Argumentizer;
+import io.jsrminer.uml.mapping.CodeFragmentMapping;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -17,12 +19,14 @@ public class ReplacementFinder {
     private static final Pattern DOUBLE_QUOTES = Pattern.compile("\"([^\"]*)\"|(\\S+)");
     private static final Pattern SPLIT_CONDITIONAL_PATTERN = Pattern.compile("(\\|\\|)|(&&)|(\\?)|(:)");
 
-    public Set<Replacement> findReplacementsWithExactMatching(SingleStatement statement1, SingleStatement statement2
+    public Set<Replacement> findReplacementsWithExactMatching(CodeFragment statement1
+            , CodeFragment statement2
             , Map<String, String> parameterToArgumentMap
             , ReplacementInfo replacementInfo
-            , PreProcessor preProcessor) {
+            , Argumentizer argumentizer
+            , Set<CodeFragmentMapping> mappings) {
 
-        final StatementDiff diff = new StatementDiff(statement1, statement2);
+        final CodeFragmentDiff diff = new CodeFragmentDiff(statement1, statement2);
 
         // Intersect variables
 
@@ -75,9 +79,8 @@ public class ReplacementFinder {
                     , diff.variables1, diff.variables2
                     , methodInvocationMap1, methodInvocationMap2
                     , functionInvocations1, functionInvocations2
-                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2);
+                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2, mappings);
         }
-
         //3. replace variables with the corresponding arguments in object creations
         intersectAndReplaceObjectCreations(statement1, statement2,
                 parameterToArgumentMap, replacementInfo, variableToArgumentMap);
@@ -132,7 +135,7 @@ public class ReplacementFinder {
 // endregion
 
         String[] argumentizedStrings = filterReplacements(statement1, statement2
-                , replacementInfo, preProcessor
+                , replacementInfo, argumentizer
                 , diff, methodInvocationMap1, methodInvocationMap2
                 , functionInvocations1, functionInvocations2);
 
@@ -155,8 +158,8 @@ public class ReplacementFinder {
 
         if (isEqualWithReplacement) {
             if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo)
-                    && !statement1.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)
-                    && !statement2.getType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+                    && !statement1.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)
+                    && !statement2.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
                 return null;
             }
             if (variableAssignmentWithEverythingReplaced(statement1, statement2, replacementInfo)) {
@@ -283,7 +286,7 @@ public class ReplacementFinder {
         return replacementInfo.getReplacements().size() == 0 ? null : replacementInfo.getReplacements();
     }
 
-    private void applyHeuristics(SingleStatement statement1, SingleStatement statement2
+    private void applyHeuristics(CodeFragment statement1, CodeFragment statement2
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , ReplacementInfo replacementInfo) {
 
@@ -770,14 +773,14 @@ public class ReplacementFinder {
 
     }
 
-    private String[] filterReplacements(SingleStatement statement1, SingleStatement statement2
-            , ReplacementInfo replacementInfo, PreProcessor preProcessor
-            , StatementDiff diff, Map<String, List<? extends Invocation>> methodInvocationMap1
+    private String[] filterReplacements(CodeFragment statement1, CodeFragment statement2
+            , ReplacementInfo replacementInfo, Argumentizer argumentizer
+            , CodeFragmentDiff diff, Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2) {
 
-        String s1 = preProcessor.getArgumentizedString(statement1);
-        String s2 = preProcessor.getArgumentizedString(statement2);
+        String s1 = argumentizer.getArgumentizedString(statement1);
+        String s2 = argumentizer.getArgumentizedString(statement2);
 
         LinkedHashSet<Replacement> replacementsToBeRemoved = new LinkedHashSet<>();
         LinkedHashSet<Replacement> replacementsToBeAdded = new LinkedHashSet<>();
@@ -817,7 +820,7 @@ public class ReplacementFinder {
         return new String[]{s1, s2};
     }
 
-    private void replaceArrayAccess(ReplacementInfo replacementInfo, StatementDiff diff, Set<String> functionInvocations1, Set<String> functionInvocations2) {
+    private void replaceArrayAccess(ReplacementInfo replacementInfo, CodeFragmentDiff diff, Set<String> functionInvocations1, Set<String> functionInvocations2) {
         // Replace variables With arrayAccess and ViceVersa
         findAndPerformBestReplacements(diff.variables1, diff.arrayAccesses2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
         findAndPerformBestReplacements(diff.arrayAccesses1, diff.variables2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_ARRAY_ACCESS);
@@ -827,7 +830,7 @@ public class ReplacementFinder {
         findAndPerformBestReplacements(diff.arrayAccesses1, functionInvocations2, replacementInfo, ReplacementType.ARRAY_ACCESS_REPLACED_WITH_METHOD_INVOCATION);
     }
 
-    private void replaceLiterals(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo, StatementDiff intersection) {
+    private void replaceLiterals(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo, CodeFragmentDiff intersection) {
         findAndPerformBestReplacements(intersection.stringLiterals1, intersection.stringLiterals2
                 , replacementInfo, ReplacementType.STRING_LITERAL);
         findAndPerformBestReplacements(intersection.numberLiterals1, intersection.numberLiterals2,
@@ -840,7 +843,7 @@ public class ReplacementFinder {
         }
     }
 
-    private void intersectAndReplaceObjectCreations(SingleStatement statement1, SingleStatement statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo, Map<String, String> variableToArgumentMap) {
+    private void intersectAndReplaceObjectCreations(CodeFragment statement1, CodeFragment statement2, Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo, Map<String, String> variableToArgumentMap) {
         Map<Integer, Set<String>> objectCreationsMap = intersectObjectCreations(statement1, statement2,
                 parameterToArgumentMap, variableToArgumentMap);
         Set<String> creations1 = objectCreationsMap.get(0);
@@ -848,13 +851,14 @@ public class ReplacementFinder {
         findAndPerformBestReplacements(creations1, creations2, replacementInfo, ReplacementType.CLASS_INSTANCE_CREATION);
     }
 
-    private void replaceVariablesAndFunctionInvocations(SingleStatement statement1, SingleStatement statement2
+    private void replaceVariablesAndFunctionInvocations(CodeFragment statement1, CodeFragment statement2
             , Map<String, String> parameterToArgumentMap, ReplacementInfo replacementInfo
             , Set<String> unmatchedVariables1, Set<String> unmatchedVariables2
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2
-            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2) {
+            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2
+            , Set<CodeFragmentMapping> mappings) {
 
         // If statements are not matched yet
 
@@ -889,11 +893,14 @@ public class ReplacementFinder {
                                 replacement = new Replacement(suffix1, suffix2, ReplacementType.VARIABLE_NAME);
                             }
                         }
-                        VariableDeclaration v1 = statement1.getVariableDeclaration(s1);
-                        VariableDeclaration v2 = statement2.getVariableDeclaration(s2);
-//                            if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1 && operation2.loopWithVariables(v1.getVariableName(), v2.getVariableName()) == null) {
-//                                replacement = null;
-//                            }
+                        VariableDeclaration v1 = statement1.findVariableDeclarationIncludingParent(s1);
+                        VariableDeclaration v2 = statement2.findVariableDeclarationIncludingParent(s2);
+                        if (inconsistentVariableMappingCount(statement1, statement2, v1, v2, mappings) > 1
+                        /** TODO && operation2.loopWithVariables
+                         (v1.variableName, v2.variableName) == null**/) {
+                            replacement = null;
+                        }
+
                     } else if (unmatchedVariables1.contains(s1) && functionInvocations2.contains(s2)) {
                         OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
                         replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationAfter, VariableReplacementWithMethodInvocation.Direction.VARIABLE_TO_INVOCATION);
@@ -929,7 +936,7 @@ public class ReplacementFinder {
         }
     }
 
-    private void intersectAndReplaceVariableDeclarationsKind(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+    private void intersectAndReplaceVariableDeclarationsKind(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo) {
 
 //////        Set<String> types1 = new LinkedHashSet<String>(statement1.getTypes());
 ////        Set<String> types2 = new LinkedHashSet<String>(statement2.getTypes());
@@ -937,7 +944,7 @@ public class ReplacementFinder {
 ////        //perform type replacements
 ////        findReplacements(types1, types2, replacementInfo, ReplacementType.TYPE);
         // Intersect
-        Map<SingleStatement, Set<String>> unmatchedKinds = intersectVariableDeclarationsKind(statement1, statement2);
+        Map<CodeFragment, Set<String>> unmatchedKinds = intersectVariableDeclarationsKind(statement1, statement2);
         Set<String> kinds1 = unmatchedKinds.get(statement1);
         Set<String> kinds2 = unmatchedKinds.get(statement2);
 
@@ -945,7 +952,7 @@ public class ReplacementFinder {
         findAndPerformBestReplacements(kinds1, kinds2, replacementInfo, ReplacementType.KIND);
     }
 
-    private Map<SingleStatement, Set<String>> intersectVariableDeclarationsKind(SingleStatement statement1, SingleStatement statement2) {
+    private Map<CodeFragment, Set<String>> intersectVariableDeclarationsKind(CodeFragment statement1, CodeFragment statement2) {
         List<String> kindList1 = statement1.getVariableDeclarations()
                 .stream()
                 .map(vd -> vd.getKind().keywordName)
@@ -1024,7 +1031,7 @@ public class ReplacementFinder {
         return Map.of(0, variablesAndMethodInvocations1, 1, variablesAndMethodInvocations2);
     }
 
-    private void intersectAndReplaceInfixOperators(SingleStatement statement1, SingleStatement statement2, ReplacementInfo replacementInfo) {
+    private void intersectAndReplaceInfixOperators(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo) {
         //5. Intersection of infixOps
         Set<String> infixOperators1 = new LinkedHashSet<>(statement1.getInfixOperators());
         Set<String> infixOperators2 = new LinkedHashSet<>(statement2.getInfixOperators());
@@ -1039,8 +1046,8 @@ public class ReplacementFinder {
      * @return The functioninvocations 0, 1 as key respectively
      */
     private Map<Integer, Set<String>> intersectFunctionInvocations(
-            SingleStatement statement1,
-            SingleStatement statement2,
+            CodeFragment statement1,
+            CodeFragment statement2,
             Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Map<String, String> parameterToArgumentMap
@@ -1105,7 +1112,7 @@ public class ReplacementFinder {
         return Map.of(0, methodInvocations1, 1, methodInvocations2);
     }
 
-    private Map<Integer, Set<String>> intersectObjectCreations(SingleStatement statement1, SingleStatement statement2,
+    private Map<Integer, Set<String>> intersectObjectCreations(CodeFragment statement1, CodeFragment statement2,
                                                                Map<String, String> parameterToArgumentMap
             , Map<String, String> variableToArgumentMap) {
         Map<String, List<? extends Invocation>> creationMap1 = new LinkedHashMap<>(statement1.getCreationMap());
@@ -1151,8 +1158,8 @@ public class ReplacementFinder {
         return Map.of(0, creations1, 1, creations2);
     }
 
-    private Map<String, String> replaceArgumentsWithVariables(SingleStatement statement1,
-                                                              StatementDiff intersection,
+    private Map<String, String> replaceArgumentsWithVariables(CodeFragment statement1,
+                                                              CodeFragmentDiff intersection,
                                                               ReplacementInfo replacementInfo) {
         final Map<String, String> variableToArgumentMap = new LinkedHashMap<>();
         final Set<String> arguments1 = intersection.arguments1;
@@ -1207,8 +1214,8 @@ public class ReplacementFinder {
                                 } else {
                                     newCall = createFunctionInvocationWithExpression((OperationInvocation) oldCall,
                                             parameter, argument);
-                                    newCalls.add(newCall);
                                 }
+                                newCalls.add(newCall);
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1235,8 +1242,8 @@ public class ReplacementFinder {
                                 } else {
                                     newCall = createFunctionInvocationWithExpression((OperationInvocation) oldCall,
                                             parameter, argument);
-                                    newCalls.add(newCall);
                                 }
+                                newCalls.add(newCall);
                             }
                             callMap.put(afterReplacement, newCalls);
                         }
@@ -1501,12 +1508,12 @@ public class ReplacementFinder {
     }
 
     /**
-     * Returns unmatched variables of each statements
+     * Returns unmatched variables from both statements
      *
      * @return
      */
-    private /*Map<SingleStatement, Set<String>>*/ Set<String> findCommonVariablesToBeAddedAsUnmatched(SingleStatement statement1, SingleStatement statement2,
-                                                                                                      ReplacementInfo replacementInfo) {
+    private Set<String> findCommonVariablesToBeAddedAsUnmatched(CodeFragment statement1, CodeFragment statement2,
+                                                                ReplacementInfo replacementInfo) {
         final Set<String> variables1 = new LinkedHashSet<>(statement1.getVariables());
         final Set<String> variables2 = new LinkedHashSet<>(statement2.getVariables());
 
@@ -1538,8 +1545,9 @@ public class ReplacementFinder {
                 // invocation 2 contains, but not invocation 1
                 if (!invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
                         invocationCoveringTheEntireStatement2.getArguments().contains(commonVariable)) {
-                    if (invocationCoveringEntireStatementUsesVariableInArgument(invocationCoveringTheEntireStatement1,
-                            commonVariable, replacementInfo.unMatchedStatements1)) {
+                    if (invocationCoveringEntireStatementUsesVariableInArgument
+                            (invocationCoveringTheEntireStatement1,
+                                    commonVariable, replacementInfo.unMatchedStatements1)) {
                         variablesToBeRemovedFromCommon.add(commonVariable);
                     }
                 } else if (invocationCoveringTheEntireStatement1.getArguments().contains(commonVariable) &&
@@ -1570,7 +1578,8 @@ public class ReplacementFinder {
         return variablesToBeRemovedFromCommon;
     }
 
-    private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement, String variable, List<SingleStatement> unMatchedStatements) {
+    private boolean invocationCoveringEntireStatementUsesVariableInArgument(OperationInvocation invocationCoveringTheEntireStatement
+            , String variable, List<? extends CodeFragment> unMatchedStatements) {
         for (String argument : invocationCoveringTheEntireStatement.getArguments()) {
             String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
             if (argument.contains(variable) && !argument.equals(variable)
@@ -1584,9 +1593,10 @@ public class ReplacementFinder {
         return false;
     }
 
-    private boolean nonMatchedStatementUsesVariableInArgument(List<SingleStatement> statements, String variable, String otherArgument) {
-        for (SingleStatement statement : statements) {
-            OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
+    private boolean nonMatchedStatementUsesVariableInArgument(List<? extends CodeFragment> statements, String variable, String otherArgument) {
+        for (CodeFragment statement : statements) {
+            OperationInvocation invocation = InvocationCoverage.INSTANCE
+                    .getInvocationCoveringEntireFragment(statement);
             if (invocation != null) {
                 for (String argument : invocation.getArguments()) {
                     String argumentNoWhiteSpace = argument.replaceAll("\\s", "");
@@ -1616,36 +1626,42 @@ public class ReplacementFinder {
         return null;
     }
 
-    private int inconsistentVariableMappingCount(SingleStatement statement1, SingleStatement statement2, VariableDeclaration v1, VariableDeclaration v2) {
+    private int inconsistentVariableMappingCount(CodeFragment statement1, CodeFragment statement2
+            , VariableDeclaration v1, VariableDeclaration v2, Set<CodeFragmentMapping> mappings) {
         int count = 0;
-//        if (v1 != null && v2 != null) {
-//            for (AbstractCodeMapping mapping : mappings) {
-//                List<VariableDeclaration> variableDeclarations1 = mapping.getFragment1().getVariableDeclarations();
-//                List<VariableDeclaration> variableDeclarations2 = mapping.getFragment2().getVariableDeclarations();
-//                if (variableDeclarations1.contains(v1) &&
-//                        variableDeclarations2.size() > 0 &&
-//                        !variableDeclarations2.contains(v2)) {
-//                    count++;
-//                }
-//                if (variableDeclarations2.contains(v2) &&
-//                        variableDeclarations1.size() > 0 &&
-//                        !variableDeclarations1.contains(v1)) {
-//                    count++;
-//                }
-//                if (mapping.isExact()) {
-//                    boolean containsMapping = true;
-//                    if (statement1 instanceof CompositeStatementObject && statement2 instanceof CompositeStatementObject &&
-//                            statement1.getLocationInfo().getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
-//                        CompositeStatementObject comp1 = (CompositeStatementObject) statement1;
-//                        CompositeStatementObject comp2 = (CompositeStatementObject) statement2;
-//                        containsMapping = comp1.contains(mapping.getFragment1()) && comp2.contains(mapping.getFragment2());
-//                    }
-//                    if (containsMapping && (VariableReplacementAnalysis.bothFragmentsUseVariable(v1, mapping) || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, mapping))) {
-//                        count++;
-//                    }
-//                }
-//            }
-//        }
+        if (v1 != null && v2 != null) {
+            for (CodeFragmentMapping mapping : mappings) {
+                List<VariableDeclaration> variableDeclarations1 = mapping.fragment1.getVariableDeclarations();
+                List<VariableDeclaration> variableDeclarations2 = mapping.fragment2.getVariableDeclarations();
+                if (variableDeclarations1.contains(v1) &&
+                        variableDeclarations2.size() > 0 &&
+                        !variableDeclarations2.contains(v2)) {
+                    count++;
+                }
+                if (variableDeclarations2.contains(v2) &&
+                        variableDeclarations1.size() > 0 &&
+                        !variableDeclarations1.contains(v1)) {
+                    count++;
+                }
+                if (mapping.isExactMatch()) {
+                    boolean containsMapping = true;
+                    if (statement1 instanceof BlockStatement
+                            && statement2 instanceof BlockStatement &&
+                            statement1.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT)) {
+                        BlockStatement comp1 = (BlockStatement) statement1;
+                        BlockStatement comp2 = (BlockStatement) statement2;
+                        containsMapping = comp1.containsFragment(mapping.fragment1) && comp2.containsFragment(mapping.fragment2);
+                    }
+
+                    // TODO revisit
+                    if (containsMapping && (
+                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, (LeafCodeFragmentMapping) mapping)
+                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, (LeafCodeFragmentMapping) mapping))) {
+                        count++;
+                    }
+                }
+            }
+        }
         return count;
     }
 
@@ -1688,7 +1704,7 @@ public class ReplacementFinder {
 
     private ObjectCreation createObjectCreationWithExpression(ObjectCreation objectCreation, String oldExpression, String newExpression) {
         ObjectCreation newObjectCreation = new ObjectCreation();
-        newObjectCreation.setType(objectCreation.getType());
+        newObjectCreation.setType(objectCreation.getCodeElementType());
         newObjectCreation.setSourceLocation(objectCreation.getSourceLocation());
         updateCall(objectCreation, newObjectCreation, oldExpression, newExpression);
         return newObjectCreation;
@@ -1721,7 +1737,7 @@ public class ReplacementFinder {
         }
     }
 
-    protected boolean expressionsContainInitializerOfVariableDeclaration(Set<String> expressions, SingleStatement statement) {
+    protected boolean expressionsContainInitializerOfVariableDeclaration(Set<String> expressions, CodeFragment statement) {
         List<VariableDeclaration> variableDeclarations = statement.getVariableDeclarations();
 
         if (variableDeclarations.size() == 1) {
@@ -1878,13 +1894,15 @@ public class ReplacementFinder {
 
     private boolean oneIsVariableDeclarationTheOtherIsReturnStatement(String s1, String s2) {
         String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+        commonSuffix = commonSuffix.trim();
+
         if (!commonSuffix.equals("null;\n") && !commonSuffix.equals("true;\n") && !commonSuffix.equals("false;\n") && !commonSuffix.equals("0;\n")) {
-            if (s1.startsWith("return ") && s1.substring(7, s1.length()).equals(commonSuffix) &&
-                    s2.contains("=") && s2.substring(s2.indexOf("=") + 1, s2.length()).equals(commonSuffix)) {
+            if (s1.startsWith("return ") && s1.substring("return ".length()).equals(commonSuffix) &&
+                    s2.contains("=") && s2.substring(s2.indexOf("=") + 2).equals(commonSuffix)) {
                 return true;
             }
-            if (s2.startsWith("return ") && s2.substring(7, s2.length()).equals(commonSuffix) &&
-                    s1.contains("=") && s1.substring(s1.indexOf("=") + 1, s1.length()).equals(commonSuffix)) {
+            if (s2.startsWith("return ") && s2.substring("return ".length()).equals(commonSuffix) &&
+                    s1.contains("=") && s1.substring(s1.indexOf("=") + 2).equals(commonSuffix)) {
                 return true;
             }
         }
@@ -2161,7 +2179,7 @@ public class ReplacementFinder {
         return false;
     }
 
-    private boolean variableAssignmentWithEverythingReplaced(SingleStatement statement1, SingleStatement statement2,
+    private boolean variableAssignmentWithEverythingReplaced(CodeFragment statement1, CodeFragment statement2,
                                                              ReplacementInfo replacementInfo) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();
@@ -2257,7 +2275,7 @@ public class ReplacementFinder {
         return false;
     }
 
-    private boolean classInstanceCreationWithEverythingReplaced(SingleStatement statement1, SingleStatement statement2,
+    private boolean classInstanceCreationWithEverythingReplaced(CodeFragment statement1, CodeFragment statement2,
                                                                 ReplacementInfo replacementInfo, Map<String, String> parameterToArgumentMap) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();

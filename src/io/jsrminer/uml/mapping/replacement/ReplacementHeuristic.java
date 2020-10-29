@@ -1,5 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
+import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.sourcetree.VariableDeclaration;
@@ -9,7 +10,7 @@ import java.util.List;
 // TODO rename class
 public class ReplacementHeuristic {
 
-    public boolean isObjectCreationReplacedWithArrayDeclaration(SingleStatement statement1, SingleStatement statement2
+    public boolean isObjectCreationReplacedWithArrayDeclaration(CodeFragment statement1, CodeFragment statement2
             , ReplacementInfo replacementInfo) {
         final ObjectCreation creationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement1);
         final ObjectCreation creationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.creationCoveringEntireFragment(statement2);

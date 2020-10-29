@@ -1,5 +1,7 @@
 package io.jsrminer;
 
+import io.jsrminer.refactorings.IRefactoring;
+
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ public abstract class RefactoringHandler {
      * @param commitId The sha of the analyzed commit.
      * @param refactorings List of refactorings detected in the commit.
      */
-    public void handle(String commitId, List<Refactoring> refactorings) {}
+    public void handle(String commitId, List<IRefactoring> refactorings) {}
 
     /**
      * This method is called whenever an exception is thrown during the analysis of the given commit.

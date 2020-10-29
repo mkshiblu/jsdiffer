@@ -5,6 +5,8 @@ import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
 import java.util.*;
 
+import static io.jsrminer.sourcetree.JsConfig.STATEMENT_TERMINATOR_CHAR;
+
 /**
  * Caches invocation coverages as singleton
  */
@@ -13,39 +15,39 @@ public enum InvocationCoverage {
 
     public final int CACHE_SIZE = 100;
     private final Map<OperationInvocation, InvocationCoverageType> invocationCoverageTypeMap = new HashMap<>();
-    private final Map<SingleStatement, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
+    private final Map<CodeFragment, OperationInvocation> invocationCoveringEntireFragmentMap = new HashMap<>();
 
-    public OperationInvocation getInvocationCoveringEntireFragment(SingleStatement statement) {
-        if (!invocationCoveringEntireFragmentMap.containsKey(statement)) {
-            OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(statement);
+    public OperationInvocation getInvocationCoveringEntireFragment(CodeFragment fragment) {
+        if (!invocationCoveringEntireFragmentMap.containsKey(fragment)) {
+            OperationInvocation invocationCoveringEntireFragment = findInvocationCoveringEntireFragment(fragment);
             updateCacheSize();
-            invocationCoveringEntireFragmentMap.put(statement, invocationCoveringEntireFragment);
+            invocationCoveringEntireFragmentMap.put(fragment, invocationCoveringEntireFragment);
         }
-        return invocationCoveringEntireFragmentMap.get(statement);
+        return invocationCoveringEntireFragmentMap.get(fragment);
     }
 
     /**
-     * Checks if the statement contains method invocation which text covers the entire statement's text
+     * Checks if the fragment contains method invocation which text covers the entire fragment's text
      */
-    private OperationInvocation findInvocationCoveringEntireFragment(SingleStatement statement) {
-        Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
-        String statementText = statement.getText();
+    private OperationInvocation findInvocationCoveringEntireFragment(CodeFragment fragment) {
+        Map<String, List<OperationInvocation>> methodInvocationMap = fragment.getMethodInvocationMap();
+        String statementText = fragment.getText();
         InvocationCoverageType coveregeType = null;
 
         for (String invocationText : methodInvocationMap.keySet()) {
             List<OperationInvocation> invocations = methodInvocationMap.get(invocationText);
 
             for (OperationInvocation invocation : invocations) {
-                if (invocationText.equals(statementText) || (invocationText + ";\n").equals(statementText)) {
+                if (invocationText.equals(statementText) || (invocationText + STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
-                } else if (("return " + invocationText + ";\n").equals(statementText)) {
+                } else if (("return " + invocationText + STATEMENT_TERMINATOR_CHAR).equals(statementText)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                 } else if (isCastExpressionCoveringEntireFragment(statementText, invocationText)) {
                     coveregeType = InvocationCoverageType.CAST_CALL;
-                } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), invocationText)) {
+                } else if (expressionIsTheInitializerOfVariableDeclaration(fragment.getVariableDeclarations(), invocationText)) {
                     coveregeType = InvocationCoverageType.VARIABLE_DECLARATION_INITIALIZER_CALL;
-                } else if (invocation.getType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
-                        invocation.getType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
+                } else if (invocation.getCodeElementType().equals(CodeElementType.SUPER_CONSTRUCTOR_INVOCATION) ||
+                        invocation.getCodeElementType().equals(CodeElementType.CONSTRUCTOR_INVOCATION)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                 }
 
@@ -58,7 +60,7 @@ public enum InvocationCoverage {
         return null;
     }
 
-    public OperationInvocation assignmentInvocationCoveringEntireStatement(SingleStatement statement) {
+    public OperationInvocation assignmentInvocationCoveringEntireStatement(CodeFragment statement) {
         Map<String, List<OperationInvocation>> methodInvocationMap = statement.getMethodInvocationMap();
         for (String methodInvocation : methodInvocationMap.keySet()) {
             List<OperationInvocation> invocations = methodInvocationMap.get(methodInvocation);
@@ -71,20 +73,20 @@ public enum InvocationCoverage {
         return null;
     }
 
-    public ObjectCreation creationCoveringEntireFragment(SingleStatement statement) {
+    public ObjectCreation creationCoveringEntireFragment(CodeFragment statement) {
         Map<String, List<ObjectCreation>> creationMap = statement.getCreationMap();
         String text = statement.getText();
         InvocationCoverageType coveregeType = null;
         for (String objectCreation : creationMap.keySet()) {
             List<ObjectCreation> creations = creationMap.get(objectCreation);
             for (ObjectCreation creation : creations) {
-                if ((objectCreation + ";\n").equals(text) || objectCreation.equals(text)) {
+                if ((objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text) || objectCreation.equals(text)) {
                     coveregeType = InvocationCoverageType.ONLY_CALL;
                     return creation;
-                } else if (("return " + objectCreation + ";\n").equals(text)) {
+                } else if (("return " + objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.RETURN_CALL;
                     return creation;
-                } else if (("throw " + objectCreation + ";\n").equals(text)) {
+                } else if (("throw " + objectCreation + STATEMENT_TERMINATOR_CHAR).equals(text)) {
                     coveregeType = InvocationCoverageType.THROW_CALL;
                     return creation;
                 } else if (expressionIsTheInitializerOfVariableDeclaration(statement.getVariableDeclarations(), objectCreation)) {
@@ -132,12 +134,12 @@ public enum InvocationCoverage {
         return false;
     }
 
-    private boolean expressionIsTheRightHandSideOfAssignment(String expression, SingleStatement statement) {
+    private boolean expressionIsTheRightHandSideOfAssignment(String expression, CodeFragment statement) {
         String statementText = statement.getText();
         if (statementText.contains("=")) {
-            Set<String> variables = statement.getVariables();
+            List<String> variables = statement.getVariables();
             if (variables.size() > 0) {
-                String s = variables.stream().findFirst().get() + " = " + expression + ";\n";
+                String s = variables.get(0) + " = " + expression + STATEMENT_TERMINATOR_CHAR;
                 if (statementText.equals(s)) {
                     return true;
                 }
@@ -156,6 +158,4 @@ public enum InvocationCoverage {
             clearCache();
         }
     }
-
-
 }
