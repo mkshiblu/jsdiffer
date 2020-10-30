@@ -118,7 +118,20 @@ public class BlockStatement extends Statement {
 
     @Override
     public Map<String, List<ObjectCreation>> getCreationMap() {
-        return null;
+        Map<String, List<ObjectCreation>> map = new LinkedHashMap<>();
+        for (Expression expression : this.expressions) {
+            Map<String, List<ObjectCreation>> expressionMap = expression.getCreationMap();
+            for (String key : expressionMap.keySet()) {
+                if (map.containsKey(key)) {
+                    map.get(key).addAll(expressionMap.get(key));
+                } else {
+                    List<ObjectCreation> list = new ArrayList<>();
+                    list.addAll(expressionMap.get(key));
+                    map.put(key, list);
+                }
+            }
+        }
+        return map;
     }
 
     @Override
@@ -186,7 +199,11 @@ public class BlockStatement extends Statement {
 
     @Override
     public List<String> getIdentifierArguments() {
-        return null;
+        List<String> variables = new ArrayList<String>();
+        for (Expression expression : expressions) {
+            variables.addAll(expression.getVariables());
+        }
+        return variables;
     }
 
     @Override

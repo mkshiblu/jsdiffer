@@ -344,8 +344,8 @@ public class FunctionBodyMapper {
                 String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                 // Check if strings are identical and they are in same depth (or not)
-                if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth()
-                        && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0))
+                if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
+                        && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
                         && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
                     BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
                             , parameterToArgumentMap, score);
