@@ -1019,12 +1019,12 @@ public class ReplacementFinder {
 
             if (!temp.equals(functionInvocation)) {
                 variablesAndMethodInvocations1.add(temp);
-                //methodInvocationMap1.put(temp, methodInvocationMap1.get(functionInvocation));
+                methodInvocationMap1.put(temp, methodInvocationMap1.get(functionInvocation));
             }
         }
 
         //add updated method invocation to the original list of invocations
-        //functionInvocations1.addAll(variablesAndMethodInvocations1);
+        functionInvocations1.addAll(variablesAndMethodInvocations1);
         variablesAndMethodInvocations1.addAll(functionInvocations1);
         variablesAndMethodInvocations1.addAll(unmatchedVariables1);
 

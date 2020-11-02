@@ -1,9 +1,12 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,6 +15,8 @@ import java.util.Map;
 public class SourceFileModelDiff {
     public final SourceFileModel sourceFileModel1;
     public final SourceFileModel sourceFileModel2;
+
+    public final List<IRefactoring> refactorings = new ArrayList<>();
 
     /**
      * Name map
