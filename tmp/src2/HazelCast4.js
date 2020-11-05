@@ -20,7 +20,7 @@ function createAddress(host, port) {
     try {
         return new Address(host, port);
     } catch (e) {
-        e.printStackTrace();
+        console.log(e);
     }
     return null;
 }

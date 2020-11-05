@@ -13,7 +13,7 @@ function createAddresses(count) {
             let address = new Address("127.0.0.1", PORTS.incrementAndGet());
             addresses[i] = address;
         } catch (e) {
-            e.printStackTrace();
+            console.log(e);
         }
     }
 
