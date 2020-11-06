@@ -1,6 +1,5 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.SourceFileModelDiff;
