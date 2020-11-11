@@ -72,7 +72,7 @@ public class InlineOperationRefactoring extends Refactoring {
         return RefactoringType.INLINE_OPERATION;
     }
 
-    public UMLOperationBodyMapper getBodyMapper() {
+    public FunctionBodyMapper getBodyMapper() {
         return bodyMapper;
     }
 

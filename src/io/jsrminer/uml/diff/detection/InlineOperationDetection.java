@@ -4,10 +4,12 @@ import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
+import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
 import io.jsrminer.uml.diff.SourceFileModelDiff;
 import io.jsrminer.uml.diff.UMLModelDiff;
+import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.ArrayList;
@@ -114,9 +116,9 @@ public class InlineOperationDetection {
         }
     }
 
-    private List<OperationInvocation> getInvocationsInTargetOperationBeforeInline(UMLOperationBodyMapper mapper) {
-        List<OperationInvocation> operationInvocations = mapper.getOperation1().getAllOperationInvocations();
-        for (StatementObject statement : mapper.getNonMappedLeavesT1()) {
+    private List<OperationInvocation> getInvocationsInTargetOperationBeforeInline(FunctionBodyMapper mapper) {
+        List<OperationInvocation> operationInvocations = mapper.function1.getBody().getAllOperationInvocations();
+        for (SingleStatement statement : mapper.getNonMappedLeavesT1()) {
             ExtractOperationDetection.addStatementInvocations(operationInvocations, statement);
             for (UMLAnonymousClass anonymousClass : classDiff.getRemovedAnonymousClasses()) {
                 if (statement.getLocationInfo().subsumes(anonymousClass.getLocationInfo())) {
@@ -133,26 +135,29 @@ public class InlineOperationDetection {
         return operationInvocations;
     }
 
-    private boolean inlineMatchCondition(UMLOperationBodyMapper operationBodyMapper) {
+    private boolean inlineMatchCondition(FunctionBodyMapper operationBodyMapper) {
         int delegateStatements = 0;
-        for (StatementObject statement : operationBodyMapper.getNonMappedLeavesT1()) {
+        for (SingleStatement statement : operationBodyMapper.getNonMappedLeavesT1()) {
             OperationInvocation invocation = statement.invocationCoveringEntireFragment();
-            if (invocation != null && invocation.matchesOperation(operationBodyMapper.getOperation1())) {
+            if (invocation != null && invocation.matchesOperation(operationBodyMapper.function1)) {
                 delegateStatements++;
             }
         }
         int mappings = operationBodyMapper.mappingsWithoutBlocks();
         int nonMappedElementsT1 = operationBodyMapper.nonMappedElementsT1() - delegateStatements;
-        List<AbstractCodeMapping> exactMatchList = operationBodyMapper.getExactMatches();
+        List<CodeFragmentMapping> exactMatchList = operationBodyMapper.getExactMatches();
         int exactMatches = exactMatchList.size();
         return mappings > 0 && (mappings > nonMappedElementsT1 ||
-                (exactMatches == 1 && !exactMatchList.get(0).getFragment1().throwsNewException() && nonMappedElementsT1 - exactMatches < 10) ||
+                (exactMatches == 1 && !exactMatchList.get(0).fragment1.throwsNewException()
+                        && nonMappedElementsT1 - exactMatches < 10) ||
                 (exactMatches > 1 && nonMappedElementsT1 - exactMatches < 20));
     }
 
-    private boolean invocationMatchesWithAddedOperation(OperationInvocation removedOperationInvocation, Map<String, UMLType> variableTypeMap, List<OperationInvocation> operationInvocationsInNewMethod) {
+    private boolean invocationMatchesWithAddedOperation(OperationInvocation removedOperationInvocation
+            , Map<String, UMLType> variableTypeMap
+            , List<OperationInvocation> operationInvocationsInNewMethod) {
         if (operationInvocationsInNewMethod.contains(removedOperationInvocation)) {
-            for (UMLOperation addedOperation : classDiff.getAddedOperations()) {
+            for (FunctionDeclaration addedOperation : classDiff.getAddedOperations().values()) {
                 if (removedOperationInvocation.matchesOperation(addedOperation, variableTypeMap, modelDiff)) {
                     return true;
                 }
