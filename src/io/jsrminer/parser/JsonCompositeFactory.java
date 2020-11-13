@@ -57,17 +57,7 @@ public class JsonCompositeFactory {
 
             // Check if it's try statement and contains any catchBlock
             if (any.keys().contains("catchClause")) {
-                BlockStatement catchClause = new BlockStatement();
-                blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
-
-                // Add the catchblacue as seprate composite to the parent of the try block
-                catchClause.setPositionIndexInParent(currentBlock.getPositionIndexInParent() + 1);
-                catchClause.setDepth(currentBlock.getDepth());
-                ((BlockStatement) currentBlock.getParent()).getStatements().add(catchClause);
-                catchClause.setParent(currentBlock.getParent());
-
-                // Add the catchclause to the try block
-                ((TryStatement) currentBlock).getCatchClauses().add(catchClause);
+                processCatchClause(currentBlock, blocksToBeProcessed, any);
             }
 
             // Parse childs of this block
@@ -88,14 +78,42 @@ public class JsonCompositeFactory {
                     child = JsonCompositeFactory.createSingleStatement(childAny, currentBlock);
                 }
 
-                child.setParent(currentBlock);
-                child.setPositionIndexInParent(++indexInParent);
-                child.setDepth(currentBlock.getDepth() + 1);
-                currentBlock.addStatement(child);
+                indexInParent = addChildToParentBlock(currentBlock, child, indexInParent);
             }
         }
 
         return newBlock;
+    }
+
+    private static int addChildToParentBlock(BlockStatement parentBlock, Statement child, int indexInParent) {
+        child.setParent(parentBlock);
+        child.setPositionIndexInParent(++indexInParent);
+        child.setDepth(parentBlock.getDepth() + 1);
+        parentBlock.addStatement(child);
+        return indexInParent;
+    }
+
+    private static void processCatchClause(BlockStatement tryBlock, Queue<Map.Entry<BlockStatement, Any>> blocksToBeProcessed, Any any) {
+        BlockStatement catchClause = new BlockStatement();
+        blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(catchClause, any.get("catchClause")));
+
+        // Add the catchblacue as seprate composite to the parent of the try block
+        catchClause.setPositionIndexInParent(tryBlock.getPositionIndexInParent() + 1);
+        catchClause.setDepth(tryBlock.getDepth());
+
+        // Insert the catch after the try block in position of their parent's statements
+        // TODO improve
+        BlockStatement parent = tryBlock.getParent();
+        catchClause.setParent(parent);
+        parent.getStatements().add(catchClause.getPositionIndexInParent(), catchClause);
+
+        // Shift position index of other child
+        for (int i = catchClause.getPositionIndexInParent() + 1; i < parent.getStatements().size(); i++) {
+            parent.getStatements().get(i).setPositionIndexInParent(i);
+        }
+
+        // Add the catchclause to the try block
+        ((TryStatement) tryBlock).getCatchClauses().add(catchClause);
     }
 
     private static void populateInvocationProperties(Any invocationAny, Invocation invocation) {

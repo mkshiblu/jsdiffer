@@ -13,16 +13,20 @@ public class Main {
     public static void main(String[] args) {
         log.debug("Program Starts");
         try {
-            Repository repo = GitUtil.openRepository("F:\\PROJECTS_REPO\\toy_js");
-            String folder = "tmp";
-            String commitId = "aac0c407169dba1a393aa478e45e34de2e5b27f6";
-            String parentCommitId = "e2a0d7d35cc08a6f6c9f42d289e823c3781d26f8";
-            new JSRefactoringMiner().detectBetweenCommits(repo, parentCommitId, commitId);
-            //JSRefactoringMiner.detectBetweenDirectories("tmp\\src1", "tmp\\src2");
+            //commitExample();
+            new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         log.info("-----------------Program Ends--------------------");
+    }
+
+    private static void commitExample() throws Exception {
+        Repository repo = GitUtil.openRepository("E:\\PROJECTS_REPO\\toy_js");
+        String folder = "tmp";
+        String commitId = "a2d18bf1f7b7bb5e31c04d2b6f47cbbc0516b453";
+        String parentCommitId = "c19d6d1d820843feada654ebd21f49a802a5be21";
+        new JSRefactoringMiner().detectBetweenCommits(repo, parentCommitId, commitId);
     }
 }

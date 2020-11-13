@@ -95,23 +95,23 @@ public class SingleStatement extends Statement {
         return this.variableDeclarations;
     }
 
-    @Override
-    public VariableDeclaration getVariableDeclaration(String variableName) {
-        for (VariableDeclaration vd : this.getVariableDeclarations()) {
-            if (vd.variableName.equals(variableName))
-                return vd;
-        }
-        return null;
-    }
+//    @Override
+//    public VariableDeclaration getVariableDeclaration(String variableName) {
+//        for (VariableDeclaration vd : this.getVariableDeclarations()) {
+//            if (vd.variableName.equals(variableName))
+//                return vd;
+//        }
+//        return null;
+//    }
 
-    @Override
-    public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
-        VariableDeclaration vd = this.getVariableDeclaration(varibleName);
-        if (vd != null) {
-            return vd;
-        } else if (getParent() != null) {
-            // TODO PullUp    return parent.findVariableDeclarationIncludingParent(varibleName);
-        }
-        return null;
-    }
+//    @Override
+//    public VariableDeclaration findVariableDeclarationIncludingParent(String variableName) {
+//        VariableDeclaration vd = this.getVariableDeclaration(variableName);
+//        if (vd != null) {
+//            return vd;
+//        } else if (getParent() != null) {
+//            // TODO PullUp    return parent.findVariableDeclarationIncludingParent(varibleName);
+//        }
+//        return null;
+//    }
 }

@@ -2,8 +2,11 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
+import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
+import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.ArrayList;
@@ -21,7 +24,6 @@ public class SourceFileModelDiffer {
     //private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
-
 
     public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
@@ -66,7 +68,7 @@ public class SourceFileModelDiffer {
 //        checkForAttributeChanges();
 //        processAnonymousClasses();
 //        checkForOperationSignatureChanges();
-//        checkForInlinedOperations();
+        checkForInlinedOperations();
         checkForExtractedOperations();
     }
 
@@ -102,6 +104,44 @@ public class SourceFileModelDiffer {
         }
     }
 
+    private void checkForInlinedOperations() {
+        List<FunctionDeclaration> removedOperations = new ArrayList<>(sourceDiff.getRemovedOperations().values());
+        List<String> operationsToBeRemoved = new ArrayList<>();
+
+        for (FunctionDeclaration removedOperation : removedOperations) {
+            for (FunctionBodyMapper mapper : this.bodyMappers) {
+                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.sourceDiff, this.modelDiff);
+                List<InlineOperationRefactoring> refs = detection.check(removedOperation);
+                for (InlineOperationRefactoring refactoring : refs) {
+                    refactorings.add(refactoring);
+                    FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+                    //processMapperRefactorings(operationBodyMapper, refactorings);
+                    mapper.addChildMapper(operationBodyMapper);
+                    operationsToBeRemoved.add(removedOperation.name);
+                }
+            }
+        }
+        for (String key : operationsToBeRemoved) {
+            sourceDiff.getRemovedOperations().remove(key);
+        }
+//
+//        for (Iterator<FunctionDeclaration> removedOperationIterator = removedOperations.iterator(); removedOperationIterator.hasNext(); ) {
+//            UMLOperation removedOperation = removedOperationIterator.next();
+//            for (UMLOperationBodyMapper mapper : getOperationBodyMapperList()) {
+//                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this, modelDiff);
+//                List<InlineOperationRefactoring> refs = detection.check(removedOperation);
+//                for (InlineOperationRefactoring refactoring : refs) {
+//                    refactorings.add(refactoring);
+//                    UMLOperationBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+//                    processMapperRefactorings(operationBodyMapper, refactorings);
+//                    mapper.addChildMapper(operationBodyMapper);
+//                    operationsToBeRemoved.add(removedOperation);
+//                }
+//            }
+//        }
+//        removedOperations.removeAll(operationsToBeRemoved);
+    }
+
     /**
      * Extract is detected by Checking if the already mapped operations contains any calls to
      * any addedOperations.
@@ -119,7 +159,7 @@ public class SourceFileModelDiffer {
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
                     //  processMapperRefactorings(operationBodyMapper, refactorings);
                     mapper.addChildMapper(operationBodyMapper);
-                    operationsToBeRemoved.add(addedOperation.getFullyQualifiedName());
+                    operationsToBeRemoved.add(addedOperation.name);
                 }
                 //checkForInconsistentVariableRenames(mapper);
             }
@@ -166,4 +206,8 @@ public class SourceFileModelDiffer {
         // endregion
     }
 
+
+    public List<IRefactoring> getRefactorings() {
+        return this.refactorings;
+    }
 }

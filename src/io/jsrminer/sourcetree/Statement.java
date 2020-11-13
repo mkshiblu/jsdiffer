@@ -1,5 +1,7 @@
 package io.jsrminer.sourcetree;
 
+import java.util.List;
+
 public abstract class Statement extends CodeFragment {
 
     protected BlockStatement parent;
@@ -17,4 +19,28 @@ public abstract class Statement extends CodeFragment {
     }
 
     public abstract int statementCount();
+
+
+    @Override
+    public VariableDeclaration findVariableDeclarationIncludingParent(String variableName) {
+        VariableDeclaration variableDeclaration = this.getVariableDeclaration(variableName);
+        if (variableDeclaration != null) {
+            return variableDeclaration;
+        } else if (parent != null) {
+            return parent.findVariableDeclarationIncludingParent(variableName);
+        }
+        return null;
+    }
+
+
+    @Override
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        List<VariableDeclaration> variableDeclarations = getVariableDeclarations();
+        for (VariableDeclaration declaration : variableDeclarations) {
+            if (declaration.variableName.equals(variableName)) {
+                return declaration;
+            }
+        }
+        return null;
+    }
 }

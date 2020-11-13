@@ -30,6 +30,8 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
             if (sourceFileModel2 != null) {
                 SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2, modelDiff);
                 SourceFileModelDiff sourceDiff = sourceDiffer.diff();
+                sourceDiff.refactorings.addAll(sourceDiffer.getRefactorings());
+                modelDiff.getRefactorings().addAll(sourceDiffer.getRefactorings());
             }
         }
 

@@ -4,9 +4,7 @@ import io.jsrminer.io.SourceFile;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Represents a source code folder
@@ -40,6 +38,22 @@ public class SourceDirectory {
             }
         }
         return sourceFilesMapped;
+    }
+
+    public String[] getRelativeSourceFilePaths() {
+        List<String> paths = new ArrayList<>(this.sourceFilesMapped.size());
+        for (SourceFile file : this.sourceFilesMapped.values()) {
+            paths.add(file.getRelativePathToSourceDirectory());
+        }
+        return paths.toArray(String[]::new);
+    }
+
+    public String[] getSourceFileAbsoultePaths() {
+        List<String> paths = new ArrayList<>(this.sourceFilesMapped.size());
+        for (SourceFile file : this.sourceFilesMapped.values()) {
+            paths.add(file.getFile().getAbsolutePath());
+        }
+        return paths.toArray(String[]::new);
     }
 
     /**

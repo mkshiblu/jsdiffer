@@ -9,7 +9,7 @@ import java.util.*;
 public class BlockStatement extends Statement {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
-    private List<VariableDeclaration> variableDeclarations;
+    //private List<VariableDeclaration> variableDeclarations;
     // exp
     // vd
 
@@ -118,7 +118,20 @@ public class BlockStatement extends Statement {
 
     @Override
     public Map<String, List<ObjectCreation>> getCreationMap() {
-        return null;
+        Map<String, List<ObjectCreation>> map = new LinkedHashMap<>();
+        for (Expression expression : this.expressions) {
+            Map<String, List<ObjectCreation>> expressionMap = expression.getCreationMap();
+            for (String key : expressionMap.keySet()) {
+                if (map.containsKey(key)) {
+                    map.get(key).addAll(expressionMap.get(key));
+                } else {
+                    List<ObjectCreation> list = new ArrayList<>();
+                    list.addAll(expressionMap.get(key));
+                    map.put(key, list);
+                }
+            }
+        }
+        return map;
     }
 
     @Override
@@ -186,28 +199,22 @@ public class BlockStatement extends Statement {
 
     @Override
     public List<String> getIdentifierArguments() {
-        return null;
+        List<String> variables = new ArrayList<String>();
+        for (Expression expression : expressions) {
+            variables.addAll(expression.getVariables());
+        }
+        return variables;
     }
 
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         List<VariableDeclaration> variableDeclarations = new ArrayList<>();
         //special handling for enhanced-for formal parameter
-        variableDeclarations.addAll(this.variableDeclarations);
+        // variableDeclarations.addAll(this.variableDeclarations);
         for (Expression expression : this.getExpressions()) {
             variableDeclarations.addAll(expression.getVariableDeclarations());
         }
         return variableDeclarations;
-    }
-
-    @Override
-    public VariableDeclaration getVariableDeclaration(String variableName) {
-        return null;
-    }
-
-    @Override
-    public VariableDeclaration findVariableDeclarationIncludingParent(String varibleName) {
-        return null;
     }
 
     public List<Expression> getExpressions() {
@@ -229,6 +236,36 @@ public class BlockStatement extends Statement {
             return this.getExpressions().contains(fragment);
         }
         return false;
+    }
+
+    public List<VariableDeclaration> getAllVariableDeclarations() {
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+        variableDeclarations.addAll(getVariableDeclarations());
+        for (Statement statement : statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                variableDeclarations.addAll(composite.getAllVariableDeclarations());
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                variableDeclarations.addAll(statementObject.getVariableDeclarations());
+//                for(LambdaExpressionObject lambda : statementObject.getLambdas()) {
+//                    if(lambda.getBody() != null) {
+//                        variableDeclarations.addAll(lambda.getBody().getAllVariableDeclarations());
+//                    }
+//                }
+            }
+        }
+        return variableDeclarations;
+    }
+
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        List<VariableDeclaration> variableDeclarations = getAllVariableDeclarations();
+        for (VariableDeclaration declaration : variableDeclarations) {
+            if (declaration.variableName.equals(variableName)) {
+                return declaration;
+            }
+        }
+        return null;
     }
 
     public Map<String, List<OperationInvocation>> getAllMethodInvocationsIncludingNested() {

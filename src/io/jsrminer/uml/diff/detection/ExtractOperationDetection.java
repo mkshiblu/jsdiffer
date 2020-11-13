@@ -1,8 +1,12 @@
-package io.jsrminer.uml.diff;
+package io.jsrminer.uml.diff.detection;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.CallTree;
+import io.jsrminer.uml.diff.CallTreeNode;
+import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;

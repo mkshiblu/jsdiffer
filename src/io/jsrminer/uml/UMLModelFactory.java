@@ -10,4 +10,9 @@ public class UMLModelFactory {
         JavaScriptParser parser = new JavaScriptParser();
         return parser.parse(fileContents/*, repositoryDirectories*/);
     }
+
+    public static UMLModel createUMLModel(Map<String, String> fileContents) {
+        JavaScriptParser parser = new JavaScriptParser();
+        return parser.parse(fileContents);
+    }
 }

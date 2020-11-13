@@ -282,11 +282,12 @@ public class ReplacementFinder {
         // endregion
 
         // If statements cannot be matched with 1 to 1 AST replacement, apply heuristics
-        applyHeuristics(statement1, statement2, methodInvocationMap1, replacementInfo);
-        return replacementInfo.getReplacements().size() == 0 ? null : replacementInfo.getReplacements();
+        boolean isMatchedByHeuristics = applyHeuristics(statement1, statement2, methodInvocationMap1, replacementInfo);
+
+        return (isEqualWithReplacement || isMatchedByHeuristics) ? replacementInfo.getReplacements() : null;
     }
 
-    private void applyHeuristics(CodeFragment statement1, CodeFragment statement2
+    private boolean applyHeuristics(CodeFragment statement1, CodeFragment statement2
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , ReplacementInfo replacementInfo) {
 
@@ -618,8 +619,10 @@ public class ReplacementFinder {
 //        }
 
         //check if array creation is replaced with data structure creation
-        heuristic.isObjectCreationReplacedWithArrayDeclaration(statement1, statement2, replacementInfo);
-
+        boolean isCreationReplacedWithArrayDeclaration = heuristic.isObjectCreationReplacedWithArrayDeclaration(statement1, statement2, replacementInfo);
+        if (isCreationReplacedWithArrayDeclaration) {
+            return true;
+        }
 
 //        if(!creations1.isEmpty() && creationCoveringTheEntireStatement2 != null) {
 //            for(String creation1 : creations1) {
@@ -771,6 +774,7 @@ public class ReplacementFinder {
 //            }
 //        }
 
+        return false;
     }
 
     private String[] filterReplacements(CodeFragment statement1, CodeFragment statement2
@@ -1003,8 +1007,8 @@ public class ReplacementFinder {
             , ReplacementInfo replacementInfo) {
 
         Set<String> variablesAndMethodInvocations1 = new LinkedHashSet<>();
-        variablesAndMethodInvocations1.addAll(functionInvocations1);
-        variablesAndMethodInvocations1.addAll(unmatchedVariables1);
+        //variablesAndMethodInvocations1.addAll(functionInvocations1);
+        // variablesAndMethodInvocations1.addAll(unmatchedVariables1);
 
         Set<String> variablesAndMethodInvocations2 = new LinkedHashSet<>();
         variablesAndMethodInvocations2.addAll(functionInvocations2);

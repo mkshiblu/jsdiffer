@@ -11,13 +11,14 @@ import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLParameter;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
-        final HashMap<String, SourceFileModel> sourceModels = new HashMap<>();
+        final HashMap<String, SourceFileModel> sourceModels = new LinkedHashMap<>();
         final UMLModel umlModel = new UMLModel();
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
@@ -29,7 +30,7 @@ public class JavaScriptParser implements IParser {
                 final FunctionDeclaration[] fds = convert(fdsArray, filepath);
 
                 // Create source model
-                final SourceFileModel source = new SourceFileModel();
+                final SourceFileModel source = new SourceFileModel(filepath);
                 source.setFunctionDeclarations(fds);
 
                 sourceModels.put(filepath, source);
@@ -71,7 +72,7 @@ public class JavaScriptParser implements IParser {
             fd.setBody(new FunctionBody(body));
 
             fds[i] = fd;
-            v8Fd.release();
+             v8Fd.release();
             v8Location.release();
             v8ParamsArray.release();
         }

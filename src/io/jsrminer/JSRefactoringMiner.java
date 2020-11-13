@@ -1,13 +1,14 @@
 package io.jsrminer;
 
+import io.jsrminer.io.FileUtil;
+import io.jsrminer.io.GitUtil;
+import io.jsrminer.io.SourceFile;
 import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.uml.UMLModel;
+import io.jsrminer.uml.UMLModelFactory;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
-import io.jsrminer.io.FileUtil;
-import io.jsrminer.io.GitUtil;
-import io.jsrminer.uml.UMLModel;
-import io.jsrminer.uml.UMLModelFactory;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -20,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
@@ -38,8 +41,27 @@ public class JSRefactoringMiner {
         System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
         System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
 
-        // TODO unfinished
+        try {
+            Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
+            Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
+            List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings.forEach(r -> System.out.println(r));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
+    Map<String, String> populateFileContents(SourceFile[] files) throws IOException {
+        Map<String, String> fileContents = new LinkedHashMap<>();
+        for (int i = 0; i < files.length; i++) {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(new FileInputStream(files[i].getFile()), writer, Charset.defaultCharset());
+            fileContents.put(files[i].getRelativePathToSourceDirectory(), writer.toString());
+        }
+
+        return fileContents;
+    }
+
 
     public void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
         RefactoringHandler handler = null;
@@ -65,7 +87,7 @@ public class JSRefactoringMiner {
 
             } catch (Exception e) {
                 log.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
-              //  handler.handleException(currentCommit.getId().getName(), e);
+                //  handler.handleException(currentCommit.getId().getName(), e);
                 errorCommitsCount++;
             }
 
@@ -124,6 +146,22 @@ public class JSRefactoringMiner {
             walk.dispose();
         }
         return refactoringsAtRevision;
+    }
+
+
+    public List<IRefactoring> detectRefactorings(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
+
+        // TODO Multi thread?
+        UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore);
+
+        // TODO multi thread?
+        UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
+
+        UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
+
+        /*, renamedFilesHint*/
+        List<IRefactoring> refactorings = umlModelBefore.diff(umlModelCurrent).getRefactorings();
+        return refactorings;
     }
 
     private void populateFileContents(Repository repository, RevCommit commit,

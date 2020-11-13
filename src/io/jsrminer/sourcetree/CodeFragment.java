@@ -102,7 +102,7 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract VariableDeclaration getVariableDeclaration(String variableName);
 
-    public abstract VariableDeclaration findVariableDeclarationIncludingParent(String varibleName);
+    public abstract VariableDeclaration findVariableDeclarationIncludingParent(String variableName);
 
 
     //endregion
