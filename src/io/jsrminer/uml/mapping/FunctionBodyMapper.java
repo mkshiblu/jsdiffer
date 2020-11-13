@@ -135,7 +135,7 @@ public class FunctionBodyMapper {
             }
 
             //resetNodes(leaves1);
-            argumentizer.clearCache(leaves1, leaves2);
+            argumentizer.clearCache(leaves1);
 
             //replace parameters with arguments in leaves1
             if (!parameterToArgumentMap.isEmpty()) {
@@ -176,7 +176,7 @@ public class FunctionBodyMapper {
             }
 
             //resetNodes(innerNodes1);
-            argumentizer.clearCache(innerNodes1, innerNodes2);
+            argumentizer.clearCache(innerNodes1);
 
             //replace parameters with arguments in innerNodes1
             if (!parameterToArgumentMap.isEmpty()) {
@@ -203,10 +203,11 @@ public class FunctionBodyMapper {
             leaves2.removeAll(addedLeaves2);
             //remove the innerNodes that were mapped with replacement, if they are not mapped again for a second time
             innerNodes2.removeAll(addedInnerNodes2);
-            nonMappedLeavesT1.addAll(leaves1);
-            nonMappedLeavesT2.addAll(leaves2);
-            nonMappedInnerNodesT1.addAll(innerNodes1);
-            nonMappedInnerNodesT2.addAll(innerNodes2);
+
+            nonMappedLeavesT1 = leaves1;
+            nonMappedLeavesT2 = leaves2;
+            nonMappedInnerNodesT1 = innerNodes1;
+            nonMappedInnerNodesT2 = innerNodes2;
 
 //            for (StatementObject statement : getNonMappedLeavesT2()) {
 //                temporaryVariableAssignment(statement, nonMappedLeavesT2);
@@ -612,13 +613,14 @@ public class FunctionBodyMapper {
     private String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
         String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
+
         // TODO replace return value with the argumentaized string
-//        if (statement1 instanceof SingleStatement && statement2 instanceof Expression) {
-//            if (argumentizedString.startsWith("return ") && argumentizedString.endsWith(";\n")) {
-//                argumentizedString = argumentizedString.substring("return ".length(),
-//                        argumentizedString.lastIndexOf(";\n"));
-//            }
-//        }
+        if (statement1 instanceof SingleStatement && statement2 instanceof Expression) {
+            if (argumentizedString.startsWith("return ") && argumentizedString.endsWith(JsConfig.STATEMENT_TERMINATOR_CHAR + "")) {
+                argumentizedString = argumentizedString.substring("return ".length(),
+                        argumentizedString.lastIndexOf(JsConfig.STATEMENT_TERMINATOR_CHAR));
+            }
+        }
         return argumentizedString;
     }
 

@@ -72,7 +72,7 @@ public class JavaScriptParser implements IParser {
             fd.setBody(new FunctionBody(body));
 
             fds[i] = fd;
-            v8Fd.release();
+             v8Fd.release();
             v8Location.release();
             v8ParamsArray.release();
         }

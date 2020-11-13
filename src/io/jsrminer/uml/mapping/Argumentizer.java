@@ -59,6 +59,9 @@ public class Argumentizer {
     }
 
     public String getArgumentizedString(CodeFragment statement) {
+        String argumentizedString = this.afterReplacementsMap.get(statement);
+        if (argumentizedString == null)
+            return statement.getText();
         return this.afterReplacementsMap.get(statement);
     }
 
@@ -99,5 +102,9 @@ public class Argumentizer {
     public void clearCache(Collection<? extends CodeFragment> fragments1, Collection<? extends CodeFragment> fragments2) {
         fragments1.forEach(fragment -> afterReplacementsMap.remove(fragment));
         fragments2.forEach(fragment -> afterReplacementsMap.remove(fragment));
+    }
+
+    public void clearCache(Collection<? extends CodeFragment> fragments) {
+        fragments.forEach(fragment -> afterReplacementsMap.remove(fragment));
     }
 }
