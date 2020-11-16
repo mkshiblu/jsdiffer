@@ -38,6 +38,11 @@ public class FunctionBodyMapper {
         this.sourceFileModelDiff = sourceFileModelDiff;
     }
 
+    public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
+            , SourceFileModelDiff sourceFileModelDiff) {
+        this(new UMLOperationDiff(function1, function2), sourceFileModelDiff);
+    }
+
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
@@ -763,6 +768,7 @@ public class FunctionBodyMapper {
         return exactMatches;
     }
 
+
     public int nonMappedLeafElementsT2() {
         int nonMappedLeafCount = 0;
         for (SingleStatement statement : getNonMappedLeavesT2()) {
@@ -926,5 +932,23 @@ public class FunctionBodyMapper {
             }
         }
         return nullLiteralReplacements > 0 && numberOfReplacements == nullLiteralReplacements + methodInvocationReplacementsToIgnore + variableNameReplacementsToIgnore;
+    }
+
+    /**
+     * Returns the mapping's any replacements of function invocation name
+     *
+     * @return
+     */
+    public Set<MethodInvocationReplacement> getMethodInvocationRenameReplacements() {
+        Set<MethodInvocationReplacement> replacements = new LinkedHashSet<>();
+        for (CodeFragmentMapping mapping : getMappings()) {
+            for (Replacement replacement : mapping.getReplacements()) {
+                if (replacement.getType().equals(Replacement.ReplacementType.METHOD_INVOCATION_NAME) ||
+                        replacement.getType().equals(Replacement.ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT)) {
+                    replacements.add((MethodInvocationReplacement) replacement);
+                }
+            }
+        }
+        return replacements;
     }
 }
