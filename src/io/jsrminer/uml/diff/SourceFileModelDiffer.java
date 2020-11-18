@@ -118,12 +118,12 @@ public class SourceFileModelDiffer {
                         UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, bestMapper.getMappings());
                         operationDiffList.add(operationSignatureDiff);
                         refactorings.addAll(operationSignatureDiff.getRefactorings());
-                        if (!removedOperation.getName().equals(addedOperation.getName()) &&
+                        if (!removedOperation.name.equals(addedOperation.name) &&
                                 !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             refactorings.add(rename);
                         }
-                        this.addOperationBodyMapper(bestMapper);
+                        this.bodyMappers.add(bestMapper);
                     }
                 }
             }
