@@ -7,6 +7,7 @@ public enum RefactoringType {
     INLINE_OPERATION("Inline Method", "Inline Method (.+) inlined to (.+) in class (.+)"),
     MOVE_AND_INLINE_OPERATION("Move And Inline Method", "Move And Inline Method (.+) moved from class (.+) to class (.+) & inlined to (.+)"),
     ADD_PARAMETER("Add Parameter", "Add Parameter (.+) in method (.+) from class (.+)"),
+    RENAME_METHOD("Rename Method", "Rename Method (.+) renamed to (.+) in class (.+)"),
     REMOVE_PARAMETER("Remove Parameter", "Remove Parameter (.+) in method (.+) from class (.+)");
 
     private String title;

@@ -43,6 +43,11 @@ public class UMLOperationDiff extends Diff {
         tryMatchRemovedAndAddedParameters();
     }
 
+    public UMLOperationDiff(FunctionDeclaration function1, FunctionDeclaration function2, Set<CodeFragmentMapping> mappings) {
+        this(function1, function2);
+        this.setMappings(mappings);
+    }
+
     public void setMappings(Set<CodeFragmentMapping> mappings) {
         this.mappings = mappings;
     }
