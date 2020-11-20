@@ -32,7 +32,7 @@ public class JSRefactoringMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js", "ts"}));
 
-    public void detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
+    public List<IRefactoring> detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
@@ -46,9 +46,12 @@ public class JSRefactoringMiner {
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
             refactorings.forEach(r -> System.out.println(r));
+            return refactorings;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     Map<String, String> populateFileContents(SourceFile[] files) throws IOException {
