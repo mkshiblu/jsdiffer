@@ -38,7 +38,10 @@ const processNodePath = (function () {
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
         ['IfStatement', choice.processIfStatement],
         ['BlockStatement', statementProcessor.processBlockStatement],
+        
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
+        ['BreakStatement', controlFlowProcessor.processBreakStatement],
+
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
         ['ForStatement', loopsProcessor.processForStatement],

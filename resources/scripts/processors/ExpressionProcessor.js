@@ -4,6 +4,7 @@ const astUtil = require('../parser/AstUtil');
 
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
+    ['UnaryExpression', processUnaryExpression],
     ['Identifier', processIdentifier],
     ['NumericLiteral', literals.processNumericLiteral],
     ['StringLiteral', literals.processStringLiteral],
@@ -182,6 +183,27 @@ function processBinaryExpression(path, expressionResult, statement) {
     processExpression(path.get('right'), expressionResult, statement);
 }
 
+
+// interface UnaryExpression <: Expression {
+//     type: "UnaryExpression";
+//     operator: UnaryOperator;
+//     prefix: boolean;
+//     argument: Expression;
+//   }
+function processUnaryExpression(path, expressionResult, statement) {
+    const node = path.node;
+    const isPrefix = node.prefix;
+    const operator = node.operator;
+
+    if (isPrefix) {
+        expressionResult.prefixOperators.push(operator);
+    }
+    else {
+        expressionResult.postfixOperators.push(operator);
+    }
+    processExpression(path.get('argument'), expressionResult, statement);
+}
+
 /* interface AssignmentExpression<: Expression {
     type: "AssignmentExpression";
     operator: AssignmentOperator;
@@ -189,7 +211,7 @@ function processBinaryExpression(path, expressionResult, statement) {
     right: Expression;
 }
 An assignment operator expression.
-
+ 
     AssignmentOperator
 enum AssignmentOperator {
     "=" | "+=" | "-=" | "*=" | "/=" | "%="
