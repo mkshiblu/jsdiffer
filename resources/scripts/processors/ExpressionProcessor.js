@@ -2,14 +2,19 @@ const t = require('@babel/types');
 const literals = require("./Literals");
 const astUtil = require('../parser/AstUtil');
 const objects = require('./ObjectExpression');
+const processor = require('./AstNodeProcessor');
 
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
+    ['LogicalExpression', processLogicalExpression],
     ['UnaryExpression', processUnaryExpression],
     ['Identifier', processIdentifier],
+    
     ['NumericLiteral', literals.processNumericLiteral],
     ['StringLiteral', literals.processStringLiteral],
     ['NullLiteral', literals.processNullLiteral],
+    ['RegExpLiteral', literals.processRegExpLiteral],
+
     ['NewExpression', processNewExpression],
     ['CallExpression', processCallExpression],
     ['AssignmentExpression', processAssignmentExpression],
@@ -167,7 +172,6 @@ function processArgument(argumentPath, statement) {
     }
 }
 
-
 /**
 interface BinaryExpression<: Expression {
     type: "BinaryExpression";
@@ -186,6 +190,27 @@ function processBinaryExpression(path, expressionResult, statement) {
     processExpression(path.get('right'), expressionResult, statement);
 }
 
+// LogicalExpression
+// interface LogicalExpression <: Expression {
+//   type: "LogicalExpression";
+//   operator: LogicalOperator;
+//   left: Expression;
+//   right: Expression;
+// }
+// A logical operator expression.
+
+// LogicalOperator
+// enum LogicalOperator {
+//   "||" | "&&" | "??"
+// }
+// A logical operator token.
+function processLogicalExpression(path, expressionResult, statement) {
+    const node = path.node;
+    const operator = node.operator;
+    expressionResult.infixOperators.push(operator);
+    processExpression(path.get('left'), expressionResult, statement);
+    processExpression(path.get('right'), expressionResult, statement);
+}
 
 // interface UnaryExpression <: Expression {
 //     type: "UnaryExpression";
@@ -218,10 +243,10 @@ function processUnaryExpression(path, expressionResult, statement) {
 function processConditionalExpression(path, expressionResult, statement) {
     const node = path.node;
 
-    const test = processExpression(path.get('test'), expressionResult, statement);
-    const consequent = processExpression(path.get('consequent'), expressionResult, statement);
-    const alternate = processExpression(path.get('alternate'), expressionResult, statement);
-    
+    const test = processor.processExpression(path.get('test'), statement);
+    const consequent = processor.processExpression(path.get('consequent'), statement);
+    const alternate = processor.processExpression(path.get('alternate'), statement);
+
     const ternaryExpression = {
         text: path.toString(),
         condition: test,
@@ -229,12 +254,8 @@ function processConditionalExpression(path, expressionResult, statement) {
         else: alternate,
     };
 
-    if (expressionResult.ternaryExpressions) {
-        expressionResult.ternaryExpressions.push(ternaryExpression);
-    }
-    else {
-        expressionResult.ternaryExpressions = [ternaryExpression];
-    }
+    astUtil.mergeArrayProperties(expressionResult, test, consequent, alternate);
+    (expressionResult.ternaryExpressions || []).push(ternaryExpression);
 }
 
 /* interface AssignmentExpression<: Expression {

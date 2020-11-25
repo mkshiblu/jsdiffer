@@ -1,4 +1,5 @@
 const astProcessor = require("../processors/AstNodeProcessor");
+const astUtil = require('../parser/AstUtil');
 
 /** Process for a AST functionDeclarationNodePath */
 exports.processFunctionDeclaration = (functionDeclarationPath, processStatement) => {
@@ -57,9 +58,10 @@ exports.processVariableDeclaration = (path) => {
         // Add info from initializers
         const initializer = variableDeclaration.initializer;
         if (initializer) {
-            statement.identifiers.push(...initializer.identifiers);
-            statement.functionInvocations = initializer.functionInvocations;
-            statement.objectCreations = initializer.objectCreations;
+            //statement.identifiers.push(...initializer.identifiers);
+            //statement.functionInvocations = initializer.functionInvocations;
+            //statement.objectCreations = initializer.objectCreations;
+            astUtil.mergeArrayProperties(statement, initializer);
         }
     });
 

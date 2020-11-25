@@ -3,7 +3,7 @@ const controlFlowProcessor = require('./ControlFlowProcessor');
 const choice = require("./Choice");
 const statementProcessor = require('./StatementProcessor');
 const expressionProcessor = require('./ExpressionProcessor');
-const loopsProcessor = require('./LoopsProcessor');
+const loopsProcessor = require('./Loops');
 const exceptions = require('./Exceptions');
 
 function createBaseExpressionInfo(path) {
@@ -36,7 +36,10 @@ const processNodePath = (function () {
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
+        
         ['IfStatement', choice.processIfStatement],
+        ['SwitchStatement', choice.processSwitchStatement],
+
         ['BlockStatement', statementProcessor.processBlockStatement],
         
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
@@ -45,6 +48,7 @@ const processNodePath = (function () {
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
         ['ForStatement', loopsProcessor.processForStatement],
+        ['ForInStatement', loopsProcessor.processForInStatement],
         ['TryStatement', exceptions.processTryStatement],
     ]);
 
