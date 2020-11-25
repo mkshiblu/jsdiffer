@@ -1,6 +1,7 @@
 const t = require('@babel/types');
 const literals = require("./Literals");
 const astUtil = require('../parser/AstUtil');
+const objects = require('./ObjectExpression');
 
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
@@ -15,6 +16,8 @@ const processes = new Map([
     ['MemberExpression', processMemberExpression],
     ['ArrayExpression', processArrayExpression],
     ['UpdateExpression', processUpdateExpression],
+    ['ConditionalExpression', processConditionalExpression],
+    ['ObjectExpression', objects.processObjectExpression],
 ]);
 
 /**
@@ -204,6 +207,36 @@ function processUnaryExpression(path, expressionResult, statement) {
     processExpression(path.get('argument'), expressionResult, statement);
 }
 
+// interface ConditionalExpression<: Expression {
+//     type: "ConditionalExpression";
+//     test: Expression;
+//     alternate: Expression;
+//     consequent: Expression;
+// }
+// A conditional expression, i.e., a ternary ? /: expression.
+
+function processConditionalExpression(path, expressionResult, statement) {
+    const node = path.node;
+
+    const test = processExpression(path.get('test'), expressionResult, statement);
+    const consequent = processExpression(path.get('consequent'), expressionResult, statement);
+    const alternate = processExpression(path.get('alternate'), expressionResult, statement);
+    
+    const ternaryExpression = {
+        text: path.toString(),
+        condition: test,
+        then: consequent,
+        else: alternate,
+    };
+
+    if (expressionResult.ternaryExpressions) {
+        expressionResult.ternaryExpressions.push(ternaryExpression);
+    }
+    else {
+        expressionResult.ternaryExpressions = [ternaryExpression];
+    }
+}
+
 /* interface AssignmentExpression<: Expression {
     type: "AssignmentExpression";
     operator: AssignmentOperator;
@@ -281,3 +314,4 @@ function processUpdateExpression(path, expressionResult, statement) {
 }
 
 exports.processExpression = processExpression;
+
