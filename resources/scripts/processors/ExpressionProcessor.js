@@ -9,12 +9,14 @@ const processes = new Map([
     ['LogicalExpression', processLogicalExpression],
     ['UnaryExpression', processUnaryExpression],
     ['Identifier', processIdentifier],
-    
+
     ['NumericLiteral', literals.processNumericLiteral],
     ['StringLiteral', literals.processStringLiteral],
     ['NullLiteral', literals.processNullLiteral],
     ['RegExpLiteral', literals.processRegExpLiteral],
+    ['BooleanLiteral', literals.processBooleanLiteral],
 
+    ['FunctionExpression', processFunctionExpression],
     ['NewExpression', processNewExpression],
     ['CallExpression', processCallExpression],
     ['AssignmentExpression', processAssignmentExpression],
@@ -23,6 +25,8 @@ const processes = new Map([
     ['UpdateExpression', processUpdateExpression],
     ['ConditionalExpression', processConditionalExpression],
     ['ObjectExpression', objects.processObjectExpression],
+    ['SequenceExpression', processSequenceExpression],
+    ['ThisExpression', processThisExpression],
 ]);
 
 /**
@@ -32,7 +36,6 @@ const processes = new Map([
  * @param {*} node 
  */
 function processExpression(path, expressionResult, statement) {
-    const node = path.node;
     const process = processes.get(path.node.type);
     if (process) {
         expressionResult.loc = astUtil.getFormattedLocation(path.node);
@@ -212,6 +215,20 @@ function processLogicalExpression(path, expressionResult, statement) {
     processExpression(path.get('right'), expressionResult, statement);
 }
 
+
+// interface ThisExpression<: Expression {
+//     type: "ThisExpression";
+// }
+
+function processThisExpression(path, expressionResult, statement) {
+    const node = path.node;
+    // TODO how to determine if this is used as a params
+    if (path.toString() !== "this") {
+        throw "Not supported yet: " + path.toString();
+    }
+    expressionResult.identifiers.push("this");
+}
+
 // interface UnaryExpression <: Expression {
 //     type: "UnaryExpression";
 //     operator: UnaryOperator;
@@ -313,6 +330,19 @@ function processIdentifier(path, { identifiers = [] }) {
     identifiers.push(name);
 }
 
+// interface SequenceExpression <: Expression {
+//     type: "SequenceExpression";
+//     expressions: [ Expression ];
+//   }
+
+function processSequenceExpression(path, expressionResult, statement) {
+    const name = path.node.name;
+
+    path.get('expressions').forEach((expressionPath) => {
+        processExpression(expressionPath, expressionResult, statement);
+    });
+}
+
 /** An ++ or -- after or befor and expression */
 // interface UpdateExpression <: Expression {
 //     type: "UpdateExpression";
@@ -332,6 +362,32 @@ function processUpdateExpression(path, expressionResult, statement) {
         expressionResult.postfixOperators.push(node.operator);
     }
     processExpression(path.get('argument'), expressionResult, statement);
+}
+
+// interface FunctionExpression <: Function, Expression {
+//     type: "FunctionExpression";
+//   }
+//   A function expression.
+
+// function [name]([param1[, param2[, ..., paramN]]]) {
+//     statements
+//  }
+
+function processFunctionExpression(path, expressionResult, statement) {
+    const node = path.node;
+
+    // Body is a block statmeent
+    const name = node.name;
+
+    const functionDeclarationStatement = {
+        type: node.type,
+        //qualifiedName,
+        name,
+        params: node.params.map(id => id.name)
+    };
+    processor.processStatement(path.get('body'), functionDeclarationStatement);
+
+    expressionResult.functionDeclarations = [functionDeclarationStatement];
 }
 
 exports.processExpression = processExpression;

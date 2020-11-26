@@ -15,7 +15,7 @@ function processObjectExpression(path, expressionResult, statement) {
             expressionResult.objectLiterals = [path.toString()];
         }
     } else {
-        throw "Not supported yet " + path.toString();
+        throw "Object Literals Not supported yet " + path.toString() + JSON.stringify(path.node.loc);
     }
 }
 

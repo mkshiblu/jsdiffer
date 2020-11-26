@@ -40,7 +40,16 @@ function processRegExpLiteral(path, { stringLiterals = [] }) {
   stringLiterals.push(path.toString());
 }
 
+// interface BooleanLiteral <: Literal {
+//   type: "BooleanLiteral";
+//   value: boolean;
+// }
+function processBooleanLiteral(path, { booleanLiterals = [] }) {
+  booleanLiterals.push(path.toString());
+}
+
 exports.processRegExpLiteral = processRegExpLiteral;
 exports.processStringLiteral = processStringLiteral;
 exports.processNumericLiteral = processNumericLiteral;
 exports.processNullLiteral = processNullLiteral;
+exports.processBooleanLiteral = processBooleanLiteral;
