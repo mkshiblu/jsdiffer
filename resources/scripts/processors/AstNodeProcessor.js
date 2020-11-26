@@ -36,12 +36,13 @@ const processNodePath = (function () {
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
-        
+
         ['IfStatement', choice.processIfStatement],
         ['SwitchStatement', choice.processSwitchStatement],
+        ['SwitchCase', choice.processSwitchCase],
 
         ['BlockStatement', statementProcessor.processBlockStatement],
-        
+
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
         ['BreakStatement', controlFlowProcessor.processBreakStatement],
 
@@ -49,7 +50,9 @@ const processNodePath = (function () {
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
         ['ForStatement', loopsProcessor.processForStatement],
         ['ForInStatement', loopsProcessor.processForInStatement],
+
         ['TryStatement', exceptions.processTryStatement],
+        ['ThrowStatement', exceptions.processThrowStatement],
     ]);
 
     return function (nodePath, processStatement) {

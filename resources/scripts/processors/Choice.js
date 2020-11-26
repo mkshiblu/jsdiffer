@@ -74,21 +74,21 @@ exports.processSwitchStatement = (path, processStatement, processExpression) => 
 // A case (if test is an Expression) or default (if test === null) clause in the body of a switch statement.
 exports.processSwitchCase = (path, processStatement, processExpression) => {
     const node = path.node;
-    // const statement = {
-    //     type: node.type,
-    //     expressions: [],
-    //     text: "switch"
-    // };
+    const statement = {
+        type: node.type,
+        expressions: [],
+        text: "case"
+    };
 
-    // const expression = processExpression(path.get('discriminant'));
-    // statement.expressions.push(expression);
+    if (node.test) {
+        const expression = processExpression(path.get('test'));
+        statement.expressions.push(expression);
+        statement.text = "case " + expression.text + ":";
+    }
 
-    // // For composite we store the expression that appears inside the bracket and its name
-    // statement.text = compositeHelper.getTextWithExpressions(statement);
-
-    // // Extract body
-    // const switchCases = path.get('cases');
-    // switchCases.forEach((switchCasePath) => processStatement(switchCasePath, statement));
+    // Extract body
+    path.get('consequent')
+        .forEach((childStatementPath) => processStatement(childStatementPath, statement));
 
     return statement;
 };
