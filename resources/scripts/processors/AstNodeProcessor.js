@@ -19,7 +19,7 @@ function processStatement(path, parent) {
         // Add children
         addStatement(parent, statement);
     } catch (ex) {
-        console.error(ex, path, parent);
+        console.error(ex);
     }
 }
 
@@ -70,11 +70,14 @@ const processNodePath = (function () {
 
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
         ['BreakStatement', controlFlowProcessor.processBreakStatement],
+        ['ContinueStatement', controlFlowProcessor.processContinueStatement],
 
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
+        
         ['ForStatement', loopsProcessor.processForStatement],
         ['ForInStatement', loopsProcessor.processForInStatement],
+        ['WhileStatement', loopsProcessor.processWhileStatement],
 
         ['TryStatement', exceptions.processTryStatement],
         ['ThrowStatement', exceptions.processThrowStatement],

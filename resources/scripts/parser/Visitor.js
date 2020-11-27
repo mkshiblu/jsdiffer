@@ -102,4 +102,4 @@ function concatScopes(path) {
 }
 
 exports.Visitor = new Visitor();
-exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));
+exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => fd/*!fd.qualifiedName.includes("$|$")*/);

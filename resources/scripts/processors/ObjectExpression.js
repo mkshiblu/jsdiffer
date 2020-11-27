@@ -15,8 +15,30 @@ function processObjectExpression(path, expressionResult, statement) {
             expressionResult.objectLiterals = [path.toString()];
         }
     } else {
-        throw "Object Literals Not supported yet " + path.toString() + JSON.stringify(path.node.loc);
+        console.log("Object Literals Not supported yet " + path.toString() + JSON.stringify(path.node.loc));
+        // extract properties
+        node.properties.forEach(prop => {
+
+        });
     }
+}
+
+// interface ObjectProperty<: ObjectMember {
+//     type: "ObjectProperty";
+//     shorthand: boolean;
+//     value: Expression;
+// }
+function parseObjectProperty(objectProperty) {
+
+}
+
+// interface ObjectMethod<: ObjectMember, Function {
+//     type: "ObjectMethod";
+//     kind: "get" | "set" | "method";
+// }
+
+function parseObjectMethod(objectMethod) {
+
 }
 
 exports.processObjectExpression = processObjectExpression;

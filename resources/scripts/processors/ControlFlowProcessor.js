@@ -19,6 +19,22 @@ exports.processReturnStatement = function (path) {
     return statement;
 }
 
+// ContinueStatement
+// interface ContinueStatement<: Statement {
+//     type: "ContinueStatement";
+//     label: Identifier | null;
+// }
+// A continue statement.
+
+exports.processContinueStatement = function (path) {
+    let statement = templates.getStatementTemplate(path);
+
+    if (path.node.label != null) {
+        throw "Labeled statements are not supported yet: " + path;
+    }
+
+    return statement;
+}
 
 /**
  * BreakStatement

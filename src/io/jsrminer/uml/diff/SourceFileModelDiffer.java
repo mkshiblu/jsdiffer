@@ -175,54 +175,54 @@ public class SourceFileModelDiffer {
         FunctionDeclaration bestMapperOperation1 = bestMapper.function1;
         FunctionDeclaration bestMapperOperation2 = bestMapper.function2;
 
-        if (bestMapperOperation1.equalReturnParameter(bestMapperOperation2) &&
-                bestMapperOperation1.name.equals(bestMapperOperation2.name) &&
-                bestMapperOperation1.commonParameterTypes(bestMapperOperation2).size() > 0) {
-            return bestMapper;
-        }
-        boolean identicalBodyWithOperation1OfTheBestMapper = identicalBodyWithAnotherAddedMethod(bestMapper);
-        boolean identicalBodyWithOperation2OfTheBestMapper = identicalBodyWithAnotherRemovedMethod(bestMapper);
-        for (int i = 1; i < mapperList.size(); i++) {
-            FunctionBodyMapper mapper = mapperList.get(i);
-            FunctionDeclaration operation2 = mapper.function2;
-            List<OperationInvocation> operationInvocations2 = operation2.getBody().getAllOperationInvocations();
-            boolean anotherMapperCallsOperation2OfTheBestMapper = false;
-            for (OperationInvocation invocation : operationInvocations2) {
-                if (invocation.matchesOperation(bestMapper.getOperation2(), operation2.variableTypeMap(), modelDiff) && !invocation.matchesOperation(bestMapper.getOperation1(), operation2.variableTypeMap(), modelDiff) &&
-                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, removedOperations)) {
-                    anotherMapperCallsOperation2OfTheBestMapper = true;
-                    break;
-                }
-            }
-            FunctionDeclaration operation1 = mapper.function1;
-            List<OperationInvocation> operationInvocations1 = operation1.getBody().getAllOperationInvocations();
-            boolean anotherMapperCallsOperation1OfTheBestMapper = false;
-            for (OperationInvocation invocation : operationInvocations1) {
-                if (invocation.matchesOperation(bestMapper.function1/*, operation1.variableTypeMap(), modelDiff*/)
-                        && !invocation.matchesOperation(bestMapper.function2/*, operation1.variableTypeMap(), modelDiff*/) &&
-                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, addedOperations)) {
-                    anotherMapperCallsOperation1OfTheBestMapper = true;
-                    break;
-                }
-            }
-            boolean nextMapperMatchesConsistentRename = matchesConsistentMethodInvocationRename(mapper, consistentMethodInvocationRenames);
-            boolean bestMapperMismatchesConsistentRename = mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames);
-            if (bestMapperMismatchesConsistentRename && nextMapperMatchesConsistentRename) {
-                bestMapper = mapper;
-                break;
-            }
-            if (anotherMapperCallsOperation2OfTheBestMapper || anotherMapperCallsOperation1OfTheBestMapper) {
-                bestMapper = mapper;
-                break;
-            }
-            if (identicalBodyWithOperation2OfTheBestMapper || identicalBodyWithOperation1OfTheBestMapper) {
-                bestMapper = mapper;
-                break;
-            }
-        }
-        if (mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames)) {
-            return null;
-        }
+//        if (bestMapperOperation1.equalReturnParameter(bestMapperOperation2) &&
+//                bestMapperOperation1.name.equals(bestMapperOperation2.name) &&
+//                bestMapperOperation1.commonParameterTypes(bestMapperOperation2).size() > 0) {
+//            return bestMapper;
+//        }
+//        boolean identicalBodyWithOperation1OfTheBestMapper = identicalBodyWithAnotherAddedMethod(bestMapper);
+//        boolean identicalBodyWithOperation2OfTheBestMapper = identicalBodyWithAnotherRemovedMethod(bestMapper);
+//        for (int i = 1; i < mapperList.size(); i++) {
+//            FunctionBodyMapper mapper = mapperList.get(i);
+//            FunctionDeclaration operation2 = mapper.function2;
+//            List<OperationInvocation> operationInvocations2 = operation2.getBody().getAllOperationInvocations();
+//            boolean anotherMapperCallsOperation2OfTheBestMapper = false;
+//            for (OperationInvocation invocation : operationInvocations2) {
+//                if (invocation.matchesOperation(bestMapper.getOperation2(), operation2.variableTypeMap(), modelDiff) && !invocation.matchesOperation(bestMapper.getOperation1(), operation2.variableTypeMap(), modelDiff) &&
+//                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, removedOperations)) {
+//                    anotherMapperCallsOperation2OfTheBestMapper = true;
+//                    break;
+//                }
+//            }
+//            FunctionDeclaration operation1 = mapper.function1;
+//            List<OperationInvocation> operationInvocations1 = operation1.getBody().getAllOperationInvocations();
+//            boolean anotherMapperCallsOperation1OfTheBestMapper = false;
+//            for (OperationInvocation invocation : operationInvocations1) {
+//                if (invocation.matchesOperation(bestMapper.function1/*, operation1.variableTypeMap(), modelDiff*/)
+//                        && !invocation.matchesOperation(bestMapper.function2/*, operation1.variableTypeMap(), modelDiff*/) &&
+//                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, addedOperations)) {
+//                    anotherMapperCallsOperation1OfTheBestMapper = true;
+//                    break;
+//                }
+//            }
+//            boolean nextMapperMatchesConsistentRename = matchesConsistentMethodInvocationRename(mapper, consistentMethodInvocationRenames);
+//            boolean bestMapperMismatchesConsistentRename = mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames);
+//            if (bestMapperMismatchesConsistentRename && nextMapperMatchesConsistentRename) {
+//                bestMapper = mapper;
+//                break;
+//            }
+//            if (anotherMapperCallsOperation2OfTheBestMapper || anotherMapperCallsOperation1OfTheBestMapper) {
+//                bestMapper = mapper;
+//                break;
+//            }
+//            if (identicalBodyWithOperation2OfTheBestMapper || identicalBodyWithOperation1OfTheBestMapper) {
+//                bestMapper = mapper;
+//                break;
+//            }
+//        }
+//        if (mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames)) {
+//            return null;
+//        }
         return bestMapper;
     }
 
@@ -232,43 +232,43 @@ public class SourceFileModelDiffer {
 
         List<CodeFragmentMapping> totalMappings = new ArrayList<>(operationBodyMapper.getMappings());
         int mappings = operationBodyMapper.mappingsWithoutBlocks();
-        if (mappings > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
-            if (exactMappings(operationBodyMapper)) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper) &&
-                    absoluteDifferenceInPosition <= differenceInPosition &&
-                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition) &&
-                    removedOperation.testAnnotationCheck(addedOperation)) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT2(mappings, operationBodyMapper) &&
-                    absoluteDifferenceInPosition <= differenceInPosition &&
-                    isPartOfMethodExtracted(removedOperation, addedOperation) &&
-                    removedOperation.testAnnotationCheck(addedOperation)) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT1(mappings, operationBodyMapper) &&
-                    absoluteDifferenceInPosition <= differenceInPosition &&
-                    isPartOfMethodInlined(removedOperation, addedOperation) &&
-                    removedOperation.testAnnotationCheck(addedOperation)) {
-                mapperSet.add(operationBodyMapper);
-            }
-        } else {
-            for (MethodInvocationReplacement replacement : consistentMethodInvocationRenames) {
-                if (replacement.getInvokedOperationBefore().matchesOperation(removedOperation) &&
-                        replacement.getInvokedOperationAfter().matchesOperation(addedOperation)) {
-                    mapperSet.add(operationBodyMapper);
-                    break;
-                }
-            }
-        }
-        if (totalMappings.size() > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
-            if (singleUnmatchedStatementCallsAddedOperation(operationBodyMapper, sourceDiff) &&
-                    absoluteDifferenceInPosition <= differenceInPosition &&
-                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition)) {
-                mapperSet.add(operationBodyMapper);
-            }
-        }
+//        if (mappings > 0) {
+//            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
+//            if (exactMappings(operationBodyMapper)) {
+//                mapperSet.add(operationBodyMapper);
+//            } else if (mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition) &&
+//                    removedOperation.testAnnotationCheck(addedOperation)) {
+//                mapperSet.add(operationBodyMapper);
+//            } else if (mappedElementsMoreThanNonMappedT2(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    isPartOfMethodExtracted(removedOperation, addedOperation) &&
+//                    removedOperation.testAnnotationCheck(addedOperation)) {
+//                mapperSet.add(operationBodyMapper);
+//            } else if (mappedElementsMoreThanNonMappedT1(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    isPartOfMethodInlined(removedOperation, addedOperation) &&
+//                    removedOperation.testAnnotationCheck(addedOperation)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//        } else {
+//            for (MethodInvocationReplacement replacement : consistentMethodInvocationRenames) {
+//                if (replacement.getInvokedOperationBefore().matchesOperation(removedOperation) &&
+//                        replacement.getInvokedOperationAfter().matchesOperation(addedOperation)) {
+//                    mapperSet.add(operationBodyMapper);
+//                    break;
+//                }
+//            }
+//        }
+//        if (totalMappings.size() > 0) {
+//            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
+//            if (singleUnmatchedStatementCallsAddedOperation(operationBodyMapper, sourceDiff) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//        }
     }
 
     private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper operationBodyMapper, SourceFileModelDiff sourceDiff) {

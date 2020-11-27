@@ -2,6 +2,29 @@ const astProcessor = require("./AstNodeProcessor");
 const declarationProcessor = require("./DeclarationProcessor");
 const templates = require('../parser/Templates');
 
+// interface WhileStatement<: Statement {
+//     type: "WhileStatement";
+//     test: Expression;
+//     body: Statement;
+// }
+exports.processWhileStatement = (path, processStatement, processExpression) => {
+    const node = path.node;
+    const statement = {
+        type: node.type,
+        text: 'while',
+        statements: [],
+        expressions: []
+    };
+
+    const test = astProcessor.processExpression(path.get("test"), statement);
+    statement.expressions.push(test);
+
+    processStatement(path.get('body'), statement);
+
+    return statement;
+};
+
+
 /* interface ForStatement<: Statement {
     type: "ForStatement";
     init: VariableDeclaration | Expression | null;
@@ -9,7 +32,6 @@ const templates = require('../parser/Templates');
     update: Expression | null;
     body: Statement;
 } */
-
 exports.processForStatement = (path, processStatement, processExpression) => {
     const node = path.node;
     const statement = {
@@ -44,7 +66,7 @@ exports.processForStatement = (path, processStatement, processExpression) => {
     processStatement(path.get('body'), statement);
 
     return statement;
-}
+};
 
 // interface ForInStatement <: Statement {
 //     type: "ForInStatement";
@@ -77,7 +99,7 @@ exports.processForInStatement = (path, processStatement, processExpression) => {
     processStatement(path.get('body'), statement);
 
     return statement;
-}
+};
 
 function processLoopVariableDeclarationAsExpression(path, statement) {
     const declarationStatement = declarationProcessor.processVariableDeclaration(path);

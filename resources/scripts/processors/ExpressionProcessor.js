@@ -84,8 +84,11 @@ function processCallExpression(path, expressionResult, statement) {
         processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
-    } else {
-        throw "Unsupported callee: " + node.callee.type;
+    } else if(t.isCallExpression(callee)) {
+        //name =  callee.callee
+        console.log("Unsupported callee: " + node.loc);
+    }else{
+        throw "Unsupported callee: " + node.loc;
     }
 
     const result = {
