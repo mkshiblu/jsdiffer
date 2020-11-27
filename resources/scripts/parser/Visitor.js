@@ -60,7 +60,7 @@ function Visitor() {
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     functionDeclarations.push({
         qualifiedName: qualifiedName
-        , body: JSON.stringify(functionBody)
+        , body: /*JSON.stringify(*/functionBody/*)*/
         , params: node.params.map(id => id.name)
         , location: astUtil.getFormattedLocation(node)
     });

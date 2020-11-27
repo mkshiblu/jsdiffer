@@ -951,4 +951,8 @@ public class FunctionBodyMapper {
         }
         return replacements;
     }
+
+    public FunctionBodyMapper getParentMapper() {
+        return parentMapper;
+    }
 }

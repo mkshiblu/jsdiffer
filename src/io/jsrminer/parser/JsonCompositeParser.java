@@ -7,7 +7,7 @@ import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
 
-public class JsonCompositeFactory {
+public class JsonCompositeParser {
 
     public static BlockStatement createBlockStatement(final String blockStatementJson) {
         // Helper variables
@@ -75,7 +75,7 @@ public class JsonCompositeFactory {
                     child = childBlock;
                 } else {
                     // A leaf statement
-                    child = JsonCompositeFactory.createSingleStatement(childAny, currentBlock);
+                    child = JsonCompositeParser.createSingleStatement(childAny, currentBlock);
                 }
 
                 indexInParent = addChildToParentBlock(currentBlock, child, indexInParent);
