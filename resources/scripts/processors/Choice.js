@@ -22,7 +22,7 @@ exports.processIfStatement = (path, processStatement, processExpression) => {
     // TODO handle else if else
 
     // For composite we store the expression that appears inside the bracket and its name
-    statement.text = compositeHelper.getTextWithExpressions(statement);
+    //statement.text = compositeHelper.getTextWithExpressions(statement);
 
     // Extract body
     const bodyPath = path.get('consequent');

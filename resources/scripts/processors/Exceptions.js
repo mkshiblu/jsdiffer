@@ -2,6 +2,7 @@ const astUtil = require('../parser/AstUtil');
 const t = require('@babel/types');
 const astProcessor = require("../processors/AstNodeProcessor");
 const templates = require("../parser/Templates");
+const compositeHelper = require("./CompositeStatementHelper");
 
 /* interface TryStatement<: Statement {
     type: "TryStatement";
@@ -67,6 +68,9 @@ function porcessCatchClause(path, processStatement) {
     }
 
     processStatement(path.get('body'), statement);
+
+    // For composite we store the expression that appears inside the bracket and its name
+    //statement.text = compositeHelper.getTextWithExpressions(statement);
     return statement;
 }
 
