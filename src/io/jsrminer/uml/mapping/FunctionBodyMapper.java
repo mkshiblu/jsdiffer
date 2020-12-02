@@ -794,6 +794,10 @@ public class FunctionBodyMapper {
     }
 
 
+    /**
+     * Returns the non mapped count
+     * @return
+     */
     public int nonMappedElementsT1() {
         int nonMappedInnerNodeCount = 0;
         for (BlockStatement composite : getNonMappedInnerNodesT1()) {
