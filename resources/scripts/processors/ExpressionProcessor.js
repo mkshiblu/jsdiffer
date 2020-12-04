@@ -86,7 +86,9 @@ function processCallExpression(path, expressionResult, statement) {
         // TODO handle arguments
     } else if(t.isCallExpression(callee)) {
         //name =  callee.callee
-        console.log("Unsupported callee: " + node.loc);
+        //console.log("Unsupported callee: " + node.loc);
+        // TODO chain call
+        processCallExpression(path.get('callee'), expressionResult, statement);
     }else{
         throw "Unsupported callee: " + node.loc;
     }
