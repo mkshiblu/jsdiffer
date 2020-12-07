@@ -1,7 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.refactorings.AddParameterRefactoring;
-import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.RemoveParameterRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLParameter;
@@ -41,6 +41,11 @@ public class UMLOperationDiff extends Diff {
                 diffParametersByNameAndDefaultValue(function1, function2);
         parametersReordered = checkParametersReordered(parametersMatchedByNameAndDefaultValue.size());
         tryMatchRemovedAndAddedParameters();
+    }
+
+    public UMLOperationDiff(FunctionDeclaration function1, FunctionDeclaration function2, Set<CodeFragmentMapping> mappings) {
+        this(function1, function2);
+        this.setMappings(mappings);
     }
 
     public void setMappings(Set<CodeFragmentMapping> mappings) {

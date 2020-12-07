@@ -46,6 +46,11 @@ public class FunctionDeclaration extends CodeEntity {
      */
     public final boolean isTopLevel;
 
+    /**
+     * True if the function is also a constructor
+     */
+    private boolean isConstructor;
+
     public FunctionDeclaration(String qualifiedName, boolean isTopLevel) {
         this.isTopLevel = isTopLevel;
         this.qualifiedName = qualifiedName;
@@ -121,5 +126,13 @@ public class FunctionDeclaration extends CodeEntity {
 
     public int parameterCount() {
         return this.nameParameterMap.size();
+    }
+
+    public boolean isConstructor() {
+        return isConstructor;
+    }
+
+    public void setConstructor(boolean constructor) {
+        isConstructor = constructor;
     }
 }

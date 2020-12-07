@@ -1,6 +1,8 @@
 const astUtil = require('../parser/AstUtil');
 const t = require('@babel/types');
 const astProcessor = require("../processors/AstNodeProcessor");
+const templates = require("../parser/Templates");
+const compositeHelper = require("./CompositeStatementHelper");
 
 /* interface TryStatement<: Statement {
     type: "TryStatement";
@@ -52,11 +54,11 @@ function porcessCatchClause(path, processStatement) {
         if (t.isIdentifier(param)) {
 
             const variableDeclaration = {
-               // text: param.name,
+                // text: param.name,
                 variableName: param.name,
                 kind: 'let', // TODO: Does it work as let?
                 type: 'VariableDeclaration',
-               // loc: astUtil.getFormattedLocation(param),
+                // loc: astUtil.getFormattedLocation(param),
             };
             expression.identifiers = [];
             expression.variableDeclarations.push(variableDeclaration);
@@ -66,7 +68,21 @@ function porcessCatchClause(path, processStatement) {
     }
 
     processStatement(path.get('body'), statement);
+
+    // For composite we store the expression that appears inside the bracket and its name
+    //statement.text = compositeHelper.getTextWithExpressions(statement);
     return statement;
+}
+
+// interface ThrowStatement <: Statement {
+//     type: "ThrowStatement";
+//     argument: Expression;
+//   }
+exports.processThrowStatement = (path, processStatement, processExpression) => {
+    const statement = templates.getStatementTemplate(path);
+    const expression = processExpression(path.get('argument'));
+    Object.assign(expression, statement);
+    return expression;
 }
 
 exports.porcessCatchClause = porcessCatchClause;

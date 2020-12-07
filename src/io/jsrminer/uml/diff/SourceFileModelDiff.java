@@ -1,6 +1,6 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceFileModel;
 

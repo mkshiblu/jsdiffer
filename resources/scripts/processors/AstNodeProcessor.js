@@ -3,8 +3,32 @@ const controlFlowProcessor = require('./ControlFlowProcessor');
 const choice = require("./Choice");
 const statementProcessor = require('./StatementProcessor');
 const expressionProcessor = require('./ExpressionProcessor');
-const loopsProcessor = require('./LoopsProcessor');
+const loopsProcessor = require('./Loops');
 const exceptions = require('./Exceptions');
+const astUtil = require('../parser/AstUtil');
+
+/**
+ * Could be called by each node recursively if they have child to be processed
+ */
+function processStatement(path, parent) {
+    try {
+        const statement = processNodePath(path, processStatement);
+        statement.loc = astUtil.getFormattedLocation(path.node);
+
+        // Add children
+        // Add children
+        addStatement(parent, statement);
+    } catch (ex) {
+        console.error(ex);
+    }
+}
+
+function addStatement(parent, childStatement) {
+    if (!parent.statements) {
+        parent.statements = [];
+    }
+    parent.statements.push(childStatement);
+}
 
 function createBaseExpressionInfo(path) {
     return {
@@ -13,6 +37,7 @@ function createBaseExpressionInfo(path) {
         numericLiterals: [],
         stringLiterals: [],
         nullLiterals: [],
+        booleanLiterals: [],
         infixOperators: [],
         prefixOperators: [],
         postfixOperators: [],
@@ -36,13 +61,26 @@ const processNodePath = (function () {
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],
+
         ['IfStatement', choice.processIfStatement],
+        ['SwitchStatement', choice.processSwitchStatement],
+        ['SwitchCase', choice.processSwitchCase],
+
         ['BlockStatement', statementProcessor.processBlockStatement],
+
         ['ReturnStatement', controlFlowProcessor.processReturnStatement],
+        ['BreakStatement', controlFlowProcessor.processBreakStatement],
+        ['ContinueStatement', controlFlowProcessor.processContinueStatement],
+
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
+        
         ['ForStatement', loopsProcessor.processForStatement],
+        ['ForInStatement', loopsProcessor.processForInStatement],
+        ['WhileStatement', loopsProcessor.processWhileStatement],
+
         ['TryStatement', exceptions.processTryStatement],
+        ['ThrowStatement', exceptions.processThrowStatement],
     ]);
 
     return function (nodePath, processStatement) {
@@ -58,6 +96,7 @@ const processNodePath = (function () {
     }
 })();
 
+exports.processStatement = processStatement;
 exports.processNodePath = processNodePath;
 exports.processExpression = processExpression;
 exports.createBaseExpressionInfo = createBaseExpressionInfo;

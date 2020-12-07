@@ -1,19 +1,32 @@
 const t = require('@babel/types');
 const literals = require("./Literals");
 const astUtil = require('../parser/AstUtil');
+const objects = require('./ObjectExpression');
+const processor = require('./AstNodeProcessor');
 
 const processes = new Map([
     ['BinaryExpression', processBinaryExpression],
+    ['LogicalExpression', processLogicalExpression],
+    ['UnaryExpression', processUnaryExpression],
     ['Identifier', processIdentifier],
+
     ['NumericLiteral', literals.processNumericLiteral],
     ['StringLiteral', literals.processStringLiteral],
     ['NullLiteral', literals.processNullLiteral],
+    ['RegExpLiteral', literals.processRegExpLiteral],
+    ['BooleanLiteral', literals.processBooleanLiteral],
+
+    ['FunctionExpression', processFunctionExpression],
     ['NewExpression', processNewExpression],
     ['CallExpression', processCallExpression],
     ['AssignmentExpression', processAssignmentExpression],
     ['MemberExpression', processMemberExpression],
     ['ArrayExpression', processArrayExpression],
     ['UpdateExpression', processUpdateExpression],
+    ['ConditionalExpression', processConditionalExpression],
+    ['ObjectExpression', objects.processObjectExpression],
+    ['SequenceExpression', processSequenceExpression],
+    ['ThisExpression', processThisExpression],
 ]);
 
 /**
@@ -23,7 +36,6 @@ const processes = new Map([
  * @param {*} node 
  */
 function processExpression(path, expressionResult, statement) {
-    const node = path.node;
     const process = processes.get(path.node.type);
     if (process) {
         expressionResult.loc = astUtil.getFormattedLocation(path.node);
@@ -72,8 +84,13 @@ function processCallExpression(path, expressionResult, statement) {
         processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
-    } else {
-        throw "Unsupported callee: " + node.callee.type;
+    } else if(t.isCallExpression(callee)) {
+        //name =  callee.callee
+        //console.log("Unsupported callee: " + node.loc);
+        // TODO chain call
+        processCallExpression(path.get('callee'), expressionResult, statement);
+    }else{
+        throw "Unsupported callee: " + node.loc;
     }
 
     const result = {
@@ -163,7 +180,6 @@ function processArgument(argumentPath, statement) {
     }
 }
 
-
 /**
 interface BinaryExpression<: Expression {
     type: "BinaryExpression";
@@ -182,6 +198,88 @@ function processBinaryExpression(path, expressionResult, statement) {
     processExpression(path.get('right'), expressionResult, statement);
 }
 
+// LogicalExpression
+// interface LogicalExpression <: Expression {
+//   type: "LogicalExpression";
+//   operator: LogicalOperator;
+//   left: Expression;
+//   right: Expression;
+// }
+// A logical operator expression.
+
+// LogicalOperator
+// enum LogicalOperator {
+//   "||" | "&&" | "??"
+// }
+// A logical operator token.
+function processLogicalExpression(path, expressionResult, statement) {
+    const node = path.node;
+    const operator = node.operator;
+    expressionResult.infixOperators.push(operator);
+    processExpression(path.get('left'), expressionResult, statement);
+    processExpression(path.get('right'), expressionResult, statement);
+}
+
+
+// interface ThisExpression<: Expression {
+//     type: "ThisExpression";
+// }
+
+function processThisExpression(path, expressionResult, statement) {
+    const node = path.node;
+    // TODO how to determine if this is used as a params
+    if (path.toString() !== "this") {
+        throw "Not supported yet: " + path.toString();
+    }
+    expressionResult.identifiers.push("this");
+}
+
+// interface UnaryExpression <: Expression {
+//     type: "UnaryExpression";
+//     operator: UnaryOperator;
+//     prefix: boolean;
+//     argument: Expression;
+//   }
+function processUnaryExpression(path, expressionResult, statement) {
+    const node = path.node;
+    const isPrefix = node.prefix;
+    const operator = node.operator;
+
+    if (isPrefix) {
+        expressionResult.prefixOperators.push(operator);
+    }
+    else {
+        expressionResult.postfixOperators.push(operator);
+    }
+    processExpression(path.get('argument'), expressionResult, statement);
+}
+
+// interface ConditionalExpression<: Expression {
+//     type: "ConditionalExpression";
+//     test: Expression;
+//     alternate: Expression;
+//     consequent: Expression;
+// }
+// A conditional expression, i.e., a ternary ? /: expression.
+
+function processConditionalExpression(path, expressionResult, statement) {
+    const node = path.node;
+
+    const test = processor.processExpression(path.get('test'), statement);
+    const consequent = processor.processExpression(path.get('consequent'), statement);
+    const alternate = processor.processExpression(path.get('alternate'), statement);
+
+    const ternaryExpression = {
+        text: path.toString(),
+        condition: test,
+        then: consequent,
+        else: alternate,
+    };
+
+    astUtil.mergeArrayProperties(expressionResult, test, consequent, alternate);
+    (expressionResult.ternaryExpressions || []).push(ternaryExpression);
+}
+
 /* interface AssignmentExpression<: Expression {
     type: "AssignmentExpression";
     operator: AssignmentOperator;
@@ -189,7 +287,7 @@ function processBinaryExpression(path, expressionResult, statement) {
     right: Expression;
 }
 An assignment operator expression.
-
+ 
     AssignmentOperator
 enum AssignmentOperator {
     "=" | "+=" | "-=" | "*=" | "/=" | "%="
@@ -237,6 +335,19 @@ function processIdentifier(path, { identifiers = [] }) {
     identifiers.push(name);
 }
 
+// interface SequenceExpression <: Expression {
+//     type: "SequenceExpression";
+//     expressions: [ Expression ];
+//   }
+
+function processSequenceExpression(path, expressionResult, statement) {
+    const name = path.node.name;
+
+    path.get('expressions').forEach((expressionPath) => {
+        processExpression(expressionPath, expressionResult, statement);
+    });
+}
+
 /** An ++ or -- after or befor and expression */
 // interface UpdateExpression <: Expression {
 //     type: "UpdateExpression";
@@ -258,4 +369,31 @@ function processUpdateExpression(path, expressionResult, statement) {
     processExpression(path.get('argument'), expressionResult, statement);
 }
 
+// interface FunctionExpression <: Function, Expression {
+//     type: "FunctionExpression";
+//   }
+//   A function expression.
+
+// function [name]([param1[, param2[, ..., paramN]]]) {
+//     statements
+//  }
+
+function processFunctionExpression(path, expressionResult, statement) {
+    const node = path.node;
+
+    // Body is a block statmeent
+    const name = node.name;
+
+    const functionDeclarationStatement = {
+        type: node.type,
+        //qualifiedName,
+        name,
+        params: node.params.map(id => id.name)
+    };
+    processor.processStatement(path.get('body'), functionDeclarationStatement);
+
+    expressionResult.functionDeclarations = [functionDeclarationStatement];
+}
+
 exports.processExpression = processExpression;
+

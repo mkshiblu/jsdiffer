@@ -60,7 +60,7 @@ function Visitor() {
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {
     functionDeclarations.push({
         qualifiedName: qualifiedName
-        , body: JSON.stringify(functionBody)
+        , body: /*JSON.stringify(*/functionBody/*)*/
         , params: node.params.map(id => id.name)
         , location: astUtil.getFormattedLocation(node)
     });
@@ -102,4 +102,4 @@ function concatScopes(path) {
 }
 
 exports.Visitor = new Visitor();
-exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => !fd.qualifiedName.includes("$|$"));
+exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => fd/*!fd.qualifiedName.includes("$|$")*/);

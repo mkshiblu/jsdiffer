@@ -1,6 +1,6 @@
 package io.jsrminer;
 
-import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.api.IRefactoring;
 
 import java.util.List;
 

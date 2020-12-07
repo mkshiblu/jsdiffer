@@ -62,5 +62,32 @@ exports.getFormattedObjectCreation = (path) => {
     return objectCreation;
 }
 
+/**
+ * Mergess array properties from obj2 to obj1 and returns obj1
+ */
+exports.mergeArrayProperties = (obj, ...objectsToBeMerged) => {
+    objectsToBeMerged.forEach((obj2)=> {
+        for (const property in obj2) {
+            if (Array.isArray(obj2[property])) {
+                obj[property] = [ ...obj2[property], ...obj[property] || [],];
+            }
+        }
+    });
+
+    // obj1.identifiers = [...obj1.identifiers, ...obj2.identifiers];
+    // obj1.numericLiterals = [...obj1.numericLiterals, ...obj2.numericLiterals];
+    // obj1.stringLiterals = [...obj1.stringLiterals, ...obj2.stringLiterals];
+    // obj1.nullLiterals = [...obj1.nullLiterals, ...obj2.nullLiterals];
+    // obj1.infixOperators = [...obj1.infixOperators, ...obj2.infixOperators];
+    // obj1.prefixOperators = [...obj1.prefixOperators, ...obj2.prefixOperators];
+    // obj1.functionInvocations = [...obj1.functionInvocations, ...obj2.functionInvocations];
+    // obj1.constructorInvocations = [...obj1.constructorInvocations, ...obj2.constructorInvocations];
+    // obj1.objectCreations = [...obj1.objectCreations, ...obj2.objectCreations];
+    // obj1.arguments = [...obj1.arguments, ...obj2.arguments];
+
+    return obj;
+}
+
+
 exports.getFormattedLocation = getFormattedLocation;
 exports.getFunctionNamespace = getFunctionNamespace;

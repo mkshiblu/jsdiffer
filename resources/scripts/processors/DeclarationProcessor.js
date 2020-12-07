@@ -1,4 +1,5 @@
 const astProcessor = require("../processors/AstNodeProcessor");
+const astUtil = require('../parser/AstUtil');
 
 /** Process for a AST functionDeclarationNodePath */
 exports.processFunctionDeclaration = (functionDeclarationPath, processStatement) => {
@@ -36,44 +37,60 @@ exports.processVariableDeclaration = (path) => {
     const kind = node.kind;
     let initializer;
 
+    const statement = {
+        type: node.type,
+        text: path.toString(),
+        identifiers: [],
+        // functionInvocations: [],
+        // objectCreations: []
+        variableDeclarations: []
+    };
+
     // Extract initilaizer which is an expression
     const declarators = path.get("declarations");
 
     // TODO remove if no such things found
-    if (declarators.length > 1) {
-        throw "not supported yet multi-length initializers" + variableDeclarationPath;
-    }
+    declarators.forEach(declaratorPath => {
+        const variableDeclaration = processVariableDeclarator(declaratorPath, kind, statement);
+        statement.variableDeclarations.push(variableDeclaration);
+        statement.identifiers.push(variableDeclaration.variableName);
 
-    const declaratorPath = declarators[0];
-    const declaratorNode = declaratorPath.node;
+        // Add info from initializers
+        const initializer = variableDeclaration.initializer;
+        if (initializer) {
+            //statement.identifiers.push(...initializer.identifiers);
+            //statement.functionInvocations = initializer.functionInvocations;
+            //statement.objectCreations = initializer.objectCreations;
+            astUtil.mergeArrayProperties(statement, initializer);
+        }
+    });
+
+    return statement;
+}
+
+/**
+ * interface VariableDeclarator <: Node {
+  type: "VariableDeclarator";
+  id: Pattern;
+  init: Expression | null;
+}
+ * @param {declaratorPath} path 
+ */
+function processVariableDeclarator(path, kind, statement) {
+
+    const declaratorNode = path.node;
     const variableName = declaratorNode.id.name;
-    
-    const variableDeclaration = {
-        text: path.toString(),
-        variableName,
-        kind,
-    };
 
-    const statement = {
-        type: node.type,
+    const variableDeclaration = {
+        kind,
+        variableName,
         text: path.toString(),
-        identifiers: [variableName],
-        // functionInvocations: [],
-        // objectCreations: []
-        variableDeclarations: [variableDeclaration]
     };
 
     if (declaratorNode.init) {
-        initializer = astProcessor.processExpression(declaratorPath.get("init"), statement);
-    }
-
-    if (initializer) {
+        initializer = astProcessor.processExpression(path.get("init"), statement);
         variableDeclaration.initializer = initializer;
-        statement.variableDeclarations
-        statement.identifiers.push(...initializer.identifiers);
-        statement.functionInvocations = initializer.functionInvocations;
-        statement.objectCreations = initializer.objectCreations;
     }
 
-    return statement;
+    return variableDeclaration;
 }

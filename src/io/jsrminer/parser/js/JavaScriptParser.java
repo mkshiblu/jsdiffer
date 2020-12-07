@@ -26,15 +26,9 @@ public class JavaScriptParser implements IParser {
 
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
-                final V8Array fdsArray = processScript(content, jsEngine);
-                final FunctionDeclaration[] fds = convert(fdsArray, filepath);
 
-                // Create source model
-                final SourceFileModel source = new SourceFileModel(filepath);
-                source.setFunctionDeclarations(fds);
-
+                SourceFileModel source = parse(content, jsEngine, filepath);
                 sourceModels.put(filepath, source);
-                fdsArray.release();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -43,7 +37,27 @@ public class JavaScriptParser implements IParser {
         return umlModel;
     }
 
-    private FunctionDeclaration[] convert(final V8Array fdsArray, String file) {
+    public SourceFileModel parseSource(String content) {
+        String filepath = null;
+        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+            jsEngine.createParseFunction();
+            return parse(content, jsEngine, filepath);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected SourceFileModel parse(String fileContent, JavaScriptEngine jsEngine, String filepath) {
+        final V8Array fdsArray = processScript(fileContent, jsEngine);
+        final FunctionDeclaration[] fds = convert(jsEngine, fdsArray, filepath);
+        // Create source model
+        final SourceFileModel source = new SourceFileModel(filepath);
+        source.setFunctionDeclarations(fds);
+        fdsArray.release();
+        return source;
+    }
+
+    private FunctionDeclaration[] convert(JavaScriptEngine jsEngine, final V8Array fdsArray, String file) {
         final FunctionDeclaration[] fds = new FunctionDeclaration[fdsArray.length()];
 
         FunctionDeclaration fd;
@@ -51,6 +65,7 @@ public class JavaScriptParser implements IParser {
         String qualifiedName;
         String body;
         V8Array v8ParamsArray;
+        V8Object v8Body;
 
         for (int i = 0; i < fds.length; i++) {
             // Extract nodes
@@ -59,7 +74,8 @@ public class JavaScriptParser implements IParser {
 
             // Extract fds info
             qualifiedName = v8Fd.getString("qualifiedName");
-            body = v8Fd.getString("body");
+
+
             v8ParamsArray = v8Fd.getArray("params");
 
             // Create java object
@@ -69,10 +85,14 @@ public class JavaScriptParser implements IParser {
             location = JV8.parseLocation(v8Location);
             location.setFile(file);
             fd.setSourceLocation(location);
+
+            v8Body = v8Fd.getObject("body");
+            body = jsEngine.toJson(v8Body);
             fd.setBody(new FunctionBody(body));
 
             fds[i] = fd;
-             v8Fd.release();
+            v8Body.release();
+            v8Fd.release();
             v8Location.release();
             v8ParamsArray.release();
         }
