@@ -1,22 +1,17 @@
-package io.jsrminer.integration.refactorings;
+package io.jsrminer.refactorings;
 
-import io.jsrminer.TestBase;
 import io.jsrminer.JSRefactoringMiner;
-import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.refactorings.IRefactoring;
-import io.jsrminer.refactorings.RefactoringType;
+import io.jsrminer.TestBase;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.ObjectCreationReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Replace;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 

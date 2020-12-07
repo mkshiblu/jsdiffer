@@ -1,5 +1,6 @@
 package io.jsrminer.refactorings;
 
+import io.jsrminer.api.IRefactoring;
 import org.eclipse.jgit.annotations.NonNull;
 
 public class Refactoring implements IRefactoring {

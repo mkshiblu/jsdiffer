@@ -1,11 +1,10 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.refactorings.IRefactoring;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;

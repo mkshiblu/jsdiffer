@@ -1,11 +1,8 @@
-package io.jsrminer.integration.refactorings;
+package io.jsrminer.refactorings;
 
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.TestBase;
-import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.refactorings.IRefactoring;
-import io.jsrminer.refactorings.InlineOperationRefactoring;
-import io.jsrminer.refactorings.RefactoringType;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.ObjectCreationReplacement;

@@ -19,11 +19,14 @@ import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.TrackingRefUpdate;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
+
 import java.io.*;
 import java.lang.invoke.MethodHandles;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -92,7 +95,7 @@ public class GitUtil {
         return repository;
     }
 
-    public static Repository openRepository(String repositoryPath) throws Exception {
+    public static Repository openRepository(String repositoryPath) throws IOException {
         File folder = new File(repositoryPath);
         Repository repository;
         if (folder.exists()) {
@@ -234,6 +237,13 @@ public class GitUtil {
         return ref.getObjectId();
     }
 
+    public static RevCommit getCurrentCommit(Repository repository) throws IOException {
+        ObjectId id = repository.resolve(Constants.HEAD);
+        try (RevWalk walk = new RevWalk(repository)) {
+            return walk.parseCommit(id);
+        }
+    }
+
     public static Iterable<RevCommit> createRevsWalkBetweenCommits(Repository repository, String startCommitId, String endCommitId)
             throws Exception {
         ObjectId from = repository.resolve(startCommitId);
@@ -273,60 +283,61 @@ public class GitUtil {
             return "RegularCommitsFilter";
         }
     }
-//
-//
-//    /**
-//     * Finds the of two commits
-//     */
-//    public static void fileTreeDiff(final Repository repository, final RevCommit commitBefore
-//            , final RevCommit commitAfter
-//            , final List<String> filesBefore, final List<String> filesAfter, final String[] supportedExtensions) {
-//        try {
-//            final ObjectId oldHead = commitBefore.getTree();
-//            final ObjectId head = commitAfter.getTree();
-//
-//            final Set<String> allowedExtensionsSet = Arrays.stream(supportedExtensions)
-//                    .map(extension -> extension.toLowerCase())
-//                    .collect(Collectors.toSet());
-//
-//            // prepare the two iterators to compute the diff between
-//            ObjectReader reader = repository.newObjectReader();
-//            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
-//            oldTreeIter.reset(reader, oldHead);
-//            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-//            newTreeIter.reset(reader, head);
-//
-//            // finally get the list of changed files
-//            try (Git git = new Git(repository)) {
-//                List<DiffEntry> diffs = git.diff()
-//                        .setNewTree(newTreeIter)
-//                        .setOldTree(oldTreeIter)
-//                        .setShowNameAndStatusOnly(true)
-//                        .call();
-//                for (DiffEntry entry : diffs) {
-//                    DiffEntry.ChangeType changeType = entry.getChangeType();
-//                    if (changeType != DiffEntry.ChangeType.ADD) {
-//                        String oldPath = entry.getOldPath();
-//                        if (allowedExtensionsSet.contains(FileUtil.getExtension(oldPath).toLowerCase()))
-//                            filesBefore.add(Paths.get(oldPath).toString());
-//                    }
-//                    if (changeType != DiffEntry.ChangeType.DELETE) {
-//                        String newPath = entry.getNewPath();
-//                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
-//                            filesAfter.add(Paths.get(newPath).toString());
-//
-//                            if (changeType == DiffEntry.ChangeType.RENAME) {
-//                                String oldPath = entry.getOldPath();
-//                                renamedFilesHint.put(oldPath, newPath);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+
+
+    /**
+     * Finds the of two commits
+     */
+    public static void fileTreeDiff2(final Repository repository, final RevCommit commitBefore
+            , final RevCommit commitAfter
+            , final List<String> filesBefore, final List<String> filesAfter
+            , Map<String, String> renamedFilesHint, final String[] supportedExtensions) {
+        try {
+            final ObjectId oldHead = commitBefore.getTree();
+            final ObjectId head = commitAfter.getTree();
+
+            final Set<String> allowedExtensionsSet = Arrays.stream(supportedExtensions)
+                    .map(extension -> extension.toLowerCase())
+                    .collect(Collectors.toSet());
+
+            // prepare the two iterators to compute the diff between
+            ObjectReader reader = repository.newObjectReader();
+            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+            oldTreeIter.reset(reader, oldHead);
+            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+            newTreeIter.reset(reader, head);
+
+            // finally get the list of changed files
+            try (Git git = new Git(repository)) {
+                List<DiffEntry> diffs = git.diff()
+                        .setNewTree(newTreeIter)
+                        .setOldTree(oldTreeIter)
+                        .setShowNameAndStatusOnly(true)
+                        .call();
+                for (DiffEntry entry : diffs) {
+                    DiffEntry.ChangeType changeType = entry.getChangeType();
+                    if (changeType != DiffEntry.ChangeType.ADD) {
+                        String oldPath = entry.getOldPath();
+                        if (allowedExtensionsSet.contains(FileUtil.getExtension(oldPath).toLowerCase()))
+                            filesBefore.add(Paths.get(oldPath).toString());
+                    }
+                    if (changeType != DiffEntry.ChangeType.DELETE) {
+                        String newPath = entry.getNewPath();
+                        if (allowedExtensionsSet.contains(FileUtil.getExtension(newPath).toLowerCase())) {
+                            filesAfter.add(Paths.get(newPath).toString());
+
+                            if (changeType == DiffEntry.ChangeType.RENAME) {
+                                String oldPath = entry.getOldPath();
+                                renamedFilesHint.put(oldPath, newPath);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Finds the file differences between two commits. The parameters are

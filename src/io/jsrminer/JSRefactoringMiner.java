@@ -1,9 +1,10 @@
 package io.jsrminer;
 
+import io.jsrminer.api.IGitHistoryMiner;
+import io.jsrminer.api.IRefactoring;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
 import io.jsrminer.io.SourceFile;
-import io.jsrminer.refactorings.IRefactoring;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLModelFactory;
 import io.jsrminer.uml.diff.SourceDirDiff;
@@ -28,9 +29,23 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class JSRefactoringMiner {
+public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js", "ts"}));
+
+    @Override
+    public List<IRefactoring> detectAtCurrentCommit(String gitRepositoryPath) {
+        List<IRefactoring> refactorings = null;
+        try {
+            Repository repository = GitUtil.openRepository(gitRepositoryPath);
+            RevCommit commit = GitUtil.getCurrentCommit(repository);
+            Iterable<RevCommit> walk = List.of(commit);
+            refactorings = detect(repository, null, walk);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return refactorings;
+    }
 
     public List<IRefactoring> detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
@@ -65,14 +80,13 @@ public class JSRefactoringMiner {
         return fileContents;
     }
 
-
     public void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
         RefactoringHandler handler = null;
         Iterable<RevCommit> walk = GitUtil.createRevsWalkBetweenCommits(repository, startCommitId, endCommitId);
-        detect(repository, handler, walk.iterator());
+        detect(repository, handler, walk);
     }
 
-    private void detect(Repository repository, final RefactoringHandler handler, Iterator<RevCommit> i) {
+    private List<IRefactoring> detect(Repository repository, final RefactoringHandler handler, Iterable<RevCommit> commits) {
         int commitsCount = 0;
         int errorCommitsCount = 0;
         int refactoringsCount = 0;
@@ -82,11 +96,15 @@ public class JSRefactoringMiner {
         String projectName = projectFolder.getName();
 
         long time = System.currentTimeMillis();
+        final Iterator<RevCommit> i = commits.iterator();
+        List<IRefactoring> allRefactorings = new ArrayList<>();
+
         while (i.hasNext()) {
             RevCommit currentCommit = i.next();
             try {
                 List<IRefactoring> refactoringsAtRevision = detectRefactorings(repository, currentCommit, handler);
                 refactoringsCount += refactoringsAtRevision.size();
+                allRefactorings.addAll(refactoringsAtRevision);
 
             } catch (Exception e) {
                 log.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
@@ -104,10 +122,10 @@ public class JSRefactoringMiner {
 
         // handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
         log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
+        return allRefactorings;
     }
 
     protected List<IRefactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
-        RevCommit parentCommit = currentCommit.getParent(0);
         List<IRefactoring> refactoringsAtRevision = null;
         String commitId = currentCommit.getId().getName();
 
@@ -115,15 +133,16 @@ public class JSRefactoringMiner {
         List<String> filePathsCurrent = new ArrayList<String>();
         Map<String, String> renamedFilesHint = new HashMap<String, String>();
 
-        GitUtil.fileTreeDiff(repository, parentCommit, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint
-                , supportedExtensions.toArray(String[]::new));
-
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
         Map<String, String> fileContentsBefore = new LinkedHashMap<String, String>();
         Map<String, String> fileContentsCurrent = new LinkedHashMap<String, String>();
 
         try (RevWalk walk = new RevWalk(repository)) {
+            RevCommit parentCommit = walk.parseCommit(currentCommit.getParent(0).getId());
+            GitUtil.fileTreeDiff2(repository, parentCommit, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint
+                    , supportedExtensions.toArray(String[]::new));
+
             // If no java files changed, there is no refactoring. Also, if there are
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
@@ -150,7 +169,6 @@ public class JSRefactoringMiner {
         }
         return refactoringsAtRevision;
     }
-
 
     public List<IRefactoring> detectRefactorings(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
 

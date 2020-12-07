@@ -7,9 +7,9 @@ let content = `const PORTS = new function () {
     }
 };
 
-function createAddresses(count) {
+function createAddresses(count, d) {
     var addresses = new Array(count);
-
+    const v = d.raw();
     for (let i = 0; i < count; i++) {
         try {
             addresses[i] = new Address("127.0.0.1", PORTS.incrementAndGet());
