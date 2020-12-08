@@ -2,7 +2,6 @@ package io.jsrminer.parser.js;
 
 import com.eclipsesource.v8.NodeJS;
 import com.eclipsesource.v8.V8Object;
-import io.jsrminer.io.FileUtil;
 
 import java.io.File;
 
@@ -10,7 +9,7 @@ import java.io.File;
  * Represents the JS engine or environment where JS scripts could be executed
  */
 class JavaScriptEngine implements AutoCloseable {
-    public static final String SCRIPTS_DIRECTORY_NAME = "scripts";
+    public static final String SCRIPTS_DIRECTORY_NAME = "src-js/scripts";
     private NodeJS nodeJs;
     private V8Object parser;
 
@@ -21,7 +20,7 @@ class JavaScriptEngine implements AutoCloseable {
     }
 
     public void createParseFunction() {
-        parser = this.nodeJs.require(new File(FileUtil.getResourcePath(SCRIPTS_DIRECTORY_NAME),
+        parser = this.nodeJs.require(new File(SCRIPTS_DIRECTORY_NAME,
                 "Parser.js"));
         this.nodeJs.getRuntime().add("parser", parser);
         this.nodeJs.getRuntime().executeVoidScript("function parse(script) { return parser.parse(script); }");

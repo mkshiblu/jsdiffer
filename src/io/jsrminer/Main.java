@@ -8,15 +8,15 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 
 public class Main {
-    //private static final Logger log = LogManager.getLogger(MethodHandles.lookup().lookupClass());
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     public static void main(String[] args) {
-        log.debug("Program Starts");
+        log.info("Program Starts");
         try {
             //commitExample();
             //directoryExample();
-            new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
+            jqueryExample();
+            //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -34,6 +34,10 @@ public class Main {
     }
 
     static void directoryExample() {
+        new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
+    }
+
+    static void jqueryExample(){
         new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
     }
 }
