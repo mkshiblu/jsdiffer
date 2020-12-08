@@ -1,5 +1,4 @@
-const parser = require('./Parser');
-
+const parser = require('./scripts/Parser');
 let content = `const PORTS = new function () {
     let counter = 0;
     this.incrementAndGet = function () {
@@ -30,7 +29,7 @@ function Address(host, port) {
 }
 `;
 //content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
-//content = require('fs').readFileSync('E:\\PROJECTS_REPO\\jquery\\external\\qunit\\qunit.js', 'utf-8');
+content = require('fs').readFileSync('../resources/real-projects/jquery/jquery_qunit.js', 'utf-8');
 const sourceModel = parser.parse(content);
 const json = JSON.stringify(sourceModel);
 console.log(json);

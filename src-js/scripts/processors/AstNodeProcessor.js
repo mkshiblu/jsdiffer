@@ -19,7 +19,7 @@ function processStatement(path, parent) {
         // Add children
         addStatement(parent, statement);
     } catch (ex) {
-        console.error(ex);
+        console.error(ex, path.node.loc.start.toString());
     }
 }
 
@@ -57,7 +57,6 @@ function processExpression(path, statement) {
 }
 
 const processNodePath = (function () {
-    const visitor = require('../parser/Visitor');
     var nodePathProcesses = new Map([
         ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
         ['VariableDeclaration', declarationProcessor.processVariableDeclaration],

@@ -90,7 +90,7 @@ function processCallExpression(path, expressionResult, statement) {
         // TODO chain call
         processCallExpression(path.get('callee'), expressionResult, statement);
     }else{
-        throw "Unsupported callee: " + node.loc;
+        throw "Unsupported callee: " + node.loc.toString();
     }
 
     const result = {

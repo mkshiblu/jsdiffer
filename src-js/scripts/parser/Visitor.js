@@ -31,8 +31,14 @@ function Visitor() {
             saveFunctionDeclaration(fe, qualifiedName);
         } else {
 
-            // This is an unmamed function expression. TODO handle
+            // This is an unmamed function expression. TODO handle name
+            const processedBody = processor.processFunctionBody(path.get('body'));
+            const namespace = concatScopes(path);
+            const qualifiedName = namespace == null ? null : namespace + '.' ;
+            saveFunctionDeclaration(fe, qualifiedName, processedBody);
+            path.skip();
         }
+        path.skip();
     };
 
     // Could be a declaration or declaration expression
@@ -53,8 +59,6 @@ function Visitor() {
             });
         }
     }
-
-    
 }
 
 function saveFunctionDeclaration(node, qualifiedName, functionBody) {

@@ -17,7 +17,7 @@ public class JavaScriptParserTest extends TestBase {
     @BeforeAll
     public static void setup() throws IOException {
         JavaScriptParser parser = new JavaScriptParser();
-        String sourceContent = Files.readString(Path.of(getRootResourceDirectory() + "real-sources", "jquery_qunit.js"));
+        String sourceContent = Files.readString(Path.of(getRootResourceDirectory() + "real-projects", "jquery_qunit.js"));
         model = parser.parseSource(sourceContent);
     }
 

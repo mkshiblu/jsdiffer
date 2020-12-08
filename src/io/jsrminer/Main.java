@@ -38,6 +38,7 @@ public class Main {
     }
 
     static void jqueryExample(){
-        new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
+        String root = "resources\\real-projects\\jquery";
+        new JSRefactoringMiner().detectBetweenDirectories(root, root);
     }
 }
