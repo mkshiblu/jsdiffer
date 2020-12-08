@@ -90,7 +90,7 @@ function processCallExpression(path, expressionResult, statement) {
         // TODO chain call
         processCallExpression(path.get('callee'), expressionResult, statement);
     }else{
-        throw "Unsupported callee: " + node.loc.toString();
+        throw "Unsupported callee: " + path.toString();
     }
 
     const result = {
@@ -123,10 +123,12 @@ function processCallExpression(path, expressionResult, statement) {
 function processNewExpression(path, expressionResult, statement) {
 
     const node = path.node;
+    const callee = node.callee;
+
     let name;
     let expressionText;
-
-    if (t.isIdentifier(node.callee)) {
+    
+    if (t.isIdentifier(callee)) {
         name = node.callee.name;
     } else if (t.isMemberExpression(callee)) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)

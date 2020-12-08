@@ -32,11 +32,10 @@ function Visitor() {
         } else {
 
             // This is an unmamed function expression. TODO handle name
-            const processedBody = processor.processFunctionBody(path.get('body'));
-            const namespace = concatScopes(path);
-            const qualifiedName = namespace == null ? null : namespace + '.' ;
-            saveFunctionDeclaration(fe, qualifiedName, processedBody);
-            path.skip();
+            // const processedBody = processor.processFunctionBody(path.get('body'));
+            // const namespace = concatScopes(path);
+            // const qualifiedName = namespace == null ? null : namespace + '.' ;
+            // saveFunctionDeclaration(fe, qualifiedName, processedBody);
         }
         path.skip();
     };
