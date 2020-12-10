@@ -45,6 +45,6 @@ public class Main {
 
     static void vueExample() {
         String root = "resources\\real-projects\\vue";
-        new JSRefactoringMiner().detectBetweenDirectories(root + "\\src1", root + "src2");
+        new JSRefactoringMiner().detectBetweenDirectories(root + "\\src1", root + "\\src2");
     }
 }

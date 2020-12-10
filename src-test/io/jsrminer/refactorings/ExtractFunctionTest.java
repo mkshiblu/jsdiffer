@@ -37,11 +37,11 @@ public class ExtractFunctionTest extends TestBase {
         assertEquals(extractOperationRefactoring.getSourceOperationBeforeExtraction().name, "createAddresses");
     }
 
-    @Test
-    void testRefactoringsCount() {
-        assertNotNull(refactorings);
-        assertTrue(refactorings.size() == 1);
-    }
+//    @Test
+//    void testRefactoringsCount() {
+//        assertNotNull(refactorings);
+//        assertTrue(refactorings.size() == 1);
+//    }
 
     @Test
     void testRefactoringType() {

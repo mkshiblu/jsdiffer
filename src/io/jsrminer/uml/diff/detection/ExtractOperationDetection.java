@@ -41,7 +41,10 @@ public class ExtractOperationDetection {
                 !mapper.getReplacementsInvolvingMethodInvocation().isEmpty()) {
 
             List<OperationInvocation> addedOperationInvocations = matchingInvocations(addedOperation, operationInvocations);
-            processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+
+            if (addedOperationInvocations.size() > 0)
+                processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+
 //            if (addedOperationInvocations.size() > 0) {
 //                int otherAddedMethodsCalled = 0;
 //                for (FunctionDeclaration addedOperation2 : this.addedOperations) {

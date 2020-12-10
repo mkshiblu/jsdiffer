@@ -17,8 +17,9 @@ public enum CodeElementType {
     TRY_STATEMENT("TryStatement"),
     CATCH_CLAUSE("CatchClause"),
     ARRAY_EXPRESSION("ArrayExpression"),
-    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"), // TODO revisit
-    FOR_STATEMENT("ForStatement");
+    ENHANCED_FOR_STATEMENT("ForInStatement"), // TODO revisit
+    FOR_STATEMENT("ForStatement"),
+    WHILE_STATEMENT("WhileStatement");
 
     public final String titleCase;
 

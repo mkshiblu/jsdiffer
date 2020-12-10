@@ -3,7 +3,7 @@ const traverse = require('@babel/traverse');
 const visitor = require('./parser/Visitor');
 
 function parse(script) {
-    console.time('parse');
+  //  console.time('parse');
     const ast = babelParser.parse(script,
         {
             sourceType: 'unambiguous',
@@ -12,7 +12,7 @@ function parse(script) {
             plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
         });
 
-    console.timeEnd('parse');
+//    console.timeEnd('parse');
     
     traverse.default(ast, visitor.Visitor);
     const functionDeclarations = visitor.getFunctionDeclarations();

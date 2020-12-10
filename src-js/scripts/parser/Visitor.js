@@ -28,7 +28,8 @@ function Visitor() {
             const name = fe.id.name;
             const namespace = concatScopes(path);
             const qualifiedName = namespace == null ? name : namespace + '.' + name;
-            saveFunctionDeclaration(fe, qualifiedName);
+            const processedBody = processor.processFunctionBody(path.get('body'));
+            //saveFunctionDeclaration(fe, qualifiedName, processedBody);
         } else {
 
             // This is an unmamed function expression. TODO handle name
