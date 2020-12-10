@@ -29,9 +29,10 @@ function Address(host, port) {
 }
 `;
 //content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
-content = require('fs').readFileSync('../resources/real-projects/vue/vue_common_ef432c6.js', 'utf-8');
+content = require('fs').readFileSync('../resources/real-projects/vue/src1/vue_common.js', 'utf-8');
 const sourceModel = parser.parse(content);
 const json = JSON.stringify(sourceModel);
+require('fs').writeFileSync("E:\\functions.json", json);
 console.log(json);
 
 
