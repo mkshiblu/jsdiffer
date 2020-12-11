@@ -181,7 +181,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
 
         /*, renamedFilesHint*/
-        List<IRefactoring> refactorings = umlModelBefore.diff(umlModelCurrent).getRefactorings();
+        List<IRefactoring> refactorings = diff.getRefactorings();
         return refactorings;
     }
 

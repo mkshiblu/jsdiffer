@@ -16,7 +16,7 @@ function parse(script) {
     
     traverse.default(ast, visitor.Visitor);
     const functionDeclarations = visitor.getFunctionDeclarations();
-
+    visitor.clearFunctionDeclarations();
     // return JSON.stringify(functionDeclarations);
     return functionDeclarations;
 };
