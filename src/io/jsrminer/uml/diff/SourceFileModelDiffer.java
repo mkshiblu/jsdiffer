@@ -84,7 +84,14 @@ public class SourceFileModelDiffer {
         if (removedOperations.size() <= addedOperations.size()) {
             for (Iterator<FunctionDeclaration> removedOperationIterator = removedOperations.iterator(); removedOperationIterator.hasNext(); ) {
                 FunctionDeclaration removedOperation = removedOperationIterator.next();
-                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>();
+                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>((Comparator<FunctionBodyMapper>) (o1, o2) -> {
+                    int thisOperationNameEditDistance = o1.operationNameEditDistance();
+                    int otherOperationNameEditDistance = o2.operationNameEditDistance();
+                    if(thisOperationNameEditDistance != otherOperationNameEditDistance)
+                        return Integer.compare(thisOperationNameEditDistance, otherOperationNameEditDistance);
+                    else
+                        return o1.compareTo(o2);
+                });
 
                 for (Iterator<FunctionDeclaration> addedOperationIterator = addedOperations.iterator(); addedOperationIterator.hasNext(); ) {
                     FunctionDeclaration addedOperation = addedOperationIterator.next();

@@ -89,7 +89,7 @@ public class UMLOperationDiff extends Diff {
                 indexPositionMap.put(addedParameter.getIndexPositionInParent(), addedParameter);
             }
 
-            final Set<String> removedParameterNames = removedParameters.keySet();
+            final List<String> removedParameterNames = new ArrayList<>(removedParameters.keySet());
             UMLParameter addedParameter, removedParameter;
 
             for (String removedParameterName : removedParameterNames) {

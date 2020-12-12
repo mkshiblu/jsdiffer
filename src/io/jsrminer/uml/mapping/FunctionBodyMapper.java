@@ -3,12 +3,13 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.*;
 
 import java.util.*;
 
-public class FunctionBodyMapper {
+public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
@@ -614,7 +615,7 @@ public class FunctionBodyMapper {
                 unmatchedStatments1, unmatchedStatements2);
     }
 
-    // TODO: Similar to processInput without checking for abstractexpression
+    // TODO: Similar to processInput
     private String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
         String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
@@ -796,6 +797,7 @@ public class FunctionBodyMapper {
 
     /**
      * Returns the non mapped count
+     *
      * @return
      */
     public int nonMappedElementsT1() {
@@ -954,6 +956,77 @@ public class FunctionBodyMapper {
             }
         }
         return replacements;
+    }
+
+    public int operationNameEditDistance() {
+        return StringDistance.editDistance(this.function1.name, this.function2.name);
+    }
+
+    @Override
+
+    public int compareTo(FunctionBodyMapper operationBodyMapper) {
+        int thisCallChainIntersectionSum = 0;
+        for (CodeFragmentMapping mapping : this.mappings) {
+            if (mapping instanceof LeafCodeFragmentMapping) {
+                //      thisCallChainIntersectionSum += ((LeafCodeFragmentMapping)mapping).callChainIntersection().size();
+            }
+        }
+        int otherCallChainIntersectionSum = 0;
+        for (CodeFragmentMapping mapping : operationBodyMapper.mappings) {
+            if (mapping instanceof LeafCodeFragmentMapping) {
+                //    otherCallChainIntersectionSum += ((LeafCodeFragmentMapping)mapping).callChainIntersection().size();
+            }
+        }
+        if (thisCallChainIntersectionSum != otherCallChainIntersectionSum) {
+            return -Integer.compare(thisCallChainIntersectionSum, otherCallChainIntersectionSum);
+        }
+        int thisMappings = this.mappingsWithoutBlocks();
+//        for(CodeFragmentMapping mapping : this.getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//                thisMappings++;
+//            }
+//        }
+        int otherMappings = operationBodyMapper.mappingsWithoutBlocks();
+//        for(CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//                otherMappings++;
+//            }
+//        }
+        if (thisMappings != otherMappings) {
+            return -Integer.compare(thisMappings, otherMappings);
+        } else {
+            int thisExactMatches = this.getExactMatches().size();
+            int otherExactMatches = operationBodyMapper.getExactMatches().size();
+            if (thisExactMatches != otherExactMatches) {
+                return -Integer.compare(thisExactMatches, otherExactMatches);
+            } else {
+                int thisEditDistance = this.editDistance();
+                int otherEditDistance = operationBodyMapper.editDistance();
+                if (thisEditDistance != otherEditDistance) {
+                    return Integer.compare(thisEditDistance, otherEditDistance);
+                } else {
+                    int thisOperationNameEditDistance = this.operationNameEditDistance();
+                    int otherOperationNameEditDistance = operationBodyMapper.operationNameEditDistance();
+                    return Integer.compare(thisOperationNameEditDistance, otherOperationNameEditDistance);
+                }
+            }
+        }
+    }
+
+    private int editDistance() {
+        int count = 0;
+        for (CodeFragmentMapping mapping : getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//            }
+//                continue;
+            String s1 = createArgumentizedString(mapping.fragment1, mapping.fragment2);
+            String s2 = createArgumentizedString(mapping.fragment2, mapping.fragment1);
+
+            if (!s1.equals(s2)) {
+                count += StringDistance.editDistance(s1, s2);
+            }
+        }
+        return count;
     }
 
     public FunctionBodyMapper getParentMapper() {
