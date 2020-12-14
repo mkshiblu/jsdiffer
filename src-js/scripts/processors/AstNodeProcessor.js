@@ -6,6 +6,7 @@ const expressionProcessor = require('./ExpressionProcessor');
 const loopsProcessor = require('./Loops');
 const exceptions = require('./Exceptions');
 const astUtil = require('../parser/AstUtil');
+const types = require('@babel/types');
 
 /**
  * Could be called by each node recursively if they have child to be processed
@@ -14,16 +15,24 @@ function processStatement(path, parent) {
     try {
         const statement = processNodePath(path, processStatement);
         statement.loc = astUtil.getFormattedLocation(path.node);
-
         // Add children
-        // Add children
-        addStatement(parent, statement);
+        addStatement(parent, statement, path);
     } catch (ex) {
         console.error(ex, path.node.loc.start.toString());
     }
 }
 
-function addStatement(parent, childStatement) {
+function addStatement(parent, childStatement, childPath) {
+
+    if (types.isFunctionDeclaration(childPath.node)) {
+        if (!parent.functionDeclarations) {
+            parent.functionDeclarations = [];
+        }
+
+        parent.functionDeclarations.push(childStatement);
+        return;
+    }
+
     if (!parent.statements) {
         parent.statements = [];
     }
@@ -73,7 +82,7 @@ const processNodePath = (function () {
 
         ['EmptyStatement', statementProcessor.processEmptyStatement],
         ['ExpressionStatement', statementProcessor.processExpressionStatement],
-        
+
         ['ForStatement', loopsProcessor.processForStatement],
         ['ForInStatement', loopsProcessor.processForInStatement],
         ['WhileStatement', loopsProcessor.processWhileStatement],

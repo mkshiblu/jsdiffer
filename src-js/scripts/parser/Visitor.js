@@ -2,10 +2,26 @@ const babelParser = require('@babel/parser');
 const t = require('@babel/types');
 const processor = require('./FunctionBodyProcessor');
 const astUtil = require('./AstUtil');
+const nodeProcessors = require('../processors/AstNodeProcessor');
+
+const containerVisitor = {
+    Statement(path, parent) {
+        nodeProcessors.processStatement(path, parent);
+        path.skip();
+    },
+    Expression(path, parent) {
+        path.skip();
+    },
+    FunctionDeclaration(path, parent) {
+        nodeProcessors.processStatement(path, parent);
+        path.skip();
+    },
+    FunctionExpression(path, parent) {
+        path.skip();
+    }
+};
 
 const functionDeclarations = [];
-
-
 function Visitor() {
     this.FunctionDeclaration = (path) => {
         const fd = path.node;
@@ -106,5 +122,6 @@ function concatScopes(path) {
 }
 
 exports.Visitor = new Visitor();
+exports.containerVisitor = containerVisitor;
 exports.getFunctionDeclarations = () => functionDeclarations.filter(fd => fd/*!fd.qualifiedName.includes("$|$")*/);
 exports.clearFunctionDeclarations = () => functionDeclarations.length = 0;
