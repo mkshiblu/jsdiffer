@@ -25,7 +25,7 @@ exports.getBaseContainerTemplate = (path) => {
 
 exports.getBaseExpressionInfo = (path) => {
     return {
-        text: path.toString(),
+        text: path ? path.toString() : undefined,
         identifiers: [],
         numericLiterals: [],
         stringLiterals: [],
