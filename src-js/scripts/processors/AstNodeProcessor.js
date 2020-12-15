@@ -7,6 +7,7 @@ const loopsProcessor = require('./Loops');
 const exceptions = require('./Exceptions');
 const astUtil = require('../parser/AstUtil');
 const types = require('@babel/types');
+const templates = require('../parser/Templates');
 
 /**
  * Could be called by each node recursively if they have child to be processed
@@ -39,28 +40,8 @@ function addStatement(parent, childStatement, childPath) {
     parent.statements.push(childStatement);
 }
 
-function createBaseExpressionInfo(path) {
-    return {
-        text: path.toString(),
-        identifiers: [],
-        numericLiterals: [],
-        stringLiterals: [],
-        nullLiterals: [],
-        booleanLiterals: [],
-        infixOperators: [],
-        prefixOperators: [],
-        postfixOperators: [],
-        variableDeclarations: [],
-        functionInvocations: [],
-        constructorInvocations: [],
-        objectCreations: [],
-        arguments: [],
-        loc: {}
-    };
-}
-
 function processExpression(path, statement) {
-    const expressionInfo = createBaseExpressionInfo(path);
+    const expressionInfo = templates.getBaseExpressionInfo(path);
     const expression = expressionProcessor.processExpression(path, expressionInfo, statement);
     return expression;
 }
@@ -107,4 +88,4 @@ const processNodePath = (function () {
 exports.processStatement = processStatement;
 exports.processNodePath = processNodePath;
 exports.processExpression = processExpression;
-exports.createBaseExpressionInfo = createBaseExpressionInfo;
+exports.createBaseExpressionInfo = templates.getBaseExpressionInfo;

@@ -1,4 +1,5 @@
 const expressions = require('./ExpressionProcessor');
+const templates = require('../parser/Templates');
 
 const propertyProcesses = new Map([["ObjectProperty", parseObjectProperty]
     , ["ObjectMethod", parseObjectMethod]
@@ -22,10 +23,17 @@ function processObjectExpression(path, expressionResult, statement) {
         }
     } else {
         // extract properties
+        const objectExpression = templates.getBaseExpressionInfo(path);
+        if (!statement.objectExpressions) {
+            statement.objectExpressions = [];
+        }
         path.get('properties').forEach(propPath => {
             const func = propertyProcesses.get(propPath.node.type);
-            func(propPath, expressionResult, statement);
+            func(propPath, objectExpression, objectExpression);
         });
+
+        Object.assign(statement, objectExpression);
+        statement.objectExpressions.push(objectExpression);
     }
 }
 

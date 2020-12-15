@@ -15,12 +15,12 @@ function parse(script) {
     // Pass in the program model
     const container = templates.getBaseContainerTemplate();
     traverse.default(ast, visitor.containerVisitor, undefined, container, undefined);
-    traverse.default(ast, visitor.Visitor);
-    const functionDeclarations = visitor.getFunctionDeclarations();
-    visitor.clearFunctionDeclarations();
+    // traverse.default(ast, visitor.Visitor);
+    //const functionDeclarations = visitor.getFunctionDeclarations();
+    //visitor.clearFunctionDeclarations();
     //    console.timeEnd('parse');
     // return JSON.stringify(functionDeclarations);
-    return functionDeclarations;
+    return container;
 };
 
 module.exports.parse = parse;

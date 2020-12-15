@@ -16,9 +16,31 @@ exports.getBaseContainerTemplate = (path) => {
     return {
         type: path ? path.node.type : 'File',
         functionDeclarations: [],
-        variableDeclarations: [],
+        //variableDeclarations: [],
         classDeclarations: [],
-        leafStatements: [],
-        compositeStatements: [],
+        //leafStatements: [],
+        statements: [],
+    };
+};
+
+exports.getBaseExpressionInfo = (path) => {
+    return {
+        text: path.toString(),
+        identifiers: [],
+        numericLiterals: [],
+        stringLiterals: [],
+        nullLiterals: [],
+        booleanLiterals: [],
+        infixOperators: [],
+        prefixOperators: [],
+        postfixOperators: [],
+        variableDeclarations: [],
+        functionInvocations: [],
+        constructorInvocations: [],
+        objectCreations: [],
+        functionExpressions: [],
+        functionDeclarations: [],
+        arguments: [],
+        loc: {}
     };
 };
