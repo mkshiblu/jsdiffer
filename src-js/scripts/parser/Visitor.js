@@ -9,18 +9,16 @@ const containerVisitor = {
         nodeProcessors.processStatement(path, parent);
         path.skip();
     },
+    Expression(path, parent) {
+        path.skip();
+    },
     FunctionDeclaration(path, parent) {
         nodeProcessors.processStatement(path, parent);
         path.skip();
     },
     FunctionExpression(path, parent) {
-        nodeProcessors.processStatement(path, parent);
         path.skip();
-    },
-    ClassDeclaration(path, parent) {
-        nodeProcessors.processStatement(path, parent);
-        path.skip();
-    },
+    }
 };
 
 const functionDeclarations = [];

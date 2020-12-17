@@ -322,4 +322,9 @@ public class BlockStatement extends Statement {
         }
         return count;
     }
+
+    @Override
+    public String toString(){
+        return this.getText();
+    }
 }

@@ -19,7 +19,6 @@ exports.processIfStatement = (path, processStatement, processExpression) => {
 
     const expression = processExpression(path.get('test'));
     statement.expressions.push(expression);
-    // TODO handle else if else
 
     // For composite we store the expression that appears inside the bracket and its name
     //statement.text = compositeHelper.getTextWithExpressions(statement);
@@ -30,6 +29,11 @@ exports.processIfStatement = (path, processStatement, processExpression) => {
     if (bodyPath)
         processStatement(bodyPath, statement);
 
+    // Handle Else If
+    if (path.node.alternate != null) {
+        const alternatePath = path.get('alternate');
+        processStatement(alternatePath, statement);
+    }
     return statement;
 };
 

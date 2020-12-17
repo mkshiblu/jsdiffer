@@ -386,15 +386,15 @@ function processFunctionExpression(path, expressionResult, statement) {
     // Body is a block statmeent
     const name = node.name;
 
-    const functionExpression = {
+    const functionDeclarationStatement = {
         type: node.type,
         //qualifiedName,
         name,
         params: node.params.map(id => id.name)
     };
-    processor.processStatement(path.get('body'), functionExpression);
+    processor.processStatement(path.get('body'), functionDeclarationStatement);
 
-    expressionResult.functionExpressions.push(functionExpression);
+    expressionResult.functionDeclarations = [functionDeclarationStatement];
 }
 
 exports.processExpression = processExpression;

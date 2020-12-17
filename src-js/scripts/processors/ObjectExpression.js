@@ -1,5 +1,4 @@
 const expressions = require('./ExpressionProcessor');
-const templates = require('../parser/Templates');
 
 const propertyProcesses = new Map([["ObjectProperty", parseObjectProperty]
     , ["ObjectMethod", parseObjectMethod]
@@ -22,23 +21,11 @@ function processObjectExpression(path, expressionResult, statement) {
             expressionResult.objectLiterals = [path.toString()];
         }
     } else {
-
-        const objectExpression = {
-            properties: [],
-        };
-
         // extract properties
-        if (!statement.objectExpressions) {
-            statement.objectExpressions = [];
-        }
-
         path.get('properties').forEach(propPath => {
             const func = propertyProcesses.get(propPath.node.type);
-            const prop = func(propPath);
-            objectExpression.properties.push(prop);
+            func(propPath, expressionResult, statement);
         });
-
-        statement.objectExpressions.push(objectExpression);
     }
 }
 
@@ -49,22 +36,17 @@ function processObjectExpression(path, expressionResult, statement) {
 // }
 
 // Has a key property?
-function parseObjectProperty(path/*, expressionResult, statement*/) {
+function parseObjectProperty(path, expressionResult, statement) {
 
     const node = path.node;
 
     if (node.shorthand) {
         console.log("Shorthand not implemented yet" + path.node.loc);
     }
-    const expressionResult = templates.getBaseExpressionInfo();
-    
-    //const key = expressions.processExpression(path.get('key'), (path.get('key')), expressionResult);
-    const value = expressions.processExpression(path.get('value'), expressionResult, expressionResult);
 
-    return {
-        key: path.get('key').toString(),
-        value,
-    }
+    expressions.processExpression(path.get('key'), expressionResult, statement);
+    expressions.processExpression(path.get('value'), expressionResult, statement);
+
 }
 
 // interface ObjectMethod<: ObjectMember, Function {
