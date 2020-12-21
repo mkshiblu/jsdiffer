@@ -14,6 +14,10 @@ public interface IParser {
     UMLModel parse(Map<String, String> fileContents);
 
     /**
+     * Parses the file contents paraelly to reduce execution time
+     */
+    UMLModel parseParallelly(Map<String, String> fileContents);
+    /**
      * Parse a json string containing the source code in composite
      * structure and construct an UML model from it
      */

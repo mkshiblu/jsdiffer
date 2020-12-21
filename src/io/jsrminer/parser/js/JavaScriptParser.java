@@ -10,11 +10,13 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLParameter;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
+    public static final String SCRIPTS_DIRECTORY_NAME = "src-js/scripts";
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
@@ -35,6 +37,21 @@ public class JavaScriptParser implements IParser {
         }
         umlModel.setSourceFileModels(sourceModels);
         return umlModel;
+    }
+
+    // TODO 
+    @Override
+    public UMLModel parseParallelly(Map<String, String> fileContents) {
+        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+            jsEngine.createParseFunction();
+            //String jsonString = new Gson().toJson(data, Map.class);
+            Object obj = jsEngine.executeFunction("parse", fileContents);
+
+            System.out.println(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     public SourceFileModel parseSource(String content) {
