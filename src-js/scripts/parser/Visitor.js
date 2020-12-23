@@ -5,11 +5,13 @@ const astUtil = require('./AstUtil');
 const nodeProcessors = require('../processors/AstNodeProcessor');
 
 const containerVisitor = {
+    
     Statement(path, parent) {
         nodeProcessors.processStatement(path, parent);
         path.skip();
     },
     Expression(path, parent) {
+        throw 'Expression not handled yet';
         path.skip();
     },
     FunctionDeclaration(path, parent) {
@@ -17,6 +19,7 @@ const containerVisitor = {
         path.skip();
     },
     FunctionExpression(path, parent) {
+        throw 'Function Expression not handled yet';
         path.skip();
     }
 };

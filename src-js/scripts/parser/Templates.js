@@ -18,7 +18,19 @@ exports.getBaseContainerTemplate = (path) => {
         functionDeclarations: [],
         variableDeclarations: [],
         classDeclarations: [],
-        leafStatements: [],
         compositeStatements: [],
+    };
+};
+
+/**
+ * Returns the format of a Block of Code. The type is set as
+ * a Block Statement
+ */
+exports.getBaseCompositeTemplate = () => {
+    return {
+        type: 'BlockStatement',
+        functionDeclarations: [],
+        classDeclarations: [],
+        statements: [],
     };
 };

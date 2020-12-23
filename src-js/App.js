@@ -1,6 +1,6 @@
 const parser = require('./scripts/Parser');
 let content = `
-Test.count = 0;
+Test.count = -2;
 Test.prototype = {
 
     after: function() {
@@ -31,7 +31,7 @@ Test.prototype = {
     },
 };
 `;
-//content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
+content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
 //content = require('fs').readFileSync('../resources/real-projects/vue/src1/vue_common.js', 'utf-8');
 //content = require('fs').readFileSync('../test-resources/ExtractOrInlineFunction/src1/vue_runtime_common.js', 'utf-8');
 const sourceModel = parser.parse(content);

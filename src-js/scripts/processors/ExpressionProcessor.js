@@ -84,12 +84,21 @@ function processCallExpression(path, expressionResult, statement) {
         processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
-    } else if(t.isCallExpression(callee)) {
+    } else if (t.isCallExpression(callee)) {
         //name =  callee.callee
         //console.log("Unsupported callee: " + node.loc);
         // TODO chain call
         processCallExpression(path.get('callee'), expressionResult, statement);
-    }else{
+    } else if (t.isFunctionExpression(callee)) {
+
+        // For handling this types of code blocks
+        // (function (global, factory) {
+        //     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+        //         typeof define === 'function' && define.amd ? define(factory) :
+        //             (global.Vue = factory());
+        // }(this, (function () { 
+        processExpression(path.get('callee'), expressionResult, statement);
+    } else {
         throw "Unsupported callee: " + path.toString();
     }
 
@@ -127,7 +136,7 @@ function processNewExpression(path, expressionResult, statement) {
 
     let name;
     let expressionText;
-    
+
     if (t.isIdentifier(callee)) {
         name = node.callee.name;
     } else if (t.isMemberExpression(callee)) {
@@ -248,10 +257,10 @@ function processUnaryExpression(path, expressionResult, statement) {
     const operator = node.operator;
 
     if (isPrefix) {
-        expressionResult.prefixOperators.push(operator);
+        expressionResult.prefixExpressions.push(path.toString());
     }
     else {
-        expressionResult.postfixOperators.push(operator);
+        expressionResult.postfixExpressions.push(path.toString());
     }
     processExpression(path.get('argument'), expressionResult, statement);
 }
@@ -364,9 +373,9 @@ function processUpdateExpression(path, expressionResult, statement) {
 
     // Extract operator (++/ --)
     if (node.prefix) {
-        expressionResult.prefixOperators.push(node.operator);
+        expressionResult.prefixExpressions.push(node.operator);
     } else {
-        expressionResult.postfixOperators.push(node.operator);
+        expressionResult.postfixExpressions.push(node.operator);
     }
     processExpression(path.get('argument'), expressionResult, statement);
 }

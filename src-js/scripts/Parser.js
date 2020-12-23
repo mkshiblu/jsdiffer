@@ -13,14 +13,9 @@ function parse(script) {
             plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
         });
     // Pass in the program model
-    const container = templates.getBaseContainerTemplate();
-    traverse.default(ast, visitor.containerVisitor, undefined, container, undefined);
-    traverse.default(ast, visitor.Visitor);
-    const functionDeclarations = visitor.getFunctionDeclarations();
-    visitor.clearFunctionDeclarations();
-    //    console.timeEnd('parse');
-    // return JSON.stringify(functionDeclarations);
-    return functionDeclarations;
+    const blockCodeFragment = templates.getBaseCompositeTemplate();
+    traverse.default(ast, visitor.containerVisitor, undefined, blockCodeFragment, undefined);
+    return blockCodeFragment;
 };
 
 module.exports.parse = parse;

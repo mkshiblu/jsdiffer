@@ -74,17 +74,6 @@ exports.mergeArrayProperties = (obj, ...objectsToBeMerged) => {
         }
     });
 
-    // obj1.identifiers = [...obj1.identifiers, ...obj2.identifiers];
-    // obj1.numericLiterals = [...obj1.numericLiterals, ...obj2.numericLiterals];
-    // obj1.stringLiterals = [...obj1.stringLiterals, ...obj2.stringLiterals];
-    // obj1.nullLiterals = [...obj1.nullLiterals, ...obj2.nullLiterals];
-    // obj1.infixOperators = [...obj1.infixOperators, ...obj2.infixOperators];
-    // obj1.prefixOperators = [...obj1.prefixOperators, ...obj2.prefixOperators];
-    // obj1.functionInvocations = [...obj1.functionInvocations, ...obj2.functionInvocations];
-    // obj1.constructorInvocations = [...obj1.constructorInvocations, ...obj2.constructorInvocations];
-    // obj1.objectCreations = [...obj1.objectCreations, ...obj2.objectCreations];
-    // obj1.arguments = [...obj1.arguments, ...obj2.arguments];
-
     return obj;
 }
 
