@@ -36,6 +36,7 @@ const processes = new Map([
  * @param {*} node 
  */
 function processExpression(path, expressionResult, statement) {
+   t.removeComments(path.node);
     const process = processes.get(path.node.type);
     if (process) {
         expressionResult.loc = astUtil.getFormattedLocation(path.node);

@@ -1,4 +1,7 @@
 package io.jsrminer.parser;
 
-public class JsonDeserializer {
+/**
+ * A deserializer for the program which is 
+ */
+public class JsonCompositeDeserializer {
 }

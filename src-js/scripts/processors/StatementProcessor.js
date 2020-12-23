@@ -1,4 +1,5 @@
 const astProcessor = require("../processors/AstNodeProcessor");
+const types = require("@babel/types");
 
 exports.processBlockStatement = (blockStatementPath, processStatement) => {
     const statement = {

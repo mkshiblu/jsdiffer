@@ -10,8 +10,20 @@ function parse(script) {
             sourceType: 'unambiguous',
             allowImportExportEverywhere: true,
             allowReturnOutsideFunction: true,
-            plugins: ['jsx', 'objectRestSpread', 'exportDefaultFrom', 'exportNamespaceFrom', 'classProperties', 'flow', 'dynamicImport', 'decorators-legacy', 'optionalCatchBinding']
+            plugins: 
+            [
+                'jsx'
+                , 'objectRestSpread'
+                , 'exportDefaultFrom'
+                , 'exportNamespaceFrom'
+                , 'classProperties'
+                , 'flow'
+                , 'dynamicImport'
+                , 'decorators-legacy'
+                , 'optionalCatchBinding'
+            ]
         });
+
     // Pass in the program model
     const blockCodeFragment = templates.getBaseCompositeTemplate();
     traverse.default(ast, visitor.containerVisitor, undefined, blockCodeFragment, undefined);

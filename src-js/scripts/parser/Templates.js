@@ -1,5 +1,14 @@
 const astUtil = require("./AstUtil");
 
+// /**
+//  * Returns a base format of a node. With type and text populated
+//  * From the specified path 
+//  */
+// exports.getBaseTemplate = (path) => {
+//     type: types.removeComments(path.node);
+//     text:
+// };
+
 exports.getStatementTemplate = (path) => {
     return {
         type: path.node.type,

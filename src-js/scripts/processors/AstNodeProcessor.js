@@ -13,6 +13,7 @@ const types = require('@babel/types');
  */
 function processStatement(path, parent) {
     try {
+        types.removeComments(path.node);
         const statement = processNodePath(path, processStatement);
         statement.loc = astUtil.getFormattedLocation(path.node);
         // Add children
