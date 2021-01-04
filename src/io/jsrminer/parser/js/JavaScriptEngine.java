@@ -23,7 +23,7 @@ class JavaScriptEngine implements AutoCloseable {
         parser = this.nodeJs.require(new File(SCRIPTS_DIRECTORY_NAME,
                 "Parser.js"));
         this.nodeJs.getRuntime().add("parser", parser);
-        this.nodeJs.getRuntime().executeVoidScript("function parse(script) { return parser.parse(script); }");
+        this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script, asJson); }");
     }
 
     public Object executeFunction(final String name, final Object... args) {

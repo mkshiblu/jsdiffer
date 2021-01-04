@@ -5,7 +5,7 @@ import io.rminer.core.api.IContainer;
 
 public abstract class Container implements IContainer {
     protected ContainerType containerType;
-    protected CompositeFragment body;
+    protected IComposite body;
 
     @Override
     public ContainerType getContainerType() {

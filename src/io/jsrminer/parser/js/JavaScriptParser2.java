@@ -1,9 +1,11 @@
 package io.jsrminer.parser.js;
 
-import com.eclipsesource.v8.V8Array;
 import io.jsrminer.api.IParser;
 import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.UMLModel;
+import io.rminer.core.api.IComposite;
+import io.rminer.core.entities.CompositeFragment;
+import io.rminer.core.entities.SourceFile;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,8 +25,11 @@ public class JavaScriptParser2 implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
 
-                SourceFileModel source = loadSourceFileModel(content, jsEngine, filepath);
-                sourceModels.put(filepath, source);
+                SourceFile source = new SourceFile(filepath);
+                IComposite body = parse(content, jsEngine, filepath);
+                source.setBody(body);
+
+                //sourceModels.put(filepath, source);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -33,17 +38,35 @@ public class JavaScriptParser2 implements IParser {
         return umlModel;
     }
 
-    private SourceFileModel loadSourceFileModel(String fileContent, JavaScriptEngine jsEngine, String filePath) {
-        final SourceFileModel source = new SourceFileModel(filePath);
+    @Override
+    public SourceFileModel parseSource(String content) {
+        String filepath = null;
+        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+            jsEngine.createParseFunction();
 
-        return source;
+            SourceFile source = new SourceFile(filepath);
+            IComposite body = parse(content, jsEngine, filepath);
+            source.setBody(body);
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private V8Array processScript(String script, JavaScriptEngine jsEngine) {
-        // String json = null;
+    /**
+     * Parses the code using the jsEngine
+     *
+     * @return
+     */
+    private IComposite parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
+        IComposite body = new CompositeFragment();
+        final String blockJson = processScript(fileContent, jsEngine);
+        return body;
+    }
+
+    private String processScript(String script, JavaScriptEngine jsEngine) {
         try {
-            //json = (String) jsEngine.executeFunction("parse", script);
-            return (V8Array) jsEngine.executeFunction("parse", script);
+            return (String) jsEngine.executeFunction("parse", script, true);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

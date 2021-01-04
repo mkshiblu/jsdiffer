@@ -48,12 +48,6 @@ public class JavaScriptParser implements IParser {
         }
     }
 
-    private SourceFileModel loadSourceFileModel(String fileContent, JavaScriptEngine jsEngine, String filePath) {
-        final SourceFileModel source = new SourceFileModel(filePath);
-
-        return source;
-    }
-
     protected SourceFileModel parse(String fileContent, JavaScriptEngine jsEngine, String filepath) {
         final V8Array fdsArray = processScript(fileContent, jsEngine);
         final FunctionDeclaration[] fds = convert(jsEngine, fdsArray, filepath);

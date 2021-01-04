@@ -149,11 +149,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
                 // TODO Multi thread?
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore, repositoryDirectoriesBefore);
+                UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
 
                 // TODO multi thread?
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent, repositoryDirectoriesCurrent);
+                UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
 
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
 
