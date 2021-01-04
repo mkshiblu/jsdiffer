@@ -6,7 +6,7 @@ import io.rminer.core.api.IVariableDeclaration;
 import java.util.List;
 
 public class CompositeFragment extends Fragment implements IComposite {
-    private List<Statement> statementList;
+    private List<Fragment> statementList;
     private List<ExpressionFragment> expressionList;
     private List<IVariableDeclaration> variableDeclarations;
     private List<ClassDeclaration> classDeclarations;

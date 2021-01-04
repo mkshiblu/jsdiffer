@@ -10,7 +10,6 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLParameter;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,21 +38,6 @@ public class JavaScriptParser implements IParser {
         return umlModel;
     }
 
-    // TODO 
-    @Override
-    public UMLModel parseParallelly(Map<String, String> fileContents) {
-        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
-            jsEngine.createParseFunction();
-            //String jsonString = new Gson().toJson(data, Map.class);
-            Object obj = jsEngine.executeFunction("parse", fileContents);
-
-            System.out.println(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
     public SourceFileModel parseSource(String content) {
         String filepath = null;
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
@@ -62,6 +46,12 @@ public class JavaScriptParser implements IParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private SourceFileModel loadSourceFileModel(String fileContent, JavaScriptEngine jsEngine, String filePath) {
+        final SourceFileModel source = new SourceFileModel(filePath);
+
+        return source;
     }
 
     protected SourceFileModel parse(String fileContent, JavaScriptEngine jsEngine, String filepath) {

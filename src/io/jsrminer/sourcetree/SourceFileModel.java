@@ -1,7 +1,7 @@
 package io.jsrminer.sourcetree;
 
 // Represents a single source file
-public class SourceFileModel {
+public class SourceFileModel  {
     public final String path;
     private FunctionDeclaration[] functionDeclarations;
 

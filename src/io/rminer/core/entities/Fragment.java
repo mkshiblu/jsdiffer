@@ -5,7 +5,7 @@ import io.rminer.core.api.*;
 import java.util.List;
 import java.util.Map;
 
-public class Fragment implements IFragment {
+public abstract class Fragment implements ICodeFragment {
     private String text;
     private ISourceLocation locationInfo;
 

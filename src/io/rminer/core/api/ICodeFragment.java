@@ -1,8 +1,6 @@
 package io.rminer.core.api;
 
-import java.util.List;
-
-public interface IFragment {
+public interface ICodeFragment {
 //    List<String> getStringLiterals();
 //    List<String> getNullLiterals();
 //    List<String> getBooleanLiterals();
