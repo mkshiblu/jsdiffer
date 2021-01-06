@@ -1,8 +1,8 @@
 package io.jsrminer.parser;
 
 import io.jsrminer.TestBase;
-import io.jsrminer.api.IParser;
-import io.jsrminer.parser.js.JavaScriptParser2;
+import io.rminer.core.api.IParser;
+import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,7 +21,7 @@ public class SourceFileModelTest extends TestBase {
 
     @BeforeAll
     public static void setup() throws IOException {
-        IParser parser = new JavaScriptParser2();
+        IParser parser = new JavaScriptParser();
         String sourceContent = Files.readString(Path.of(getRootResourceDirectory() , "vue.js"));
         functions = parser.parseSource(sourceContent).getFunctionDeclarations();
         checkKeyCodesFunction = functions[functions.length];

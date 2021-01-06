@@ -1,12 +1,14 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.IComposite;
+
 import java.util.*;
 
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
  * May contain other block statements or statements (i.e. composite statements)
  */
-public class BlockStatement extends Statement {
+public class BlockStatement extends Statement implements IComposite {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
     //private List<VariableDeclaration> variableDeclarations;

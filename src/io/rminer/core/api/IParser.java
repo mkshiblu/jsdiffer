@@ -1,6 +1,5 @@
-package io.jsrminer.api;
+package io.rminer.core.api;
 
-import io.jsrminer.sourcetree.SourceFileModel;
 import io.jsrminer.uml.UMLModel;
 
 import java.util.Map;
@@ -13,7 +12,7 @@ public interface IParser {
      */
     UMLModel parse(Map<String, String> fileContents);
 
-    SourceFileModel parseSource(String fileContent);
+    ISourceFile parseSource(String fileContent);
 
     /**
      * Parse a json string containing the source code in composite

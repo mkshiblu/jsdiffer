@@ -2,7 +2,7 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.SourceFileModel;
+import io.rminer.core.api.ISourceFile;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -13,8 +13,8 @@ import java.util.Map;
  * Represents a diff between two version of the same source file
  */
 public class SourceFileModelDiff {
-    public final SourceFileModel sourceFileModel1;
-    public final SourceFileModel sourceFileModel2;
+    public final ISourceFile sourceFileModel1;
+    public final ISourceFile sourceFileModel2;
 
     public final List<IRefactoring> refactorings = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class SourceFileModelDiff {
     private final Map<String, FunctionDeclaration> addedOperations = new LinkedHashMap<>();
     private final Map<String, FunctionDeclaration> removedOperations = new LinkedHashMap<>();
 
-    public SourceFileModelDiff(SourceFileModel sourceFileModel1, SourceFileModel sourceFileModel2) {
+    public SourceFileModelDiff(ISourceFile sourceFileModel1, ISourceFile sourceFileModel2) {
         this.sourceFileModel1 = sourceFileModel1;
         this.sourceFileModel2 = sourceFileModel2;
     }

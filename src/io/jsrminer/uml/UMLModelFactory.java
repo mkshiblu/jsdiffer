@@ -1,7 +1,7 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.api.IParser;
-import io.jsrminer.parser.js.JavaScriptParser2;
+import io.rminer.core.api.IParser;
+import io.jsrminer.parser.js.JavaScriptParser;
 
 import java.util.Map;
 
@@ -12,7 +12,7 @@ public class UMLModelFactory {
 //    }
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
-        IParser parser = new JavaScriptParser2();
+        IParser parser = new JavaScriptParser();
         return parser.parse(fileContents);
     }
 }

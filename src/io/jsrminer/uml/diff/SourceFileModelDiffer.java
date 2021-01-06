@@ -13,6 +13,7 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
 import io.jsrminer.uml.mapping.replacement.MethodInvocationReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.rminer.core.api.ISourceFile;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
@@ -20,8 +21,8 @@ import java.util.*;
 public class SourceFileModelDiffer {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
-    public final SourceFileModel source1;
-    public final SourceFileModel source2;
+    public final ISourceFile source1;
+    public final ISourceFile source2;
     public final SourceFileModelDiff sourceDiff;
     public final UMLModelDiff modelDiff;
 
@@ -29,7 +30,7 @@ public class SourceFileModelDiffer {
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
 
-    public SourceFileModelDiffer(final SourceFileModel source1, final SourceFileModel source2, final UMLModelDiff modelDiff) {
+    public SourceFileModelDiffer(final ISourceFile source1, final ISourceFile source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
         this.source2 = source2;
         sourceDiff = new SourceFileModelDiff(source1, source2);

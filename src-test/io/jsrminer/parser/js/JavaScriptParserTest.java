@@ -1,7 +1,7 @@
 package io.jsrminer.parser.js;
 
 import io.jsrminer.TestBase;
-import io.jsrminer.sourcetree.SourceFileModel;
+import io.rminer.core.api.ISourceFile;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -12,12 +12,12 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class JavaScriptParserTest extends TestBase {
-    protected static SourceFileModel model;
+    protected static ISourceFile model;
 
     @BeforeAll
     public static void setup() throws IOException {
         JavaScriptParser parser = new JavaScriptParser();
-        String sourceContent = Files.readString(Path.of(getRootResourceDirectory() , "vue.js"));
+        String sourceContent = Files.readString(Path.of(getRootResourceDirectory(), "vue.js"));
         model = parser.parseSource(sourceContent);
     }
 
