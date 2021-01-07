@@ -23,7 +23,7 @@ public class SourceFile extends Container implements ISourceFile {
 
     @Override
     public IComposite getBody() {
-        return null;
+        return this.body;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class SourceFile extends Container implements ISourceFile {
         if (this.body == null)
             throw new NullPointerException("SourceFile's body is null that means not populated correctly");
 
-        //this.body.getFunctionDeclarations();
+        //this.((BlockStatement)body).getFunctionDeclarations();
         return null;
     }
 }

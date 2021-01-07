@@ -37,8 +37,10 @@ public class JsonCompositeParser {
             // Parse source location
             try {
 
-                final SourceLocation location = any.get("loc").as(SourceLocation.class);
-                currentBlock.setSourceLocation(location);
+                if (any.keys().contains("loc")) {
+                    final SourceLocation location = any.get("loc").as(SourceLocation.class);
+                    currentBlock.setSourceLocation(location);
+                }
             } catch (Exception ex) {
                 System.out.println(ex);
             }
