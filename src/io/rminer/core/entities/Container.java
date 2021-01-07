@@ -1,26 +1,35 @@
 package io.rminer.core.entities;
 
-import io.rminer.core.api.IComposite;
+import io.jsrminer.sourcetree.SourceLocation;
+import io.rminer.core.api.ICodeFragment;
 import io.rminer.core.api.IContainer;
+import io.rminer.core.api.IFunctionDeclaration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Container implements IContainer {
-    protected ContainerType containerType;
-    protected IComposite body;
+    protected final ContainerType containerType;
+    protected final List<ICodeFragment> statements = new ArrayList<>();
+    protected final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
+    protected SourceLocation sourceLocation;
+
+    public Container(ContainerType containerType) {
+        this.containerType = containerType;
+    }
 
     @Override
     public ContainerType getContainerType() {
         return containerType;
     }
 
-    /**
-     * Returns the body of the container which is a Block Statement
-     * Even though file that does not have a direct block statement it is assumed to
-     * have Wrapper Block statement
-     *
-     * @return
-     */
     @Override
-    public IComposite getBody() {
-        return body;
+    public List<ICodeFragment> getStatements() {
+        return statements;
+    }
+
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        return functionDeclarations;
     }
 }

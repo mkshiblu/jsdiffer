@@ -1,11 +1,14 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
+import io.rminer.core.api.IFunctionDeclaration;
+import io.rminer.core.entities.DeclarationContainer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-public class FunctionDeclaration extends CodeEntity {
+public class FunctionDeclaration extends DeclarationContainer implements IFunctionDeclaration {
 
     /**
      * Name parameter map
@@ -64,14 +67,9 @@ public class FunctionDeclaration extends CodeEntity {
         }
     }
 
-    @Override
-    public String toString() {
-        return qualifiedName;
-    }
 
-    @Override
     public void setSourceLocation(SourceLocation sourceLocation) {
-        super.setSourceLocation(sourceLocation);
+        super.sourceLocation = sourceLocation;
         fullyQualifiedName = sourceLocation.getFile() + "|" + qualifiedName;
     }
 
@@ -134,5 +132,19 @@ public class FunctionDeclaration extends CodeEntity {
 
     public void setConstructor(boolean constructor) {
         isConstructor = constructor;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(qualifiedName);
+        sb.append('(');
+        String commaSeparatedParams = this.getParameters().keySet()
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(" ,"));
+        sb.append(commaSeparatedParams);
+        sb.append(')');
+        return sb.toString();
     }
 }

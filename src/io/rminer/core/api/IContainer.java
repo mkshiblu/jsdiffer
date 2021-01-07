@@ -1,7 +1,9 @@
 package io.rminer.core.api;
 
+import java.util.List;
+
 /**
- * Rerpresents a code container such as FunctionDeclrations, Class Declarations or a File
+ * Represents a code container such as FunctionDeclrations, Class Declarations or a File
  */
 public interface IContainer {
     /**
@@ -20,5 +22,7 @@ public interface IContainer {
 
     ContainerType getContainerType();
 
-    IComposite getBody();
+    List<ICodeFragment> getStatements();
+
+    List<IFunctionDeclaration> getFunctionDeclarations();
 }

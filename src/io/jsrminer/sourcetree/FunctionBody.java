@@ -1,7 +1,5 @@
 package io.jsrminer.sourcetree;
 
-import io.jsrminer.parser.JsonCompositeParser;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +7,8 @@ import java.util.Map;
 public class FunctionBody extends CodeEntity {
     public final BlockStatement blockStatement;
 
-    public FunctionBody(String functionBody) {
-        blockStatement = JsonCompositeParser.createBlockStatement(functionBody);
+    public FunctionBody(BlockStatement blockStatement) {
+        this.blockStatement = blockStatement;
     }
 
     public List<OperationInvocation> getAllOperationInvocations() {

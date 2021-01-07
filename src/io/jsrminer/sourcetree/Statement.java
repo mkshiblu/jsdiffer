@@ -1,8 +1,10 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.ICodeFragment;
+
 import java.util.List;
 
-public abstract class Statement extends CodeFragment {
+public abstract class Statement extends CodeFragment implements ICodeFragment {
 
     protected BlockStatement parent;
 

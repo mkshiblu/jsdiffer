@@ -1,7 +1,5 @@
 package io.rminer.core.entities;
 
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.rminer.core.api.IComposite;
 import io.rminer.core.api.ISourceFile;
 
 /**
@@ -10,28 +8,20 @@ import io.rminer.core.api.ISourceFile;
 public class SourceFile extends Container implements ISourceFile {
     private String filepath;
 
+    public SourceFile() {
+        super(ContainerType.File);
+    }
+
     public SourceFile(String filepath) {
+        this();
         this.filepath = filepath;
     }
 
-    /**
-     * Sets the content of the source file as a composite body
-     */
-    public void setBody(IComposite body) {
-        this.body = body;
+    public String getFilepath() {
+        return filepath;
     }
 
-    @Override
-    public IComposite getBody() {
-        return this.body;
-    }
-
-    @Override
-    public FunctionDeclaration[] getFunctionDeclarations() {
-        if (this.body == null)
-            throw new NullPointerException("SourceFile's body is null that means not populated correctly");
-
-        //this.((BlockStatement)body).getFunctionDeclarations();
-        return null;
+    public void setFilepath(String filepath) {
+        this.filepath = filepath;
     }
 }

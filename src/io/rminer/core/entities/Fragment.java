@@ -2,32 +2,38 @@ package io.rminer.core.entities;
 
 import io.rminer.core.api.*;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public abstract class Fragment implements ICodeFragment {
-    private String text;
-    private ISourceLocation locationInfo;
+    protected String text;
+    protected ISourceLocation locationInfo;
 
-    //private CompositeStatementObject owner;
-    private List<String> variables;
-    private List<String> types;
+    protected ICompositeFragment owner;
+    protected List<String> variables = new ArrayList<>();
+    protected List<String> types = new ArrayList<>();
+    protected List<IVariableDeclaration> variableDeclarations = new ArrayList<>();
+    protected List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    protected List<String> stringLiterals = new ArrayList<>();
+    protected List<String> numberLiterals = new ArrayList<>();
+    protected List<String> nullLiterals = new ArrayList<>();
+    protected List<String> booleanLiterals = new ArrayList<>();
+    protected List<String> infixOperators = new ArrayList<>();
+    protected List<String> arrayAccesses = new ArrayList<>();
+    protected List<String> typeLiterals = new ArrayList<>();
+    protected List<String> prefixExpressions = new ArrayList<>();
+    protected List<String> postfixExpressions = new ArrayList<>();
+    protected List<ITernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
+    protected List<String> arguments = new ArrayList<>();
+    protected Map<String, List<IOperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
+    protected Map<String, List<IObjectCreation>> creationMap = new LinkedHashMap<>();
+    protected List<ILambdaExpression> lambdas = new ArrayList<>();
+    protected List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
 
-    private List<IVariableDeclaration> variableDeclarations;
-    private Map<String, List<IOperationInvocation>> methodInvocationMap;
-    private List<IAnonymousClassDeclaration> anonymousClassDeclarations;
-    private List<String> stringLiterals;
-    private List<String> numberLiterals;
-    private List<String> nullLiterals;
-    private List<String> booleanLiterals;
-    private List<String> typeLiterals;
-    private Map<String, List<IObjectCreation>> creationMap;
-    private List<String> infixOperators;
-    private List<String> arrayAccesses;
-    private List<String> prefixExpressions;
-    private List<String> postfixExpressions;
-    private List<String> arguments;
-    private List<ITernaryOperatorExpression> ternaryOperatorExpressions;
-    private List<ILambdaExpression> lambdas;
+    @Override
+    public List<? extends IFunctionDeclaration> getFunctionDeclarations() {
+        return this.functionDeclarations;
+    }
 }
-

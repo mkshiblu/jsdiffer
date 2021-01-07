@@ -8,8 +8,12 @@ import org.eclipse.jgit.annotations.NonNull;
 import java.util.*;
 
 public class JsonCompositeParser {
-
     public static BlockStatement createBlockStatement(final String blockStatementJson) {
+        Any any = JsonIterator.deserialize(blockStatementJson);
+        return createBlockStatement(any);
+    }
+
+    public static BlockStatement createBlockStatement(Any any) {
         // Helper variables
         BlockStatement currentBlock, childBlock;
         Statement child;
@@ -23,7 +27,6 @@ public class JsonCompositeParser {
         newBlock.setDepth(0);
 
         //Enqueue to process
-        Any any = JsonIterator.deserialize(blockStatementJson);
         blocksToBeProcessed.add(new AbstractMap.SimpleImmutableEntry<>(newBlock, any));
 
         while (!blocksToBeProcessed.isEmpty()) {
@@ -267,8 +270,8 @@ public class JsonCompositeParser {
         populateStringListFromAny(any.get("identifiers"), expression.getVariables());
         populateStringListFromAny(any.get("numericLiterals"), expression.getNumberLiterals());
         populateStringListFromAny(any.get("infixOperators"), expression.getInfixOperators());
-        populateStringListFromAny(any.get("postfixOperators"), expression.getPostfixExpressions());
-        populateStringListFromAny(any.get("prefixOperators"), expression.getPrefixExpressions());
+        populateStringListFromAny(any.get("postfixExpressions"), expression.getPostfixExpressions());
+        populateStringListFromAny(any.get("prefixExpressions"), expression.getPrefixExpressions());
 
         final List<Any> anys = any.get("variableDeclarations").asList();
 

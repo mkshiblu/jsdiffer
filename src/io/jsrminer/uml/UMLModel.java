@@ -6,6 +6,7 @@ import io.jsrminer.uml.diff.SourceFileModelDiffer;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.rminer.core.api.ISourceFile;
+import io.rminer.core.entities.SourceFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
     public FunctionDeclaration[] getFunctionDeclarationsInSource(String file) {
         ISourceFile sourceFileModel;
         if ((sourceFileModel = sourceModelMap.get(file)) != null) {
-            return sourceFileModel.getFunctionDeclarations();
+            return ((SourceFile)sourceFileModel).getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
         }
         return null;
     }

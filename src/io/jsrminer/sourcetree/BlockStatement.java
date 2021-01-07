@@ -1,6 +1,7 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IComposite;
+import io.rminer.core.api.ICompositeFragment;
+import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
@@ -8,7 +9,7 @@ import java.util.*;
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
  * May contain other block statements or statements (i.e. composite statements)
  */
-public class BlockStatement extends Statement implements IComposite {
+public class BlockStatement extends Statement implements ICompositeFragment {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
     //private List<VariableDeclaration> variableDeclarations;
@@ -201,11 +202,11 @@ public class BlockStatement extends Statement implements IComposite {
 
     @Override
     public List<String> getIdentifierArguments() {
-        List<String> variables = new ArrayList<String>();
+        List<String> arguments = new ArrayList<String>();
         for (Expression expression : expressions) {
-            variables.addAll(expression.getVariables());
+            arguments.addAll(expression.getIdentifierArguments());
         }
-        return variables;
+        return arguments;
     }
 
     @Override
@@ -328,5 +329,10 @@ public class BlockStatement extends Statement implements IComposite {
     @Override
     public String toString(){
         return this.getText();
+    }
+
+    @Override
+    public List<? extends IFunctionDeclaration> getFunctionDeclarations() {
+        return null;
     }
 }

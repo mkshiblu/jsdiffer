@@ -23,6 +23,6 @@ public class JavaScriptParserTest extends TestBase {
 
     @Test
     public void topLevelfunctionDeclarationCount() {
-        assertEquals(1, model.getFunctionDeclarations().length);
+        assertEquals(4, model.getFunctionDeclarations().size());
     }
 }

@@ -1,8 +1,11 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.ICodeFragment;
+import io.rminer.core.api.IFunctionDeclaration;
+
 import java.util.*;
 
-public class SingleStatement extends Statement {
+public class SingleStatement extends Statement implements ICodeFragment {
     // private List<AbstractExpression> expressionList;
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();
@@ -93,6 +96,11 @@ public class SingleStatement extends Statement {
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
+    }
+
+    @Override
+    public List<? extends IFunctionDeclaration> getFunctionDeclarations() {
+        return null;
     }
 
 //    @Override

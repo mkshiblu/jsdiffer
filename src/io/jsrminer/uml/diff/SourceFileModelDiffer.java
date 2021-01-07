@@ -1,10 +1,13 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.OperationInvocation;
+import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
@@ -40,8 +43,8 @@ public class SourceFileModelDiffer {
     public SourceFileModelDiff diff() {
 
         // Find functiondeclarations
-        final FunctionDeclaration[] functions1 = source1.getFunctionDeclarations();
-        final FunctionDeclaration[] functions2 = source2.getFunctionDeclarations();
+        final FunctionDeclaration[] functions1 = source1.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
+        final FunctionDeclaration[] functions2 = source2.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
 
         // Check if the common file has some fds
         if (functions2 != null) {
@@ -88,7 +91,7 @@ public class SourceFileModelDiffer {
                 TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>((Comparator<FunctionBodyMapper>) (o1, o2) -> {
                     int thisOperationNameEditDistance = o1.operationNameEditDistance();
                     int otherOperationNameEditDistance = o2.operationNameEditDistance();
-                    if(thisOperationNameEditDistance != otherOperationNameEditDistance)
+                    if (thisOperationNameEditDistance != otherOperationNameEditDistance)
                         return Integer.compare(thisOperationNameEditDistance, otherOperationNameEditDistance);
                     else
                         return o1.compareTo(o2);
@@ -233,7 +236,7 @@ public class SourceFileModelDiffer {
 //        if (mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames)) {
 //            return null;
 //        }
-       return bestMapper;
+        return bestMapper;
     }
 //    public boolean equalReturnParameter(FunctionDeclaration function1, FunctionDeclaration function2) {
 //
@@ -446,10 +449,10 @@ public class SourceFileModelDiffer {
     private boolean operationsBeforeAndAfterMatch(FunctionDeclaration removedOperation, FunctionDeclaration addedOperation) {
         FunctionDeclaration operationBefore1 = null;
         FunctionDeclaration operationAfter1 = null;
-        FunctionDeclaration[] originalClassOperations = source1.getFunctionDeclarations();
+        FunctionDeclaration[] originalClassOperations = source1.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
 
 
-        int removedOperationIndex = ArrayUtils.indexOf(source1.getFunctionDeclarations(), removedOperation);
+        int removedOperationIndex = ArrayUtils.indexOf(source1.getFunctionDeclarations().toArray(), removedOperation);
 
         if (removedOperationIndex > 0) {
             operationBefore1 = originalClassOperations[removedOperationIndex - 1];
@@ -459,7 +462,7 @@ public class SourceFileModelDiffer {
             operationAfter1 = originalClassOperations[removedOperationIndex + 1];
         }
 
-        FunctionDeclaration[] nextClassOperations = source2.getFunctionDeclarations();
+        FunctionDeclaration[] nextClassOperations = source2.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
         int addedOperationIndex = ArrayUtils.indexOf(nextClassOperations, addedOperation);
 
         FunctionDeclaration operationBefore2 = null;
@@ -521,8 +524,8 @@ public class SourceFileModelDiffer {
     }
 
     private int computeAbsoluteDifferenceInPositionWithinClass(FunctionDeclaration removedOperation, FunctionDeclaration addedOperation) {
-        int index1 = ArrayUtils.indexOf(source1.getFunctionDeclarations(), removedOperation);
-        int index2 = ArrayUtils.indexOf(source2.getFunctionDeclarations(), addedOperation);
+        int index1 = source1.getFunctionDeclarations().indexOf(removedOperation);
+        int index2 = source2.getFunctionDeclarations().indexOf(addedOperation);
         return Math.abs(index1 - index2);
     }
 

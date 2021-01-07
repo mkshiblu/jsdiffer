@@ -23,8 +23,8 @@ public class SourceFileModelTest extends TestBase {
     public static void setup() throws IOException {
         IParser parser = new JavaScriptParser();
         String sourceContent = Files.readString(Path.of(getRootResourceDirectory() , "vue.js"));
-        functions = parser.parseSource(sourceContent).getFunctionDeclarations();
-        checkKeyCodesFunction = functions[functions.length];
+        functions = parser.parseSource(sourceContent).getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
+        checkKeyCodesFunction = functions[functions.length -1];
     }
 
     @Test

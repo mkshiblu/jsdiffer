@@ -1,8 +1,7 @@
 package io.jsrminer.parser.js;
 
-import io.jsrminer.parser.JsonCompositeParser;
+import io.jsrminer.parser.JsonCompositeDeserializer;
 import io.jsrminer.uml.UMLModel;
-import io.rminer.core.api.IComposite;
 import io.rminer.core.api.IParser;
 import io.rminer.core.api.ISourceFile;
 import io.rminer.core.entities.SourceFile;
@@ -25,11 +24,9 @@ public class JavaScriptParser implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
 
-                SourceFile source = new SourceFile(filepath);
-                IComposite body = parse(content, jsEngine);
-                source.setBody(body);
-
-                sourceModels.put(filepath, source);
+                SourceFile sourceFile = parse(content, jsEngine);
+                sourceFile.setFilepath(filepath);
+                sourceModels.put(filepath, sourceFile);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -44,9 +41,8 @@ public class JavaScriptParser implements IParser {
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
             jsEngine.createParseFunction();
 
-            SourceFile source = new SourceFile(filepath);
-            IComposite body = parse(content, jsEngine);
-            source.setBody(body);
+            SourceFile source = parse(content, jsEngine);
+            source.setFilepath(filepath);
             return source;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -58,11 +54,10 @@ public class JavaScriptParser implements IParser {
      *
      * @return
      */
-    private IComposite parse(String fileContent, JavaScriptEngine jsEngine) {
-       // IComposite body = new CompositeFragment();
+    private SourceFile parse(String fileContent, JavaScriptEngine jsEngine) {
+        // IComposite body = new CompositeFragment();
         final String blockJson = processScript(fileContent, jsEngine);
-
-        return JsonCompositeParser.createBlockStatement(blockJson);
+        return JsonCompositeDeserializer.parseSourceFile(blockJson);
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {
