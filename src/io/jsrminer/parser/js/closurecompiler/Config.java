@@ -11,6 +11,8 @@ public class Config {
     public static final Set<ParseTreeType> ignoredNodes = new HashSet<>() {{
         add(ParseTreeType.IMPORT_DECLARATION);
         add(ParseTreeType.EXPORT_DECLARATION);
+        add(ParseTreeType.MISSING_PRIMARY_EXPRESSION);
+        add(ParseTreeType.EMPTY_STATEMENT);
     }};
 
     public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{

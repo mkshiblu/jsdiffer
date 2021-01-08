@@ -73,39 +73,26 @@ public class Visitor {
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {
-        var processor = nodeProcessors.get(tree.type);
-
-        if (processor == null && !isIgnored(tree)) {
-            throw new NotImplementedException("Processor not implemented for " + tree.type);
-        }
-
-        // enter(tree, leaf, container);
-        processor.visit(tree, leaf, container);
-        //exit(tree, leaf, container);
+        visit(tree, leaf, container);
     }
 
     static Object visitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
+        return visit(tree, parent, container);
+    }
+
+    private static Object visit(ParseTree tree, ICodeFragment parent, IContainer container) {
         var processor = nodeProcessors.get(tree.type);
-
-        if (processor == null && !isIgnored(tree)) {
+        if (processor == null) {
+            if (!isIgnored(tree))
             throw new NotImplementedException("Processor not implemented for " + tree.type);
+        } else {
+            Object result = processor.visit(tree, parent, container);
+            return result;
         }
-
-        enterStatement(tree, parent, container);
-        Object result = processor.visit(tree, parent, container);
-        exitStatement(tree, parent, container);
-        return result;
+        return null;
     }
 
     public static boolean isIgnored(ParseTree parseTree) {
         return Config.ignoredNodes.contains(parseTree.type);
-    }
-
-    static void enterStatement(ParseTree tree, BlockStatement parent, IContainer container) {
-
-    }
-
-    static void exitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
-
     }
 }
