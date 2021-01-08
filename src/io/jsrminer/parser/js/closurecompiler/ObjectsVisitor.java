@@ -27,9 +27,6 @@ public class ObjectsVisitor {
             = new NodeVisitor<>() {
         @Override
         public ObjectLiteral visit(ObjectLiteralExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            if (tree.hasTrailingComma) {
-                throw new RuntimeException("Object expressions with trailing comma not handled");
-            }
 
             BlockStatement blockStatement = new BlockStatement();
             blockStatement.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));

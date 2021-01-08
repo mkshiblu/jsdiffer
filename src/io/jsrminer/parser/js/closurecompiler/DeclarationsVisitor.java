@@ -41,16 +41,30 @@ class DeclarationsVisitor {
 
             // Load functionBody by passing the function as the new container
             if (tree.functionBody != null) {
-                BlockTree blockTree = tree.functionBody.asBlock();
-                BlockStatement bodyBlock = new BlockStatement();
-                bodyBlock.setText("{");
-                populateBlockStatementData(blockTree, bodyBlock);
-                function.setBody(new FunctionBody(bodyBlock));
+                switch (tree.functionBody.type) {
+                    case BLOCK:
 
-                blockTree.statements.forEach(statementTree -> {
-                    Visitor.visitStatement(statementTree, bodyBlock, function);
-                });
+                        BlockStatement bodyBlock = new BlockStatement();
+                        bodyBlock.setText("{");
+                        function.setBody(new FunctionBody(bodyBlock));
+                        BlockTree blockTree = tree.functionBody.asBlock();
+                        populateBlockStatementData(blockTree, bodyBlock);
+                        blockTree.statements.forEach(statementTree -> {
+                            Visitor.visitStatement(statementTree, bodyBlock, function);
+                        });
+                        break;
+                    case IDENTIFIER_EXPRESSION:
+                    case UNARY_EXPRESSION:
+                        // TODO handle Arrow expression or Identifier
+                        //var bodyTree = tree.functionBody.asUnaryExpression();
+                        // bodyTree.
+                        if (isAnonymous)
+                            ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().remove(function);
+                        else
+                            container.getFunctionDeclarations().remove(function);
 
+                        break;
+                }
             } else {
                 throw new RuntimeException("Null function body not handled for "
                         + function.getQualifiedName() + " at " + tree.location.toString());
