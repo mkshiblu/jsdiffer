@@ -1,9 +1,13 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.IAnonymousClassDeclaration;
 import io.rminer.core.api.ICodeFragment;
 import io.rminer.core.api.IFunctionDeclaration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class SingleStatement extends Statement implements ICodeFragment {
     // private List<AbstractExpression> expressionList;
@@ -20,6 +24,10 @@ public class SingleStatement extends Statement implements ICodeFragment {
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
+    private List<String> postfixExpressions = new ArrayList<>();
+    protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
+    private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
 
     public SingleStatement() {
     }
@@ -82,6 +90,16 @@ public class SingleStatement extends Statement implements ICodeFragment {
         return prefixExpressions;
     }
 
+    @Override
+    public List<String> getPostfixExpressions() {
+        return this.postfixExpressions;
+    }
+
+    @Override
+    public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
+        return this.ternaryOperatorExpressions;
+    }
+
     /**
      * Returns arguments which are Invocations
      */
@@ -99,8 +117,13 @@ public class SingleStatement extends Statement implements ICodeFragment {
     }
 
     @Override
-    public List<? extends IFunctionDeclaration> getFunctionDeclarations() {
-        return null;
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        return this.anonymousClassDeclarations;
+    }
+
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        return this.functionDeclarations;
     }
 
 //    @Override

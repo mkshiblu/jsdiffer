@@ -1,4 +1,5 @@
 package io.rminer.core.api;
 
-public class IAnonymousClassDeclaration {
+public interface IAnonymousClassDeclaration extends IClassDeclaration{
+
 }

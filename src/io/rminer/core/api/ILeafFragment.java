@@ -1,4 +1,4 @@
 package io.rminer.core.api;
 
-public interface ILeafFragment {
+public interface ILeafFragment extends ICodeFragment{
 }

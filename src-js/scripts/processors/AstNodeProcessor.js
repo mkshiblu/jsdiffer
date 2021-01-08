@@ -55,6 +55,7 @@ function createBaseExpressionInfo(path) {
         functionInvocations: [],
         constructorInvocations: [],
         objectCreations: [],
+        objectExpressions: [],
         arguments: [],
         loc: {}
     };

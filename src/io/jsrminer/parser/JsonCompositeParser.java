@@ -3,6 +3,7 @@ package io.jsrminer.parser;
 import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
+import io.rminer.core.api.IAnonymousClassDeclaration;
 import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.*;
@@ -218,7 +219,21 @@ public class JsonCompositeParser {
             populateStringListFromAny(any.get("argumentsWithIdentifier"), singleStatement.getIdentifierArguments());
         }
 
+        // FunctionDeclarations
+
+        // AnonymousClass
+        if (any.keys().contains("objectExpressions")) {
+            for (Any objAny : any.get("objectExpressions").asList()) {
+                singleStatement.getAnonymousClassDeclarations()
+                        .add(loadAnonymousClass(objAny));
+            }
+        }
         return singleStatement;
+    }
+
+    public static IAnonymousClassDeclaration loadAnonymousClass(Any any) {
+        AnonymousClassDeclaration anonymousClassDeclaration = new AnonymousClassDeclaration();
+        return anonymousClassDeclaration;
     }
 
     public static void parseAndLoadFunctionInvocations(Any functionInvocationsAny, Map<String, List<OperationInvocation>> operationInvocationMap) {

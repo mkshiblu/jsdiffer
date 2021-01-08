@@ -14,9 +14,9 @@ public class Main {
         log.info("Program Starts");
         try {
             //commitExample();
-            //directoryExample();
+            directoryExample();
             //jqueryExample();
-            vueExample();
+//            vueExample();
             //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class Main {
     }
 
     static void directoryExample() {
-        new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
+        new JSRefactoringMiner().detectBetweenDirectories("tmp\\vue1", "tmp\\vue2");
     }
 
     static void jqueryExample() {

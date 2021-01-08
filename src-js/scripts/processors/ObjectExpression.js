@@ -1,4 +1,6 @@
 const expressions = require('./ExpressionProcessor');
+const astProcessor = require('./AstNodeProcessor');
+const types = require('@babel/types');
 
 const propertyProcesses = new Map([["ObjectProperty", parseObjectProperty]
     , ["ObjectMethod", parseObjectMethod]
@@ -8,7 +10,6 @@ const propertyProcesses = new Map([["ObjectProperty", parseObjectProperty]
 //     type: "ObjectExpression";
 //     properties: [ObjectProperty | ObjectMethod | SpreadElement];
 // }
-
 function processObjectExpression(path, expressionResult, statement) {
     const node = path.node;
     const isEmptyLiteral = node.properties.length == 0;
@@ -21,11 +22,20 @@ function processObjectExpression(path, expressionResult, statement) {
             expressionResult.objectLiterals = [path.toString()];
         }
     } else {
+
+        // Create a new Expression to serve as annonmous class
+        let objectExpression = {
+            properties: []
+        };
+
         // extract properties
         path.get('properties').forEach(propPath => {
             const func = propertyProcesses.get(propPath.node.type);
-            func(propPath, expressionResult, statement);
+            let prop = func(propPath, statement);
+            objectExpression.properties.push(prop);
         });
+
+        expressionResult.objectExpressions.push(objectExpression);
     }
 }
 
@@ -36,7 +46,7 @@ function processObjectExpression(path, expressionResult, statement) {
 // }
 
 // Has a key property?
-function parseObjectProperty(path, expressionResult, statement) {
+function parseObjectProperty(path, statement) {
 
     const node = path.node;
 
@@ -44,9 +54,26 @@ function parseObjectProperty(path, expressionResult, statement) {
         console.log("Shorthand not implemented yet" + path.node.loc);
     }
 
-    expressions.processExpression(path.get('key'), expressionResult, statement);
-    expressions.processExpression(path.get('value'), expressionResult, statement);
+    if (types.isIdentifier(path.get('key').node)) {
 
+        const result = {
+            key: path.get('key').toString(),
+            value: null,
+        };
+
+        let propValueExpression = astProcessor.createBaseExpressionInfo(path.get('value'));
+        expressions.processExpression(path.get('value'), propValueExpression, statement);
+
+        if (types.isFunctionExpression(path.get('value'))) {
+            result.value = propValueExpression.functionDeclarations[0];
+        } else {
+            result.value = propValueExpression;
+        }
+
+        return result;
+    } else {
+        throw "Object key is not an identifier: " + path.node.loc.startLine;
+    }
 }
 
 // interface ObjectMethod<: ObjectMember, Function {

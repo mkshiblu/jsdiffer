@@ -62,16 +62,16 @@ public class AddParameterRefactoring extends Refactoring {
 //        return pairs;
 //    }
 
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(getName()).append("\t");
-//        sb.append(parameter.getVariableDeclaration());
-//        sb.append(" in method ");
-//        sb.append(operationAfter);
-//        sb.append(" from class ");
-//        sb.append(operationAfter.getClassName());
-//        return sb.toString();
-//    }
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName()).append("\t");
+        sb.append(parameter.name);
+        sb.append(" in method ");
+        sb.append(operationAfter);
+        //sb.append(" from container ");
+       // sb.append(operationAfter.getSourceLocation().getFile());
+        return sb.toString();
+    }
 //
 //    @Override
 //    public int hashCode() {

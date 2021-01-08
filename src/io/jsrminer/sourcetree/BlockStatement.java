@@ -1,5 +1,6 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.IAnonymousClassDeclaration;
 import io.rminer.core.api.ICompositeFragment;
 import io.rminer.core.api.IFunctionDeclaration;
 
@@ -201,6 +202,24 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
+    public List<String> getPostfixExpressions() {
+        List<String> postfixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            postfixExpressions.addAll(expression.getPostfixExpressions());
+        }
+        return postfixExpressions;
+    }
+
+    @Override
+    public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
+        List<TernaryOperatorExpression> ternaryExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            ternaryExpressions.addAll(expression.getTernaryOperatorExpressions());
+        }
+        return ternaryExpressions;
+    }
+
+    @Override
     public List<String> getIdentifierArguments() {
         List<String> arguments = new ArrayList<String>();
         for (Expression expression : expressions) {
@@ -271,6 +290,25 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         return null;
     }
 
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        List<IFunctionDeclaration> functions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            functions.addAll(expression.getFunctionDeclarations());
+        }
+        return functions;
+    }
+
+    @Override
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            anonymousClassDeclarations.addAll(expression.getAnonymousClassDeclarations());
+        }
+        return anonymousClassDeclarations;
+    }
+
+
     public Map<String, List<OperationInvocation>> getAllMethodInvocationsIncludingNested() {
         Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
         map.putAll(getMethodInvocationMap());
@@ -327,12 +365,7 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return this.getText();
-    }
-
-    @Override
-    public List<? extends IFunctionDeclaration> getFunctionDeclarations() {
-        return null;
     }
 }

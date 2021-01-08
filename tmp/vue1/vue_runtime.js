@@ -10,6 +10,13 @@ function checkKeyCodes (
     eventKeyName
 ) {
     var keyCodes = config.keyCodes[key] || builtInAlias;
+    let shape  = {
+        width: 10,
+        height: -20,
+        calcArea: function () {
+            return width * height;
+        },
+    };
     if (keyCodes) {
         if (Array.isArray(keyCodes)) {
             return keyCodes.indexOf(eventKeyCode) === -1

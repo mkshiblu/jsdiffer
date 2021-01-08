@@ -34,7 +34,6 @@ public abstract class Statement extends CodeFragment implements ICodeFragment {
         return null;
     }
 
-
     @Override
     public VariableDeclaration getVariableDeclaration(String variableName) {
         List<VariableDeclaration> variableDeclarations = getVariableDeclarations();

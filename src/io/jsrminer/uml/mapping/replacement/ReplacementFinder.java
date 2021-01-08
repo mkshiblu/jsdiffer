@@ -102,37 +102,36 @@ public class ReplacementFinder {
             nullLiterals2.add("null");
             findAndPerformBestReplacements(diff.variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
         }
-        // region TODO ternaryOpsExp
-//
-//        if (statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
-//            if (!statement1.getNullLiterals().isEmpty()) {
-//                Set<String> nullLiterals1 = new LinkedHashSet<String>();
-//                nullLiterals1.add("null");
-//                Set<String> ternaryExpressions2 = new LinkedHashSet<String>();
-//                for (TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
-//                    ternaryExpressions2.add(ternary.getExpression());
-//                }
-//                findReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-//            }
-//        } else if (!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
-//            if (!statement2.getNullLiterals().isEmpty()) {
-//                Set<String> nullLiterals2 = new LinkedHashSet<String>();
-//                nullLiterals2.add("null");
-//                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
-//                for (TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
-//                    ternaryExpressions1.add(ternary.getExpression());
-//                }
-//                findReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-//            }
-//        }
+        // region ternaryOpsExp
+        if (statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
+            if (!statement1.getNullLiterals().isEmpty()) {
+                Set<String> nullLiterals1 = new LinkedHashSet<>();
+                nullLiterals1.add("null");
+                Set<String> ternaryExpressions2 = new LinkedHashSet<>();
+                for (TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
+                    ternaryExpressions2.add(ternary.getText());
+                }
+                findAndPerformBestReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+            }
+        } else if (!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
+            if (!statement2.getNullLiterals().isEmpty()) {
+                Set<String> nullLiterals2 = new LinkedHashSet<String>();
+                nullLiterals2.add("null");
+                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
+                for (TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
+                    ternaryExpressions1.add(ternary.getText());
+                }
+                findAndPerformBestReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+            }
+        }
 
-//        if (!statement1.getString().endsWith("=true;\n") && !statement1.getString().endsWith("=false;\n")) {
-//            findReplacements(booleanLiterals1, variables2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_VARIABLE);
+//        if (!statement1.getText().endsWith("= true" + JsConfig.STATEMENT_TERMINATOR_CHAR) && !statement1.getText().endsWith("= false" + JsConfig.STATEMENT_TERMINATOR_CHAR)) {
+//            findAndPerformBestReplacements( booleanLiterals1, variables2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_VARIABLE);
 //        }
-//        if (!statement2.getString().endsWith("=true;\n") && !statement2.getString().endsWith("=false;\n")) {
-//            findReplacements(arguments1, booleanLiterals2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_ARGUMENT);
+//        if (!statement2.getText().endsWith("= true" + JsConfig.STATEMENT_TERMINATOR_CHAR) && !statement2.getText().endsWith("= false" + JsConfig.STATEMENT_TERMINATOR_CHAR)) {
+//            findAndPerformBestReplacements(arguments1, booleanLiterals2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_ARGUMENT);
 //        }
-// endregion
+        // endregion
 
         String[] argumentizedStrings = filterReplacements(statement1, statement2
                 , replacementInfo, argumentizer

@@ -32,4 +32,8 @@ public abstract class Container implements IContainer {
     public List<IFunctionDeclaration> getFunctionDeclarations() {
         return functionDeclarations;
     }
+
+    public SourceLocation getSourceLocation(){
+        return this.sourceLocation;
+    }
 }

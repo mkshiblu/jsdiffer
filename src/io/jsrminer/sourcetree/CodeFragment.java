@@ -1,5 +1,8 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.IAnonymousClassDeclaration;
+import io.rminer.core.api.IFunctionDeclaration;
+
 import java.util.List;
 import java.util.Map;
 
@@ -96,6 +99,10 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract List<String> getPrefixExpressions();
 
+    public abstract List<String> getPostfixExpressions();
+
+    public abstract List<TernaryOperatorExpression> getTernaryOperatorExpressions();
+
     public abstract List<String> getIdentifierArguments();
 
     public abstract List<VariableDeclaration> getVariableDeclarations();
@@ -104,6 +111,9 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract VariableDeclaration findVariableDeclarationIncludingParent(String variableName);
 
+    public abstract List<IAnonymousClassDeclaration> getAnonymousClassDeclarations();
+
+    public abstract List<IFunctionDeclaration> getFunctionDeclarations();
 
     //endregion
     public boolean countableStatement() {

@@ -36,7 +36,7 @@ const processes = new Map([
  * @param {*} node 
  */
 function processExpression(path, expressionResult, statement) {
-   t.removeComments(path.node);
+    t.removeComments(path.node);
     const process = processes.get(path.node.type);
     if (process) {
         expressionResult.loc = astUtil.getFormattedLocation(path.node);
@@ -147,8 +147,13 @@ function processNewExpression(path, expressionResult, statement) {
         processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
         // TODO handle arguments
+    } else if (t.isFunctionExpression(callee)) {
+        // For handling nodes like
+        // const PORTS = new function () {
+        // }
+        processExpression(path.get('callee'), expressionResult, statement);  
     } else {
-        throw "Unsupported callee: " + node.callee.type;
+        throw "Unsupported callee: " + path.get('callee').toString();
     }
 
     const result = {

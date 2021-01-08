@@ -52,9 +52,9 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
 
-        System.out.println("Common Files: " + Arrays.deepToString(diff.getCommonSourceFiles()));
-        System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
-        System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
+//        System.out.println("Common Files: " + Arrays.deepToString(diff.getCommonSourceFiles()));
+//        System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
+//        System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
 
         try {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
