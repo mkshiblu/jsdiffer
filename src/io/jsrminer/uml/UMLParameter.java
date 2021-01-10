@@ -34,4 +34,9 @@ public class UMLParameter {
     public boolean hasDefaultValue() {
         return this.defaultValue != null;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

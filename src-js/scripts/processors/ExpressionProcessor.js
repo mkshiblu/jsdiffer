@@ -151,7 +151,7 @@ function processNewExpression(path, expressionResult, statement) {
         // For handling nodes like
         // const PORTS = new function () {
         // }
-        processExpression(path.get('callee'), expressionResult, statement);  
+        processExpression(path.get('callee'), expressionResult, statement);
     } else {
         throw "Unsupported callee: " + path.get('callee').toString();
     }
@@ -399,13 +399,14 @@ function processFunctionExpression(path, expressionResult, statement) {
     const node = path.node;
 
     // Body is a block statmeent
-    const name = node.name;
+    const name = node.id ? node.id.name : null;
 
     const functionDeclarationStatement = {
         type: node.type,
         //qualifiedName,
         name,
-        params: node.params.map(id => id.name)
+        params: node.params.map(id => id.name), 
+        loc: astUtil.getFormattedLocation(path.node)
     };
     processor.processStatement(path.get('body'), functionDeclarationStatement);
 

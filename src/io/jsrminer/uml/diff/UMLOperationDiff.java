@@ -162,7 +162,7 @@ public class UMLOperationDiff extends Diff {
     private List<SimpleEntry<UMLParameter, UMLParameter>> diffParametersByNameAndDefaultValue(FunctionDeclaration function1, FunctionDeclaration function2) {
         final List<SimpleEntry<UMLParameter, UMLParameter>> paramsMatchedByNameAndValue = new ArrayList<>();
         UMLParameter parameter2;
-        for (UMLParameter parameter1 : function1.getParameters().values()) {
+        for (UMLParameter parameter1 : function1.getParameters()) {
             // Check if function 2 contains the same named parameter
             // IN java it's equalsIncludingName i.e. full match
             parameter2 = function2.getParameter(parameter1.name);
@@ -178,7 +178,7 @@ public class UMLOperationDiff extends Diff {
             }
         }
 
-        for (UMLParameter param2 : function2.getParameters().values()) {
+        for (UMLParameter param2 : function2.getParameters()) {
             if (!function1.hasParameterOfName(param2.name)) {
                 // Params2 is not present in function . i.e it has been added
                 this.addedParameters.put(param2.name, param2);
@@ -189,8 +189,8 @@ public class UMLOperationDiff extends Diff {
     }
 
     private boolean checkParametersReordered(int matchedParameterCount) {
-        final Set<String> parameterNames1 = function1.getParameters().keySet();
-        final Set<String> parameterNames2 = function2.getParameters().keySet();
+        final Set<String> parameterNames1 = new LinkedHashSet<>(function1.getParameterNames());
+        final Set<String> parameterNames2 = new LinkedHashSet<>(function2.getParameterNames());
 
         return removedParameters.isEmpty() && addedParameters.isEmpty()
                 && parameterNames1.size() > 1

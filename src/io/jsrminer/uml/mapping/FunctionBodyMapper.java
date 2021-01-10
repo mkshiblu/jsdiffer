@@ -959,7 +959,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public int operationNameEditDistance() {
-        return StringDistance.editDistance(this.function1.name, this.function2.name);
+        return StringDistance.editDistance(this.function1.getName(), this.function2.getName());
     }
 
     @Override

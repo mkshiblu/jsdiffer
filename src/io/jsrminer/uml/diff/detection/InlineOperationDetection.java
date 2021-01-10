@@ -108,7 +108,7 @@ public class InlineOperationDetection {
     private FunctionBodyMapper createMapperForInlinedMethod(FunctionBodyMapper mapper,
                                                             FunctionDeclaration removedOperation, OperationInvocation removedOperationInvocation) throws RefactoringMinerTimedOutException {
         List<String> arguments = removedOperationInvocation.getArguments();
-        List<UMLParameter> parameters = new ArrayList<>(removedOperation.getParameters().values());//
+        List<UMLParameter> parameters = new ArrayList<>(removedOperation.getParameters());//
 
         Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         //special handling for methods with varargs parameter for which no argument is passed in the matching invocation

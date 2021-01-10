@@ -12,7 +12,7 @@ public interface IParser {
      */
     UMLModel parse(Map<String, String> fileContents);
 
-    ISourceFile parseSource(String fileContent);
+    ISourceFile parseSource(String fileContent, String sourcePath);
 
     /**
      * Parse a json string containing the source code in composite

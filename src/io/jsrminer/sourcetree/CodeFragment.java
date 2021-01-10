@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousClassDeclaration;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.List;
@@ -111,7 +111,7 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract VariableDeclaration findVariableDeclarationIncludingParent(String variableName);
 
-    public abstract List<IAnonymousClassDeclaration> getAnonymousClassDeclarations();
+    public abstract List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations();
 
     public abstract List<IFunctionDeclaration> getFunctionDeclarations();
 

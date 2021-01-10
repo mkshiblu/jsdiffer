@@ -18,7 +18,7 @@ public class JavaScriptParserTest extends TestBase {
     public static void setup() throws IOException {
         JavaScriptParser parser = new JavaScriptParser();
         String sourceContent = Files.readString(Path.of(getRootResourceDirectory(), "vue.js"));
-        model = parser.parseSource(sourceContent);
+        model = parser.parseSource(sourceContent, null);
     }
 
     @Test

@@ -30,15 +30,15 @@ public class SourceFileModelDiff {
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {
-        if (addedOperations.containsKey(addedOperation.name))
+        if (addedOperations.containsKey(addedOperation.getName()))
             throw new RuntimeException("Duplicate names for removed operations" + addedOperation);
-        addedOperations.put(addedOperation.name, addedOperation);
+        addedOperations.put(addedOperation.getName(), addedOperation);
     }
 
     public void reportRemovedOperation(FunctionDeclaration removedOperation) {
-        if (removedOperations.containsKey(removedOperation.name))
+        if (removedOperations.containsKey(removedOperation.getName()))
             throw new RuntimeException("Duplicate names for removed operations" + removedOperation);
-        removedOperations.put(removedOperation.name, removedOperation);
+        removedOperations.put(removedOperation.getName(), removedOperation);
     }
 
     public boolean isRemovedOperation(String functionName) {

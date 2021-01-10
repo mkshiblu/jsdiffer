@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousClassDeclaration;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.ICompositeFragment;
 import io.rminer.core.api.IFunctionDeclaration;
 
@@ -300,12 +300,12 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
-    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
-        List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
         for (Expression expression : this.expressions) {
-            anonymousClassDeclarations.addAll(expression.getAnonymousClassDeclarations());
+            anonymousFunctionDeclarations.addAll(expression.getAnonymousFunctionDeclarations());
         }
-        return anonymousClassDeclarations;
+        return anonymousFunctionDeclarations;
     }
 
 

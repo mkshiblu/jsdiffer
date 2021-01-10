@@ -224,7 +224,7 @@ public class ExtractOperationDetection {
         //        = new LinkedHashMap<>();
 
         List<String> invocationArguments = addedOperationInvocation.getArguments();
-        List<UMLParameter> addedOperationParameters = new ArrayList<>(addedOperation.getParameters().values());
+        List<UMLParameter> addedOperationParameters = new ArrayList<>(addedOperation.getParameters());
         Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         int size = Math.min(invocationArguments.size(), addedOperationParameters.size());
         for (int i = 0; i < size; i++) {

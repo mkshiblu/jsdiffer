@@ -37,9 +37,9 @@ public class InlineFunctionTest extends TestBase {
 
     @Test
     void testFunctionNames() {
-        assertEquals(inlineOperationRefactoring.getInlinedOperation().name, "createAddress");
-        assertEquals(inlineOperationRefactoring.getTargetOperationAfterInline().name, "createAddresses");
-        assertEquals(inlineOperationRefactoring.getTargetOperationBeforeInline().name, "createAddresses");
+        assertEquals(inlineOperationRefactoring.getInlinedOperation().getName(), "createAddress");
+        assertEquals(inlineOperationRefactoring.getTargetOperationAfterInline().getName(), "createAddresses");
+        assertEquals(inlineOperationRefactoring.getTargetOperationBeforeInline().getName(), "createAddresses");
         assertEquals("createAddress(\"127.0.0.1\", PORTS.incrementAndGet())", inlineOperationRefactoring.getInlinedOperationInvocations().get(0)
                 .getText());
     }

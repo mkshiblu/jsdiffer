@@ -32,9 +32,9 @@ public class ExtractFunctionTest extends TestBase {
 
     @Test
     void testFunctionNames() {
-        assertEquals(extractOperationRefactoring.getExtractedOperation().name, "createAddress");
-        assertEquals(extractOperationRefactoring.getSourceOperationAfterExtraction().name, "createAddresses");
-        assertEquals(extractOperationRefactoring.getSourceOperationBeforeExtraction().name, "createAddresses");
+        assertEquals(extractOperationRefactoring.getExtractedOperation().getName(), "createAddress");
+        assertEquals(extractOperationRefactoring.getSourceOperationAfterExtraction().getName(), "createAddresses");
+        assertEquals(extractOperationRefactoring.getSourceOperationBeforeExtraction().getName(), "createAddresses");
     }
 
 //    @Test

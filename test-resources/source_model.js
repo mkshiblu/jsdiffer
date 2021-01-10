@@ -1,7 +1,3 @@
-const parser = require('./scripts/Parser');
-const types = require('@babel/types');
-
-let content = `
 /*!
  * Vue.js v2.5.0
  * (c) 2014-2017 Evan You
@@ -61,22 +57,12 @@ Test.prototype = {
 };
 
 let c = function d(){
-console.log('Hello, world!')    
-        
+console.log('Hello, world!')
+
 }
 
 c();
 
 new c();
-
-function f1(){
-    
+function x(){
 }
-`;
-//content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
-//content = require('fs').readFileSync('../resources/real-projects/vue/src1/vue_common.js', 'utf-8');
-//content = require('fs').readFileSync('../test-resources/ExtractOrInlineFunction/src1/vue_runtime_common.js', 'utf-8');
-const sourceModel = parser.parse(content);
-const json = JSON.stringify(sourceModel);
-require('fs').writeFileSync("E:\\functions.json", json);
-console.log(json);

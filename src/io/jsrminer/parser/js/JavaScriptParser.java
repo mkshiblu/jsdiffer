@@ -24,7 +24,7 @@ public class JavaScriptParser implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
 
-                SourceFile sourceFile = parse(content, jsEngine);
+                SourceFile sourceFile = parse(content, jsEngine, filepath);
                 sourceFile.setFilepath(filepath);
                 sourceModels.put(filepath, sourceFile);
             }
@@ -36,12 +36,11 @@ public class JavaScriptParser implements IParser {
     }
 
     @Override
-    public ISourceFile parseSource(String content) {
-        String filepath = null;
+    public ISourceFile parseSource(String content, String filepath) {
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
             jsEngine.createParseFunction();
 
-            SourceFile source = parse(content, jsEngine);
+            SourceFile source = parse(content, jsEngine, filepath);
             source.setFilepath(filepath);
             return source;
         } catch (Exception e) {
@@ -54,10 +53,10 @@ public class JavaScriptParser implements IParser {
      *
      * @return
      */
-    private SourceFile parse(String fileContent, JavaScriptEngine jsEngine) {
+    private SourceFile parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
         // IComposite body = new CompositeFragment();
         final String blockJson = processScript(fileContent, jsEngine);
-        return JsonCompositeDeserializer.parseSourceFile(blockJson);
+        return JsonCompositeDeserializer.parseSourceFile(blockJson, filePath);
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {

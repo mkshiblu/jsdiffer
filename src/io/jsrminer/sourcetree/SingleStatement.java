@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousClassDeclaration;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.ICodeFragment;
 import io.rminer.core.api.IFunctionDeclaration;
 
@@ -26,7 +26,8 @@ public class SingleStatement extends Statement implements ICodeFragment {
     private List<String> prefixExpressions = new ArrayList<>();
     private List<String> postfixExpressions = new ArrayList<>();
     protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
-    private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
     private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
 
     public SingleStatement() {
@@ -114,11 +115,16 @@ public class SingleStatement extends Statement implements ICodeFragment {
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
+
     }
 
+    //    @Override
+//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+//        return this.anonymousClassDeclarations;
+//    }
     @Override
-    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
-        return this.anonymousClassDeclarations;
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        return this.anonymousFunctionDeclarations;
     }
 
     @Override

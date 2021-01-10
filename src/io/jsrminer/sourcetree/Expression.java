@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousClassDeclaration;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.ArrayList;
@@ -24,7 +24,8 @@ public class Expression extends CodeFragment {
     private List<String> postfixExpressions = new ArrayList<>();
 
     protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
-    private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
     private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
     private BlockStatement ownerBlock;
 
@@ -121,10 +122,14 @@ public class Expression extends CodeFragment {
         }
         return null;
     }
+//    @Override
+//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+//        return anonymousClassDeclarations;
+//    }
 
     @Override
-    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
-        return anonymousClassDeclarations;
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        return anonymousFunctionDeclarations;
     }
 
     @Override

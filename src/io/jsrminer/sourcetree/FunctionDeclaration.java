@@ -4,28 +4,28 @@ import io.jsrminer.uml.UMLParameter;
 import io.rminer.core.api.IFunctionDeclaration;
 import io.rminer.core.entities.DeclarationContainer;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class FunctionDeclaration extends DeclarationContainer implements IFunctionDeclaration {
 
     /**
-     * Name parameter map
-     */
-    private Map<String, UMLParameter> nameParameterMap = new LinkedHashMap<>();
-    /**
      * The name of the function.
      */
-    public final String name;
+    private String name;
+    /**
+     * Name parameter map
+     */
+    private List<UMLParameter> parameters = new ArrayList<>();
 
     /**
      * Qualified name excluding the filename but including the parent function name.
      * For example if function y() is declared inside x(), it will return x.y.
      */
-    public final String qualifiedName;
+    private String qualifiedName;
 
-    public final String namespace;
+    //public final String namespace;
 
     /**
      * Fully Qualified name including the filename, parent function name if any.
@@ -47,26 +47,15 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
      * file and not nested
      */
-    public final boolean isTopLevel;
+    private boolean isTopLevel;
 
     /**
      * True if the function is also a constructor
      */
     private boolean isConstructor;
 
-    public FunctionDeclaration(String qualifiedName, boolean isTopLevel) {
-        this.isTopLevel = isTopLevel;
-        this.qualifiedName = qualifiedName;
-        int idx = qualifiedName.lastIndexOf('.');
-        if (idx != -1) {
-            name = qualifiedName.substring(idx + 1);
-            namespace = qualifiedName.substring(0, idx);
-        } else {
-            name = qualifiedName;
-            namespace = null;
-        }
+    public FunctionDeclaration() {
     }
-
 
     public void setSourceLocation(SourceLocation sourceLocation) {
         super.sourceLocation = sourceLocation;
@@ -81,20 +70,13 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         return fullyQualifiedName;
     }
 
-    // region Setters & getters
-    public Map<String, UMLParameter> getParameters() {
-        return nameParameterMap;
+    public List<String> getParameterNames() {
+        return getParameters().stream().map(parameter -> parameter.name).collect(Collectors.toList());
     }
 
-    public void setParameters(UMLParameter[] parameters) {
-        this.nameParameterMap.clear();
-        LinkedHashMap<String, String> x;
-        UMLParameter parameter;
-        for (int i = 0; i < parameters.length; i++) {
-            parameter = parameters[i];
-            parameter.setIndexPositionInParent(i);
-            nameParameterMap.put(parameter.name, parameter);
-        }
+    // region Setters & getters
+    public List<UMLParameter> getParameters() {
+        return parameters;
     }
 
     public void setBody(FunctionBody body) {
@@ -111,11 +93,14 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
     //endregion
 
     public boolean hasParameterOfName(String name) {
-        return nameParameterMap.containsKey(name);
+        return parameters.stream().anyMatch(p -> p.name.equals(name));
     }
 
     public UMLParameter getParameter(String parameterName) {
-        return nameParameterMap.get(parameterName);
+        return parameters.stream()
+                .filter(p -> parameterName.equals(p.name))
+                .findAny()
+                .orElse(null);
     }
 
     public boolean nameEquals(FunctionDeclaration function) {
@@ -123,7 +108,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
     }
 
     public int parameterCount() {
-        return this.nameParameterMap.size();
+        return this.parameters.size();
     }
 
     public boolean isConstructor() {
@@ -134,12 +119,46 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         isConstructor = constructor;
     }
 
+    /**
+     * Qualified name excluding the filename but including the parent function name.
+     * For example if function y() is declared inside x(), it will return x.y.
+     */
+    public String getQualifiedName() {
+        return qualifiedName;
+    }
+
+    public void setQualifiedName(String qualifiedName) {
+        this.qualifiedName = qualifiedName;
+    }
+
+    public void setIsTopLevel(boolean isTopLevel) {
+        this.isTopLevel = isTopLevel;
+    }
+
+    public boolean isTopLevel() {
+        return isTopLevel;
+    }
+
+    /**
+     * The name of the function.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * The name of the function.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(qualifiedName);
         sb.append('(');
-        String commaSeparatedParams = this.getParameters().keySet()
+        String commaSeparatedParams = this.getParameters()
                 .stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(" ,"));

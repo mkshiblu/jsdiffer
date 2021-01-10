@@ -41,4 +41,9 @@ public class SourceLocation {
     public void setFile(String file) {
         this.file = file;
     }
+
+    @Override
+    public String toString() {
+        return "line: " + startLine + "column: " + startColumn;
+    }
 }
