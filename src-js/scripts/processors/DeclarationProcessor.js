@@ -4,12 +4,12 @@ const astUtil = require('../parser/AstUtil');
 /** Process for a AST functionDeclarationNodePath */
 exports.processFunctionDeclaration = (functionDeclarationPath, processStatement) => {
     const node = functionDeclarationPath.node;
-    const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
+    //const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
     const name = node.id.name
 
     const statement = {
         type: node.type,
-        qualifiedName,
+      //  qualifiedName,
         name,
         params: node.params.map(id => id.name)
     };

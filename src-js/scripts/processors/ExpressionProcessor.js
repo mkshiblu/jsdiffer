@@ -399,15 +399,14 @@ function processFunctionExpression(path, expressionResult, statement) {
     const node = path.node;
 
     // Body is a block statmeent
-    const name = node.id ? node.id.name : null;
-
+    const name = node.id ? node.id.name : undefined;
     const functionDeclarationStatement = {
         type: node.type,
-        //qualifiedName,
         name,
-        params: node.params.map(id => id.name), 
+        params: node.params.map(id => id.name),
         loc: astUtil.getFormattedLocation(path.node)
     };
+
     processor.processStatement(path.get('body'), functionDeclarationStatement);
 
     expressionResult.functionDeclarations = [functionDeclarationStatement];

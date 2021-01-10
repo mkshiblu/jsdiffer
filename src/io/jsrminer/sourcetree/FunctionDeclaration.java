@@ -19,12 +19,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      */
     private List<UMLParameter> parameters = new ArrayList<>();
 
-    /**
-     * Qualified name excluding the filename but including the parent function name.
-     * For example if function y() is declared inside x(), it will return x.y.
-     */
-    private String qualifiedName;
-
     //public final String namespace;
 
     /**
@@ -59,7 +53,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public void setSourceLocation(SourceLocation sourceLocation) {
         super.sourceLocation = sourceLocation;
-        fullyQualifiedName = sourceLocation.getFile() + "|" + qualifiedName;
+        fullyQualifiedName = sourceLocation.getFile() + "|" + getQualifiedName();
     }
 
     public boolean hasIdenticalBody(FunctionDeclaration fd) {
@@ -119,18 +113,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         isConstructor = constructor;
     }
 
-    /**
-     * Qualified name excluding the filename but including the parent function name.
-     * For example if function y() is declared inside x(), it will return x.y.
-     */
-    public String getQualifiedName() {
-        return qualifiedName;
-    }
-
-    public void setQualifiedName(String qualifiedName) {
-        this.qualifiedName = qualifiedName;
-    }
-
     public void setIsTopLevel(boolean isTopLevel) {
         this.isTopLevel = isTopLevel;
     }
@@ -156,7 +138,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(qualifiedName);
+        sb.append(getQualifiedName());
         sb.append('(');
         String commaSeparatedParams = this.getParameters()
                 .stream()

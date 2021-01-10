@@ -56,7 +56,7 @@ public class JavaScriptParser implements IParser {
     private SourceFile parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
         // IComposite body = new CompositeFragment();
         final String blockJson = processScript(fileContent, jsEngine);
-        return JsonCompositeDeserializer.parseSourceFile(blockJson, filePath);
+        return new JsonCompositeDeserializer(filePath).parseSourceFile(blockJson);
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {

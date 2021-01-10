@@ -4,8 +4,11 @@ import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.rminer.core.entities.Container;
+import io.rminer.core.entities.DeclarationContainer;
 import io.rminer.core.entities.SourceFile;
 import org.eclipse.jgit.annotations.NonNull;
+import org.eclipse.jgit.util.StringUtils;
 
 import java.util.*;
 
@@ -13,41 +16,71 @@ import java.util.*;
  * A deserializer for the program which is in a composite json format
  */
 public class JsonCompositeDeserializer {
+    final String sourcePath;
 
-    public static SourceFile parseSourceFile(final String containerJson, final String filePath) {
+    private HashMap<String, FunctionDeclaration> loadedFunctions = new HashMap<>();
+
+    public JsonCompositeDeserializer(String sourcePath) {
+        this.sourcePath = sourcePath;
+    }
+
+    public SourceFile parseSourceFile(final String containerJson) {
         Any any = JsonIterator.deserialize(containerJson);
-        SourceFile sourceFile = new SourceFile(filePath);
+        SourceFile sourceFile = new SourceFile(sourcePath);
 
         // Statements is wrapped as a Block Any
-        BlockStatement blockBody = createBlockStatement(any, filePath);
+        BlockStatement blockBody = createBlockStatement(any, sourceFile);
         sourceFile.getStatements().addAll(blockBody.getStatements());
 
         // Functions
         List<Any> functionDeclarationAnys = any.get("functionDeclarations").asList();
         for (Any functionDeclarationAny : functionDeclarationAnys) {
-            FunctionDeclaration functionDeclaration = new FunctionDeclaration();
-            loadFunctionDeclaration(functionDeclarationAny, functionDeclaration, filePath);
+            FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, sourceFile);
+            if (functionDeclaration == null)
+                functionDeclaration = new FunctionDeclaration();
+
+            loadFunctionDeclaration(functionDeclarationAny, functionDeclaration, sourceFile);
             functionDeclaration.setIsTopLevel(true);
             sourceFile.getFunctionDeclarations().add(functionDeclaration);
         }
         return sourceFile;
     }
 
-    public static String generateQualifiedName(Any any) {
-        return any.toString("qualifiedName");
+    private FunctionDeclaration getFunctionIfAlreadyLoaded(Any any, Container parentContainer) {
+        String name = generateName(any, parentContainer);
+        String qualifiedName = generateQualifiedName(name, parentContainer);
+        return loadedFunctions.getOrDefault(qualifiedName, null);
     }
 
-    public static void loadFunctionDeclaration(Any any, FunctionDeclaration function, String filePath) {
-        //Names
-        String qualifiedName = generateQualifiedName(any);
+    public String generateQualifiedName(String name, Container parentContainer) {
+        String namespace = null;
+
+        if (parentContainer instanceof DeclarationContainer) {
+            namespace = ((DeclarationContainer) parentContainer).getQualifiedName();
+        }
+        return namespace == null ? name : namespace + "." + name;
+    }
+
+    public String generateName(Any any, Container parentContainer) {
         String name = any.toString("name");
 
-        function.setName(name);
-        function.setQualifiedName(qualifiedName);
+        // Anonymous
+        if (StringUtils.isEmptyOrNull(name)) {
+            name = parentContainer.getAnonymousFunctionDeclarations().size() + 1 + "";
+        }
+        return name;
+    }
 
+    public void loadFunctionDeclaration(Any any, FunctionDeclaration function, Container parentContainer) {
         // Location
-        SourceLocation location = createSourceLocation(any.get("loc"), filePath);
+        SourceLocation location = createSourceLocation(any.get("loc"));
         function.setSourceLocation(location);
+
+        String name = generateName(any, parentContainer);
+        String qualifiedName = generateQualifiedName(name, parentContainer);
+
+        function.setQualifiedName(qualifiedName);
+        function.setName(name);
 
         // Params
         List<Any> params = any.get("params").asList();
@@ -60,22 +93,24 @@ public class JsonCompositeDeserializer {
 
         // Body Statements will be always 1 block
         Any body = any.get("statements").asList().get(0);
-        BlockStatement bodyBlock = createBlockStatement(body, filePath);
+
+        // Use the new function as the parent container
+        BlockStatement bodyBlock = createBlockStatement(body, function);
         function.setBody(new FunctionBody(bodyBlock));
 
-        // Todo save Functions from the body to this function?
+        loadedFunctions.put(function.getQualifiedName(), function);
     }
 
-    static UMLParameter parseUMLParameter(Any parameterAny) {
+    UMLParameter parseUMLParameter(Any parameterAny) {
         return new UMLParameter(parameterAny.toString());
     }
 
-    public static BlockStatement createBlockStatement(final String blockStatementJson, String filePath) {
+    public BlockStatement createBlockStatement(final String blockStatementJson, Container parentContainer) {
         Any any = JsonIterator.deserialize(blockStatementJson);
-        return createBlockStatement(any, filePath);
+        return createBlockStatement(any, parentContainer);
     }
 
-    public static BlockStatement createBlockStatement(Any any, String filePath) {
+    public BlockStatement createBlockStatement(Any any, Container parentContainer) {
         // Helper variables
         BlockStatement currentBlock, childBlock;
         Statement child;
@@ -103,7 +138,7 @@ public class JsonCompositeDeserializer {
             try {
 
                 if (any.keys().contains("loc")) {
-                    final SourceLocation location = createSourceLocation(any.get("loc"), filePath);
+                    final SourceLocation location = createSourceLocation(any.get("loc"));
                     currentBlock.setSourceLocation(location);
                 }
             } catch (Exception ex) {
@@ -118,7 +153,7 @@ public class JsonCompositeDeserializer {
             // Parse Expressions (Todo optimize
             if (any.keys().contains("expressions")) {
                 for (Any expressionAny : any.get("expressions").asList()) {
-                    Expression expression = createExpression(expressionAny, currentBlock, filePath);
+                    Expression expression = createExpression(expressionAny, currentBlock, parentContainer);
                     currentBlock.addExpression(expression);
                 }
             }
@@ -146,7 +181,7 @@ public class JsonCompositeDeserializer {
                     child = childBlock;
                 } else {
                     // A leaf statement
-                    child = createSingleStatement(childAny, currentBlock, filePath);
+                    child = createSingleStatement(childAny, currentBlock, parentContainer);
                 }
 
                 indexInParent = addChildToParentBlock(currentBlock, child, indexInParent);
@@ -187,7 +222,7 @@ public class JsonCompositeDeserializer {
         ((TryStatement) tryBlock).getCatchClauses().add(catchClause);
     }
 
-    private static void populateInvocationProperties(Any invocationAny, Invocation invocation, String filePath) {
+    private void populateInvocationProperties(Any invocationAny, Invocation invocation, Container parentContainer) {
         invocation.setText(invocationAny.toString("text"));
 
         // Type
@@ -195,16 +230,16 @@ public class JsonCompositeDeserializer {
         invocation.setType(CodeElementType.getFromTitleCase(type));
 
         //Loc
-        invocation.setSourceLocation(createSourceLocation(invocationAny.get("loc"), filePath));
+        invocation.setSourceLocation(createSourceLocation(invocationAny.get("loc")));
 
         // Arguments
         List<Any> argumentAnys = invocationAny.get("arguments").asList();
         argumentAnys.forEach(argumentAny -> invocation.getArguments().add(argumentAny.toString()));
     }
 
-    public static ObjectCreation createObjectCreation(Any any, String filePath) {
+    public ObjectCreation createObjectCreation(Any any, Container parentContainer) {
         ObjectCreation creation = new ObjectCreation();
-        populateInvocationProperties(any, creation, filePath);
+        populateInvocationProperties(any, creation, parentContainer);
         creation.setFunctionName(any.toString("typeName"));
 
         if (any.keys().contains("expressionText")) {
@@ -215,9 +250,9 @@ public class JsonCompositeDeserializer {
         return creation;
     }
 
-    public static OperationInvocation createOperationInvocation(Any any, String filePath) {
+    public OperationInvocation createOperationInvocation(Any any, Container parentContainer) {
         OperationInvocation operationInvocation = new OperationInvocation();
-        populateInvocationProperties(any, operationInvocation, filePath);
+        populateInvocationProperties(any, operationInvocation, parentContainer);
 
         operationInvocation.setFunctionName(any.toString("functionName"));
 
@@ -231,7 +266,7 @@ public class JsonCompositeDeserializer {
     /**
      * @param any SingleStatement any node
      */
-    public static SingleStatement createSingleStatement(Any any, BlockStatement parent, String filePath) {
+    public SingleStatement createSingleStatement(Any any, BlockStatement parent, Container parentContainer) {
         SingleStatement singleStatement = new SingleStatement();
         // Text
         singleStatement.setText(any.toString("text"));
@@ -240,20 +275,20 @@ public class JsonCompositeDeserializer {
         String type = any.toString("type");
         singleStatement.setType(CodeElementType.getFromTitleCase(type));
 
-        loadLeafData(any, singleStatement, parent, filePath);
+        loadLeafData(any, singleStatement, parent, parentContainer);
         return singleStatement;
     }
 
-    public static Expression createExpression(Any any, BlockStatement ownerBlock, String filePath) {
+    public Expression createExpression(Any any, BlockStatement ownerBlock, Container parentContainer) {
         Expression expression = new Expression();
         //Text
         expression.setText(any.toString("text"));
-        loadLeafData(any, expression, ownerBlock, filePath);
+        loadLeafData(any, expression, ownerBlock, parentContainer);
         expression.setOwnerBlock(ownerBlock);
         return expression;
     }
 
-    public static void loadLeafData(Any any, CodeFragment leaf, BlockStatement parentOrOwner, String filePath) {
+    public void loadLeafData(Any any, CodeFragment leaf, BlockStatement parentOrOwner, Container parentContainer) {
 
         // Additional info if present
         // region
@@ -266,7 +301,7 @@ public class JsonCompositeDeserializer {
         // region Variable declarations
         if (any.keys().contains("variableDeclarations")) {
             for (Any variableDeclarationAny : any.get("variableDeclarations").asList()) {
-                VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny, parentOrOwner, filePath);
+                VariableDeclaration declaration = createVariableDeclaration(variableDeclarationAny, parentOrOwner, parentContainer);
                 leaf.getVariableDeclarations().add(declaration);
             }
         }
@@ -274,7 +309,7 @@ public class JsonCompositeDeserializer {
 
         // region Function Invocation
         if (any.keys().contains("functionInvocations")) {
-            parseAndLoadFunctionInvocations(any.get("functionInvocations"), leaf.getMethodInvocationMap(), filePath);
+            parseAndLoadFunctionInvocations(any.get("functionInvocations"), leaf.getMethodInvocationMap(), parentContainer);
         }
         // endregion
 
@@ -285,7 +320,7 @@ public class JsonCompositeDeserializer {
 
         // region Object Creations
         if (any.keys().contains("objectCreations")) {
-            parseAndLoadObjectCreations(any.get("objectCreations"), leaf.getCreationMap(), filePath);
+            parseAndLoadObjectCreations(any.get("objectCreations"), leaf.getCreationMap(), parentContainer);
         }
         // endregion
 
@@ -307,7 +342,7 @@ public class JsonCompositeDeserializer {
         // Anonymous FunctionDeclarations
         if (any.keys().contains("functionDeclarations")) {
             for (Any objAny : any.get("functionDeclarations").asList()) {
-                AnonymousFunctionDeclaration anonymousFunctionDeclaration = loadAnonymousFunction(objAny, filePath);
+                AnonymousFunctionDeclaration anonymousFunctionDeclaration = loadAnonymousFunction(objAny, parentContainer);
                 leaf.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
             }
         }
@@ -320,9 +355,16 @@ public class JsonCompositeDeserializer {
 //        }
     }
 
-    public static AnonymousFunctionDeclaration loadAnonymousFunction(Any any, String filePath) {
-        AnonymousFunctionDeclaration anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
-        loadFunctionDeclaration(any, anonymousFunctionDeclaration, filePath);
+    public AnonymousFunctionDeclaration loadAnonymousFunction(Any any, Container parentContainer) {
+        AnonymousFunctionDeclaration anonymousFunctionDeclaration;
+        FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, parentContainer);
+        if (functionDeclaration == null) {
+            anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
+            loadFunctionDeclaration(any, anonymousFunctionDeclaration, parentContainer);
+            parentContainer.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+        } else {
+            anonymousFunctionDeclaration = (AnonymousFunctionDeclaration) functionDeclaration;
+        }
 
         return anonymousFunctionDeclaration;
     }
@@ -332,9 +374,9 @@ public class JsonCompositeDeserializer {
 //        return anonymousClassDeclaration;
 //    }
 
-    public static void parseAndLoadFunctionInvocations(Any functionInvocationsAny, Map<String, List<OperationInvocation>> operationInvocationMap, String filePath) {
+    public void parseAndLoadFunctionInvocations(Any functionInvocationsAny, Map<String, List<OperationInvocation>> operationInvocationMap, Container parentContainer) {
         for (Any operationInvocationAny : functionInvocationsAny.asList()) {
-            OperationInvocation operationInvocation = createOperationInvocation(operationInvocationAny, filePath);
+            OperationInvocation operationInvocation = createOperationInvocation(operationInvocationAny, parentContainer);
             final String text = operationInvocationAny.toString("text");
             List<OperationInvocation> list = operationInvocationMap.get(text);
             if (list == null) {
@@ -346,9 +388,9 @@ public class JsonCompositeDeserializer {
     }
 
 
-    public static void parseAndLoadObjectCreations(Any creationsAny, Map<String, List<ObjectCreation>> creationMap, String filePath) {
+    public void parseAndLoadObjectCreations(Any creationsAny, Map<String, List<ObjectCreation>> creationMap, Container parentContainer) {
         for (Any creationAny : creationsAny.asList()) {
-            ObjectCreation creation = createObjectCreation(creationAny, filePath);
+            ObjectCreation creation = createObjectCreation(creationAny, parentContainer);
             final String text = creationAny.toString("text");
             List<ObjectCreation> list = creationMap.get(text);
             if (list == null) {
@@ -359,26 +401,26 @@ public class JsonCompositeDeserializer {
         }
     }
 
-    public static VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner, String filePath) {
+    public VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner, Container parentContainer) {
         VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"));
         //vd.setText(any.toString("text"));
         VariableDeclarationKind kind = VariableDeclarationKind.fromName(any.toString("kind"));
         vd.setKind(kind);
 
         if (any.keys().contains("initializer")) {
-            Expression expression = createExpression(any.get("initializer"), owner, filePath);
+            Expression expression = createExpression(any.get("initializer"), owner, parentContainer);
             vd.setInitializer(expression);
         }
         return vd;
     }
 
-    static SourceLocation createSourceLocation(Any sourceLocationAny, String filePath) {
+    SourceLocation createSourceLocation(Any sourceLocationAny) {
         SourceLocation loc = sourceLocationAny.as(SourceLocation.class);
-        loc.setFile(filePath);
+        loc.setFile(sourcePath);
         return loc;
     }
 
-    static void populateStringListFromAny(Any any, @NonNull List<String> listToBePopulated) {
+    void populateStringListFromAny(Any any, @NonNull List<String> listToBePopulated) {
         any.asList().forEach(item -> listToBePopulated.add(item.toString()));
     }
 }
