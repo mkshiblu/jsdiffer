@@ -2,6 +2,7 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.rminer.core.api.IContainer;
 import io.rminer.core.api.ISourceFile;
 
 import java.util.ArrayList;
@@ -10,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a diff between two version of the same source file
+ * Represents a diff between two containers
  */
-public class SourceFileModelDiff {
-    public final ISourceFile sourceFileModel1;
-    public final ISourceFile sourceFileModel2;
+public class ContainerDiff {
+    public final IContainer container1;
+    public final IContainer cotainer2;
 
     public final List<IRefactoring> refactorings = new ArrayList<>();
 
@@ -24,9 +25,9 @@ public class SourceFileModelDiff {
     private final Map<String, FunctionDeclaration> addedOperations = new LinkedHashMap<>();
     private final Map<String, FunctionDeclaration> removedOperations = new LinkedHashMap<>();
 
-    public SourceFileModelDiff(ISourceFile sourceFileModel1, ISourceFile sourceFileModel2) {
-        this.sourceFileModel1 = sourceFileModel1;
-        this.sourceFileModel2 = sourceFileModel2;
+    public ContainerDiff(ISourceFile container1, ISourceFile cotainer2) {
+        this.container1 = container1;
+        this.cotainer2 = cotainer2;
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {

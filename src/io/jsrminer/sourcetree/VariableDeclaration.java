@@ -36,4 +36,8 @@ public class VariableDeclaration extends CodeEntity {
     public VariableDeclarationKind getKind() {
         return kind;
     }
+
+    public String getVariableName() {
+        return variableName;
+    }
 }

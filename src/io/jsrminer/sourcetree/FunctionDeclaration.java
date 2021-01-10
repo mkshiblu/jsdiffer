@@ -53,7 +53,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public void setSourceLocation(SourceLocation sourceLocation) {
         super.sourceLocation = sourceLocation;
-        fullyQualifiedName = sourceLocation.getFile() + "|" + getQualifiedName();
     }
 
     public boolean hasIdenticalBody(FunctionDeclaration fd) {
@@ -105,11 +104,11 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         return this.parameters.size();
     }
 
-    public boolean isConstructor() {
+    public boolean getIsConstructor() {
         return isConstructor;
     }
 
-    public void setConstructor(boolean constructor) {
+    public void setIsConstructor(boolean constructor) {
         isConstructor = constructor;
     }
 
@@ -119,6 +118,10 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public boolean isTopLevel() {
         return isTopLevel;
+    }
+
+    public void setFullyQualifiedName(String fullyQualifiedName) {
+        this.fullyQualifiedName = fullyQualifiedName;
     }
 
     /**

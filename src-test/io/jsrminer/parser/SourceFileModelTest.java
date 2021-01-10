@@ -34,8 +34,9 @@ public class SourceFileModelTest extends TestBase {
 
     @Test
     public void testElementsCount() {
-
-        assertEquals(4, functions.length);
+        assertEquals(1, functions.length);
+        assertEquals(2, sourceFile.getAnonymousFunctionDeclarations().size());
+        assertEquals(6, statements.size());
     }
 
     @AfterAll

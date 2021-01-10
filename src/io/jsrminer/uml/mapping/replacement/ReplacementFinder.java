@@ -2,9 +2,10 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
+import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -19,12 +20,21 @@ public class ReplacementFinder {
     private static final Pattern DOUBLE_QUOTES = Pattern.compile("\"([^\"]*)\"|(\\S+)");
     private static final Pattern SPLIT_CONDITIONAL_PATTERN = Pattern.compile("(\\|\\|)|(&&)|(\\?)|(:)");
 
+    FunctionDeclaration function1;
+    FunctionDeclaration function2;
+    FunctionBodyMapper bodyMapper;
+
+    public ReplacementFinder(FunctionBodyMapper bodyMapper) {
+        this.bodyMapper = bodyMapper;
+        this.function1 = bodyMapper.function1;
+        this.function2 = bodyMapper.function2;
+    }
+
     public Set<Replacement> findReplacementsWithExactMatching(CodeFragment statement1
             , CodeFragment statement2
             , Map<String, String> parameterToArgumentMap
             , ReplacementInfo replacementInfo
-            , Argumentizer argumentizer
-            , Set<CodeFragmentMapping> mappings) {
+            , Argumentizer argumentizer) {
 
         final CodeFragmentDiff diff = new CodeFragmentDiff(statement1, statement2);
 
@@ -79,7 +89,7 @@ public class ReplacementFinder {
                     , diff.variables1, diff.variables2
                     , methodInvocationMap1, methodInvocationMap2
                     , functionInvocations1, functionInvocations2
-                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2, mappings);
+                    , variablesAndMethodInvocations1, variablesAndMethodInvocations2);
         }
         //3. replace variables with the corresponding arguments in object creations
         intersectAndReplaceObjectCreations(statement1, statement2,
@@ -168,87 +178,19 @@ public class ReplacementFinder {
                 return null;
             }
 
-            // region TODO annynomous class
-            //        List<AnonymousClassDeclarationObject> anonymousClassDeclarations1 = statement1.getAnonymousClassDeclarations();
-//        List<AnonymousClassDeclarationObject> anonymousClassDeclarations2 = statement2.getAnonymousClassDeclarations();
-
-//            if(!anonymousClassDeclarations1.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
-//                Set<Replacement> replacementsInsideAnonymous = new LinkedHashSet<Replacement>();
-//                for(Replacement replacement : replacementInfo.getReplacements()) {
-//                    if(replacement instanceof MethodInvocationReplacement) {
-//                        for(int i=0; i<anonymousClassDeclarations1.size(); i++) {
-//                            for(int j=0; j<anonymousClassDeclarations2.size(); j++) {
-//                                AnonymousClassDeclarationObject anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
-//                                AnonymousClassDeclarationObject anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
-//                                if(anonymousClassDeclaration1.getMethodInvocationMap().containsKey(replacement.getBefore()) &&
-//                                        anonymousClassDeclaration2.getMethodInvocationMap().containsKey(replacement.getAfter())) {
-//                                    replacementsInsideAnonymous.add(replacement);
-//                                    break;
-//                                }
-//                            }
-//                            if(replacementsInsideAnonymous.contains(replacement)) {
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//                for(Replacement replacement : replacementsInsideAnonymous) {
-//                    equalAfterNewArgumentAdditions(replacement.getBefore(), replacement.getAfter(), replacementInfo);
-//                }
-//            }
-            // endregion
-
+            // TODO anonymous
+            //checkMethodInvocatioRepalcementInsideAnonymousFunctionDeclarations(statement1, statement2, replacementInfo);
             return replacementInfo.getReplacements();
         }
 
         // region annonymous
-//        if (!anonymousClassDeclarations1.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
-//            for (int i = 0; i < anonymousClassDeclarations1.size(); i++) {
-//                for (int j = 0; j < anonymousClassDeclarations2.size(); j++) {
-//                    AnonymousClassDeclarationObject anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
-//                    AnonymousClassDeclarationObject anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
-//                    String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, operation1);
-//                    String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, operation2);
-//                    if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
-//                            identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacementInfo.getReplacements()) ||
-//                            (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-//                                    (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()) ||
-//                                            invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)))) {
-//                        UMLAnonymousClass anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, operation1);
-//                        UMLAnonymousClass anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, operation2);
-//                        int matchedOperations = 0;
-//                        for (UMLOperation operation1 : anonymousClass1.getOperations()) {
-//                            for (UMLOperation operation2 : anonymousClass2.getOperations()) {
-//                                if (operation1.equals(operation2) || operation1.equalSignature(operation2) || operation1.equalSignatureWithIdenticalNameIgnoringChangedTypes(operation2)) {
-//                                    UMLOperationBodyMapper mapper = new UMLOperationBodyMapper(operation1, operation2, classDiff);
-//                                    int mappings = mapper.mappingsWithoutBlocks();
-//                                    if (mappings > 0) {
-//                                        int nonMappedElementsT1 = mapper.nonMappedElementsT1();
-//                                        int nonMappedElementsT2 = mapper.nonMappedElementsT2();
-//                                        if (mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
-//                                            this.mappings.addAll(mapper.mappings);
-//                                            this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
-//                                            this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
-//                                            this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
-//                                            this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
-//                                            matchedOperations++;
-//                                            UMLOperationDiff operationDiff = new UMLOperationDiff(operation1, operation2, mapper.mappings);
-//                                            this.refactorings.addAll(mapper.getRefactorings());
-//                                            this.refactorings.addAll(operationDiff.getRefactorings());
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                        if (matchedOperations > 0) {
-//                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
-//                            replacementInfo.addReplacement(replacement);
-//                            return replacementInfo.getReplacements();
-//                        }
-//                    }
-//                }
-//            }
-//        }
+        AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, bodyMapper);
+
+        Set<Replacement> replacements = anonymousReplacer.replaceInAnonymousFunctions(statement1, statement2, function1, function2,
+                replacementInfo);
+        if (replacements != null) {
+            return replacements;
+        }
         // endregion
 
         // region lambda
@@ -284,6 +226,37 @@ public class ReplacementFinder {
         boolean isMatchedByHeuristics = applyHeuristics(statement1, statement2, methodInvocationMap1, replacementInfo);
 
         return (isEqualWithReplacement || isMatchedByHeuristics) ? replacementInfo.getReplacements() : null;
+    }
+
+    private void checkMethodInvocatioRepalcementInsideAnonymousFunctionDeclarations(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo) {
+//        List<IAnonymousFunctionDeclaration> anonymousFunction1 = statement1.getAnonymousFunctionDeclarations();
+//        List<IAnonymousFunctionDeclaration> anonymousFunction2 = statement2.getAnonymousFunctionDeclarations();
+//
+//        if (!anonymousFunction1.isEmpty() && !anonymousFunction2.isEmpty()) {
+//            Set<Replacement> replacementsInsideAnonymous = new LinkedHashSet<>();
+//            for (Replacement replacement : replacementInfo.getReplacements()) {
+//                if (replacement instanceof MethodInvocationReplacement) {
+//                    for (int i = 0; i < anonymousFunction1.size(); i++) {
+//                        for (int j = 0; j < anonymousFunction2.size(); j++) {
+//                            IAnonymousFunctionDeclaration anonymousClassDeclaration1 = anonymousFunction1.get(i);
+//                            IAnonymousFunctionDeclaration anonymousClassDeclaration2 = anonymousFunction2.get(j);
+//
+//                            if (anonymousClassDeclaration1.getMethodInvocationMap().containsKey(replacement.getBefore()) &&
+//                                    anonymousClassDeclaration2.getMethodInvocationMap().containsKey(replacement.getAfter())) {
+//                                replacementsInsideAnonymous.add(replacement);
+//                                break;
+//                            }
+//                        }
+//                        if (replacementsInsideAnonymous.contains(replacement)) {
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//            for (Replacement replacement : replacementsInsideAnonymous) {
+//                equalAfterNewArgumentAdditions(replacement.getBefore(), replacement.getAfter(), replacementInfo);
+//            }
+//        }
     }
 
     private boolean applyHeuristics(CodeFragment statement1, CodeFragment statement2
@@ -860,8 +833,7 @@ public class ReplacementFinder {
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , Map<String, List<? extends Invocation>> methodInvocationMap2
             , Set<String> functionInvocations1, Set<String> functionInvocations2
-            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2
-            , Set<CodeFragmentMapping> mappings) {
+            , Set<String> variablesAndMethodInvocations1, Set<String> variablesAndMethodInvocations2) {
 
         // If statements are not matched yet
 
@@ -898,7 +870,7 @@ public class ReplacementFinder {
                         }
                         VariableDeclaration v1 = statement1.findVariableDeclarationIncludingParent(s1);
                         VariableDeclaration v2 = statement2.findVariableDeclarationIncludingParent(s2);
-                        if (inconsistentVariableMappingCount(statement1, statement2, v1, v2, mappings) > 1
+                        if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1
                         /** TODO && operation2.loopWithVariables
                          (v1.variableName, v2.variableName) == null**/) {
                             replacement = null;
@@ -1630,10 +1602,10 @@ public class ReplacementFinder {
     }
 
     private int inconsistentVariableMappingCount(CodeFragment statement1, CodeFragment statement2
-            , VariableDeclaration v1, VariableDeclaration v2, Set<CodeFragmentMapping> mappings) {
+            , VariableDeclaration v1, VariableDeclaration v2) {
         int count = 0;
         if (v1 != null && v2 != null) {
-            for (CodeFragmentMapping mapping : mappings) {
+            for (CodeFragmentMapping mapping : bodyMapper.getMappings()) {
                 List<VariableDeclaration> variableDeclarations1 = mapping.fragment1.getVariableDeclarations();
                 List<VariableDeclaration> variableDeclarations2 = mapping.fragment2.getVariableDeclarations();
                 if (variableDeclarations1.contains(v1) &&

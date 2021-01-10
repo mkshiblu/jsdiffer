@@ -97,4 +97,12 @@ public abstract class CodeFragmentMapping {
 
         return equalTextWithArgumentization;
     }
+
+    public CodeFragment getFragment1(){
+        return this.fragment1;
+    }
+
+    public CodeFragment getFragment2() {
+        return fragment2;
+    }
 }

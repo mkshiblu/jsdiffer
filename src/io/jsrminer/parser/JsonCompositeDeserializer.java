@@ -4,6 +4,7 @@ import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.rminer.core.api.IContainer;
 import io.rminer.core.entities.Container;
 import io.rminer.core.entities.DeclarationContainer;
 import io.rminer.core.entities.SourceFile;
@@ -32,17 +33,6 @@ public class JsonCompositeDeserializer {
         BlockStatement blockBody = createBlockStatement(any, sourceFile);
         sourceFile.getStatements().addAll(blockBody.getStatements());
 
-        // Functions
-        List<Any> functionDeclarationAnys = any.get("functionDeclarations").asList();
-        for (Any functionDeclarationAny : functionDeclarationAnys) {
-            FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, sourceFile);
-            if (functionDeclaration == null)
-                functionDeclaration = new FunctionDeclaration();
-
-            loadFunctionDeclaration(functionDeclarationAny, functionDeclaration, sourceFile);
-            functionDeclaration.setIsTopLevel(true);
-            sourceFile.getFunctionDeclarations().add(functionDeclaration);
-        }
         return sourceFile;
     }
 
@@ -79,9 +69,9 @@ public class JsonCompositeDeserializer {
         String name = generateName(any, parentContainer);
         String qualifiedName = generateQualifiedName(name, parentContainer);
 
-        function.setQualifiedName(qualifiedName);
         function.setName(name);
-
+        function.setQualifiedName(qualifiedName);
+        function.setFullyQualifiedName(qualifiedName);
         // Params
         List<Any> params = any.get("params").asList();
         for (int i = 0; i < params.size(); i++) {
@@ -155,6 +145,22 @@ public class JsonCompositeDeserializer {
                 for (Any expressionAny : any.get("expressions").asList()) {
                     Expression expression = createExpression(expressionAny, currentBlock, parentContainer);
                     currentBlock.addExpression(expression);
+                }
+            }
+
+            // parse the nested functionDeclarations
+            if (any.keys().contains("functionDeclarations")) {
+                for (Any functionAny : any.get("functionDeclarations").asList()) {
+                    FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, parentContainer);
+                    if (functionDeclaration == null)
+                        functionDeclaration = new FunctionDeclaration();
+
+                    loadFunctionDeclaration(functionAny, functionDeclaration, parentContainer);
+
+                    if (parentContainer.getContainerType().equals(IContainer.ContainerType.File)) {
+                        functionDeclaration.setIsTopLevel(true);
+                    }
+                    parentContainer.getFunctionDeclarations().add(functionDeclaration);
                 }
             }
 
@@ -366,6 +372,8 @@ public class JsonCompositeDeserializer {
             anonymousFunctionDeclaration = (AnonymousFunctionDeclaration) functionDeclaration;
         }
 
+        // Text
+        anonymousFunctionDeclaration.setText(any.toString("text"));
         return anonymousFunctionDeclaration;
     }
 

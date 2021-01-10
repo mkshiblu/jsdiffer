@@ -403,6 +403,7 @@ function processFunctionExpression(path, expressionResult, statement) {
     const functionDeclarationStatement = {
         type: node.type,
         name,
+        text: path.toString(),
         params: node.params.map(id => id.name),
         loc: astUtil.getFormattedLocation(path.node)
     };

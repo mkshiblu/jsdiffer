@@ -113,4 +113,9 @@ public class OperationInvocation extends Invocation {
         return this.getFunctionName().equals(operation.getName())
                 /*&& (this.typeArguments == operation.getParameterTypeList().size() || varArgsMatch(operation))*/;
     }
+
+    @Override
+    public boolean identicalName(Invocation call) {
+        return getFunctionName().equals(((OperationInvocation)call).getFunctionName());
+    }
 }

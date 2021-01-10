@@ -22,26 +22,26 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SourceFileModelDiffer {
+public class ContainerDiffer {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
     public final ISourceFile source1;
     public final ISourceFile source2;
-    public final SourceFileModelDiff sourceDiff;
+    public final ContainerDiff sourceDiff;
     public final UMLModelDiff modelDiff;
 
     //private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
 
-    public SourceFileModelDiffer(final ISourceFile source1, final ISourceFile source2, final UMLModelDiff modelDiff) {
+    public ContainerDiffer(final ISourceFile source1, final ISourceFile source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
         this.source2 = source2;
-        sourceDiff = new SourceFileModelDiff(source1, source2);
+        sourceDiff = new ContainerDiff(source1, source2);
         this.modelDiff = modelDiff;
     }
 
-    public SourceFileModelDiff diff() {
+    public ContainerDiff diff() {
 
         // Find functiondeclarations
         final FunctionDeclaration[] functions1 = source1.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
@@ -52,15 +52,15 @@ public class SourceFileModelDiffer {
             // region Convert common file's fds to hashmap
             final HashMap<String, FunctionDeclaration> functionMap1 = new LinkedHashMap<>();
             for (FunctionDeclaration function1 : functions1) {
-                functionMap1.put(function1.getName(), function1);
+                functionMap1.put(function1.getQualifiedName(), function1);
             }
 
             final HashMap<String, FunctionDeclaration> functionMap2 = new LinkedHashMap<>();
             for (FunctionDeclaration function2 : functions2) {
-                functionMap2.put(function2.getName(), function2);
+                functionMap2.put(function2.getQualifiedName(), function2);
             }
 
-            diffOperations(this.sourceDiff, functionMap1, functionMap2);
+            diff(this.sourceDiff, functionMap1, functionMap2);
         }
         return this.sourceDiff;
     }
@@ -68,20 +68,68 @@ public class SourceFileModelDiffer {
     /**
      * Diff operations between two common files
      */
-    protected void diffOperations(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
+    private void diff(ContainerDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
         // Process Annotations
         // Process Inheritance
         reportAddedAndRemovedOperations(sourceDiff, functionMap1, functionMap2);
         createBodyMapperForCommonNamedFunctions(sourceDiff, functionMap1, functionMap2);
 //        processAttributes();
 //        checkForAttributeChanges();
-//        processAnonymousClasses();
+       // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges(sourceDiff);
         checkForInlinedOperations();
         checkForExtractedOperations();
     }
 
-    private void checkForOperationSignatureChanges(SourceFileModelDiff sourceDiff) {
+    /**
+     * Reports removed and added anonymous classes
+     */
+    protected void processAnonymousFunctions(ContainerDiff sourceDiff) {
+
+//        for (IAnonymousFunctionDeclaration umlAnonymousClass : this.source1.getAnonymousFunctionDeclarations()) {
+//            if (!this.source2.containsAnonymousWithSameAttributesAndOperations(umlAnonymousClass))
+//                this.removedAnonymousClasses.add(umlAnonymousClass);
+//        }
+//        for (UMLAnonymousClass umlAnonymousClass : nextClass.getAnonymousClassList()) {
+//            if (!originalClass.containsAnonymousWithSameAttributesAndOperations(umlAnonymousClass))
+//                this.addedAnonymousClasses.add(umlAnonymousClass);
+//        }
+    }
+
+    protected void createBodyMapperForCommonNamedFunctions(ContainerDiff sourceDiff
+            , final HashMap<String, FunctionDeclaration> functionMap1
+            , final HashMap<String, FunctionDeclaration> functionMap2) {
+
+        // First map by fully qualified name? TODO revisit
+        for (FunctionDeclaration function1 : functionMap1.values()) {
+            final FunctionDeclaration function2 = functionMap2.get(function1.getQualifiedName());
+            // If function exists in both file, try to match their statements
+            if (function2 != null) {
+
+                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
+
+                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, sourceDiff);
+                mapper.map();
+
+                this.refactorings.addAll(operationDiff.getRefactorings());
+
+                // save the mapper TODO
+                this.bodyMappers.add(mapper);
+            }
+        }
+
+
+        for (FunctionDeclaration function1 : functionMap1.values()) {
+            // Not qualified but contains the function in the same index?
+//            if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
+//                    && !sourceDiff.isRemovedOperation(function1.name)) {
+//// TODO
+//
+//            }
+        }
+    }
+
+    private void checkForOperationSignatureChanges(ContainerDiff sourceDiff) {
 
         List<FunctionDeclaration> removedOperations = new ArrayList<>(sourceDiff.getRemovedOperations().values());
         List<FunctionDeclaration> addedOperations = new ArrayList<>(sourceDiff.getAddedOperations().values());
@@ -89,7 +137,7 @@ public class SourceFileModelDiffer {
         if (removedOperations.size() <= addedOperations.size()) {
             for (Iterator<FunctionDeclaration> removedOperationIterator = removedOperations.iterator(); removedOperationIterator.hasNext(); ) {
                 FunctionDeclaration removedOperation = removedOperationIterator.next();
-                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>((Comparator<FunctionBodyMapper>) (o1, o2) -> {
+                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>((o1, o2) -> {
                     int thisOperationNameEditDistance = o1.operationNameEditDistance();
                     int otherOperationNameEditDistance = o2.operationNameEditDistance();
                     if (thisOperationNameEditDistance != otherOperationNameEditDistance)
@@ -110,14 +158,12 @@ public class SourceFileModelDiffer {
                     //}
                     updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, sourceDiff);
 
-                    // TODO operationsInsideAnonymousClass
+                    // TODO  operationsInsideAnonymousClass
 //                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousClass(this.addedAnonymousClasses);
 //                    for (FunctionDeclaration operationInsideAnonymousClass : operationsInsideAnonymousClass) {
 //                        updateMapperSet(mapperSet, removedOperation, operationInsideAnonymousClass, addedOperation, maxDifferenceInPosition);
 //                    }
                 }
-
-
                 if (!mapperSet.isEmpty()) {
                     FunctionBodyMapper bestMapper = findBestMapper(mapperSet);
                     if (bestMapper != null) {
@@ -130,7 +176,7 @@ public class SourceFileModelDiffer {
                         //operationDiffList.add(operationSignatureDiff);
                         refactorings.addAll(operationSignatureDiff.getRefactorings());
                         if (!removedOperation.getName().equals(addedOperation.getName()) &&
-                                !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
+                                !(removedOperation.getIsConstructor() && addedOperation.getIsConstructor())) {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             refactorings.add(rename);
                         }
@@ -169,7 +215,7 @@ public class SourceFileModelDiffer {
                         //operationDiffList.add(operationSignatureDiff);
                         refactorings.addAll(operationSignatureDiff.getRefactorings());
                         if (!removedOperation.getName().equals(addedOperation.getName()) &&
-                                !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
+                                !(removedOperation.getIsConstructor() && addedOperation.getIsConstructor())) {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             refactorings.add(rename);
                         }
@@ -253,7 +299,7 @@ public class SourceFileModelDiffer {
 //    }
 
     private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int differenceInPosition, SourceFileModelDiff sourceDiff) {
+            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff sourceDiff) {
         FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
         operationBodyMapper.map();
 
@@ -409,7 +455,7 @@ public class SourceFileModelDiffer {
 //        return true;
 //    }
 
-    private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper operationBodyMapper, SourceFileModelDiff sourceDiff) {
+    private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper operationBodyMapper, ContainerDiff sourceDiff) {
         Set<SingleStatement> nonMappedLeavesT1 = operationBodyMapper.getNonMappedLeavesT1();
         Set<SingleStatement> nonMappedLeavesT2 = operationBodyMapper.getNonMappedLeavesT2();
         if (nonMappedLeavesT1.size() == 1 && nonMappedLeavesT2.size() == 1) {
@@ -586,7 +632,7 @@ public class SourceFileModelDiffer {
 //        removedOperations.removeAll(operationsToBeRemoved);
     }
 
-    private boolean exactMappings(FunctionBodyMapper operationBodyMapper, SourceFileModelDiff sourceDiff) {
+    private boolean exactMappings(FunctionBodyMapper operationBodyMapper, ContainerDiff sourceDiff) {
         if (allMappingsAreExactMatches(operationBodyMapper)) {
             if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() == 0)
                 return true;
@@ -750,38 +796,6 @@ public class SourceFileModelDiffer {
     }
 
 
-    protected void createBodyMapperForCommonNamedFunctions(SourceFileModelDiff sourceDiff
-            , final HashMap<String, FunctionDeclaration> functionMap1
-            , final HashMap<String, FunctionDeclaration> functionMap2) {
-
-        // First map by fully qualified name? TODO revisit
-        for (FunctionDeclaration function1 : functionMap1.values()) {
-            final FunctionDeclaration function2 = functionMap2.get(function1.getName());
-            // If function exists in both file, try to match their statements
-            if (function2 != null) {
-
-                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, function2);
-
-                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, sourceDiff);
-                mapper.map();
-
-                this.refactorings.addAll(operationDiff.getRefactorings());
-
-                // save the mapper TODO
-                this.bodyMappers.add(mapper);
-            }
-        }
-
-        for (FunctionDeclaration function1 : functionMap1.values()) {
-            // Not qualified but contains the function in the same index?
-//            if (!this.functionBodyMappers.containsKey(function1.qualifiedName)
-//                    && !sourceDiff.isRemovedOperation(function1.name)) {
-//// TODO
-//
-//            }
-        }
-    }
-
     public double normalizedNameDistance(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         String s1 = operation1.getName().toLowerCase();
         String s2 = operation2.getName().toLowerCase();
@@ -791,18 +805,18 @@ public class SourceFileModelDiffer {
     }
 
     // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperations(SourceFileModelDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
+    private void reportAddedAndRemovedOperations(ContainerDiff sourceDiff, final HashMap<String, FunctionDeclaration> functionMap1, final HashMap<String, FunctionDeclaration> functionMap2) {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
         for (FunctionDeclaration fd1 : functionMap1.values()) {
-            if (!functionMap2.containsKey(fd1.getName())) {
+            if (!functionMap2.containsKey(fd1.getQualifiedName())) {
                 sourceDiff.reportRemovedOperation(fd1);
             }
         }
 
         for (FunctionDeclaration fd2 : functionMap2.values()) {
-            if (!functionMap1.containsKey(fd2.getName())) {
+            if (!functionMap1.containsKey(fd2.getQualifiedName())) {
                 sourceDiff.reportAddedOperation(fd2);
             }
         }

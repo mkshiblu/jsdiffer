@@ -1,11 +1,15 @@
 package io.rminer.core.api;
 
+import io.jsrminer.sourcetree.SourceLocation;
+
 import java.util.List;
 
 /**
  * Represents a code container such as FunctionDeclrations, Class Declarations or a File
  */
 public interface IContainer {
+    SourceLocation getSourceLocation();
+
     /**
      * Represents a container type such s File or Declaration
      **/
@@ -25,4 +29,6 @@ public interface IContainer {
     List<ICodeFragment> getStatements();
 
     List<IFunctionDeclaration> getFunctionDeclarations();
+
+    List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations();
 }

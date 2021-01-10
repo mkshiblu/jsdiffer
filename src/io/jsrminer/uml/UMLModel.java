@@ -1,12 +1,10 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.api.Diffable;
-import io.jsrminer.uml.diff.SourceFileModelDiff;
-import io.jsrminer.uml.diff.SourceFileModelDiffer;
+import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.ContainerDiffer;
 import io.jsrminer.uml.diff.UMLModelDiff;
-import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.rminer.core.api.ISourceFile;
-import io.rminer.core.entities.SourceFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,22 +27,14 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
 
             // Check if model2 contains the same file
             if (sourceFileModel2 != null) {
-                SourceFileModelDiffer sourceDiffer = new SourceFileModelDiffer(entry.getValue(), sourceFileModel2, modelDiff);
-                SourceFileModelDiff sourceDiff = sourceDiffer.diff();
+                ContainerDiffer sourceDiffer = new ContainerDiffer(entry.getValue(), sourceFileModel2, modelDiff);
+                ContainerDiff sourceDiff = sourceDiffer.diff();
                 sourceDiff.refactorings.addAll(sourceDiffer.getRefactorings());
                 modelDiff.getRefactorings().addAll(sourceDiffer.getRefactorings());
             }
         }
 
         return modelDiff;
-    }
-
-    public FunctionDeclaration[] getFunctionDeclarationsInSource(String file) {
-        ISourceFile sourceFileModel;
-        if ((sourceFileModel = sourceModelMap.get(file)) != null) {
-            return ((SourceFile)sourceFileModel).getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
-        }
-        return null;
     }
 
     public boolean containsSourceFileModel(String file) {

@@ -1,5 +1,7 @@
 package io.jsrminer.uml.mapping.replacement;
 
+import io.rminer.core.api.IContainer;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -177,5 +179,15 @@ public class ReplacementUtil {
             }
         }
         return 0;
+    }
+
+    public static boolean equalsSourceLocation(IContainer container1, IContainer container2) {
+        if (container1.getSourceLocation().getFile() == null) {
+            if (container2.getSourceLocation().getFile() != null)
+                return false;
+        } else if (!container1.getSourceLocation().getFile().equals(container2.getSourceLocation().getFile()))
+            return false;
+
+        return container1.getSourceLocation().equalsLineAndColumn(container2.getSourceLocation());
     }
 }

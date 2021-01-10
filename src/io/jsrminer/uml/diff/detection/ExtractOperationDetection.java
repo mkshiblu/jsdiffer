@@ -5,7 +5,7 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
@@ -17,14 +17,14 @@ import java.util.*;
 public class ExtractOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> addedOperations;
-    private SourceFileModelDiff classDiff;
+    private ContainerDiff classDiff;
     private UMLModelDiff modelDiff;
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     Argumentizer argumentizer;
 
-    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, SourceFileModelDiff classDiff, UMLModelDiff modelDiff) {
+    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, ContainerDiff classDiff, UMLModelDiff modelDiff) {
         this.mapper = mapper;
         this.addedOperations = addedOperations;
         this.classDiff = classDiff;

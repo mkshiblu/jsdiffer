@@ -10,21 +10,25 @@ public class SourceLocation {
     public final int startColumn;
     public final int endLine;
     public final int endColumn;
+    private final int start;
+    private final int end;
 
     public SourceLocation() {
-        this(-1, -1, -1, -1);
+        this(-1, -1, -1, -1, -1, -1);
     }
 
-    public SourceLocation(String file, int startLine, int startColumn, int endLine, int endColumn) {
-        this(startLine, startColumn, endLine, endColumn);
+    public SourceLocation(String file, int startLine, int startColumn, int endLine, int endColumn, int start, int end) {
+        this(startLine, startColumn, endLine, endColumn, start, end);
         this.file = file;
     }
 
-    public SourceLocation(int startLine, int startColumn, int endLine, int endColumn) {
+    public SourceLocation(int startLine, int startColumn, int endLine, int endColumn, int start, int end) {
         this.startLine = startLine;
         this.startColumn = startColumn;
         this.endLine = endLine;
         this.endColumn = endColumn;
+        this.start = start;
+        this.end = end;
     }
 
     public String getFile() {
@@ -44,6 +48,13 @@ public class SourceLocation {
 
     @Override
     public String toString() {
-        return "line: " + startLine + "column: " + startColumn;
+        return startLine + ":" + startColumn;
+    }
+
+    public boolean subsumes(SourceLocation other) {
+        boolean isEqualFile = this.file != null && this.file == other.file;
+        return isEqualFile &&
+                this.start <= other.start &&
+                this.end >= other.end;
     }
 }

@@ -2,18 +2,18 @@ const astProcessor = require("../processors/AstNodeProcessor");
 const astUtil = require('../parser/AstUtil');
 
 /** Process for a AST functionDeclarationNodePath */
-exports.processFunctionDeclaration = (functionDeclarationPath, processStatement) => {
-    const node = functionDeclarationPath.node;
+exports.processFunctionDeclaration = (path, processStatement) => {
+    const node = path.node;
     //const qualifiedName = astUtil.getFunctionQualifiedName(functionDeclarationPath);
     const name = node.id.name
 
     const statement = {
         type: node.type,
-      //  qualifiedName,
+        text: path.toString(),
         name,
         params: node.params.map(id => id.name)
     };
-    processStatement(functionDeclarationPath.get('body'), statement);
+    processStatement(path.get('body'), statement);
     return statement;
 }
 
