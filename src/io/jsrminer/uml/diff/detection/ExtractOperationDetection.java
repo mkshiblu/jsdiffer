@@ -125,7 +125,7 @@ public class ExtractOperationDetection {
                         }
                         //add back to mapper non-exact matches
                         for (CodeFragmentMapping mapping : nestedMapper.getMappings()) {
-                            if (!mapping.isExact(argumentizer) || mapping.fragment1.getText().equals("{")) {
+                            if (!mapping.isExact() || mapping.fragment1.getText().equals("{")) {
                                 CodeFragment fragment1 = mapping.fragment1;
                                 if (fragment1 instanceof SingleStatement) {
                                     if (!mapper.getNonMappedLeavesT1().contains(fragment1)) {

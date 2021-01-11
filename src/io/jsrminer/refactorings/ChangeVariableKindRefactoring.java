@@ -8,13 +8,13 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class ChangeVariableKindRefactoring extends implements IRefactoring {
+public class ChangeVariableKindRefactoring extends Refactoring implements IRefactoring {
     private VariableDeclaration originalVariable;
     private VariableDeclaration changedTypeVariable;
     private FunctionDeclaration operationBefore;
     private FunctionDeclaration operationAfter;
     private Set<CodeFragmentMapping> variableReferences;
-    private Set<Refactoring> relatedRefactorings;
+    private Set<IRefactoring> relatedRefactorings;
 
     public ChangeVariableKindRefactoring(VariableDeclaration originalVariable, VariableDeclaration changedTypeVariable,
                                          FunctionDeclaration operationBefore, FunctionDeclaration operationAfter, Set<CodeFragmentMapping> variableReferences) {
@@ -23,14 +23,14 @@ public class ChangeVariableKindRefactoring extends implements IRefactoring {
         this.operationBefore = operationBefore;
         this.operationAfter = operationAfter;
         this.variableReferences = variableReferences;
-        this.relatedRefactorings = new LinkedHashSet<Refactoring>();
+        this.relatedRefactorings = new LinkedHashSet<>();
     }
 
-    public void addRelatedRefactoring(Refactoring refactoring) {
+    public void addRelatedRefactoring(IRefactoring refactoring) {
         this.relatedRefactorings.add(refactoring);
     }
 
-    public Set<Refactoring> getRelatedRefactorings() {
+    public Set<IRefactoring> getRelatedRefactorings() {
         return relatedRefactorings;
     }
 

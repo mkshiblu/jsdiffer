@@ -404,7 +404,7 @@ function processFunctionExpression(path, expressionResult, statement) {
         type: node.type,
         name,
         text: path.toString(),
-        params: node.params.map(id => id.name),
+        params: astUtil.processfunctionParameters(path),
         loc: astUtil.getFormattedLocation(path.node)
     };
 

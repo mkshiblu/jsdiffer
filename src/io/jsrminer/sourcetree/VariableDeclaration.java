@@ -4,6 +4,8 @@ public class VariableDeclaration extends CodeEntity {
     private Expression initializer;
     private VariableDeclarationKind kind;
     public final String variableName;
+    private SourceLocation variableScope;
+    private boolean isParameter;
 
     public VariableDeclaration(String variableName) {
         this.variableName = variableName;
@@ -39,5 +41,21 @@ public class VariableDeclaration extends CodeEntity {
 
     public String getVariableName() {
         return variableName;
+    }
+
+    public SourceLocation getScope() {
+        return variableScope;
+    }
+
+    public void setVariableScope(SourceLocation variableScope) {
+        this.variableScope = variableScope;
+    }
+
+    public boolean isParameter() {
+        return isParameter;
+    }
+
+    public void setIsParameter(boolean isParameter) {
+        this.isParameter = isParameter;
     }
 }

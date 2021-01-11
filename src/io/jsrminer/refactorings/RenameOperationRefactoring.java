@@ -14,15 +14,16 @@ public class RenameOperationRefactoring extends Refactoring {
     private FunctionBodyMapper bodyMapper;
 
     public RenameOperationRefactoring(FunctionBodyMapper bodyMapper) {
-        this(bodyMapper.function1, bodyMapper.function2);
         this.bodyMapper = bodyMapper;
+        this.originalOperation = bodyMapper.getOperation1();
+        this.renamedOperation = bodyMapper.getOperation2();
         this.replacements = bodyMapper.getReplacements();
     }
 
     public RenameOperationRefactoring(FunctionDeclaration originalOperation, FunctionDeclaration renamedOperation) {
-        super((RefactoringType.RENAME_METHOD));
         this.originalOperation = originalOperation;
         this.renamedOperation = renamedOperation;
+        this.replacements = new LinkedHashSet<>();
     }
 
     public String toString() {
@@ -114,7 +115,7 @@ public class RenameOperationRefactoring extends Refactoring {
 //        return ranges;
 //    }
 
-//    @Override
+    //    @Override
 //    public int hashCode() {
 //        final int prime = 31;
 //        int result = 1;
@@ -152,5 +153,12 @@ public class RenameOperationRefactoring extends Refactoring {
 //        }
 //        return true;
 //    }
+    public String getName() {
+        return this.getRefactoringType().getDisplayName();
+    }
+
+    public RefactoringType getRefactoringType() {
+        return RefactoringType.RENAME_METHOD;
+    }
 }
 

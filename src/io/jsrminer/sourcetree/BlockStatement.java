@@ -102,6 +102,26 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         return variables;
     }
 
+    /**
+     * Returns all variables inside including nested ones
+     *
+     * @return
+     */
+    public List<String> getAllVariablesIncludingNested() {
+        List<String> variables = new ArrayList<>();
+        variables.addAll(getVariables());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                variables.addAll(composite.getAllVariablesIncludingNested());
+            } else if (statement instanceof SingleStatement) {
+                BlockStatement statementObject = (BlockStatement) statement;
+                variables.addAll(statementObject.getVariables());
+            }
+        }
+        return variables;
+    }
+
     @Override
     public Map<String, List<OperationInvocation>> getMethodInvocationMap() {
         Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
@@ -354,6 +374,51 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         return map;
     }
 
+    public BlockStatement loopWithVariables(String currentElementName, String collectionName) {
+        for (BlockStatement innerNode : getAllBlockStatementsIncludingNested()) {
+            if (innerNode.getCodeElementType().equals(equals(CodeElementType.ENHANCED_FOR_STATEMENT))) {
+                boolean currentElementNameMatched = false;
+                for (VariableDeclaration declaration : innerNode.getVariableDeclarations()) {
+                    if (declaration.getVariableName().equals(currentElementName)) {
+                        currentElementNameMatched = true;
+                        break;
+                    }
+                }
+                boolean collectionNameMatched = false;
+                for (Expression expression : innerNode.getExpressions()) {
+                    if (expression.getVariables().contains(collectionName)) {
+                        collectionNameMatched = true;
+                        break;
+                    }
+                }
+                if (currentElementNameMatched && collectionNameMatched) {
+                    return innerNode;
+                }
+            } else if (innerNode.getCodeElementType().equals(CodeElementType.FOR_STATEMENT) ||
+                    innerNode.getCodeElementType().equals(CodeElementType.WHILE_STATEMENT)) {
+                boolean collectionNameMatched = false;
+                for (Expression expression : innerNode.getExpressions()) {
+                    if (expression.getVariables().contains(collectionName)) {
+                        collectionNameMatched = true;
+                        break;
+                    }
+                }
+                boolean currentElementNameMatched = false;
+                for (SingleStatement statement : innerNode.getAllLeafStatementsIncludingNested()) {
+                    VariableDeclaration variableDeclaration = statement.getVariableDeclaration(currentElementName);
+                    if (variableDeclaration != null && statement.getVariables().contains(collectionName)) {
+                        currentElementNameMatched = true;
+                        break;
+                    }
+                }
+                if (currentElementNameMatched && collectionNameMatched) {
+                    return innerNode;
+                }
+            }
+        }
+        return null;
+    }
+
     public int statementCount() {
         int count = 0;
         if (!this.getText().equals("{"))
@@ -362,6 +427,17 @@ public class BlockStatement extends Statement implements ICompositeFragment {
             count += statement.statementCount();
         }
         return count;
+    }
+
+    public boolean contains(CodeFragment fragment) {
+        if (fragment instanceof SingleStatement) {
+            return getAllLeafStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof BlockStatement) {
+            return getAllBlockStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof Expression) {
+            return getExpressions().contains(fragment);
+        }
+        return false;
     }
 
     @Override

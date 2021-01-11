@@ -91,7 +91,7 @@ public class AnonymousFunctionReplacementFinder {
                 matchedOperations++;
 
                 UMLOperationDiff operationDiff = new UMLOperationDiff(operation1, operation2, mapper.getMappings());
-                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.findVariableAnalysisRefactorings());
+                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
                 this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
             }
         }

@@ -26,7 +26,7 @@ public class UMLOperationDiff extends Diff {
 
     private Map<String, UMLParameter> addedParameters = new HashMap<>();
     private Map<String, UMLParameter> removedParameters = new HashMap<>();
-    private List<UMLParameterDiff> parameterDiffs = new ArrayList<>();
+    private final List<UMLParameterDiff> parameterDiffs = new ArrayList<>();
 
     public final boolean nameChanged;
     public final boolean parametersReordered;
@@ -255,5 +255,9 @@ public class UMLOperationDiff extends Diff {
 //            refactorings.add(refactoring);
 //        }
         return refactorings;
+    }
+
+    public List<UMLParameterDiff> getParameterDiffs() {
+        return parameterDiffs;
     }
 }

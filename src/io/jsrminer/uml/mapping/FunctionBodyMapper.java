@@ -1,7 +1,9 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.Refactoring;
+import io.jsrminer.refactorings.CandidateAttributeRefactoring;
+import io.jsrminer.refactorings.CandidateMergeVariableRefactoring;
+import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.ContainerDiff;
@@ -30,9 +32,15 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private FunctionDeclaration callerFunction;
     private final ContainerDiff containerDiff;
-    private List<FunctionBodyMapper> childMappers = new ArrayList<>();
+    private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
+    private Map<CodeFragment, FunctionDeclaration> codeFragmentOperationMap1 = new LinkedHashMap<>();
+    private Map<CodeFragment, FunctionDeclaration> codeFragmentOperationMap2 = new LinkedHashMap<>();
+
+    private Set<CandidateAttributeRefactoring> candidateAttributeRenames = new LinkedHashSet<>();
+    private Set<CandidateMergeVariableRefactoring> candidateAttributeMerges = new LinkedHashSet<>();
+    private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
             , ContainerDiff containerDiff) {
@@ -380,7 +388,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
-        ReplacementFinder replacementFinder = new ReplacementFinder(this);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
         Iterator<? extends CodeFragment> it1 = leaves1.iterator();
         Iterator<? extends CodeFragment> it2 = leaves2.iterator();
@@ -503,7 +511,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void matchInnerNodersWithVariableRenames
             (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
-        ReplacementFinder replacementFinder = new ReplacementFinder(this);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
         for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
             BlockStatement statement2 = innerNodeIterator2.next();
@@ -620,13 +628,12 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return refactorings;
     }
 
-    public ContainerDiff getContainerDiff(){
+    public ContainerDiff getContainerDiff() {
         return containerDiff;
     }
 
-    public Set<Refactoring> findVariableAnalysisRefactorings() {
+    public Set<IRefactoring> getRefactoringsByVariableAnalysis() {
         VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, containerDiff);
-
         // Local (variables & Paramters)
         refactorings.addAll(analysis.getVariableRenames());
         refactorings.addAll(analysis.getVariableMerges());
@@ -636,8 +643,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         candidateAttributeRenames.addAll(analysis.getCandidateAttributeRenames());
         candidateAttributeMerges.addAll(analysis.getCandidateAttributeMerges());
         candidateAttributeSplits.addAll(analysis.getCandidateAttributeSplits());
-        TypeReplacementAnalysis typeAnalysis = new TypeReplacementAnalysis(this.getMappings());
-        refactorings.addAll(typeAnalysis.getChangedTypes());
+        //TypeReplacementAnalysis typeAnalysis = new TypeReplacementAnalysis(this.getMappings());
+        //refactorings.addAll(typeAnalysis.getChangedTypes());
         return refactorings;
     }
 
@@ -660,7 +667,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             leaf2, Map<String, String> parameterToArgumentMap) {
 //        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
 //        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
-        LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2);
+        LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2, function1, function2, argumentizer);
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
 //            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
@@ -673,19 +680,16 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private BlockCodeFragmentMapping createCompositeMapping(BlockStatement statement1,
                                                             BlockStatement statement2
             , Map<String, String> parameterToArgumentMap, double score) {
-//        FunctionDeclaration operation1 = /*codeFragmentOperationMap1.containsKey(statement1)
-//                ? codeFragmentOperationMap1.get(statement1) :*/ this.function1;
-//        FunctionDeclaration operation2 = /*codeFragmentOperationMap2.containsKey(statement2)
-//                ? codeFragmentOperationMap2.get(statement2) :*/ this.function2;
 
-        BlockCodeFragmentMapping mapping = new BlockCodeFragmentMapping(statement1, statement2
-                /*, operation1, operation2*/, score);
-//        for (String key : parameterToArgumentMap.keySet()) {
-//            String value = parameterToArgumentMap.get(key);
-////            if (!key.equals(value) && ReplacementUtil.contains(statement2.getString(), key) && ReplacementUtil.contains(statement1.getString(), value)) {
-//            //              mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
-//            //        }
-//        }
+        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(statement1) ? codeFragmentOperationMap1.get(statement1) : this.function1;
+        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(statement2) ? codeFragmentOperationMap2.get(statement2) : this.function2;
+        BlockCodeFragmentMapping mapping = new BlockCodeFragmentMapping(statement1, statement2, score, operation1, operation2, argumentizer);
+        for (String key : parameterToArgumentMap.keySet()) {
+            String value = parameterToArgumentMap.get(key);
+            if (!key.equals(value) && ReplacementUtil.contains(statement2.getText(), key) && ReplacementUtil.contains(statement1.getText(), value)) {
+                mapping.getReplacements().add(new Replacement(value, key, Replacement.ReplacementType.VARIABLE_NAME));
+            }
+        }
         return mapping;
     }
 
@@ -787,7 +791,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     public List<CodeFragmentMapping> getExactMatches() {
         List<CodeFragmentMapping> exactMatches = new ArrayList<>();
         for (CodeFragmentMapping mapping : getMappings()) {
-            if (mapping.isExact(argumentizer) && mapping.fragment1.countableStatement()
+            if (mapping.isExact() && mapping.fragment1.countableStatement()
                     && mapping.fragment2.countableStatement() &&
                     !mapping.fragment1.getText().equals("try"))
                 exactMatches.add(mapping);
@@ -1057,5 +1061,33 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     public FunctionBodyMapper getParentMapper() {
         return parentMapper;
+    }
+
+    public List<FunctionBodyMapper> getChildMappers() {
+        return childMappers;
+    }
+
+    public FunctionDeclaration getCallerFunction() {
+        return this.callerFunction;
+    }
+
+    public FunctionDeclaration getOperation1() {
+        return function1;
+    }
+
+    public FunctionDeclaration getOperation2() {
+        return function2;
+    }
+
+    public Set<CandidateAttributeRefactoring> getCandidateAttributeRenames() {
+        return candidateAttributeRenames;
+    }
+
+    public Set<CandidateMergeVariableRefactoring> getCandidateAttributeMerges() {
+        return candidateAttributeMerges;
+    }
+
+    public Set<CandidateSplitVariableRefactoring> getCandidateAttributeSplits() {
+        return candidateAttributeSplits;
     }
 }

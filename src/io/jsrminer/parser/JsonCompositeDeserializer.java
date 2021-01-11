@@ -19,7 +19,7 @@ import java.util.*;
 public class JsonCompositeDeserializer {
     final String sourcePath;
 
-    private HashMap<String, FunctionDeclaration> loadedFunctions = new HashMap<>();
+    private HashMap<Integer, FunctionDeclaration> loadedFunctions = new HashMap<>();
 
     public JsonCompositeDeserializer(String sourcePath) {
         this.sourcePath = sourcePath;
@@ -37,9 +37,15 @@ public class JsonCompositeDeserializer {
     }
 
     private FunctionDeclaration getFunctionIfAlreadyLoaded(Any any, Container parentContainer) {
-        String name = generateName(any, parentContainer);
-        String qualifiedName = generateQualifiedName(name, parentContainer);
-        return loadedFunctions.getOrDefault(qualifiedName, null);
+        return loadedFunctions.getOrDefault(any.get("loc").toInt("start"), null);
+    }
+
+    public String getParentContainerName(Container parentContainer) {
+        if (parentContainer instanceof DeclarationContainer) {
+            return ((DeclarationContainer) parentContainer).getQualifiedName();
+        }
+
+        return ((SourceFile) parentContainer).getFilepath();
     }
 
     public String generateQualifiedName(String name, Container parentContainer) {
@@ -71,13 +77,15 @@ public class JsonCompositeDeserializer {
 
         function.setName(name);
         function.setQualifiedName(qualifiedName);
-        function.setFullyQualifiedName(qualifiedName);
+        function.setContainerName(getParentContainerName(parentContainer));
+        function.setFullyQualifiedName(function.getSourceLocation().getFile() + "|" + function.getQualifiedName());
         // Params
         List<Any> params = any.get("params").asList();
         for (int i = 0; i < params.size(); i++) {
             Any paramAny = params.get(i);
-            UMLParameter parameter = parseUMLParameter(paramAny);
+            UMLParameter parameter = parseUMLParameter(paramAny, location);
             parameter.setIndexPositionInParent(i);
+
             function.getParameters().add(parameter);
         }
 
@@ -88,11 +96,18 @@ public class JsonCompositeDeserializer {
         BlockStatement bodyBlock = createBlockStatement(body, function);
         function.setBody(new FunctionBody(bodyBlock));
 
-        loadedFunctions.put(function.getQualifiedName(), function);
+        loadedFunctions.put(location.start, function);
     }
 
-    UMLParameter parseUMLParameter(Any parameterAny) {
-        return new UMLParameter(parameterAny.toString());
+    UMLParameter parseUMLParameter(Any any, SourceLocation scope) {
+        String name = any.toString("name");
+        UMLParameter parameter = new UMLParameter(name);
+        parameter.setSourceLocation(createSourceLocation(any.get("loc")));
+        VariableDeclaration vd = new VariableDeclaration(name);
+        vd.setIsParameter(true);
+        vd.setVariableScope(scope);
+        parameter.setVariableDeclaration(vd);
+        return parameter;
     }
 
     public BlockStatement createBlockStatement(final String blockStatementJson, Container parentContainer) {

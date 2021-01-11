@@ -1,13 +1,12 @@
 package io.jsrminer.refactorings;
 
-import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.VariableDeclaration;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 
 import java.util.Set;
 
-public class SplitVariableRefactoring extends Refactoring implements IRefactoring {
+public class SplitVariableRefactoring extends Refactoring {
     private Set<VariableDeclaration> splitVariables;
     private VariableDeclaration oldVariable;
     private FunctionDeclaration operationBefore;
@@ -86,7 +85,7 @@ public class SplitVariableRefactoring extends Refactoring implements IRefactorin
         sb.append(splitVariables);
         sb.append(" in function ");
         sb.append(operationAfter);
-        sb.append(" at ").append(operationAfter..getClassName());
+        sb.append(" at ").append(operationAfter.getQualifiedName());
         return sb.toString();
     }
 

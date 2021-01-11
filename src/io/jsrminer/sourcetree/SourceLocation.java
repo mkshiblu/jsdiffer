@@ -10,8 +10,8 @@ public class SourceLocation {
     public final int startColumn;
     public final int endLine;
     public final int endColumn;
-    private final int start;
-    private final int end;
+    public final int start;
+    public final int end;
 
     public SourceLocation() {
         this(-1, -1, -1, -1, -1, -1);

@@ -11,7 +11,7 @@ exports.processFunctionDeclaration = (path, processStatement) => {
         type: node.type,
         text: path.toString(),
         name,
-        params: node.params.map(id => id.name)
+        params: astUtil.processfunctionParameters(path)
     };
     processStatement(path.get('body'), statement);
     return statement;

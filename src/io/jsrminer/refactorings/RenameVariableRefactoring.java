@@ -7,7 +7,7 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 
 import java.util.Set;
 
-public class RenameVariableRefactoring implements IRefactoring {
+public class RenameVariableRefactoring extends Refactoring implements IRefactoring {
 
     private VariableDeclaration originalVariable;
     private VariableDeclaration renamedVariable;

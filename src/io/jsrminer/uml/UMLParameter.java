@@ -1,9 +1,13 @@
 package io.jsrminer.uml;
 
-public class UMLParameter {
+import io.jsrminer.sourcetree.CodeEntity;
+import io.jsrminer.sourcetree.VariableDeclaration;
+
+public class UMLParameter extends CodeEntity {
     public final String name;
     private String defaultValue;    // IT  could be expression, function call or can use an earlier parameter
     private int indexPositionInParent; // Move to FD?
+    private VariableDeclaration variableDeclaration;
 
     public UMLParameter(String name) {
         this.name = name;
@@ -33,6 +37,14 @@ public class UMLParameter {
 
     public boolean hasDefaultValue() {
         return this.defaultValue != null;
+    }
+
+    public VariableDeclaration getVariableDeclaration() {
+        return variableDeclaration;
+    }
+
+    public void setVariableDeclaration(VariableDeclaration variableDeclaration) {
+        this.variableDeclaration = variableDeclaration;
     }
 
     @Override

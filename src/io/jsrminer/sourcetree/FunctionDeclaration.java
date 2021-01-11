@@ -32,6 +32,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      */
     private FunctionBody body;
 
+    private String containerName;
     /**
      * Stores whether the body of the function is empty or not
      */
@@ -138,6 +139,34 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         this.name = name;
     }
 
+    public List<String> getParameterNameList() {
+        List<String> parameterNameList = new ArrayList<>();
+        for (UMLParameter parameter : parameters) {
+            parameterNameList.add(parameter.name);
+        }
+        return parameterNameList;
+    }
+
+    public List<String> getAllVariables() {
+        if (this.getBody() != null)
+            return this.getBody().blockStatement.getAllVariablesIncludingNested();
+        return new ArrayList<>();
+    }
+
+    public List<VariableDeclaration> getAllVariableDeclarations() {
+        if (body != null)
+            return body.blockStatement.getAllVariableDeclarations();
+        return new ArrayList<>();
+    }
+
+    public BlockStatement loopWithVariables(String currentElementName, String collectionName) {
+        return body.blockStatement.loopWithVariables(currentElementName, collectionName);
+    }
+
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        return body.blockStatement.getVariableDeclaration(variableName);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -150,5 +179,13 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         sb.append(commaSeparatedParams);
         sb.append(')');
         return sb.toString();
+    }
+
+    public String getContainerName() {
+        return containerName;
+    }
+
+    public void setContainerName(String containerName) {
+        this.containerName = containerName;
     }
 }

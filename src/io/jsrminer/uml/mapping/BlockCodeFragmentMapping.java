@@ -1,6 +1,7 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.diff.StringDistance;
 
 public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Comparable<BlockCodeFragmentMapping> {
@@ -8,8 +9,8 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
     private double compositeChildMatchingScore;
 
     public BlockCodeFragmentMapping(BlockStatement statement1, BlockStatement statement2, double childMatchScore
-            /*,FunctionDeclaration operation1, FunctionDeclaration operation2*/) {
-        super(statement1, statement2/*, operation1, operation2*/);
+            , FunctionDeclaration operation1, FunctionDeclaration operation2, Argumentizer argumentizer) {
+        super(statement1, statement2, operation1, operation2, argumentizer);
         this.compositeChildMatchingScore = childMatchScore;
     }
 

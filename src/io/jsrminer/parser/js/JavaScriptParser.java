@@ -5,6 +5,7 @@ import io.jsrminer.uml.UMLModel;
 import io.rminer.core.api.IParser;
 import io.rminer.core.api.ISourceFile;
 import io.rminer.core.entities.SourceFile;
+import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -36,7 +37,10 @@ public class JavaScriptParser implements IParser {
     }
 
     @Override
-    public ISourceFile parseSource(String content, String filepath) {
+    public ISourceFile parseSource(String content, @NonNull String filepath) {
+        if (filepath == null)
+            filepath = "unnamedfile";
+
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
             jsEngine.createParseFunction();
 

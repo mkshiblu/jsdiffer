@@ -1,28 +1,13 @@
-// /**
-//  * Find the namespace of a function. For example, if A() is declared inside B() and C() is 
-//  * declared inside A(), it will return A.B for path of C()
-//  */
-// function getFunctionNamespace(path) {
-//     let namespace = '';
-//     let scope = path.scope.parent;
-//     while (scope.parent != null) {
-//         if (scope.block.id) {
-//             namespace += scope.block.id.name;
-//         } else {
-//             namespace += "$|$"; // TODO handle this
+exports.processfunctionParameters = (functionPath) => {
+    const parameters = functionPath.get('params').map(path => {
+        return {
+            name: path.node.name,
+            loc: getFormattedLocation(path.node)
+        }
+    });
 
-//         }
-//         scope = scope.parent;
-//     }
-//     return namespace == '' ? null : namespace;
-// }
-
-// exports.getFunctionQualifiedName = (path) => {
-//     // TODO Handle function Expressions when id could be null
-//     const namespace = getFunctionNamespace(path);
-//     const name = path.node.id.name;
-//     return namespace == null ? name : namespace + '.' + name;
-// }
+    return parameters;
+};
 
 function getFormattedLocation(node) {
     const sourceLocation = node.loc;
@@ -53,10 +38,10 @@ exports.getFormattedObjectCreation = (path) => {
  * Mergess array properties from obj2 to obj1 and returns obj1
  */
 exports.mergeArrayProperties = (obj, ...objectsToBeMerged) => {
-    objectsToBeMerged.forEach((obj2)=> {
+    objectsToBeMerged.forEach((obj2) => {
         for (const property in obj2) {
             if (Array.isArray(obj2[property])) {
-                obj[property] = [ ...obj2[property], ...obj[property] || [],];
+                obj[property] = [...obj2[property], ...obj[property] || [],];
             }
         }
     });

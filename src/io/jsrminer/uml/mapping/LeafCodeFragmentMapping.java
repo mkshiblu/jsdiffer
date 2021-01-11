@@ -2,13 +2,14 @@ package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.CodeFragment;
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
 
 public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comparable<LeafCodeFragmentMapping> {
 
-    public LeafCodeFragmentMapping(CodeFragment statement1, CodeFragment statement2) {
-        super(statement1, statement2);
+    public LeafCodeFragmentMapping(CodeFragment statement1, CodeFragment statement2, FunctionDeclaration function1, FunctionDeclaration function2, Argumentizer argumentizer) {
+        super(statement1, statement2, function1, function2, argumentizer);
     }
 
     @Override

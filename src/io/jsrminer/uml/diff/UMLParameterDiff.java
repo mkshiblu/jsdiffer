@@ -70,4 +70,12 @@ public class UMLParameterDiff extends Diff {
 //        }
         return refactorings;
     }
+
+    public UMLParameter getRemovedParameter() {
+        return parameter1;
+    }
+
+    public UMLParameter getAddedParameter() {
+        return parameter2;
+    }
 }

@@ -16,7 +16,7 @@ import java.util.Map;
 public class ContainerDiff {
     public final IContainer container1;
     public final IContainer cotainer2;
-
+    private List<UMLOperationDiff> operationDiffList = new ArrayList<>();
     public final List<IRefactoring> refactorings = new ArrayList<>();
 
     /**
@@ -52,5 +52,18 @@ public class ContainerDiff {
 
     public Map<String, FunctionDeclaration> getRemovedOperations() {
         return removedOperations;
+    }
+
+    public List<UMLOperationDiff> getOperationDiffList() {
+        return operationDiffList;
+    }
+
+    public UMLOperationDiff getOperationDiff(FunctionDeclaration operation1, FunctionDeclaration operation2) {
+        for (UMLOperationDiff diff : operationDiffList) {
+            if (diff.function1.equals(operation1) && diff.function2.equals(operation2)) {
+                return diff;
+            }
+        }
+        return null;
     }
 }

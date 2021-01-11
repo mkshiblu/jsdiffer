@@ -10,7 +10,6 @@ public class RemoveParameterRefactoring extends Refactoring {
 
     public RemoveParameterRefactoring(UMLParameter parameter, FunctionDeclaration operationBefore,
                                       FunctionDeclaration operationAfter) {
-        super(RefactoringType.REMOVE_PARAMETER);
         this.parameter = parameter;
         this.operationBefore = operationBefore;
         this.operationAfter = operationAfter;
@@ -26,6 +25,16 @@ public class RemoveParameterRefactoring extends Refactoring {
 
     public FunctionDeclaration getOperationAfter() {
         return operationAfter;
+    }
+
+    @Override
+    public RefactoringType getRefactoringType() {
+        return RefactoringType.REMOVE_PARAMETER;
+    }
+
+    @Override
+    public String getName() {
+        return this.getRefactoringType().getDisplayName();
     }
 
 //    @Override

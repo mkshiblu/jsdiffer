@@ -1,9 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.refactorings.InlineOperationRefactoring;
-import io.jsrminer.refactorings.RenameOperationRefactoring;
+import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
@@ -13,9 +11,7 @@ import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
-import io.jsrminer.uml.mapping.replacement.MethodInvocationReplacement;
-import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.*;
 import io.rminer.core.api.ISourceFile;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -33,6 +29,9 @@ public class ContainerDiffer {
     //private final Map<String, FunctionBodyMapper> functionBodyMappers = new HashMap<>();
     protected List<IRefactoring> refactorings = new ArrayList<>();
     private List<FunctionBodyMapper> bodyMappers = new ArrayList<>();
+    private Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
+    private Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
+    private Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
 
     public ContainerDiffer(final ISourceFile source1, final ISourceFile source2, final UMLModelDiff modelDiff) {
         this.source1 = source1;
@@ -75,7 +74,7 @@ public class ContainerDiffer {
         createBodyMapperForCommonNamedFunctions(sourceDiff, functionMap1, functionMap2);
 //        processAttributes();
 //        checkForAttributeChanges();
-       // processAnonymousFunctions(sourceDiff);
+        // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges(sourceDiff);
         checkForInlinedOperations();
         checkForExtractedOperations();
@@ -129,10 +128,10 @@ public class ContainerDiffer {
         }
     }
 
-    private void checkForOperationSignatureChanges(ContainerDiff sourceDiff) {
+    private void checkForOperationSignatureChanges(ContainerDiff containerDiff) {
 
-        List<FunctionDeclaration> removedOperations = new ArrayList<>(sourceDiff.getRemovedOperations().values());
-        List<FunctionDeclaration> addedOperations = new ArrayList<>(sourceDiff.getAddedOperations().values());
+        List<FunctionDeclaration> removedOperations = new ArrayList<>(containerDiff.getRemovedOperations().values());
+        List<FunctionDeclaration> addedOperations = new ArrayList<>(containerDiff.getAddedOperations().values());
 
         if (removedOperations.size() <= addedOperations.size()) {
             for (Iterator<FunctionDeclaration> removedOperationIterator = removedOperations.iterator(); removedOperationIterator.hasNext(); ) {
@@ -156,7 +155,7 @@ public class ContainerDiffer {
 //                    } else {
                     maxDifferenceInPosition = Math.max(removedOperations.size(), addedOperations.size());
                     //}
-                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, sourceDiff);
+                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, containerDiff);
 
                     // TODO  operationsInsideAnonymousClass
 //                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousClass(this.addedAnonymousClasses);
@@ -173,7 +172,7 @@ public class ContainerDiffer {
                         removedOperationIterator.remove();
 
                         UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, bestMapper.getMappings());
-                        //operationDiffList.add(operationSignatureDiff);
+                        containerDiff.getOperationDiffList().add(operationSignatureDiff);
                         refactorings.addAll(operationSignatureDiff.getRefactorings());
                         if (!removedOperation.getName().equals(addedOperation.getName()) &&
                                 !(removedOperation.getIsConstructor() && addedOperation.getIsConstructor())) {
@@ -196,7 +195,7 @@ public class ContainerDiffer {
 //                    } else {
                     maxDifferenceInPosition = Math.max(removedOperations.size(), addedOperations.size());
                     //}
-                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, sourceDiff);
+                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, containerDiff);
 //                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousClass(this.addedAnonymousClasses);
 //                    for (FunctionDeclaration operationInsideAnonymousClass : operationsInsideAnonymousClass) {
 //                        updateMapperSet(mapperSet, removedOperation, operationInsideAnonymousClass, addedOperation, maxDifferenceInPosition);
@@ -212,7 +211,7 @@ public class ContainerDiffer {
 
                         UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, bestMapper.getMappings());
 
-                        //operationDiffList.add(operationSignatureDiff);
+                        containerDiff.getOperationDiffList().add(operationSignatureDiff);
                         refactorings.addAll(operationSignatureDiff.getRefactorings());
                         if (!removedOperation.getName().equals(addedOperation.getName()) &&
                                 !(removedOperation.getIsConstructor() && addedOperation.getIsConstructor())) {
@@ -605,7 +604,7 @@ public class ContainerDiffer {
                 for (InlineOperationRefactoring refactoring : refs) {
                     refactorings.add(refactoring);
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-                    //processMapperRefactorings(operationBodyMapper, refactorings);
+                    processMapperRefactorings(operationBodyMapper, refactorings);
                     mapper.addChildMapper(operationBodyMapper);
                     operationsToBeRemoved.add(removedOperation.getName());
                 }
@@ -614,22 +613,166 @@ public class ContainerDiffer {
         for (String key : operationsToBeRemoved) {
             sourceDiff.getRemovedOperations().remove(key);
         }
-//
-//        for (Iterator<FunctionDeclaration> removedOperationIterator = removedOperations.iterator(); removedOperationIterator.hasNext(); ) {
-//            UMLOperation removedOperation = removedOperationIterator.next();
-//            for (UMLOperationBodyMapper mapper : getOperationBodyMapperList()) {
-//                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this, modelDiff);
-//                List<InlineOperationRefactoring> refs = detection.check(removedOperation);
-//                for (InlineOperationRefactoring refactoring : refs) {
-//                    refactorings.add(refactoring);
-//                    UMLOperationBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-//                    processMapperRefactorings(operationBodyMapper, refactorings);
-//                    mapper.addChildMapper(operationBodyMapper);
-//                    operationsToBeRemoved.add(removedOperation);
+    }
+
+    private void processMapperRefactorings(FunctionBodyMapper mapper, List<IRefactoring> refactorings) {
+        for (IRefactoring refactoring : mapper.getRefactoringsByVariableAnalysis()) {
+            if (refactorings.contains(refactoring)) {
+                //special handling for replacing rename variable refactorings having statement mapping information
+                int index = refactorings.indexOf(refactoring);
+                refactorings.remove(index);
+                refactorings.add(index, refactoring);
+            } else {
+                refactorings.add(refactoring);
+            }
+        }
+        for (CandidateAttributeRefactoring candidate : mapper.getCandidateAttributeRenames()) {
+            if (!multipleExtractedMethodInvocationsWithDifferentAttributesAsArguments(candidate, refactorings)) {
+                String before = PrefixSuffixUtils.normalize(candidate.getOriginalVariableName());
+                String after = PrefixSuffixUtils.normalize(candidate.getRenamedVariableName());
+                if (before.contains(".") && after.contains(".")) {
+                    String prefix1 = before.substring(0, before.lastIndexOf(".") + 1);
+                    String prefix2 = after.substring(0, after.lastIndexOf(".") + 1);
+                    if (prefix1.equals(prefix2)) {
+                        before = before.substring(prefix1.length(), before.length());
+                        after = after.substring(prefix2.length(), after.length());
+                    }
+                }
+                Replacement renamePattern = new Replacement(before, after, Replacement.ReplacementType.VARIABLE_NAME);
+                if (renameMap.containsKey(renamePattern)) {
+                    renameMap.get(renamePattern).add(candidate);
+                } else {
+                    Set<CandidateAttributeRefactoring> set = new LinkedHashSet<>();
+                    set.add(candidate);
+                    renameMap.put(renamePattern, set);
+                }
+            }
+        }
+        for (CandidateMergeVariableRefactoring candidate : mapper.getCandidateAttributeMerges()) {
+            Set<String> before = new LinkedHashSet<String>();
+            for (String mergedVariable : candidate.getMergedVariables()) {
+                before.add(PrefixSuffixUtils.normalize(mergedVariable));
+            }
+            String after = PrefixSuffixUtils.normalize(candidate.getNewVariable());
+            MergeVariableReplacement merge = new MergeVariableReplacement(before, after);
+            processMerge(mergeMap, merge, candidate);
+        }
+
+        for (CandidateSplitVariableRefactoring candidate : mapper.getCandidateAttributeSplits()) {
+            Set<String> after = new LinkedHashSet<String>();
+            for (String splitVariable : candidate.getSplitVariables()) {
+                after.add(PrefixSuffixUtils.normalize(splitVariable));
+            }
+            String before = PrefixSuffixUtils.normalize(candidate.getOldVariable());
+            SplitVariableReplacement split = new SplitVariableReplacement(before, after);
+            processSplit(splitMap, split, candidate);
+        }
+    }
+
+    private void processMerge(Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap,
+                              MergeVariableReplacement newMerge, CandidateMergeVariableRefactoring candidate) {
+        MergeVariableReplacement mergeToBeRemoved = null;
+        for (MergeVariableReplacement merge : mergeMap.keySet()) {
+            if (merge.subsumes(newMerge)) {
+                mergeMap.get(merge).add(candidate);
+                return;
+            } else if (merge.equal(newMerge)) {
+                mergeMap.get(merge).add(candidate);
+                return;
+            } else if (merge.commonAfter(newMerge)) {
+                mergeToBeRemoved = merge;
+                Set<String> mergedVariables = new LinkedHashSet<String>();
+                mergedVariables.addAll(merge.getMergedVariables());
+                mergedVariables.addAll(newMerge.getMergedVariables());
+                MergeVariableReplacement replacement = new MergeVariableReplacement(mergedVariables, merge.getAfter());
+                Set<CandidateMergeVariableRefactoring> candidates = mergeMap.get(mergeToBeRemoved);
+                candidates.add(candidate);
+                mergeMap.put(replacement, candidates);
+                break;
+            } else if (newMerge.subsumes(merge)) {
+                mergeToBeRemoved = merge;
+                Set<CandidateMergeVariableRefactoring> candidates = mergeMap.get(mergeToBeRemoved);
+                candidates.add(candidate);
+                mergeMap.put(newMerge, candidates);
+                break;
+            }
+        }
+        if (mergeToBeRemoved != null) {
+            mergeMap.remove(mergeToBeRemoved);
+            return;
+        }
+        Set<CandidateMergeVariableRefactoring> set = new LinkedHashSet<CandidateMergeVariableRefactoring>();
+        set.add(candidate);
+        mergeMap.put(newMerge, set);
+    }
+
+    private void processSplit(Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap,
+                              SplitVariableReplacement newSplit, CandidateSplitVariableRefactoring candidate) {
+        SplitVariableReplacement splitToBeRemoved = null;
+        for (SplitVariableReplacement split : splitMap.keySet()) {
+            if (split.subsumes(newSplit)) {
+                splitMap.get(split).add(candidate);
+                return;
+            } else if (split.equal(newSplit)) {
+                splitMap.get(split).add(candidate);
+                return;
+            } else if (split.commonBefore(newSplit)) {
+                splitToBeRemoved = split;
+                Set<String> splitVariables = new LinkedHashSet<String>();
+                splitVariables.addAll(split.getSplitVariables());
+                splitVariables.addAll(newSplit.getSplitVariables());
+                SplitVariableReplacement replacement = new SplitVariableReplacement(split.getBefore(), splitVariables);
+                Set<CandidateSplitVariableRefactoring> candidates = splitMap.get(splitToBeRemoved);
+                candidates.add(candidate);
+                splitMap.put(replacement, candidates);
+                break;
+            } else if (newSplit.subsumes(split)) {
+                splitToBeRemoved = split;
+                Set<CandidateSplitVariableRefactoring> candidates = splitMap.get(splitToBeRemoved);
+                candidates.add(candidate);
+                splitMap.put(newSplit, candidates);
+                break;
+            }
+        }
+        if (splitToBeRemoved != null) {
+            splitMap.remove(splitToBeRemoved);
+            return;
+        }
+        Set<CandidateSplitVariableRefactoring> set = new LinkedHashSet<CandidateSplitVariableRefactoring>();
+        set.add(candidate);
+        splitMap.put(newSplit, set);
+    }
+
+    private boolean multipleExtractedMethodInvocationsWithDifferentAttributesAsArguments(CandidateAttributeRefactoring candidate, List<IRefactoring> refactorings) {
+//        for (IRefactoring refactoring : refactorings) {
+//            if (refactoring instanceof ExtractOperationRefactoring) {
+//                ExtractOperationRefactoring extractRefactoring = (ExtractOperationRefactoring) refactoring;
+//                if (extractRefactoring.getExtractedOperation().equals(candidate.getOperationAfter())) {
+//                    List<OperationInvocation> extractedInvocations = extractRefactoring.getExtractedOperationInvocations();
+//                    if (extractedInvocations.size() > 1) {
+//                        Set<VariableDeclaration> attributesMatchedWithArguments = new LinkedHashSet<VariableDeclaration>();
+//                        Set<String> attributeNamesMatchedWithArguments = new LinkedHashSet<String>();
+//                        for (OperationInvocation extractedInvocation : extractedInvocations) {
+//                            for (String argument : extractedInvocation.getArguments()) {
+//                                for (UMLAttribute attribute : originalClass.getAttributes()) {
+//                                    if (attribute.getName().equals(argument)) {
+//                                        attributesMatchedWithArguments.add(attribute.getVariableDeclaration());
+//                                        attributeNamesMatchedWithArguments.add(attribute.getName());
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                        if ((attributeNamesMatchedWithArguments.contains(candidate.getOriginalVariableName()) ||
+//                                attributeNamesMatchedWithArguments.contains(candidate.getRenamedVariableName())) &&
+//                                attributesMatchedWithArguments.size() > 1) {
+//                            return true;
+//                        }
+//                    }
 //                }
 //            }
 //        }
-//        removedOperations.removeAll(operationsToBeRemoved);
+        return false;
     }
 
     private boolean exactMappings(FunctionBodyMapper operationBodyMapper, ContainerDiff sourceDiff) {
