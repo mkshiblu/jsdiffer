@@ -19,7 +19,7 @@ import java.util.*;
 public class JsonCompositeDeserializer {
     final String sourcePath;
 
-    private HashMap<Integer, FunctionDeclaration> loadedFunctions = new HashMap<>();
+    private HashMap<String, FunctionDeclaration> loadedFunctions = new HashMap<>();
 
     public JsonCompositeDeserializer(String sourcePath) {
         this.sourcePath = sourcePath;
@@ -36,8 +36,9 @@ public class JsonCompositeDeserializer {
         return sourceFile;
     }
 
-    private FunctionDeclaration getFunctionIfAlreadyLoaded(Any any, Container parentContainer) {
-        return loadedFunctions.getOrDefault(any.get("loc").toInt("start"), null);
+    private FunctionDeclaration getFunctionIfAlreadyLoaded(Any any) {
+        SourceLocation location = createSourceLocation(any.get("loc"));
+        return loadedFunctions.getOrDefault(location.startLine + "," + location.startColumn, null);
     }
 
     public String getParentContainerName(Container parentContainer) {
@@ -96,14 +97,14 @@ public class JsonCompositeDeserializer {
         BlockStatement bodyBlock = createBlockStatement(body, function);
         function.setBody(new FunctionBody(bodyBlock));
 
-        loadedFunctions.put(location.start, function);
+        loadedFunctions.put(location.startLine + "," + location.startColumn, function);
     }
 
     UMLParameter parseUMLParameter(Any any, SourceLocation scope) {
         String name = any.toString("name");
         UMLParameter parameter = new UMLParameter(name);
         parameter.setSourceLocation(createSourceLocation(any.get("loc")));
-        VariableDeclaration vd = new VariableDeclaration(name);
+        VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.LET);
         vd.setIsParameter(true);
         vd.setVariableScope(scope);
         parameter.setVariableDeclaration(vd);
@@ -166,7 +167,7 @@ public class JsonCompositeDeserializer {
             // parse the nested functionDeclarations
             if (any.keys().contains("functionDeclarations")) {
                 for (Any functionAny : any.get("functionDeclarations").asList()) {
-                    FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, parentContainer);
+                    FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(functionAny);
                     if (functionDeclaration == null)
                         functionDeclaration = new FunctionDeclaration();
 
@@ -378,7 +379,7 @@ public class JsonCompositeDeserializer {
 
     public AnonymousFunctionDeclaration loadAnonymousFunction(Any any, Container parentContainer) {
         AnonymousFunctionDeclaration anonymousFunctionDeclaration;
-        FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any, parentContainer);
+        FunctionDeclaration functionDeclaration = getFunctionIfAlreadyLoaded(any);
         if (functionDeclaration == null) {
             anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
             loadFunctionDeclaration(any, anonymousFunctionDeclaration, parentContainer);
@@ -425,11 +426,12 @@ public class JsonCompositeDeserializer {
     }
 
     public VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner, Container parentContainer) {
-        VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"));
-        //vd.setText(any.toString("text"));
-        VariableDeclarationKind kind = VariableDeclarationKind.fromName(any.toString("kind"));
-        vd.setKind(kind);
 
+        VariableDeclarationKind kind = VariableDeclarationKind.GLOBAL;
+        if (any.keys().contains("kind")) {
+            kind = VariableDeclarationKind.fromName(any.toString("kind"));
+        }
+        VariableDeclaration vd = new VariableDeclaration(any.toString("variableName"), kind);
         if (any.keys().contains("initializer")) {
             Expression expression = createExpression(any.get("initializer"), owner, parentContainer);
             vd.setInitializer(expression);
