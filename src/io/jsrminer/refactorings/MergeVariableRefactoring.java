@@ -82,7 +82,7 @@ public class MergeVariableRefactoring extends Refactoring implements IRefactorin
         sb.append(newVariable);
         sb.append(" in method ");
         sb.append(operationAfter);
-        sb.append(" at ").append(operationAfter.getQualifiedName());
+        sb.append(" at ").append(operationAfter.getFullyQualifiedName());
         return sb.toString();
     }
 

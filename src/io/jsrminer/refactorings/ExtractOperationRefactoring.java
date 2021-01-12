@@ -63,7 +63,7 @@ public class ExtractOperationRefactoring extends Refactoring {
         sb.append(getClassName());
         if (getRefactoringType().equals(RefactoringType.EXTRACT_AND_MOVE_OPERATION)) {
             sb.append(" & moved to ");
-            sb.append(extractedOperation.getQualifiedName());
+            sb.append(extractedOperation.getFullyQualifiedName());
         }
         return sb.toString();
     }

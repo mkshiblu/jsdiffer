@@ -158,7 +158,7 @@ public class ContainerDiffer {
                     updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, containerDiff);
 
                     // TODO  operationsInsideAnonymousClass
-//                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousClass(this.addedAnonymousClasses);
+//                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousFunctionDeclarations(this.addedAnonymousClasses);
 //                    for (FunctionDeclaration operationInsideAnonymousClass : operationsInsideAnonymousClass) {
 //                        updateMapperSet(mapperSet, removedOperation, operationInsideAnonymousClass, addedOperation, maxDifferenceInPosition);
 //                    }
@@ -349,6 +349,33 @@ public class ContainerDiffer {
             }
         }
     }
+
+//    private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
+//            , FunctionDeclaration operationInsideAnonymousClass, FunctionDeclaration addedOperation, int differenceInPosition) throws RefactoringMinerTimedOutException {
+//        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, operationInsideAnonymousClass, this);
+//        int mappings = operationBodyMapper.mappingsWithoutBlocks();
+//        if(mappings > 0) {
+//            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
+//            if(exactMappings(operationBodyMapper)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//            else if(mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//            else if(mappedElementsMoreThanNonMappedT2(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    isPartOfMethodExtracted(removedOperation, addedOperation)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//            else if(mappedElementsMoreThanNonMappedT1(mappings, operationBodyMapper) &&
+//                    absoluteDifferenceInPosition <= differenceInPosition &&
+//                    isPartOfMethodInlined(removedOperation, addedOperation)) {
+//                mapperSet.add(operationBodyMapper);
+//            }
+//        }
+//    }
 
     private boolean isPartOfMethodExtracted(FunctionDeclaration removedOperation, FunctionDeclaration addedOperation
             , Map<String, FunctionDeclaration> addedOperations) {

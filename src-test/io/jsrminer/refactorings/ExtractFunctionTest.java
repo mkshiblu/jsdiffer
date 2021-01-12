@@ -40,7 +40,7 @@ public class ExtractFunctionTest extends TestBase {
     @Test
     void testRefactoringsCount() {
         assertNotNull(refactorings);
-        assertTrue(refactorings.size() == 4);
+        assertEquals(4, refactorings.size());
     }
 
     @Test

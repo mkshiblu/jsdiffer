@@ -2,6 +2,27 @@ const astProcessor = require("./AstNodeProcessor");
 const declarationProcessor = require("./DeclarationProcessor");
 const templates = require('../parser/Templates');
 
+// interface DoWhileStatement<: Statement {
+//     type: "DoWhileStatement";
+//     body: Statement;
+//     test: Expression;
+// }
+exports.processDoWhileStatement = (path, processStatement, processExpression) => {
+    const node = path.node;
+    const statement = {
+        type: node.type,
+        text: 'do',
+        statements: [],
+        expressions: []
+    };
+    processStatement(path.get('body'), statement);
+    const test = astProcessor.processExpression(path.get("test"), statement);
+    statement.expressions.push(test);
+
+    return statement;
+};
+
+
 // interface WhileStatement<: Statement {
 //     type: "WhileStatement";
 //     test: Expression;

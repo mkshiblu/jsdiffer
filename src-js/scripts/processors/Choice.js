@@ -45,9 +45,6 @@ exports.processIfStatement = (path, processStatement, processExpression) => {
 //   cases: [ SwitchCase ];
 // }
 // A switch statement.
-
-
-
 exports.processSwitchStatement = (path, processStatement, processExpression) => {
     const node = path.node;
     const statement = {

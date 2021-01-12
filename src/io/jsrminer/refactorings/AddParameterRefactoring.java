@@ -78,7 +78,7 @@ public class AddParameterRefactoring extends Refactoring {
         sb.append(" in method ");
         sb.append(operationAfter);
         sb.append(" at");
-        sb.append(operationAfter.getQualifiedName());
+        sb.append(operationAfter.getFullyQualifiedName());
         return sb.toString();
     }
 

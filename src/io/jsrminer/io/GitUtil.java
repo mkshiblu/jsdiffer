@@ -237,6 +237,13 @@ public class GitUtil {
         return ref.getObjectId();
     }
 
+    public static RevCommit getRevCommit(Repository repository, String commitId) throws IOException {
+        ObjectId id = ObjectId.fromString(commitId);
+        try (RevWalk walk = new RevWalk(repository)) {
+            return walk.parseCommit(id);
+        }
+    }
+
     public static RevCommit getCurrentCommit(Repository repository) throws IOException {
         ObjectId id = repository.resolve(Constants.HEAD);
         try (RevWalk walk = new RevWalk(repository)) {

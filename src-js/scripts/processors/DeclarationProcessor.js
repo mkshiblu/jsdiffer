@@ -35,7 +35,6 @@ interface VariableDeclarator <: Node {
 exports.processVariableDeclaration = (path) => {
     const node = path.node;
     const kind = node.kind;
-    let initializer;
 
     const statement = {
         type: node.type,
@@ -85,6 +84,8 @@ function processVariableDeclarator(path, kind, statement) {
         kind,
         variableName,
         text: path.toString(),
+        type: "VariableDeclaration",
+        loc: astUtil.getFormattedLocation(path.node),
     };
 
     if (declaratorNode.init) {

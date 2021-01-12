@@ -1,6 +1,7 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.IFunctionDeclaration;
 import io.rminer.core.entities.DeclarationContainer;
 
@@ -187,5 +188,22 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public void setContainerName(String containerName) {
         this.containerName = containerName;
+    }
+
+    public List<FunctionDeclaration> getOperationsInsideAnonymousFunctionDeclarations(List<IAnonymousFunctionDeclaration> allAddedAnonymousClasses) {
+        List<FunctionDeclaration> operationsInsideAnonymousClass = new ArrayList<>();
+        if (this.body != null) {
+            List<IAnonymousFunctionDeclaration> anonymousClassDeclarations = this.getBody().blockStatement.getAllAnonymousFunctionDeclarations();
+            for (IAnonymousFunctionDeclaration anonymousClassDeclaration : anonymousClassDeclarations) {
+                for (IAnonymousFunctionDeclaration anonymousFunction : allAddedAnonymousClasses) {
+                    if (anonymousFunction.getSourceLocation().equals(anonymousClassDeclaration.getSourceLocation())) {
+                        anonymousFunction.getFunctionDeclarations().forEach(iaf -> {
+                            operationsInsideAnonymousClass.add((FunctionDeclaration) iaf);
+                        });
+                    }
+                }
+            }
+        }
+        return operationsInsideAnonymousClass;
     }
 }

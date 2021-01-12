@@ -16,7 +16,6 @@ public class AnonymousFunctionReplacementFinder {
 
     Map<String, String> parameterToArgumentMap;
     FunctionBodyMapper parentOperationsMapper;
-    int matchedOperations = 0;
 
     public AnonymousFunctionReplacementFinder(Map<String, String> parameterToArgumentMap, FunctionBodyMapper parentOperationsMapper) {
         this.parameterToArgumentMap = parameterToArgumentMap;
@@ -58,10 +57,13 @@ public class AnonymousFunctionReplacementFinder {
                                         || equalSignature(operation1, operation2)
                                         || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
                                 ) {
-                                    createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
+                                    boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
+                                    if (isMatched)
+                                        matchedOperations++;
                                 }
                             }
                         }
+
                         if (matchedOperations > 0) {
                             Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), Replacement.ReplacementType.ANONYMOUS_CLASS_DECLARATION);
                             replacementInfo.addReplacement(replacement);
@@ -74,7 +76,8 @@ public class AnonymousFunctionReplacementFinder {
         return null;
     }
 
-    private void createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
+    private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
+        boolean isMatched = false;
         FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getContainerDiff());
         mapper.map();
         int mappings = mapper.mappingsWithoutBlocks();
@@ -88,13 +91,15 @@ public class AnonymousFunctionReplacementFinder {
                 this.parentOperationsMapper.getNonMappedInnerNodesT2().addAll(mapper.getNonMappedInnerNodesT2());
                 this.parentOperationsMapper.getNonMappedLeavesT1().addAll(mapper.getNonMappedLeavesT1());
                 this.parentOperationsMapper.getNonMappedLeavesT2().addAll(mapper.getNonMappedLeavesT2());
-                matchedOperations++;
+                isMatched = true;
 
                 UMLOperationDiff operationDiff = new UMLOperationDiff(operation1, operation2, mapper.getMappings());
                 this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
                 this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
             }
         }
+
+        return isMatched;
     }
 
     public static boolean equalSignature(IFunctionDeclaration function1, IFunctionDeclaration function2) {
@@ -127,7 +132,7 @@ public class AnonymousFunctionReplacementFinder {
 //            }
 //        }
         //return this.name.equals(operation.name) && equalTypeParameters(operation) && (equalParameterTypes || compatibleParameterTypes) && equalReturnParameter(operation);
-        return function1.getName().equals(function2.getName()) && equalParameterCount;
+        return equalParameterCount;
     }
 
     public static boolean equalSignatureWithIdenticalNameIgnoringChangedTypes(IFunctionDeclaration function1, IFunctionDeclaration function2) {

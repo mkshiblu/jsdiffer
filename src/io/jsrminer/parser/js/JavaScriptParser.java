@@ -25,9 +25,14 @@ public class JavaScriptParser implements IParser {
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
 
-                SourceFile sourceFile = parse(content, jsEngine, filepath);
-                sourceFile.setFilepath(filepath);
-                sourceModels.put(filepath, sourceFile);
+                try {
+                    SourceFile sourceFile = parse(content, jsEngine, filepath);
+                    sourceFile.setFilepath(filepath);
+                    sourceModels.put(filepath, sourceFile);
+                } catch (Exception ex) {
+                    System.out.println("Ignoring and removing file " + filepath + " due to exception" + ex.toString());
+                    fileContents.remove(filepath);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -39,7 +44,7 @@ public class JavaScriptParser implements IParser {
     @Override
     public ISourceFile parseSource(String content, @NonNull String filepath) {
         if (filepath == null)
-            filepath = "unnamedfile";
+            throw new NullPointerException("filepath cannot be null");
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
             jsEngine.createParseFunction();

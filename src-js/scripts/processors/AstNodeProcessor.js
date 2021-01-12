@@ -15,9 +15,13 @@ function processStatement(path, parent) {
     try {
         types.removeComments(path.node);
         const statement = processNodePath(path, processStatement);
+
+        if (statement) {
         statement.loc = astUtil.getFormattedLocation(path.node);
         // Add children
         addStatement(parent, statement, path);
+        }else{
+        }
     } catch (ex) {
         console.error(ex, path.node.loc.start.toString());
     }
@@ -88,6 +92,7 @@ const processNodePath = (function () {
         ['ForStatement', loopsProcessor.processForStatement],
         ['ForInStatement', loopsProcessor.processForInStatement],
         ['WhileStatement', loopsProcessor.processWhileStatement],
+        ['DoWhileStatement', loopsProcessor.processDoWhileStatement],
 
         ['TryStatement', exceptions.processTryStatement],
         ['ThrowStatement', exceptions.processThrowStatement],
@@ -102,7 +107,7 @@ const processNodePath = (function () {
         }
 
         //return 'Processeor not implemented for : ' + nodePath.node.type + " : " + nodePath.toString();
-        throw 'Processeor not implemented for : ' + nodePath.node.type;
+        console.log('Processeor not implemented for : ' + nodePath.node.type);
     }
 })();
 

@@ -32,7 +32,7 @@ public class RenameOperationRefactoring extends Refactoring {
         sb.append(originalOperation);
         sb.append(" renamed to ");
         sb.append(renamedOperation);
-        sb.append(" in class ").append(getClassName());
+        sb.append(" at ").append(originalOperation.getFullyQualifiedName());
         return sb.toString();
     }
 

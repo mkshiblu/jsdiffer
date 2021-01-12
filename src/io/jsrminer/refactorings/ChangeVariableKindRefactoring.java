@@ -76,7 +76,7 @@ public class ChangeVariableKindRefactoring extends Refactoring implements IRefac
         sb.append(" in method ");
         //
         sb.append(operationAfter.toString());
-        sb.append(" at ").append(operationAfter.getQualifiedName());
+        sb.append(" at ").append(operationAfter.getFullyQualifiedName());
         return sb.toString();
     }
 

@@ -88,7 +88,7 @@ public abstract class CodeFragmentMapping {
         return false;
     }
 
-    public boolean equalFragmentText(Argumentizer argumentizer) {
+    public boolean equalFragmentText() {
         String text1 = fragment1.getText();
         String text2 = fragment2.getText();
 

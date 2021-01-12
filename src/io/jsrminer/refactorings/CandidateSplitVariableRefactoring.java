@@ -67,7 +67,7 @@ public class CandidateSplitVariableRefactoring {
         sb.append(splitVariables);
         sb.append(" in method ");
         sb.append(operationAfter);
-        sb.append(" at ").append(operationAfter.getQualifiedName());
+        sb.append(" at ").append(operationAfter.getFullyQualifiedName());
         return sb.toString();
     }
 

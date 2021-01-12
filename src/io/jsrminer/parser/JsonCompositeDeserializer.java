@@ -106,7 +106,8 @@ public class JsonCompositeDeserializer {
         parameter.setSourceLocation(createSourceLocation(any.get("loc")));
         VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.LET);
         vd.setIsParameter(true);
-        vd.setVariableScope(scope);
+        vd.setScope(scope);
+        vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;
     }
@@ -311,8 +312,7 @@ public class JsonCompositeDeserializer {
     }
 
     public void loadLeafData(Any any, CodeFragment leaf, BlockStatement parentOrOwner, Container parentContainer) {
-
-        // Additional info if present
+        leaf.setSourceLocation(createSourceLocation(any.get("loc")));
         // region
         // Identifiers
         if (any.keys().contains("identifiers")) {
@@ -436,6 +436,8 @@ public class JsonCompositeDeserializer {
             Expression expression = createExpression(any.get("initializer"), owner, parentContainer);
             vd.setInitializer(expression);
         }
+        vd.setSourceLocation(createSourceLocation(any.get("loc")));
+        vd.setScope(parentContainer.getSourceLocation());
         return vd;
     }
 

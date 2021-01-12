@@ -31,7 +31,23 @@ import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js", "ts"}));
+    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js"}));
+
+    public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
+        List<IRefactoring> refactorings = null;
+        try {
+            Repository repository = GitUtil.openRepository(gitRepositoryPath);
+            RevCommit commit = GitUtil.getRevCommit(repository, commitId);
+            Iterable<RevCommit> walk = List.of(commit);
+            refactorings = detect(repository, null, walk);
+            log.info("RefCount + " + refactorings.size());
+            refactorings.forEach(r -> log.info(r.toString()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+        }
+        return refactorings;
+    }
 
     @Override
     public List<IRefactoring> detectAtCurrentCommit(String gitRepositoryPath) {
@@ -39,8 +55,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         try {
             Repository repository = GitUtil.openRepository(gitRepositoryPath);
             RevCommit commit = GitUtil.getCurrentCommit(repository);
-            Iterable<RevCommit> walk = List.of(commit);
-            refactorings = detect(repository, null, walk);
+            return detectAtCommit(gitRepositoryPath, commit.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -140,7 +155,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
         try (RevWalk walk = new RevWalk(repository)) {
             RevCommit parentCommit = walk.parseCommit(currentCommit.getParent(0).getId());
-            GitUtil.fileTreeDiff2(repository, parentCommit, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint
+            GitUtil.fileTreeDiff(repository, parentCommit, currentCommit, filePathsBefore, filePathsCurrent, renamedFilesHint
                     , supportedExtensions.toArray(String[]::new));
 
             // If no java files changed, there is no refactoring. Also, if there are
@@ -148,22 +163,24 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
                 // TODO Multi thread?
+                log.info("Parsing files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
                 UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
 
                 // TODO multi thread?
+                log.info("Parsing files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
 
+                log.info("Detecting refactorings...");
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
-
                 refactoringsAtRevision = umlModelBefore.diff(umlModelCurrent/*, renamedFilesHint*/).getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
-                //logger.info(String.format("Ignored revision %s with no changes in java files", commitId));
+                log.info(String.format("Ignored revision %s with no changes in js files", commitId));
                 refactoringsAtRevision = Collections.emptyList();
             }
-            //handler.handle(commitId, refactoringsAtRevision);
+            //    handler.handle(commitId, refactoringsAtRevision);
 
             walk.dispose();
         }

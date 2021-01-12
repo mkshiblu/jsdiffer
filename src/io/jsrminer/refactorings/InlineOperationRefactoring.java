@@ -45,12 +45,12 @@ public class InlineOperationRefactoring extends Refactoring {
             sb.append(" inlined to ");
             sb.append(targetOperationAfterInline);
             sb.append(" at ");
-            sb.append(targetOperationAfterInline.getQualifiedName());
+            sb.append(targetOperationAfterInline.getFullyQualifiedName());
         } else if (getRefactoringType().equals(RefactoringType.MOVE_AND_INLINE_OPERATION)) {
             sb.append(" moved from  ");
-            sb.append(inlinedOperation.getQualifiedName());
+            sb.append(inlinedOperation.getFullyQualifiedName());
             sb.append(" to ");
-            sb.append(getTargetOperationAfterInline().getQualifiedName());
+            sb.append(getTargetOperationAfterInline().getFullyQualifiedName());
             sb.append(" & inlined to ");
             sb.append(getTargetOperationAfterInline());
         }

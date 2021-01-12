@@ -1,8 +1,9 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.refactorings.AddParameterRefactoring;
 import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.AddParameterRefactoring;
 import io.jsrminer.refactorings.RemoveParameterRefactoring;
+import io.jsrminer.refactorings.ReorderParameterRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
@@ -238,10 +239,10 @@ public class UMLOperationDiff extends Diff {
             }
         }
 
-//        if (parametersReordered) {
-//            ReorderParameterRefactoring refactoring = new ReorderParameterRefactoring(removedOperation, addedOperation);
-//            refactorings.add(refactoring);
-//        }
+        if (parametersReordered) {
+            ReorderParameterRefactoring refactoring = new ReorderParameterRefactoring(function1, function2);
+            refactorings.add(refactoring);
+        }
 //        for (UMLAnnotation annotation : annotationListDiff.getAddedAnnotations()) {
 //            AddMethodAnnotationRefactoring refactoring = new AddMethodAnnotationRefactoring(annotation, removedOperation, addedOperation);
 //            refactorings.add(refactoring);

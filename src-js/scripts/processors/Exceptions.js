@@ -35,6 +35,9 @@ exports.processTryStatement = (path, processStatement) => {
 //     body: BlockStatement;
 // }
 function porcessCatchClause(path, processStatement) {
+
+    if(!path.node)
+    return;
     const statement = {
         type: path.node.type,
         text: 'catch',
@@ -58,7 +61,7 @@ function porcessCatchClause(path, processStatement) {
                 variableName: param.name,
                 kind: 'let', // TODO: Does it work as let?
                 type: 'VariableDeclaration',
-                // loc: astUtil.getFormattedLocation(param),
+                loc: astUtil.getFormattedLocation(param),
             };
             expression.identifiers = [];
             expression.variableDeclarations.push(variableDeclaration);

@@ -57,4 +57,14 @@ public class SourceLocation {
                 this.start <= other.start &&
                 this.end >= other.end;
     }
+
+    public boolean equalSourceLocation(SourceLocation other) {
+        if (this.getFile() == null) {
+            if (other.getFile() != null)
+                return false;
+        } else if (!this.getFile().equals(other.getFile()))
+            return false;
+
+        return this.equalsLineAndColumn(other);
+    }
 }

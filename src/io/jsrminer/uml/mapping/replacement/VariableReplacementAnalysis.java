@@ -452,11 +452,11 @@ public class VariableReplacementAnalysis {
                 RenameVariableRefactoring ref = new RenameVariableRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                 if (!existsConflictingExtractVariableRefactoring(ref) && !existsConflictingMergeVariableRefactoring(ref) && !existsConflictingSplitVariableRefactoring(ref)) {
                     variableRenames.add(ref);
-//                    if (!vdReplacement.getVariableDeclaration1().getType().equals(vdReplacement.getVariableDeclaration2().getType()) || !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())) {
-//                        ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
-//                        refactoring.addRelatedRefactoring(ref);
-//                        refactorings.add(refactoring);
-//                    }
+                    if (!vdReplacement.getVariableDeclaration1().getKind().equals(vdReplacement.getVariableDeclaration2().getKind()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
+                        ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
+                        refactoring.addRelatedRefactoring(ref);
+                        refactorings.add(refactoring);
+                    }
 //                    UMLAnnotationListDiff annotationListDiff = new UMLAnnotationListDiff(vdReplacement.getVariableDeclaration1().getAnnotations(), vdReplacement.getVariableDeclaration2().getAnnotations());
 //                    for (UMLAnnotation annotation : annotationListDiff.getAddedAnnotations()) {
 //                        AddVariableAnnotationRefactoring refactoring = new AddVariableAnnotationRefactoring(annotation, vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2());
@@ -716,8 +716,8 @@ public class VariableReplacementAnalysis {
     }
 
     private static boolean returnVariableMapping(CodeFragmentMapping mapping, Replacement replacement) {
-        return mapping.fragment1.getText().equals("return " + replacement.getBefore() + ";\n") &&
-                mapping.fragment2.getText().equals("return " + replacement.getAfter() + ";\n");
+        return mapping.fragment1.getText().equals("return " + replacement.getBefore() + JsConfig.STATEMENT_TERMINATOR_CHAR) &&
+                mapping.fragment2.getText().equals("return " + replacement.getAfter() + JsConfig.STATEMENT_TERMINATOR_CHAR);
     }
 
     private boolean containsMethodInvocationReplacementWithDifferentExpressionNameAndArguments(Set<Replacement> replacements) {

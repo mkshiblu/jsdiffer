@@ -8,4 +8,5 @@ public class JsConfig {
      */
     public static final char STATEMENT_TERMINATOR_CHAR = ';';
     public static final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("[\\w\\<\\>\\[\\]]+\\s+(\\w+) *\\([^\\)]*\\) *(\\{?|[^;])");
+    public static final String JS_FILE_EXTENSION = ".js";
 }

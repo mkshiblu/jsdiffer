@@ -115,11 +115,26 @@ public class BlockStatement extends Statement implements ICompositeFragment {
                 BlockStatement composite = (BlockStatement) statement;
                 variables.addAll(composite.getAllVariablesIncludingNested());
             } else if (statement instanceof SingleStatement) {
-                BlockStatement statementObject = (BlockStatement) statement;
+                SingleStatement statementObject = (SingleStatement) statement;
                 variables.addAll(statementObject.getVariables());
             }
         }
         return variables;
+    }
+
+    public List<IAnonymousFunctionDeclaration> getAllAnonymousFunctionDeclarations() {
+        List<IAnonymousFunctionDeclaration> anonymousClassDeclarations = new ArrayList<>();
+        anonymousClassDeclarations.addAll(getAnonymousFunctionDeclarations());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                anonymousClassDeclarations.addAll(composite.getAllAnonymousFunctionDeclarations());
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                anonymousClassDeclarations.addAll(statementObject.getAnonymousFunctionDeclarations());
+            }
+        }
+        return anonymousClassDeclarations;
     }
 
     @Override

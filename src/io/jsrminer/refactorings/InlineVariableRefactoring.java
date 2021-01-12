@@ -55,7 +55,7 @@ public class InlineVariableRefactoring extends Refactoring {
         sb.append(" in method ");
         sb.append(operationBefore);
         sb.append(" at ");
-        sb.append(operationBefore.getQualifiedName());
+        sb.append(operationBefore.getFullyQualifiedName());
         return sb.toString();
     }
 
