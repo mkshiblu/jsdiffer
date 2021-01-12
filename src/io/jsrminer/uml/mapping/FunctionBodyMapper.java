@@ -1,14 +1,21 @@
 package io.jsrminer.uml.mapping;
 
+import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.CandidateAttributeRefactoring;
+import io.jsrminer.refactorings.CandidateMergeVariableRefactoring;
+import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.*;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
-public class FunctionBodyMapper {
+public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     public final FunctionDeclaration function1;
     public final FunctionDeclaration function2;
@@ -20,40 +27,47 @@ public class FunctionBodyMapper {
     Map<String, String> parameterToArgumentMap1 = new LinkedHashMap<>();
     Map<String, String> parameterToArgumentMap2 = new LinkedHashMap<>();
 
-    private Set<SingleStatement> nonMappedLeavesT1;
-    private Set<SingleStatement> nonMappedLeavesT2;
-    private Set<BlockStatement> nonMappedInnerNodesT1;
-    private Set<BlockStatement> nonMappedInnerNodesT2;
+    private final Set<SingleStatement> nonMappedLeavesT1 = new LinkedHashSet<>();
+    private final Set<SingleStatement> nonMappedLeavesT2 = new LinkedHashSet<>();
+    private final Set<BlockStatement> nonMappedInnerNodesT1 = new LinkedHashSet<>();
+    private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private final SourceFileModelDiff sourceFileModelDiff;
-    private List<FunctionBodyMapper> childMappers = new ArrayList<>();
+    private final ContainerDiff containerDiff;
+    private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
+    private Set<IRefactoring> refactorings = new LinkedHashSet<>();
+    private Map<CodeFragment, FunctionDeclaration> codeFragmentOperationMap1 = new LinkedHashMap<>();
+    private Map<CodeFragment, FunctionDeclaration> codeFragmentOperationMap2 = new LinkedHashMap<>();
+
+    private Set<CandidateAttributeRefactoring> candidateAttributeRenames = new LinkedHashSet<>();
+    private Set<CandidateMergeVariableRefactoring> candidateAttributeMerges = new LinkedHashSet<>();
+    private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , SourceFileModelDiff sourceFileModelDiff) {
+            , ContainerDiff containerDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
-        this.sourceFileModelDiff = sourceFileModelDiff;
+        this.containerDiff = containerDiff;
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
-            , SourceFileModelDiff sourceFileModelDiff) {
-        this(new UMLOperationDiff(function1, function2), sourceFileModelDiff);
+            , ContainerDiff containerDiff) {
+        this(new UMLOperationDiff(function1, function2), containerDiff);
     }
 
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
-    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, SourceFileModelDiff sourceFileModelDiff
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff containerDiff
 
             , Map<String, String> parameterToArgumentMap1
             , Map<String, String> parameterToArgumentMap2) {
         this.function1 = mapper.function1;
         this.function2 = addedOperation;
         this.callerFunction = mapper.function2;
-        this.sourceFileModelDiff = sourceFileModelDiff;
+        this.containerDiff = containerDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
         this.parentMapper = mapper;
         this.parameterToArgumentMap1 = parameterToArgumentMap1;
@@ -61,12 +75,12 @@ public class FunctionBodyMapper {
     }
 
     public FunctionBodyMapper(FunctionDeclaration removedOperation, FunctionBodyMapper operationBodyMapper
-            /*, Map<String, String> parameterToArgumentMap*/, SourceFileModelDiff classDiff) {
+            /*, Map<String, String> parameterToArgumentMap*/, ContainerDiff classDiff) {
         this.parentMapper = operationBodyMapper;
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;
         this.callerFunction = operationBodyMapper.function1;
-        this.sourceFileModelDiff = classDiff;
+        this.containerDiff = classDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
     }
 
@@ -93,8 +107,8 @@ public class FunctionBodyMapper {
             if (leaves1.size() > 0 && leaves2.size() > 0)
                 matchLeaves(leaves1, leaves2, new LinkedHashMap<>());
 
-            this.nonMappedLeavesT1 = leaves1;
-            this.nonMappedLeavesT2 = leaves2;
+            this.nonMappedLeavesT1.addAll(leaves1);
+            this.nonMappedLeavesT2.addAll(leaves2);
 
             // Match composites
 
@@ -110,8 +124,8 @@ public class FunctionBodyMapper {
             if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
                 matchNestedBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
 
-            this.nonMappedInnerNodesT1 = innerNodes1;
-            this.nonMappedInnerNodesT2 = innerNodes2;
+            this.nonMappedInnerNodesT1.addAll(innerNodes1);
+            this.nonMappedInnerNodesT2.addAll(innerNodes2);
 
             // Set mappings
             this.operationDiff.setMappings(this.mappings);
@@ -134,7 +148,7 @@ public class FunctionBodyMapper {
                 if ((mapping.fragment2 instanceof SingleStatement)
                         && !returnWithVariableReplacement(mapping)
                         && !nullLiteralReplacements(mapping)
-                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer))) {
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText())) {
                     addedLeaves2.add((SingleStatement) mapping.fragment2);
                 }
             }
@@ -174,7 +188,7 @@ public class FunctionBodyMapper {
             Set<BlockStatement> addedInnerNodes2 = new LinkedHashSet<>();
             for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
                 if ((mapping.fragment2 instanceof BlockStatement)
-                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer))) {
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText())) {
                     CodeFragment fragment = mapping.fragment2;
                     addedInnerNodes2.add((BlockStatement) mapping.fragment2);
                 }
@@ -209,10 +223,10 @@ public class FunctionBodyMapper {
             //remove the innerNodes that were mapped with replacement, if they are not mapped again for a second time
             innerNodes2.removeAll(addedInnerNodes2);
 
-            nonMappedLeavesT1 = leaves1;
-            nonMappedLeavesT2 = leaves2;
-            nonMappedInnerNodesT1 = innerNodes1;
-            nonMappedInnerNodesT2 = innerNodes2;
+            nonMappedLeavesT1.addAll(leaves1);
+            nonMappedLeavesT2.addAll(leaves2);
+            nonMappedInnerNodesT1.addAll(innerNodes1);
+            nonMappedInnerNodesT2.addAll(innerNodes2);
 
 //            for (StatementObject statement : getNonMappedLeavesT2()) {
 //                temporaryVariableAssignment(statement, nonMappedLeavesT2);
@@ -231,37 +245,99 @@ public class FunctionBodyMapper {
         FunctionBody addedOperationBody = function2.getBody();
         if (addedOperationBody != null) {
             BlockStatement addedOperationBodyBlock = addedOperationBody.blockStatement;
-            //Set<BlockStatement> addedInnerNodes1 = new LinkedHashSet<>();
-            //Set<SingleStatement> addedLeaves1 = new LinkedHashSet<>();
+            Set<BlockStatement> addedInnerNodes1 = new LinkedHashSet<>();
+            Set<SingleStatement> addedLeaves1 = new LinkedHashSet<>();
+
+            Set<BlockStatement> innerNodes1 = this.parentMapper.getNonMappedInnerNodesT1();
+            Set<BlockStatement> innerNodes2 = addedOperationBodyBlock.getAllBlockStatementsIncludingNested();
 
             Set<SingleStatement> leaves1 = this.parentMapper.getNonMappedLeavesT1();
             for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
                 if ((mapping.fragment1 instanceof SingleStatement)
                         && !returnWithVariableReplacement(mapping)
                         && !nullLiteralReplacements(mapping)
-                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer))) {
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText())) {
 
                     // Add the statement to be matched again.
                     leaves1.add((SingleStatement) mapping.fragment1);
                 }
             }
 
-            // TODO add /expand  lambdas
+            //  /expand  lambdas
+            for (SingleStatement nonMappedLeaf1 : new ArrayList<>(parentMapper.getNonMappedLeavesT1())) {
+                expandAnonymousAndLambdas(nonMappedLeaf1, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, parentMapper);
+            }
+            for (CodeFragmentMapping mapping : parentMapper.getMappings()) {
+                if (!returnWithVariableReplacement(mapping)
+                        && !nullLiteralReplacements(mapping)
+                        && (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText())) {
+                    CodeFragment fragment = mapping.getFragment1();
+                    expandAnonymousAndLambdas(fragment, leaves1, innerNodes1, addedLeaves1, addedInnerNodes1, parentMapper);
+                }
+            }
 
             Set<SingleStatement> leaves2 = new LinkedHashSet<>(addedOperationBodyBlock.getAllLeafStatementsIncludingNested());
+            Set<SingleStatement> addedLeaves2 = new LinkedHashSet<>();
+            Set<BlockStatement> addedInnerNodes2 = new LinkedHashSet<>();
+            for (SingleStatement statement : leaves2) {
+                if (!statement.getAnonymousFunctionDeclarations().isEmpty()) {
+                    List<IAnonymousFunctionDeclaration> anonymousList = function2.getAnonymousFunctionDeclarations();
+                    for (IAnonymousFunctionDeclaration ia : anonymousList) {
+                        FunctionDeclaration anonymous = (FunctionDeclaration) ia;
+
+                        if (!anonymous.getQualifiedName().contains(".")
+                                && statement.getSourceLocation().subsumes(anonymous.getSourceLocation())) {
+                            for (IFunctionDeclaration ifd : anonymous.getFunctionDeclarations()) {
+                                FunctionDeclaration anonymousOperation = (FunctionDeclaration) ifd;
+                                List<SingleStatement> anonymousClassLeaves = anonymousOperation.getBody().blockStatement.getAllLeafStatementsIncludingNested();
+                                for (SingleStatement anonymousLeaf : anonymousClassLeaves) {
+                                    if (!leaves2.contains(anonymousLeaf)) {
+                                        addedLeaves2.add(anonymousLeaf);
+                                        codeFragmentOperationMap2.put(anonymousLeaf, anonymousOperation);
+                                    }
+                                }
+                                Set<BlockStatement> anonymousClassInnerNodes = anonymousOperation.getBody().blockStatement.getAllBlockStatementsIncludingNested();
+                                for (BlockStatement anonymousInnerNode : anonymousClassInnerNodes) {
+                                    if (!innerNodes2.contains(anonymousInnerNode)) {
+                                        addedInnerNodes2.add(anonymousInnerNode);
+                                        codeFragmentOperationMap2.put(anonymousInnerNode, anonymousOperation);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+//                if(!statement.getLambdas().isEmpty()) {
+//                    for(LambdaExpressionObject lambda : statement.getLambdas()) {
+//                        if(lambda.getBody() != null) {
+//                            List<StatementObject> lambdaLeaves = lambda.getBody().getCompositeStatement().getLeaves();
+//                            for(StatementObject lambdaLeaf : lambdaLeaves) {
+//                                if(!leaves2.contains(lambdaLeaf)) {
+//                                    addedLeaves2.add(lambdaLeaf);
+//                                    codeFragmentOperationMap2.put(lambdaLeaf, operation2);
+//                                }
+//                            }
+//                            List<CompositeStatementObject> lambdaInnerNodes = lambda.getBody().getCompositeStatement().getInnerNodes();
+//                            for(CompositeStatementObject lambdaInnerNode : lambdaInnerNodes) {
+//                                if(!innerNodes2.contains(lambdaInnerNode)) {
+//                                    addedInnerNodes2.add(lambdaInnerNode);
+//                                    codeFragmentOperationMap2.put(lambdaInnerNode, operation2);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+            }
+            leaves2.addAll(addedLeaves2);
             argumentizer.clearCache(leaves1, leaves2);
             replaceParametersWithArguments(leaves1, leaves2);
             matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
-
-            Set<BlockStatement> innerNodes1 = this.parentMapper.getNonMappedInnerNodesT1();
-            Set<BlockStatement> innerNodes2 = addedOperationBodyBlock.getAllBlockStatementsIncludingNested();
-            Set<BlockStatement> addedInnerNodes1 = new LinkedHashSet<>();
 
             //adding innerNodes that were mapped with replacements
             for (CodeFragmentMapping mapping : this.parentMapper.getMappings()) {
                 CodeFragment fragment = mapping.fragment1;
                 if (!innerNodes1.contains(fragment) && fragment instanceof BlockStatement) {
-                    if (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText(argumentizer)) {
+                    if (!mapping.getReplacements().isEmpty() || !mapping.equalFragmentText()) {
                         BlockStatement statement = (BlockStatement) fragment;
                         innerNodes1.add(statement);
                         addedInnerNodes1.add(statement);
@@ -271,7 +347,7 @@ public class FunctionBodyMapper {
 
             // Remove itself
             innerNodes2.remove(addedOperationBodyBlock);
-            //innerNodes2.addAll(addedInnerNodes2);
+            innerNodes2.addAll(addedInnerNodes2);
 
             argumentizer.clearCache(innerNodes1, innerNodes2);
             replaceParametersWithArguments(innerNodes1, innerNodes2);
@@ -299,23 +375,18 @@ public class FunctionBodyMapper {
             // TODO remove non-mapped inner nodes from T1 corresponding to mapped expressions
 
             //remove the leaves that were mapped with replacement, if they are not mapped again for a second time
-            //leaves1.removeAll(addedLeaves1);
-            //leaves2.removeAll(addedLeaves2);
+            leaves1.removeAll(addedLeaves1);
+            leaves2.removeAll(addedLeaves2);
             //remove the innerNodes that were mapped with replacement, if they are not mapped again for a second time
             innerNodes1.removeAll(addedInnerNodes1);
-            //innerNodes2.removeAll(addedInnerNodes2);
+            innerNodes2.removeAll(addedInnerNodes2);
 
 
-            this.nonMappedLeavesT1 = leaves1;
-            this.nonMappedLeavesT2 = leaves2;
+            this.nonMappedLeavesT1.addAll(leaves1);
+            this.nonMappedLeavesT2.addAll(leaves2);
+            this.nonMappedInnerNodesT1.addAll(innerNodes1);
+            this.nonMappedInnerNodesT2.addAll(innerNodes2);
 
-            this.nonMappedInnerNodesT1 = innerNodes1;
-            this.nonMappedInnerNodesT2 = innerNodes2;
-
-//            nonMappedLeavesT1.addAll(leaves1);
-//            nonMappedLeavesT2.addAll(leaves2);
-//            nonMappedInnerNodesT1.addAll(innerNodes1);
-//            nonMappedInnerNodesT2.addAll(innerNodes2);
 //
 //            for (StatementObject statement : getNonMappedLeavesT2()) {
 //                temporaryVariableAssignment(statement, nonMappedLeavesT2);
@@ -376,7 +447,7 @@ public class FunctionBodyMapper {
     }
 
     private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
-        ReplacementFinder replacementFinder = new ReplacementFinder();
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
         Iterator<? extends CodeFragment> it1 = leaves1.iterator();
         Iterator<? extends CodeFragment> it2 = leaves2.iterator();
@@ -456,7 +527,7 @@ public class FunctionBodyMapper {
             for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                 BlockStatement statement1 = iterator1.next();
                 double score = ChildCountMatcher.computeScore(statement1, statement2
-                        , this.sourceFileModelDiff.getRemovedOperations(), this.sourceFileModelDiff.getAddedOperations()
+                        , this.containerDiff.getRemovedOperations(), this.containerDiff.getAddedOperations()
                         , this.mappings, this.parentMapper != null);
 
                 String argumentizedString1 = createArgumentizedString(statement1, statement2);
@@ -499,7 +570,7 @@ public class FunctionBodyMapper {
     private void matchInnerNodersWithVariableRenames
             (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
-        ReplacementFinder replacementFinder = new ReplacementFinder();
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
         for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
             BlockStatement statement2 = innerNodeIterator2.next();
@@ -536,12 +607,11 @@ public class FunctionBodyMapper {
                 , statement2
                 , parameterToArgumentMap
                 , replacementInfo,
-                this.argumentizer,
-                this.mappings);
+                this.argumentizer);
 
         if (replacements != null) {
             double score = ChildCountMatcher.computeScore(statement1, statement2
-                    , this.sourceFileModelDiff.getRemovedOperations(), this.sourceFileModelDiff.getAddedOperations()
+                    , this.containerDiff.getRemovedOperations(), this.containerDiff.getAddedOperations()
                     , this.mappings, this.parentMapper != null);
 
             if (score == 0 && replacements.size() == 1 &&
@@ -570,8 +640,7 @@ public class FunctionBodyMapper {
                 , leaf2
                 , parameterToArgumentMap
                 , replacementInfo,
-                argumentizer,
-                mappings);
+                argumentizer);
         if (replacements != null) {
             LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);
@@ -614,7 +683,31 @@ public class FunctionBodyMapper {
                 unmatchedStatments1, unmatchedStatements2);
     }
 
-    // TODO: Similar to processInput without checking for abstractexpression
+    public Set<IRefactoring> getRefactoringsAfterPostProcessing() {
+        return refactorings;
+    }
+
+    public ContainerDiff getContainerDiff() {
+        return containerDiff;
+    }
+
+    public Set<IRefactoring> getRefactoringsByVariableAnalysis() {
+        VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, containerDiff);
+        // Local (variables & Paramters)
+        refactorings.addAll(analysis.getVariableRenames());
+        refactorings.addAll(analysis.getVariableMerges());
+        refactorings.addAll(analysis.getVariableSplits());
+
+        // Parent container (Attributes)
+        candidateAttributeRenames.addAll(analysis.getCandidateAttributeRenames());
+        candidateAttributeMerges.addAll(analysis.getCandidateAttributeMerges());
+        candidateAttributeSplits.addAll(analysis.getCandidateAttributeSplits());
+        //TypeReplacementAnalysis typeAnalysis = new TypeReplacementAnalysis(this.getMappings());
+        //refactorings.addAll(typeAnalysis.getChangedTypes());
+        return refactorings;
+    }
+
+    // TODO: Similar to processInput
     private String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
         String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
@@ -633,7 +726,7 @@ public class FunctionBodyMapper {
             leaf2, Map<String, String> parameterToArgumentMap) {
 //        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
 //        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
-        LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2);
+        LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2, function1, function2, argumentizer);
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
 //            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
@@ -646,19 +739,16 @@ public class FunctionBodyMapper {
     private BlockCodeFragmentMapping createCompositeMapping(BlockStatement statement1,
                                                             BlockStatement statement2
             , Map<String, String> parameterToArgumentMap, double score) {
-//        FunctionDeclaration operation1 = /*codeFragmentOperationMap1.containsKey(statement1)
-//                ? codeFragmentOperationMap1.get(statement1) :*/ this.function1;
-//        FunctionDeclaration operation2 = /*codeFragmentOperationMap2.containsKey(statement2)
-//                ? codeFragmentOperationMap2.get(statement2) :*/ this.function2;
 
-        BlockCodeFragmentMapping mapping = new BlockCodeFragmentMapping(statement1, statement2
-                /*, operation1, operation2*/, score);
-//        for (String key : parameterToArgumentMap.keySet()) {
-//            String value = parameterToArgumentMap.get(key);
-////            if (!key.equals(value) && ReplacementUtil.contains(statement2.getString(), key) && ReplacementUtil.contains(statement1.getString(), value)) {
-//            //              mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
-//            //        }
-//        }
+        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(statement1) ? codeFragmentOperationMap1.get(statement1) : this.function1;
+        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(statement2) ? codeFragmentOperationMap2.get(statement2) : this.function2;
+        BlockCodeFragmentMapping mapping = new BlockCodeFragmentMapping(statement1, statement2, score, operation1, operation2, argumentizer);
+        for (String key : parameterToArgumentMap.keySet()) {
+            String value = parameterToArgumentMap.get(key);
+            if (!key.equals(value) && ReplacementUtil.contains(statement2.getText(), key) && ReplacementUtil.contains(statement1.getText(), value)) {
+                mapping.getReplacements().add(new Replacement(value, key, Replacement.ReplacementType.VARIABLE_NAME));
+            }
+        }
         return mapping;
     }
 
@@ -749,6 +839,69 @@ public class FunctionBodyMapper {
         return replacements;
     }
 
+    private void expandAnonymousAndLambdas(CodeFragment fragment, Set<SingleStatement> leaves1,
+                                           Set<BlockStatement> innerNodes1, Set<SingleStatement> addedLeaves1,
+                                           Set<BlockStatement> addedInnerNodes1, FunctionBodyMapper operationBodyMapper) {
+        if (fragment instanceof SingleStatement) {
+            SingleStatement statement = (SingleStatement) fragment;
+            if (!leaves1.contains(statement)) {
+                leaves1.add(statement);
+                addedLeaves1.add(statement);
+            }
+            if (!statement.getAnonymousFunctionDeclarations().isEmpty()) {
+                List<IAnonymousFunctionDeclaration> anonymousList = operationBodyMapper.getOperation1().getAnonymousFunctionDeclarations();
+                for (IAnonymousFunctionDeclaration anonymous : anonymousList) {
+                    if (statement.getSourceLocation().subsumes(anonymous.getSourceLocation())) {
+                        for (IFunctionDeclaration ifd : anonymous.getFunctionDeclarations()) {
+                            FunctionDeclaration anonymousOperation = (FunctionDeclaration) ifd;
+                            List<SingleStatement> anonymousClassLeaves = anonymousOperation.getBody().blockStatement.getAllLeafStatementsIncludingNested();
+                            for (SingleStatement anonymousLeaf : anonymousClassLeaves) {
+                                if (!leaves1.contains(anonymousLeaf)) {
+                                    leaves1.add(anonymousLeaf);
+                                    addedLeaves1.add(anonymousLeaf);
+                                    codeFragmentOperationMap1.put(anonymousLeaf, anonymousOperation);
+                                }
+                            }
+                            Set<BlockStatement> anonymousClassInnerNodes = anonymousOperation.getBody()
+                                    .blockStatement.getAllBlockStatementsIncludingNested();
+                            for (BlockStatement anonymousInnerNode : anonymousClassInnerNodes) {
+                                if (!innerNodes1.contains(anonymousInnerNode)) {
+                                    innerNodes1.add(anonymousInnerNode);
+                                    addedInnerNodes1.add(anonymousInnerNode);
+                                    codeFragmentOperationMap1.put(anonymousInnerNode, anonymousOperation);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+//
+//            if (!statement.getLambdas().isEmpty()) {
+//                for (LambdaExpressionObject lambda : statement.getLambdas()) {
+//                    if (lambda.getBody() != null) {
+//                        List<StatementObject> lambdaLeaves = lambda.getBody().getCompositeStatement().getLeaves();
+//                        for (StatementObject lambdaLeaf : lambdaLeaves) {
+//                            if (!leaves1.contains(lambdaLeaf)) {
+//                                leaves1.add(lambdaLeaf);
+//                                addedLeaves1.add(lambdaLeaf);
+//                                codeFragmentOperationMap1.put(lambdaLeaf, operation1);
+//                            }
+//                        }
+//                        List<CompositeStatementObject> lambdaInnerNodes = lambda.getBody().getCompositeStatement().getInnerNodes();
+//                        for (CompositeStatementObject lambdaInnerNode : lambdaInnerNodes) {
+//                            if (!innerNodes1.contains(lambdaInnerNode)) {
+//                                innerNodes1.add(lambdaInnerNode);
+//                                addedInnerNodes1.add(lambdaInnerNode);
+//                                codeFragmentOperationMap1.put(lambdaInnerNode, operation1);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+        }
+    }
+
     public Set<Replacement> getReplacements() {
         Set<Replacement> replacements = new LinkedHashSet<>();
         for (CodeFragmentMapping mapping : getMappings()) {
@@ -760,7 +913,7 @@ public class FunctionBodyMapper {
     public List<CodeFragmentMapping> getExactMatches() {
         List<CodeFragmentMapping> exactMatches = new ArrayList<>();
         for (CodeFragmentMapping mapping : getMappings()) {
-            if (mapping.isExact(argumentizer) && mapping.fragment1.countableStatement()
+            if (mapping.isExact() && mapping.fragment1.countableStatement()
                     && mapping.fragment2.countableStatement() &&
                     !mapping.fragment1.getText().equals("try"))
                 exactMatches.add(mapping);
@@ -796,6 +949,7 @@ public class FunctionBodyMapper {
 
     /**
      * Returns the non mapped count
+     *
      * @return
      */
     public int nonMappedElementsT1() {
@@ -956,7 +1110,106 @@ public class FunctionBodyMapper {
         return replacements;
     }
 
+    public int operationNameEditDistance() {
+        return StringDistance.editDistance(this.function1.getName(), this.function2.getName());
+    }
+
+    @Override
+
+    public int compareTo(FunctionBodyMapper operationBodyMapper) {
+        int thisCallChainIntersectionSum = 0;
+        for (CodeFragmentMapping mapping : this.mappings) {
+            if (mapping instanceof LeafCodeFragmentMapping) {
+                //      thisCallChainIntersectionSum += ((LeafCodeFragmentMapping)mapping).callChainIntersection().size();
+            }
+        }
+        int otherCallChainIntersectionSum = 0;
+        for (CodeFragmentMapping mapping : operationBodyMapper.mappings) {
+            if (mapping instanceof LeafCodeFragmentMapping) {
+                //    otherCallChainIntersectionSum += ((LeafCodeFragmentMapping)mapping).callChainIntersection().size();
+            }
+        }
+        if (thisCallChainIntersectionSum != otherCallChainIntersectionSum) {
+            return -Integer.compare(thisCallChainIntersectionSum, otherCallChainIntersectionSum);
+        }
+        int thisMappings = this.mappingsWithoutBlocks();
+//        for(CodeFragmentMapping mapping : this.getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//                thisMappings++;
+//            }
+//        }
+        int otherMappings = operationBodyMapper.mappingsWithoutBlocks();
+//        for(CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//                otherMappings++;
+//            }
+//        }
+        if (thisMappings != otherMappings) {
+            return -Integer.compare(thisMappings, otherMappings);
+        } else {
+            int thisExactMatches = this.getExactMatches().size();
+            int otherExactMatches = operationBodyMapper.getExactMatches().size();
+            if (thisExactMatches != otherExactMatches) {
+                return -Integer.compare(thisExactMatches, otherExactMatches);
+            } else {
+                int thisEditDistance = this.editDistance();
+                int otherEditDistance = operationBodyMapper.editDistance();
+                if (thisEditDistance != otherEditDistance) {
+                    return Integer.compare(thisEditDistance, otherEditDistance);
+                } else {
+                    int thisOperationNameEditDistance = this.operationNameEditDistance();
+                    int otherOperationNameEditDistance = operationBodyMapper.operationNameEditDistance();
+                    return Integer.compare(thisOperationNameEditDistance, otherOperationNameEditDistance);
+                }
+            }
+        }
+    }
+
+    private int editDistance() {
+        int count = 0;
+        for (CodeFragmentMapping mapping : getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable() || mapping.isIdenticalWithInlinedVariable()) {
+//            }
+//                continue;
+            String s1 = createArgumentizedString(mapping.fragment1, mapping.fragment2);
+            String s2 = createArgumentizedString(mapping.fragment2, mapping.fragment1);
+
+            if (!s1.equals(s2)) {
+                count += StringDistance.editDistance(s1, s2);
+            }
+        }
+        return count;
+    }
+
     public FunctionBodyMapper getParentMapper() {
         return parentMapper;
+    }
+
+    public List<FunctionBodyMapper> getChildMappers() {
+        return childMappers;
+    }
+
+    public FunctionDeclaration getCallerFunction() {
+        return this.callerFunction;
+    }
+
+    public FunctionDeclaration getOperation1() {
+        return function1;
+    }
+
+    public FunctionDeclaration getOperation2() {
+        return function2;
+    }
+
+    public Set<CandidateAttributeRefactoring> getCandidateAttributeRenames() {
+        return candidateAttributeRenames;
+    }
+
+    public Set<CandidateMergeVariableRefactoring> getCandidateAttributeMerges() {
+        return candidateAttributeMerges;
+    }
+
+    public Set<CandidateSplitVariableRefactoring> getCandidateAttributeSplits() {
+        return candidateAttributeSplits;
     }
 }

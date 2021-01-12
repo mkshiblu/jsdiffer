@@ -1,9 +1,12 @@
 package io.jsrminer.sourcetree;
 
-import com.jsoniter.JsonIterator;
-import com.jsoniter.any.Any;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminer.core.api.IFunctionDeclaration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Expression extends CodeFragment {
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
@@ -17,9 +20,13 @@ public class Expression extends CodeFragment {
     public List<String> booleanLiterals = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
-    private List<String> prefixExpressions = new ArrayList<>();;
+    private List<String> prefixExpressions = new ArrayList<>();
     private List<String> postfixExpressions = new ArrayList<>();
 
+    protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
+    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+    private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
     private BlockStatement ownerBlock;
 
     @Override
@@ -115,6 +122,20 @@ public class Expression extends CodeFragment {
         }
         return null;
     }
+//    @Override
+//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+//        return anonymousClassDeclarations;
+//    }
+
+    @Override
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        return anonymousFunctionDeclarations;
+    }
+
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        return functionDeclarations;
+    }
 
     /**
      * Returns the block statement this expression belongs to
@@ -131,5 +152,10 @@ public class Expression extends CodeFragment {
 
     public List<String> getPostfixExpressions() {
         return postfixExpressions;
+    }
+
+    @Override
+    public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
+        return this.ternaryOperatorExpressions;
     }
 }

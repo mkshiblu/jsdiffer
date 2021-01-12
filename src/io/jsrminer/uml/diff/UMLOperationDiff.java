@@ -1,8 +1,9 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.refactorings.AddParameterRefactoring;
 import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.AddParameterRefactoring;
 import io.jsrminer.refactorings.RemoveParameterRefactoring;
+import io.jsrminer.refactorings.ReorderParameterRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
@@ -26,7 +27,7 @@ public class UMLOperationDiff extends Diff {
 
     private Map<String, UMLParameter> addedParameters = new HashMap<>();
     private Map<String, UMLParameter> removedParameters = new HashMap<>();
-    private List<UMLParameterDiff> parameterDiffs = new ArrayList<>();
+    private final List<UMLParameterDiff> parameterDiffs = new ArrayList<>();
 
     public final boolean nameChanged;
     public final boolean parametersReordered;
@@ -89,7 +90,7 @@ public class UMLOperationDiff extends Diff {
                 indexPositionMap.put(addedParameter.getIndexPositionInParent(), addedParameter);
             }
 
-            final Set<String> removedParameterNames = removedParameters.keySet();
+            final List<String> removedParameterNames = new ArrayList<>(removedParameters.keySet());
             UMLParameter addedParameter, removedParameter;
 
             for (String removedParameterName : removedParameterNames) {
@@ -162,7 +163,7 @@ public class UMLOperationDiff extends Diff {
     private List<SimpleEntry<UMLParameter, UMLParameter>> diffParametersByNameAndDefaultValue(FunctionDeclaration function1, FunctionDeclaration function2) {
         final List<SimpleEntry<UMLParameter, UMLParameter>> paramsMatchedByNameAndValue = new ArrayList<>();
         UMLParameter parameter2;
-        for (UMLParameter parameter1 : function1.getParameters().values()) {
+        for (UMLParameter parameter1 : function1.getParameters()) {
             // Check if function 2 contains the same named parameter
             // IN java it's equalsIncludingName i.e. full match
             parameter2 = function2.getParameter(parameter1.name);
@@ -178,7 +179,7 @@ public class UMLOperationDiff extends Diff {
             }
         }
 
-        for (UMLParameter param2 : function2.getParameters().values()) {
+        for (UMLParameter param2 : function2.getParameters()) {
             if (!function1.hasParameterOfName(param2.name)) {
                 // Params2 is not present in function . i.e it has been added
                 this.addedParameters.put(param2.name, param2);
@@ -189,8 +190,8 @@ public class UMLOperationDiff extends Diff {
     }
 
     private boolean checkParametersReordered(int matchedParameterCount) {
-        final Set<String> parameterNames1 = function1.getParameters().keySet();
-        final Set<String> parameterNames2 = function2.getParameters().keySet();
+        final Set<String> parameterNames1 = new LinkedHashSet<>(function1.getParameterNames());
+        final Set<String> parameterNames2 = new LinkedHashSet<>(function2.getParameterNames());
 
         return removedParameters.isEmpty() && addedParameters.isEmpty()
                 && parameterNames1.size() > 1
@@ -238,10 +239,10 @@ public class UMLOperationDiff extends Diff {
             }
         }
 
-//        if (parametersReordered) {
-//            ReorderParameterRefactoring refactoring = new ReorderParameterRefactoring(removedOperation, addedOperation);
-//            refactorings.add(refactoring);
-//        }
+        if (parametersReordered) {
+            ReorderParameterRefactoring refactoring = new ReorderParameterRefactoring(function1, function2);
+            refactorings.add(refactoring);
+        }
 //        for (UMLAnnotation annotation : annotationListDiff.getAddedAnnotations()) {
 //            AddMethodAnnotationRefactoring refactoring = new AddMethodAnnotationRefactoring(annotation, removedOperation, addedOperation);
 //            refactorings.add(refactoring);
@@ -255,5 +256,9 @@ public class UMLOperationDiff extends Diff {
 //            refactorings.add(refactoring);
 //        }
         return refactorings;
+    }
+
+    public List<UMLParameterDiff> getParameterDiffs() {
+        return parameterDiffs;
     }
 }

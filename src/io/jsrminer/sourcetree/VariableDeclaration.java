@@ -2,15 +2,18 @@ package io.jsrminer.sourcetree;
 
 public class VariableDeclaration extends CodeEntity {
     private Expression initializer;
-    private VariableDeclarationKind kind;
+    private final VariableDeclarationKind kind;
     public final String variableName;
+    private SourceLocation scope;
+    private boolean isParameter;
 
-    public VariableDeclaration(String variableName) {
+    public VariableDeclaration(String variableName, VariableDeclarationKind kind) {
         this.variableName = variableName;
+        this.kind = kind;
     }
 
-    public VariableDeclaration(String variableName, Expression optionalInitializer) {
-        this(variableName);
+    public VariableDeclaration(String variableName, Expression optionalInitializer, VariableDeclarationKind kind) {
+        this(variableName, kind);
         this.initializer = optionalInitializer;
     }
 
@@ -29,11 +32,71 @@ public class VariableDeclaration extends CodeEntity {
         this.initializer = initializer;
     }
 
-    public void setKind(VariableDeclarationKind kind) {
-        this.kind = kind;
-    }
-
     public VariableDeclarationKind getKind() {
         return kind;
+    }
+
+    public String getVariableName() {
+        return variableName;
+    }
+
+    public SourceLocation getScope() {
+        return scope;
+    }
+
+    public void setScope(SourceLocation scope) {
+        this.scope = scope;
+    }
+
+    public boolean isParameter() {
+        return isParameter;
+    }
+
+    public void setIsParameter(boolean isParameter) {
+        this.isParameter = isParameter;
+    }
+
+    public boolean isGlobal() {
+        return this.kind.equals(VariableDeclarationKind.GLOBAL);
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(variableName);//.append(" : ").append(kind.name());
+//        if(varargsParameter) {
+//            sb.append("...");
+//        }
+        return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
+        result = prime * result + ((variableName == null) ? 0 : variableName.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        VariableDeclaration other = (VariableDeclaration) obj;
+        if (scope == null) {
+            if (other.scope != null)
+                return false;
+        } else if (!scope.equals(other.scope))
+            return false;
+        if (variableName == null) {
+            if (other.variableName != null)
+                return false;
+        } else if (!variableName.equals(other.variableName))
+            return false;
+        return true;
     }
 }

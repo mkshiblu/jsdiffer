@@ -16,9 +16,19 @@ public enum CodeElementType {
     RETURN_STATEMENT("ReturnStatement"),
     TRY_STATEMENT("TryStatement"),
     CATCH_CLAUSE("CatchClause"),
+    THROW_STATEMENT("ThrowStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
-    ENHANCED_FOR_STATEMENT("ENHANCED_FOR_STATEMENT"), // TODO revisit
-    FOR_STATEMENT("ForStatement");
+    ENHANCED_FOR_STATEMENT("ForInStatement"), // TODO revisit
+    FOR_STATEMENT("ForStatement"),
+    LABELED_STATEMENT("LabeledStatement"),
+    VARIABLE_DECLARATION("VariableDeclaration"),
+    DD_WHILE_STATEMENT("DoWhileStatement"),
+    BREAK_STATEMENT("BreakStatement"),
+    CONTINUE_STATEMENT("ContinueStatement"),
+    SWITCH_CASE("SwitchCase"),
+    SWITCH_STATEMENT("SwitchStatement"),
+    WHILE_STATEMENT("WhileStatement");
+
 
     public final String titleCase;
 
@@ -35,6 +45,10 @@ public enum CodeElementType {
     }
 
     public static CodeElementType getFromTitleCase(String typeInTitleCase) {
-        return typeTitleCaseMap.get(typeInTitleCase);
+        CodeElementType t = typeTitleCaseMap.get(typeInTitleCase);
+        if (t == null) {
+            System.out.println("No Code Element Tpe for " + typeInTitleCase);
+        }
+        return t;
     }
 }

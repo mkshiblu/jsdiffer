@@ -5,7 +5,7 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
@@ -17,14 +17,14 @@ import java.util.*;
 public class ExtractOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> addedOperations;
-    private SourceFileModelDiff classDiff;
+    private ContainerDiff classDiff;
     private UMLModelDiff modelDiff;
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     Argumentizer argumentizer;
 
-    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, SourceFileModelDiff classDiff, UMLModelDiff modelDiff) {
+    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, ContainerDiff classDiff, UMLModelDiff modelDiff) {
         this.mapper = mapper;
         this.addedOperations = addedOperations;
         this.classDiff = classDiff;
@@ -41,7 +41,10 @@ public class ExtractOperationDetection {
                 !mapper.getReplacementsInvolvingMethodInvocation().isEmpty()) {
 
             List<OperationInvocation> addedOperationInvocations = matchingInvocations(addedOperation, operationInvocations);
-            processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+
+            if (addedOperationInvocations.size() > 0)
+                processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+
 //            if (addedOperationInvocations.size() > 0) {
 //                int otherAddedMethodsCalled = 0;
 //                for (FunctionDeclaration addedOperation2 : this.addedOperations) {
@@ -122,7 +125,7 @@ public class ExtractOperationDetection {
                         }
                         //add back to mapper non-exact matches
                         for (CodeFragmentMapping mapping : nestedMapper.getMappings()) {
-                            if (!mapping.isExact(argumentizer) || mapping.fragment1.getText().equals("{")) {
+                            if (!mapping.isExact() || mapping.fragment1.getText().equals("{")) {
                                 CodeFragment fragment1 = mapping.fragment1;
                                 if (fragment1 instanceof SingleStatement) {
                                     if (!mapper.getNonMappedLeavesT1().contains(fragment1)) {
@@ -221,7 +224,7 @@ public class ExtractOperationDetection {
         //        = new LinkedHashMap<>();
 
         List<String> invocationArguments = addedOperationInvocation.getArguments();
-        List<UMLParameter> addedOperationParameters = new ArrayList<>(addedOperation.getParameters().values());
+        List<UMLParameter> addedOperationParameters = new ArrayList<>(addedOperation.getParameters());
         Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         int size = Math.min(invocationArguments.size(), addedOperationParameters.size());
         for (int i = 0; i < size; i++) {

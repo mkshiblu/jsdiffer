@@ -8,8 +8,8 @@ import java.util.Set;
 
 public class UMLParameterDiff extends Diff {
 
-    final boolean isNameChanged;
-    final boolean defaultValueChanged;
+    public final boolean isNameChanged;
+    public final boolean defaultValueChanged;
     final UMLParameter parameter1;
     final UMLParameter parameter2;
 
@@ -69,5 +69,13 @@ public class UMLParameterDiff extends Diff {
 //            refactorings.add(refactoring);
 //        }
         return refactorings;
+    }
+
+    public UMLParameter getRemovedParameter() {
+        return parameter1;
+    }
+
+    public UMLParameter getAddedParameter() {
+        return parameter2;
     }
 }

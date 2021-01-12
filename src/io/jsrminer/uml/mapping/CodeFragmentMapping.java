@@ -1,6 +1,7 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.CodeFragment;
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
@@ -12,12 +13,17 @@ import java.util.Set;
 public abstract class CodeFragmentMapping {
     public final CodeFragment fragment1;
     public final CodeFragment fragment2;
-
+    FunctionDeclaration function1;
+    FunctionDeclaration function2;
+    Argumentizer argumentizer;
     private Set<Replacement> replacements = new LinkedHashSet<>();
 
-    public CodeFragmentMapping(CodeFragment fragment1, CodeFragment fragment2) {
+    public CodeFragmentMapping(CodeFragment fragment1, CodeFragment fragment2, FunctionDeclaration function1, FunctionDeclaration function2, Argumentizer argumentizer) {
         this.fragment1 = fragment1;
         this.fragment2 = fragment2;
+        this.function1 = function1;
+        this.function2 = function2;
+        this.argumentizer = argumentizer;
     }
 
     public abstract boolean isExactMatch();
@@ -35,7 +41,7 @@ public abstract class CodeFragmentMapping {
         return replacements;
     }
 
-    public boolean isExact(Argumentizer argumentizer) {
+    public boolean isExact() {
         return !isKeyword() && (fragment1.getText().equals(fragment2.getText())
                 || argumentizer.getArgumentizedString(fragment1).equals(argumentizer.getArgumentizedString(fragment2))
                 || isExactAfterAbstraction() || containsIdenticalOrCompositeReplacement());
@@ -82,7 +88,7 @@ public abstract class CodeFragmentMapping {
         return false;
     }
 
-    public boolean equalFragmentText(Argumentizer argumentizer) {
+    public boolean equalFragmentText() {
         String text1 = fragment1.getText();
         String text2 = fragment2.getText();
 
@@ -96,5 +102,21 @@ public abstract class CodeFragmentMapping {
                 || (argumentizedText2 != null && argumentizedText2.equals(text1));
 
         return equalTextWithArgumentization;
+    }
+
+    public CodeFragment getFragment1() {
+        return this.fragment1;
+    }
+
+    public CodeFragment getFragment2() {
+        return fragment2;
+    }
+
+    public FunctionDeclaration getOperation1() {
+        return function1;
+    }
+
+    public FunctionDeclaration getOperation2() {
+        return function2;
     }
 }

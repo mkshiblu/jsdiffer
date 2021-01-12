@@ -1,28 +1,26 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminer.core.api.IFunctionDeclaration;
+import io.rminer.core.entities.DeclarationContainer;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class FunctionDeclaration extends CodeEntity {
+public class FunctionDeclaration extends DeclarationContainer implements IFunctionDeclaration {
 
-    /**
-     * Name parameter map
-     */
-    private Map<String, UMLParameter> nameParameterMap = new LinkedHashMap<>();
     /**
      * The name of the function.
      */
-    public final String name;
-
+    private String name;
     /**
-     * Qualified name excluding the filename but including the parent function name.
-     * For example if function y() is declared inside x(), it will return x.y.
+     * Name parameter map
      */
-    public final String qualifiedName;
+    private List<UMLParameter> parameters = new ArrayList<>();
 
-    public final String namespace;
+    //public final String namespace;
 
     /**
      * Fully Qualified name including the filename, parent function name if any.
@@ -35,6 +33,7 @@ public class FunctionDeclaration extends CodeEntity {
      */
     private FunctionBody body;
 
+    private String containerName;
     /**
      * Stores whether the body of the function is empty or not
      */
@@ -44,35 +43,18 @@ public class FunctionDeclaration extends CodeEntity {
      * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
      * file and not nested
      */
-    public final boolean isTopLevel;
+    private boolean isTopLevel;
 
     /**
      * True if the function is also a constructor
      */
     private boolean isConstructor;
 
-    public FunctionDeclaration(String qualifiedName, boolean isTopLevel) {
-        this.isTopLevel = isTopLevel;
-        this.qualifiedName = qualifiedName;
-        int idx = qualifiedName.lastIndexOf('.');
-        if (idx != -1) {
-            name = qualifiedName.substring(idx + 1);
-            namespace = qualifiedName.substring(0, idx);
-        } else {
-            name = qualifiedName;
-            namespace = null;
-        }
+    public FunctionDeclaration() {
     }
 
-    @Override
-    public String toString() {
-        return qualifiedName;
-    }
-
-    @Override
     public void setSourceLocation(SourceLocation sourceLocation) {
-        super.setSourceLocation(sourceLocation);
-        fullyQualifiedName = sourceLocation.getFile() + "|" + qualifiedName;
+        super.sourceLocation = sourceLocation;
     }
 
     public boolean hasIdenticalBody(FunctionDeclaration fd) {
@@ -83,20 +65,13 @@ public class FunctionDeclaration extends CodeEntity {
         return fullyQualifiedName;
     }
 
-    // region Setters & getters
-    public Map<String, UMLParameter> getParameters() {
-        return nameParameterMap;
+    public List<String> getParameterNames() {
+        return getParameters().stream().map(parameter -> parameter.name).collect(Collectors.toList());
     }
 
-    public void setParameters(UMLParameter[] parameters) {
-        this.nameParameterMap.clear();
-        LinkedHashMap<String, String> x;
-        UMLParameter parameter;
-        for (int i = 0; i < parameters.length; i++) {
-            parameter = parameters[i];
-            parameter.setIndexPositionInParent(i);
-            nameParameterMap.put(parameter.name, parameter);
-        }
+    // region Setters & getters
+    public List<UMLParameter> getParameters() {
+        return parameters;
     }
 
     public void setBody(FunctionBody body) {
@@ -113,11 +88,14 @@ public class FunctionDeclaration extends CodeEntity {
     //endregion
 
     public boolean hasParameterOfName(String name) {
-        return nameParameterMap.containsKey(name);
+        return parameters.stream().anyMatch(p -> p.name.equals(name));
     }
 
     public UMLParameter getParameter(String parameterName) {
-        return nameParameterMap.get(parameterName);
+        return parameters.stream()
+                .filter(p -> parameterName.equals(p.name))
+                .findAny()
+                .orElse(null);
     }
 
     public boolean nameEquals(FunctionDeclaration function) {
@@ -125,14 +103,107 @@ public class FunctionDeclaration extends CodeEntity {
     }
 
     public int parameterCount() {
-        return this.nameParameterMap.size();
+        return this.parameters.size();
     }
 
-    public boolean isConstructor() {
+    public boolean getIsConstructor() {
         return isConstructor;
     }
 
-    public void setConstructor(boolean constructor) {
+    public void setIsConstructor(boolean constructor) {
         isConstructor = constructor;
+    }
+
+    public void setIsTopLevel(boolean isTopLevel) {
+        this.isTopLevel = isTopLevel;
+    }
+
+    public boolean isTopLevel() {
+        return isTopLevel;
+    }
+
+    public void setFullyQualifiedName(String fullyQualifiedName) {
+        this.fullyQualifiedName = fullyQualifiedName;
+    }
+
+    /**
+     * The name of the function.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * The name of the function.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<String> getParameterNameList() {
+        List<String> parameterNameList = new ArrayList<>();
+        for (UMLParameter parameter : parameters) {
+            parameterNameList.add(parameter.name);
+        }
+        return parameterNameList;
+    }
+
+    public List<String> getAllVariables() {
+        if (this.getBody() != null)
+            return this.getBody().blockStatement.getAllVariablesIncludingNested();
+        return new ArrayList<>();
+    }
+
+    public List<VariableDeclaration> getAllVariableDeclarations() {
+        if (body != null)
+            return body.blockStatement.getAllVariableDeclarations();
+        return new ArrayList<>();
+    }
+
+    public BlockStatement loopWithVariables(String currentElementName, String collectionName) {
+        return body.blockStatement.loopWithVariables(currentElementName, collectionName);
+    }
+
+    public VariableDeclaration getVariableDeclaration(String variableName) {
+        return body.blockStatement.getVariableDeclaration(variableName);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getQualifiedName());
+        sb.append('(');
+        String commaSeparatedParams = this.getParameters()
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(" ,"));
+        sb.append(commaSeparatedParams);
+        sb.append(')');
+        return sb.toString();
+    }
+
+    public String getContainerName() {
+        return containerName;
+    }
+
+    public void setContainerName(String containerName) {
+        this.containerName = containerName;
+    }
+
+    public List<FunctionDeclaration> getOperationsInsideAnonymousFunctionDeclarations(List<IAnonymousFunctionDeclaration> allAddedAnonymousClasses) {
+        List<FunctionDeclaration> operationsInsideAnonymousClass = new ArrayList<>();
+        if (this.body != null) {
+            List<IAnonymousFunctionDeclaration> anonymousClassDeclarations = this.getBody().blockStatement.getAllAnonymousFunctionDeclarations();
+            for (IAnonymousFunctionDeclaration anonymousClassDeclaration : anonymousClassDeclarations) {
+                for (IAnonymousFunctionDeclaration anonymousFunction : allAddedAnonymousClasses) {
+                    if (anonymousFunction.getSourceLocation().equals(anonymousClassDeclaration.getSourceLocation())) {
+                        anonymousFunction.getFunctionDeclarations().forEach(iaf -> {
+                            operationsInsideAnonymousClass.add((FunctionDeclaration) iaf);
+                        });
+                    }
+                }
+            }
+        }
+        return operationsInsideAnonymousClass;
     }
 }

@@ -1,8 +1,15 @@
 package io.jsrminer.sourcetree;
 
-import java.util.*;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminer.core.api.ICodeFragment;
+import io.rminer.core.api.IFunctionDeclaration;
 
-public class SingleStatement extends Statement {
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class SingleStatement extends Statement implements ICodeFragment {
     // private List<AbstractExpression> expressionList;
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();
@@ -17,6 +24,11 @@ public class SingleStatement extends Statement {
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
+    private List<String> postfixExpressions = new ArrayList<>();
+    protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
+    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+    private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
 
     public SingleStatement() {
     }
@@ -79,6 +91,16 @@ public class SingleStatement extends Statement {
         return prefixExpressions;
     }
 
+    @Override
+    public List<String> getPostfixExpressions() {
+        return this.postfixExpressions;
+    }
+
+    @Override
+    public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
+        return this.ternaryOperatorExpressions;
+    }
+
     /**
      * Returns arguments which are Invocations
      */
@@ -93,6 +115,21 @@ public class SingleStatement extends Statement {
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
+
+    }
+
+    //    @Override
+//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+//        return this.anonymousClassDeclarations;
+//    }
+    @Override
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        return this.anonymousFunctionDeclarations;
+    }
+
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        return this.functionDeclarations;
     }
 
 //    @Override

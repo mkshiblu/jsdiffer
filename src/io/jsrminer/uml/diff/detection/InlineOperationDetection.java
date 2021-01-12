@@ -8,7 +8,7 @@ import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.SourceFileModelDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -22,14 +22,14 @@ import java.util.Map;
 public class InlineOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> removedOperations;
-    private SourceFileModelDiff classDiff;
+    private ContainerDiff classDiff;
     private UMLModelDiff modelDiff;
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     public InlineOperationDetection(FunctionBodyMapper mapper
             , List<FunctionDeclaration> removedOperations
-            , SourceFileModelDiff classDiff, UMLModelDiff modelDiff) {
+            , ContainerDiff classDiff, UMLModelDiff modelDiff) {
         this.mapper = mapper;
         this.removedOperations = removedOperations;
         this.classDiff = classDiff;
@@ -108,7 +108,7 @@ public class InlineOperationDetection {
     private FunctionBodyMapper createMapperForInlinedMethod(FunctionBodyMapper mapper,
                                                             FunctionDeclaration removedOperation, OperationInvocation removedOperationInvocation) throws RefactoringMinerTimedOutException {
         List<String> arguments = removedOperationInvocation.getArguments();
-        List<UMLParameter> parameters = new ArrayList<>(removedOperation.getParameters().values());//
+        List<UMLParameter> parameters = new ArrayList<>(removedOperation.getParameters());//
 
         Map<String, String> parameterToArgumentMap = new LinkedHashMap<>();
         //special handling for methods with varargs parameter for which no argument is passed in the matching invocation

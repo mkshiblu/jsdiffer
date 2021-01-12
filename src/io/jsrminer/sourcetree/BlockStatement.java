@@ -1,12 +1,16 @@
 package io.jsrminer.sourcetree;
 
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminer.core.api.ICompositeFragment;
+import io.rminer.core.api.IFunctionDeclaration;
+
 import java.util.*;
 
 /**
  * A block statement, i.e., a sequence of statements surrounded by braces {}.
  * May contain other block statements or statements (i.e. composite statements)
  */
-public class BlockStatement extends Statement {
+public class BlockStatement extends Statement implements ICompositeFragment {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
     //private List<VariableDeclaration> variableDeclarations;
@@ -96,6 +100,41 @@ public class BlockStatement extends Statement {
             variables.addAll(expression.getVariables());
         }
         return variables;
+    }
+
+    /**
+     * Returns all variables inside including nested ones
+     *
+     * @return
+     */
+    public List<String> getAllVariablesIncludingNested() {
+        List<String> variables = new ArrayList<>();
+        variables.addAll(getVariables());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                variables.addAll(composite.getAllVariablesIncludingNested());
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                variables.addAll(statementObject.getVariables());
+            }
+        }
+        return variables;
+    }
+
+    public List<IAnonymousFunctionDeclaration> getAllAnonymousFunctionDeclarations() {
+        List<IAnonymousFunctionDeclaration> anonymousClassDeclarations = new ArrayList<>();
+        anonymousClassDeclarations.addAll(getAnonymousFunctionDeclarations());
+        for (Statement statement : this.statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                anonymousClassDeclarations.addAll(composite.getAllAnonymousFunctionDeclarations());
+            } else if (statement instanceof SingleStatement) {
+                SingleStatement statementObject = (SingleStatement) statement;
+                anonymousClassDeclarations.addAll(statementObject.getAnonymousFunctionDeclarations());
+            }
+        }
+        return anonymousClassDeclarations;
     }
 
     @Override
@@ -198,12 +237,30 @@ public class BlockStatement extends Statement {
     }
 
     @Override
-    public List<String> getIdentifierArguments() {
-        List<String> variables = new ArrayList<String>();
-        for (Expression expression : expressions) {
-            variables.addAll(expression.getVariables());
+    public List<String> getPostfixExpressions() {
+        List<String> postfixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            postfixExpressions.addAll(expression.getPostfixExpressions());
         }
-        return variables;
+        return postfixExpressions;
+    }
+
+    @Override
+    public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
+        List<TernaryOperatorExpression> ternaryExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            ternaryExpressions.addAll(expression.getTernaryOperatorExpressions());
+        }
+        return ternaryExpressions;
+    }
+
+    @Override
+    public List<String> getIdentifierArguments() {
+        List<String> arguments = new ArrayList<String>();
+        for (Expression expression : expressions) {
+            arguments.addAll(expression.getIdentifierArguments());
+        }
+        return arguments;
     }
 
     @Override
@@ -268,6 +325,25 @@ public class BlockStatement extends Statement {
         return null;
     }
 
+    @Override
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        List<IFunctionDeclaration> functions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            functions.addAll(expression.getFunctionDeclarations());
+        }
+        return functions;
+    }
+
+    @Override
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            anonymousFunctionDeclarations.addAll(expression.getAnonymousFunctionDeclarations());
+        }
+        return anonymousFunctionDeclarations;
+    }
+
+
     public Map<String, List<OperationInvocation>> getAllMethodInvocationsIncludingNested() {
         Map<String, List<OperationInvocation>> map = new LinkedHashMap<>();
         map.putAll(getMethodInvocationMap());
@@ -313,6 +389,51 @@ public class BlockStatement extends Statement {
         return map;
     }
 
+    public BlockStatement loopWithVariables(String currentElementName, String collectionName) {
+        for (BlockStatement innerNode : getAllBlockStatementsIncludingNested()) {
+            if (innerNode.getCodeElementType().equals(equals(CodeElementType.ENHANCED_FOR_STATEMENT))) {
+                boolean currentElementNameMatched = false;
+                for (VariableDeclaration declaration : innerNode.getVariableDeclarations()) {
+                    if (declaration.getVariableName().equals(currentElementName)) {
+                        currentElementNameMatched = true;
+                        break;
+                    }
+                }
+                boolean collectionNameMatched = false;
+                for (Expression expression : innerNode.getExpressions()) {
+                    if (expression.getVariables().contains(collectionName)) {
+                        collectionNameMatched = true;
+                        break;
+                    }
+                }
+                if (currentElementNameMatched && collectionNameMatched) {
+                    return innerNode;
+                }
+            } else if (innerNode.getCodeElementType().equals(CodeElementType.FOR_STATEMENT) ||
+                    innerNode.getCodeElementType().equals(CodeElementType.WHILE_STATEMENT)) {
+                boolean collectionNameMatched = false;
+                for (Expression expression : innerNode.getExpressions()) {
+                    if (expression.getVariables().contains(collectionName)) {
+                        collectionNameMatched = true;
+                        break;
+                    }
+                }
+                boolean currentElementNameMatched = false;
+                for (SingleStatement statement : innerNode.getAllLeafStatementsIncludingNested()) {
+                    VariableDeclaration variableDeclaration = statement.getVariableDeclaration(currentElementName);
+                    if (variableDeclaration != null && statement.getVariables().contains(collectionName)) {
+                        currentElementNameMatched = true;
+                        break;
+                    }
+                }
+                if (currentElementNameMatched && collectionNameMatched) {
+                    return innerNode;
+                }
+            }
+        }
+        return null;
+    }
+
     public int statementCount() {
         int count = 0;
         if (!this.getText().equals("{"))
@@ -321,5 +442,21 @@ public class BlockStatement extends Statement {
             count += statement.statementCount();
         }
         return count;
+    }
+
+    public boolean contains(CodeFragment fragment) {
+        if (fragment instanceof SingleStatement) {
+            return getAllLeafStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof BlockStatement) {
+            return getAllBlockStatementsIncludingNested().contains(fragment);
+        } else if (fragment instanceof Expression) {
+            return getExpressions().contains(fragment);
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return this.getText();
     }
 }

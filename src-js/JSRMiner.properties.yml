@@ -1,0 +1,8 @@
+/** Future configurable properties without build**/
+{
+    "supportedExtensions": [
+        "jsx",
+        "js",
+        "ts"
+    ],
+}

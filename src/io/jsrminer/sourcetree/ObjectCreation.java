@@ -5,6 +5,11 @@ public class ObjectCreation extends Invocation {
 
     }
 
+    public boolean identicalName(Invocation call) {
+        // getType().equals(((ObjectCreation)call).getType());
+        return getFunctionName().equals(((ObjectCreation) call).getFunctionName());
+    }
+
     public boolean isArray() {
         return CodeElementType.ARRAY_EXPRESSION == this.type;
     }
