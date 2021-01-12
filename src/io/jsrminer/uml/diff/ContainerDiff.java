@@ -2,13 +2,14 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
+import io.jsrminer.uml.mapping.replacement.MethodInvocationReplacement;
 import io.rminer.core.api.IContainer;
 import io.rminer.core.api.ISourceFile;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents a diff between two containers
@@ -16,14 +17,22 @@ import java.util.Map;
 public class ContainerDiff {
     public final IContainer container1;
     public final IContainer cotainer2;
+
+    private final List<IRefactoring> refactorings = new ArrayList<>();
+    private Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
+
+    //    private Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
+//    private Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
+//    private Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
+//
+    private final List<FunctionBodyMapper> bodyMapperList = new ArrayList<>();
     private List<UMLOperationDiff> operationDiffList = new ArrayList<>();
-    public final List<IRefactoring> refactorings = new ArrayList<>();
 
     /**
      * Name map
      */
-    private final Map<String, FunctionDeclaration> addedOperations = new LinkedHashMap<>();
-    private final Map<String, FunctionDeclaration> removedOperations = new LinkedHashMap<>();
+    private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
+    private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
     public ContainerDiff(ISourceFile container1, ISourceFile cotainer2) {
         this.container1 = container1;
@@ -31,26 +40,18 @@ public class ContainerDiff {
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {
-        if (addedOperations.containsKey(addedOperation.getName()))
-            throw new RuntimeException("Duplicate names for removed operations" + addedOperation);
-        addedOperations.put(addedOperation.getName(), addedOperation);
+        addedOperations.add(addedOperation);
     }
 
     public void reportRemovedOperation(FunctionDeclaration removedOperation) {
-        if (removedOperations.containsKey(removedOperation.getName()))
-            throw new RuntimeException("Duplicate names for removed operations" + removedOperation);
-        removedOperations.put(removedOperation.getName(), removedOperation);
+        removedOperations.add(removedOperation);
     }
 
-    public boolean isRemovedOperation(String functionName) {
-        return this.removedOperations.containsKey(functionName);
-    }
-
-    public Map<String, FunctionDeclaration> getAddedOperations() {
+    public List<FunctionDeclaration> getAddedOperations() {
         return addedOperations;
     }
 
-    public Map<String, FunctionDeclaration> getRemovedOperations() {
+    public List<FunctionDeclaration> getRemovedOperations() {
         return removedOperations;
     }
 
@@ -65,5 +66,21 @@ public class ContainerDiff {
             }
         }
         return null;
+    }
+
+    public List<FunctionBodyMapper> getBodyMapperList() {
+        return bodyMapperList;
+    }
+
+    public List<IRefactoring> getRefactorings() {
+        return refactorings;
+    }
+
+    public Set<MethodInvocationReplacement> getConsistentMethodInvocationRenames() {
+        return consistentMethodInvocationRenames;
+    }
+
+    public void setConsistentMethodInvocationRenames(Set<MethodInvocationReplacement> consistentMethodInvocationRenames) {
+        this.consistentMethodInvocationRenames = consistentMethodInvocationRenames;
     }
 }

@@ -178,7 +178,7 @@ public class InlineOperationDetection {
             /*, Map<String, UMLType> variableTypeMap*/
             , List<OperationInvocation> operationInvocationsInNewMethod) {
         if (operationInvocationsInNewMethod.contains(removedOperationInvocation)) {
-            for (FunctionDeclaration addedOperation : classDiff.getAddedOperations().values()) {
+            for (FunctionDeclaration addedOperation : classDiff.getAddedOperations()) {
                 if (removedOperationInvocation.matchesOperation(addedOperation/*, variableTypeMap, modelDiff*/)) {
                     return true;
                 }

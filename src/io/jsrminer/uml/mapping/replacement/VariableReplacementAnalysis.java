@@ -158,7 +158,7 @@ public class VariableReplacementAnalysis {
                     }
                 } else if (replacement instanceof VariableReplacementWithMethodInvocation) {
                     VariableReplacementWithMethodInvocation variableReplacement = (VariableReplacementWithMethodInvocation) replacement;
-                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
+                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, Direction.INVOCATION_TO_VARIABLE);
                 } else if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)) {
                     for (SingleStatement statement : nonMappedLeavesT1) {
                         VariableDeclaration variableDeclaration = statement.getVariableDeclaration(replacement.getBefore());
@@ -168,8 +168,8 @@ public class VariableReplacementAnalysis {
                                 OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(initializer);
                                 if (invocation != null) {
                                     VariableReplacementWithMethodInvocation variableReplacement
-                                            = new VariableReplacementWithMethodInvocation(initializer.getText(), replacement.getAfter(), invocation, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
-                                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
+                                            = new VariableReplacementWithMethodInvocation(initializer.getText(), replacement.getAfter(), invocation, Direction.INVOCATION_TO_VARIABLE);
+                                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, Direction.INVOCATION_TO_VARIABLE);
                                 }
                             }
                         }

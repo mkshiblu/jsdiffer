@@ -190,8 +190,8 @@ public class UMLOperationDiff extends Diff {
     }
 
     private boolean checkParametersReordered(int matchedParameterCount) {
-        final Set<String> parameterNames1 = new LinkedHashSet<>(function1.getParameterNames());
-        final Set<String> parameterNames2 = new LinkedHashSet<>(function2.getParameterNames());
+        final Set<String> parameterNames1 = new LinkedHashSet<>(function1.getParameterNameList());
+        final Set<String> parameterNames2 = new LinkedHashSet<>(function2.getParameterNameList());
 
         return removedParameters.isEmpty() && addedParameters.isEmpty()
                 && parameterNames1.size() > 1

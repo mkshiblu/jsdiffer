@@ -10,7 +10,6 @@ public class CompositeFragment extends Fragment implements ICompositeFragment {
     private List<Fragment> statementList;
     private List<ExpressionFragment> expressionList;
     private List<IVariableDeclaration> variableDeclarations;
-    private List<ClassDeclaration> classDeclarations;
     private List<FunctionDeclaration> functionDeclarations;
 
 //    @Override

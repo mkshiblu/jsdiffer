@@ -29,8 +29,7 @@ public class UMLModel implements Diffable<UMLModel, UMLModelDiff> {
             if (sourceFileModel2 != null) {
                 ContainerDiffer sourceDiffer = new ContainerDiffer(entry.getValue(), sourceFileModel2, modelDiff);
                 ContainerDiff sourceDiff = sourceDiffer.diff();
-                sourceDiff.refactorings.addAll(sourceDiffer.getRefactorings());
-                modelDiff.getRefactorings().addAll(sourceDiffer.getRefactorings());
+                modelDiff.getRefactorings().addAll(sourceDiff.getRefactorings());
             }
         }
 

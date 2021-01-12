@@ -41,12 +41,12 @@ public class JsonCompositeDeserializer {
         return loadedFunctions.getOrDefault(location.startLine + "," + location.startColumn, null);
     }
 
-    public String getParentContainerName(Container parentContainer) {
+    public String getParentContainerQualifiedName(Container parentContainer) {
         if (parentContainer instanceof DeclarationContainer) {
             return ((DeclarationContainer) parentContainer).getQualifiedName();
         }
 
-        return ((SourceFile) parentContainer).getFilepath();
+        return "";//((SourceFile) parentContainer).getFilepath();
     }
 
     public String generateQualifiedName(String name, Container parentContainer) {
@@ -78,7 +78,7 @@ public class JsonCompositeDeserializer {
 
         function.setName(name);
         function.setQualifiedName(qualifiedName);
-        function.setContainerName(getParentContainerName(parentContainer));
+        function.setParentContainerQualifiedName(getParentContainerQualifiedName(parentContainer));
         function.setFullyQualifiedName(function.getSourceLocation().getFile() + "|" + function.getQualifiedName());
         // Params
         List<Any> params = any.get("params").asList();

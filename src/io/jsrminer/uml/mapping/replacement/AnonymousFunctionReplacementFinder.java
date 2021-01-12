@@ -136,8 +136,8 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     public static boolean equalSignatureWithIdenticalNameIgnoringChangedTypes(IFunctionDeclaration function1, IFunctionDeclaration function2) {
-        if (!(function1.getIsConstructor() &&
-                function2.getIsConstructor() || function1.getName().equals(function2.getName())))
+        if (!(function1.isConstructor() &&
+                function2.isConstructor() || function1.getName().equals(function2.getName())))
             return false;
 //        if (this.isAbstract != operation.isAbstract)
 //            return false;
