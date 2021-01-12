@@ -91,13 +91,6 @@ function processCallExpression(path, expressionResult, statement) {
         // TODO chain call
         processCallExpression(path.get('callee'), expressionResult, statement);
     } else if (t.isFunctionExpression(callee)) {
-
-        // For handling this types of code blocks
-        // (function (global, factory) {
-        //     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        //         typeof define === 'function' && define.amd ? define(factory) :
-        //             (global.Vue = factory());
-        // }(this, (function () { 
         processExpression(path.get('callee'), expressionResult, statement);
     } else {
         throw "Unsupported callee: " + path.toString();

@@ -2,10 +2,7 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.*;
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.OperationInvocation;
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
@@ -771,7 +768,7 @@ public class ContainerDiffer {
 
     private void checkForInlinedOperations(ContainerDiff sourceDiff) {
         List<FunctionDeclaration> removedOperations = containerDiff.getRemovedOperations();
-        List<String> operationsToBeRemoved = new ArrayList<>();
+        List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration removedOperation : removedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
@@ -782,13 +779,11 @@ public class ContainerDiffer {
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
                     processMapperRefactorings(operationBodyMapper, sourceDiff.getRefactorings());
                     mapper.addChildMapper(operationBodyMapper);
-                    operationsToBeRemoved.add(removedOperation.getName());
+                    operationsToBeRemoved.add(removedOperation);
                 }
             }
         }
-        for (String key : operationsToBeRemoved) {
-            containerDiff.getRemovedOperations().remove(key);
-        }
+        containerDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
     }
 
     private void processMapperRefactorings(FunctionBodyMapper mapper, List<IRefactoring> refactorings) {
@@ -1076,7 +1071,7 @@ public class ContainerDiffer {
      */
     private void checkForExtractedOperations(ContainerDiff sourceDiff) {
         List<FunctionDeclaration> addedOperations = new ArrayList<>(containerDiff.getAddedOperations());
-        List<String> operationsToBeRemoved = new ArrayList<>();
+        List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration addedOperation : addedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
@@ -1085,36 +1080,49 @@ public class ContainerDiffer {
                 for (ExtractOperationRefactoring refactoring : refs) {
                     sourceDiff.getRefactorings().add(refactoring);
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-                    //  processMapperRefactorings(operationBodyMapper, refactorings);
+                    processMapperRefactorings(operationBodyMapper, containerDiff.getRefactorings());
                     mapper.addChildMapper(operationBodyMapper);
-                    operationsToBeRemoved.add(addedOperation.getName());
+                    operationsToBeRemoved.add(addedOperation);
                 }
-                //checkForInconsistentVariableRenames(mapper);
+                checkForInconsistentVariableRenames(mapper, sourceDiff);
             }
         }
-//
-//        for (Iterator<FunctionDeclaration> addedOperationIterator = addedOperations.iterator();
-//             addedOperationIterator.hasNext(); ) {
-//            FunctionDeclaration addedOperation = addedOperationIterator.next();
-//
-//            for (FunctionBodyMapper mapper : this.bodyMappers) {
-//                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, this, sourceDiff);
-//                List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
-//                for (ExtractOperationRefactoring refactoring : refs) {
-//                    refactorings.add(refactoring);
-//                    UMLOperationBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-//                    processMapperRefactorings(operationBodyMapper, refactorings);
-//                    mapper.addChildMapper(operationBodyMapper);
-//                    operationsToBeRemoved.add(addedOperation);
-//                }
-//                checkForInconsistentVariableRenames(mapper);
-//            }
-//        }
-        for (String key : operationsToBeRemoved) {
-            containerDiff.getAddedOperations().remove(key);
-        }
+        containerDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
+    private void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, ContainerDiff sourceDiff) {
+        if (mapper.getChildMappers().size() > 1) {
+            Set<IRefactoring> refactoringsToBeRemoved = new LinkedHashSet<>();
+            for (IRefactoring r : sourceDiff.getRefactorings()) {
+                if (r instanceof RenameVariableRefactoring) {
+                    RenameVariableRefactoring rename = (RenameVariableRefactoring) r;
+                    Set<CodeFragmentMapping> references = rename.getVariableReferences();
+                    for (CodeFragmentMapping reference : references) {
+                        if (reference.getFragment1().getVariableDeclarations().size() > 0 && !reference.isExact()) {
+                            Set<CodeFragmentMapping> allMappingsForReference = new LinkedHashSet<>();
+                            for (FunctionBodyMapper childMapper : mapper.getChildMappers()) {
+                                for (CodeFragmentMapping mapping : childMapper.getMappings()) {
+                                    if (mapping.getFragment1().equals(reference.getFragment1())) {
+                                        allMappingsForReference.add(mapping);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allMappingsForReference.size() > 1) {
+                                for (CodeFragmentMapping mapping : allMappingsForReference) {
+                                    if (!mapping.equals(reference) && mapping.isExact()) {
+                                        refactoringsToBeRemoved.add(rename);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            sourceDiff.getRefactorings().removeAll(refactoringsToBeRemoved);
+        }
+    }
 
     public double normalizedNameDistance(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         String s1 = operation1.getName().toLowerCase();

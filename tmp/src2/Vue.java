@@ -1,34 +1,12 @@
 package src1;
 
 public class Vue {
-	class Config {
-		int[][] keyCodes;
-	}
 
-	Config config;
-
-	static class Array {
-		static boolean isArray(KeyCode arr) {
-			return true;
-		}
-	}
-
-	class KeyCode {
-		int indexOf(KeyCode x) {
-			return -2;
-		}
-	}
-
-	private int hyphenate(KeyCode eventKeyName) {
-		// TODO Auto-generated method stub
-		return -1;
-	}
-
-	boolean isKeyNotMatch(KeyCode builtInKeyName, KeyCode actual) {
-		if (Array.isArray(builtInKeyName)) {
-			return builtInKeyName.indexOf(actual) == -1;
+	boolean isKeyNotMatch(KeyCode expect, KeyCode actual) {
+		if (Array.isArray(expect)) {
+			return expect.indexOf(actual) == -1;
 		} else {
-			return builtInKeyName != actual;
+			return expect != actual;
 		}
 	}
 
