@@ -23,7 +23,7 @@ function processStatement(path, parent) {
         }else{
         }
     } catch (ex) {
-        console.error(ex, path.node.loc.start.toString());
+        console.error(ex, String(path.node.loc.start.toString()));
     }
 }
 

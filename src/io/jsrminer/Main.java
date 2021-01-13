@@ -36,7 +36,7 @@ public class Main {
     }
 
     static void directoryExample() {
-        new JSRefactoringMiner().detectBetweenDirectories("tmp\\vue1", "tmp\\vue2");
+        new JSRefactoringMiner().detectBetweenDirectories("tmp\\src1", "tmp\\src2");
     }
 
     static void jqueryExample() {

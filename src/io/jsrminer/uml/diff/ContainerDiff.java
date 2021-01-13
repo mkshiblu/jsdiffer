@@ -2,9 +2,10 @@ package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MethodInvocationReplacement;
-import io.rminer.core.api.IContainer;
+import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.rminer.core.api.ISourceFile;
 
 import java.util.ArrayList;
@@ -15,8 +16,8 @@ import java.util.Set;
  * Represents a diff between two containers
  */
 public class ContainerDiff {
-    public final IContainer container1;
-    public final IContainer cotainer2;
+    public final ISourceFile container1;
+    public final ISourceFile cotainer2;
 
     private final List<IRefactoring> refactorings = new ArrayList<>();
     private Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
@@ -82,5 +83,27 @@ public class ContainerDiff {
 
     public void setConsistentMethodInvocationRenames(Set<MethodInvocationReplacement> consistentMethodInvocationRenames) {
         this.consistentMethodInvocationRenames = consistentMethodInvocationRenames;
+    }
+
+    public static boolean allMappingsAreExactMatches(FunctionBodyMapper operationBodyMapper) {
+        int mappings = operationBodyMapper.mappingsWithoutBlocks();
+        int tryMappings = 0;
+        int mappingsWithTypeReplacement = 0;
+        for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
+            if (mapping.getFragment1().getText().equals("try") && mapping.getFragment2()
+                    .getText().equals("try")) {
+                tryMappings++;
+            }
+            if (mapping.containsReplacement(Replacement.ReplacementType.TYPE)) {
+                mappingsWithTypeReplacement++;
+            }
+        }
+        if (mappings == operationBodyMapper.getExactMatches().size() + tryMappings) {
+            return true;
+        }
+        if (mappings == operationBodyMapper.getExactMatches().size() + tryMappings + mappingsWithTypeReplacement && mappings > mappingsWithTypeReplacement) {
+            return true;
+        }
+        return false;
     }
 }

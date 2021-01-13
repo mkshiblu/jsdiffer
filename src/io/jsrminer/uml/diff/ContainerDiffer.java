@@ -8,7 +8,7 @@ import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.FunctionSignatureUtil;
+import io.jsrminer.uml.mapping.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
 import io.rminer.core.api.IFunctionDeclaration;
 import io.rminer.core.api.ISourceFile;
@@ -105,7 +105,7 @@ public class ContainerDiffer {
             FunctionDeclaration function1 = (FunctionDeclaration) if1;
 
             IFunctionDeclaration function2 = functions2.stream()
-                    .filter(f2 -> FunctionSignatureUtil.equalsNameParentQualifiedNameAndParamerNames(f2, function1))
+                    .filter(f2 -> FunctionUtil.equalsNameParentQualifiedNameAndParamerNames(f2, function1))
                     .findFirst()
                     .orElse(null);
 
@@ -150,7 +150,7 @@ public class ContainerDiffer {
         for (IFunctionDeclaration if1 : functions1) {
             FunctionDeclaration function1 = (FunctionDeclaration) if1;
             IFunctionDeclaration function2 = functions2.stream()
-                    .filter(f2 -> FunctionSignatureUtil.isEqual(f2, function1))
+                    .filter(f2 -> FunctionUtil.isEqual(f2, function1))
                     .findFirst()
                     .orElse(null);
 
@@ -194,7 +194,7 @@ public class ContainerDiffer {
                     removedOperationsToBeRemoved.add(removedOperation);
                     addedOperationsToBeRemoved.add(addedOperation);
                 } else*/
-                if (FunctionSignatureUtil.nameEqualsIgnoreCase(removedOperation, addedOperation)) {
+                if (FunctionUtil.nameEqualsIgnoreCase(removedOperation, addedOperation)) {
 
                     UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
                     FunctionBodyMapper bodyMapper
@@ -1141,7 +1141,7 @@ public class ContainerDiffer {
         for (IFunctionDeclaration function1 : sourceDiff.container1.getFunctionDeclarations()) {
             isEqual = false;
             for (IFunctionDeclaration function2 : sourceDiff.cotainer2.getFunctionDeclarations()) {
-                if (isEqual = FunctionSignatureUtil.isEqual(function1, function2)) {
+                if (isEqual = FunctionUtil.isEqual(function1, function2)) {
                     break;
                 }
             }
@@ -1153,7 +1153,7 @@ public class ContainerDiffer {
         for (IFunctionDeclaration function2 : sourceDiff.cotainer2.getFunctionDeclarations()) {
             isEqual = false;
             for (IFunctionDeclaration function1 : sourceDiff.container1.getFunctionDeclarations()) {
-                if (isEqual = FunctionSignatureUtil.isEqual(function2, function1)) {
+                if (isEqual = FunctionUtil.isEqual(function2, function1)) {
                     break;
                 }
             }
@@ -1178,8 +1178,4 @@ public class ContainerDiffer {
         }
         return false;
     }
-
-//    public List<IRefactoring> getRefactorings() {
-//        return this.refactorings;
-//    }
 }

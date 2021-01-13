@@ -80,6 +80,8 @@ public class JsonCompositeDeserializer {
         function.setQualifiedName(qualifiedName);
         function.setParentContainerQualifiedName(getParentContainerQualifiedName(parentContainer));
         function.setFullyQualifiedName(function.getSourceLocation().getFile() + "|" + function.getQualifiedName());
+        function.setIsTopLevel(parentContainer.getContainerType().equals(IContainer.ContainerType.File));
+
         // Params
         List<Any> params = any.get("params").asList();
         for (int i = 0; i < params.size(); i++) {
@@ -336,8 +338,8 @@ public class JsonCompositeDeserializer {
         // endregion
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
-        if (any.keys().contains("argumentsWithIdentifier")) {
-            populateStringListFromAny(any.get("argumentsWithIdentifier"), leaf.getIdentifierArguments());
+        if (any.keys().contains("arguments")) {
+            populateStringListFromAny(any.get("arguments"), leaf.getIdentifierArguments());
         }
 
         // region Object Creations

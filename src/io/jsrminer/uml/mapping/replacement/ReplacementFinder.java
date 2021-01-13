@@ -1736,7 +1736,7 @@ public class ReplacementFinder {
     }
 
     private boolean equalAfterNewArgumentAdditions(String s1, String s2, ReplacementInfo replacementInfo) {
-        UMLOperationDiff operationDiff = this.containerDiff.getOperationDiff(function1, function2);
+        UMLOperationDiff operationDiff = containerDiff == null ? null : this.containerDiff.getOperationDiff(function1, function2);
         if (operationDiff == null) {
             operationDiff = new UMLOperationDiff(function1, function2);
         }

@@ -1,5 +1,7 @@
 package io.jsrminer.uml.mapping;
 
+import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.CodeElementType;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
@@ -7,7 +9,18 @@ import java.util.LinkedHashSet;
 /**
  * Contains helper for function signature matching
  */
-public class FunctionSignatureUtil {
+public class FunctionUtil {
+    public static boolean isLoop(BlockStatement blockStatement) {
+        return blockStatement.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT) ||
+                blockStatement.getCodeElementType().equals(CodeElementType.FOR_STATEMENT) ||
+                blockStatement.getCodeElementType().equals(CodeElementType.WHILE_STATEMENT) ||
+                blockStatement.getCodeElementType().equals(CodeElementType.DD_WHILE_STATEMENT);
+    }
+
+    public static boolean isEqualFullyQualifiedParentContainerName(IFunctionDeclaration function1, IFunctionDeclaration function2) {
+        return (function1.getSourceLocation().getFile() + "|" + function1.getParentContainerQualifiedName())
+                .equals(function2.getSourceLocation().getFile() + "|" + function2.getParentContainerQualifiedName());
+    }
 
     /**
      * Returns true if all these are eaual of two IsEmptyBody, ParentContainerQualifiedName, name ignored case,

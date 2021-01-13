@@ -1212,4 +1212,22 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     public Set<CandidateSplitVariableRefactoring> getCandidateAttributeSplits() {
         return candidateAttributeSplits;
     }
+
+    public double normalizedEditDistance() {
+        double editDistance = 0;
+        double maxLength = 0;
+        for (CodeFragmentMapping mapping : getMappings()) {
+//            if(mapping.isIdenticalWithExtractedVariable()
+//                    || mapping.isIdenticalWithInlinedVariable()) {
+//                continue;
+//            }
+            String s1 = createArgumentizedString(mapping.getFragment1(), mapping.getFragment2());
+            String s2 = createArgumentizedString(mapping.getFragment2(), mapping.getFragment1());
+            if (!s1.equals(s2)) {
+                editDistance += StringDistance.editDistance(s1, s2);
+                maxLength += Math.max(s1.length(), s2.length());
+            }
+        }
+        return editDistance / maxLength;
+    }
 }

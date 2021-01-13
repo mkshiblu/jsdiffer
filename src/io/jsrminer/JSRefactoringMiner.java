@@ -173,8 +173,8 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
 
                 log.info("Detecting refactorings...");
-                UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
-                refactoringsAtRevision = umlModelBefore.diff(umlModelCurrent/*, renamedFilesHint*/).getRefactorings();
+                UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);
+                refactoringsAtRevision = diff.getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
                 log.info(String.format("Ignored revision %s with no changes in js files", commitId));
@@ -195,7 +195,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         // TODO multi thread?
         UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
 
-        UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent);
+        UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, new LinkedHashMap<>());
 
         /*, renamedFilesHint*/
         List<IRefactoring> refactorings = diff.getRefactorings();
