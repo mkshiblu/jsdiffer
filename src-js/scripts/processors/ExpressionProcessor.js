@@ -87,7 +87,7 @@ function processCallExpression(path, expressionResult, statement) {
         name = callee.property.name;
 
         if (!t.isIdentifier(callee.object)) {
-//            console.log("non-identifier calllee" + String(path.toString()));
+            //            console.log("non-identifier calllee" + String(path.toString()));
         }
 
         expressionText = path.get('callee').get('object').toString();
@@ -201,7 +201,10 @@ function processArgument(argumentPath, statement) {
     }
 
     if (statement) {
-        (statement.arguments || []).push(argumentPath.toString());
+        if (!statement.arguments)
+            statement.arguments = [];
+
+        statement.arguments.push(argumentPath.toString());
     }
 }
 
@@ -302,7 +305,7 @@ function processConditionalExpression(path, expressionResult, statement) {
     };
 
     astUtil.mergeArrayProperties(expressionResult, test, consequent, alternate);
-    (expressionResult.ternaryExpressions || []).push(ternaryExpression);
+    expressionResult.ternaryExpressions.push(ternaryExpression);
 }
 
 /* interface AssignmentExpression<: Expression {

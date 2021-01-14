@@ -2,14 +2,13 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.ContainerDiff;
-import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.diff.UMLOperationDiff;
-import io.jsrminer.uml.diff.UMLParameterDiff;
+import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
+import io.jsrminer.uml.mapping.replacement.replacers.BooleanReplacer;
+import io.jsrminer.uml.mapping.replacement.replacers.TernaryExpressionReplacer;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -118,36 +117,11 @@ public class ReplacementFinder {
             nullLiterals2.add("null");
             findAndPerformBestReplacements(diff.variables1, nullLiterals2, replacementInfo, ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL);
         }
-        // region ternaryOpsExp
-        if (statement1.getTernaryOperatorExpressions().isEmpty() && !statement2.getTernaryOperatorExpressions().isEmpty()) {
-            if (!statement1.getNullLiterals().isEmpty()) {
-                Set<String> nullLiterals1 = new LinkedHashSet<>();
-                nullLiterals1.add("null");
-                Set<String> ternaryExpressions2 = new LinkedHashSet<>();
-                for (TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
-                    ternaryExpressions2.add(ternary.getText());
-                }
-                findAndPerformBestReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-            }
-        } else if (!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
-            if (!statement2.getNullLiterals().isEmpty()) {
-                Set<String> nullLiterals2 = new LinkedHashSet<String>();
-                nullLiterals2.add("null");
-                Set<String> ternaryExpressions1 = new LinkedHashSet<String>();
-                for (TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
-                    ternaryExpressions1.add(ternary.getText());
-                }
-                findAndPerformBestReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
-            }
-        }
+        // Replace ternary expressions
+        TernaryExpressionReplacer.apply(statement1, statement2, replacementInfo);
 
-//        if (!statement1.getText().endsWith("= true" + JsConfig.STATEMENT_TERMINATOR_CHAR) && !statement1.getText().endsWith("= false" + JsConfig.STATEMENT_TERMINATOR_CHAR)) {
-//            findAndPerformBestReplacements( booleanLiterals1, variables2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_VARIABLE);
-//        }
-//        if (!statement2.getText().endsWith("= true" + JsConfig.STATEMENT_TERMINATOR_CHAR) && !statement2.getText().endsWith("= false" + JsConfig.STATEMENT_TERMINATOR_CHAR)) {
-//            findAndPerformBestReplacements(arguments1, booleanLiterals2, replacementInfo, ReplacementType.BOOLEAN_REPLACED_WITH_ARGUMENT);
-//        }
-        // endregion
+        // Replace booleans
+        BooleanReplacer.apply(statement1, statement2, replacementInfo, diff);
 
         String[] argumentizedStrings = filterReplacements(statement1, statement2
                 , replacementInfo, argumentizer
@@ -1258,7 +1232,7 @@ public class ReplacementFinder {
         return false;
     }
 
-    private void findAndPerformBestReplacements(Set<String> strings1, Set<String> strings2, ReplacementInfo replacementInfo, ReplacementType type) {
+    public static void findAndPerformBestReplacements(Set<String> strings1, Set<String> strings2, ReplacementInfo replacementInfo, ReplacementType type) {
         Map.Entry<TreeMap<Double, Set<Replacement>>, TreeMap<Double, Set<Replacement>>> bestReplacements = findBestReplacements(strings1, strings2, type, replacementInfo);
         performReplacementOnArgumentizedString1(bestReplacements.getKey(), bestReplacements.getValue(), replacementInfo);
     }
@@ -1272,7 +1246,7 @@ public class ReplacementFinder {
      * @param type
      * @return
      */
-    private Map.Entry<TreeMap<Double, Set<Replacement>>, TreeMap<Double, Set<Replacement>>> findBestReplacements(
+    private static Map.Entry<TreeMap<Double, Set<Replacement>>, TreeMap<Double, Set<Replacement>>> findBestReplacements(
             Set<String> strings1, Set<String> strings2
             , ReplacementType type, ReplacementInfo replacementInfo) /*throws RefactoringMinerTimedOutException*/ {
         TreeMap<Double, Set<Replacement>> globalReplacementMap = new TreeMap<>();
@@ -1345,8 +1319,8 @@ public class ReplacementFinder {
         return new AbstractMap.SimpleImmutableEntry<>(globalReplacementMap, allReplacementsWithLowerEditDistance);
     }
 
-    private void performReplacementOnArgumentizedString1(TreeMap<Double, Set<Replacement>> bestReplacements, TreeMap<Double, Set<Replacement>> allReplacementsWithLowerEditDistance,
-                                                         ReplacementInfo replacementInfo) {
+    private static void performReplacementOnArgumentizedString1(TreeMap<Double, Set<Replacement>> bestReplacements, TreeMap<Double, Set<Replacement>> allReplacementsWithLowerEditDistance,
+                                                                ReplacementInfo replacementInfo) {
         // Perform replacement
         String strAfterReplacement;
         // CHeck if atleast one replacement found and change the argumentize string

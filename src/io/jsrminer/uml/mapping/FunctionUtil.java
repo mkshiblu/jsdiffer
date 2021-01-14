@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.OperationInvocation;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
@@ -139,4 +140,14 @@ public class FunctionUtil {
         return function1.getName().equals(function2.getName())
                 && new LinkedHashSet<>(function1.getParameterNameList()).equals(new LinkedHashSet<>(function2.getParameterNameList()));
     }
+
+    public static boolean isInvocationsEqual(OperationInvocation invocation1, OperationInvocation invocation2) {
+        return invocation1.getFunctionName().equals(invocation2.getFunctionName())
+                && invocation1.getArguments().size() == invocation2.getArguments().size();
+    }
+
+    public static boolean invocationsHaveEqualFunctionNames(OperationInvocation invocation1, OperationInvocation invocation2) {
+        return invocation1.getFunctionName().equals(invocation2.getFunctionName());
+    }
+
 }

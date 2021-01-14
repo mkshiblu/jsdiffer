@@ -55,6 +55,7 @@ function createBaseExpressionInfo(path) {
         infixOperators: [],
         prefixExpressions: [],
         postfixExpressions: [],
+        ternaryExpressions: [],
         variableDeclarations: [],
         functionInvocations: [],
         constructorInvocations: [],

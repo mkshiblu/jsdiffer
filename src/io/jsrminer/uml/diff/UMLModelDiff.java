@@ -223,9 +223,9 @@ public class UMLModelDiff extends Diff {
         //refactorings.addAll(identifyExtractClassRefactorings(classMoveDiffList));
         // refactorings.addAll(identifyExtractClassRefactorings(innerClassMoveDiffList));
         //refactorings.addAll(identifyExtractClassRefactorings(classRenameDiffList));
-        checkForOperationMovesBetweenCommonClasses();
-        checkForOperationMovesIncludingAddedClasses();
-        checkForOperationMovesIncludingRemovedClasses();
+        checkForOperationMovesBetweenCommonClasses();// Only the removed and common classes that are already matchc (has diff)
+        checkForOperationMovesIncludingAddedClasses();  // If a method has
+        checkForOperationMovesIncludingRemovedClasses(); // If a method has been moved from a deleted file
 //        checkForExtractedAndMovedOperations(getOperationBodyMappersInCommonClasses(), getAddedAndExtractedOperationsInCommonClasses());
 //        checkForExtractedAndMovedOperations(getOperationBodyMappersInMovedAndRenamedClasses(), getAddedOperationsInMovedAndRenamedClasses());
 //        checkForMovedAndInlinedOperations(getOperationBodyMappersInCommonClasses(), getRemovedAndInlinedOperationsInCommonClasses());
