@@ -7,6 +7,7 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.ObjectCreationReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -108,13 +109,13 @@ public class ExtractFunctionTest extends TestBase {
 
         assertEquals("var", replacement1.getBefore());
         assertEquals("let", replacement1.getAfter());
-        assertEquals(Replacement.ReplacementType.KIND, replacement1.getType());
+        assertEquals(ReplacementType.KIND, replacement1.getType());
 
         Replacement replacement2 = replacementIterator.next();
         assertTrue(replacement2 instanceof ObjectCreationReplacement);
 
         assertEquals("new Array(count)", replacement2.getBefore());
         assertEquals("[]", replacement2.getAfter());
-        assertEquals(Replacement.ReplacementType.ARRAY_CONSTRUCTOR_REPLACED_WITH_ARRAY_CREATION, replacement2.getType());
+        assertEquals(ReplacementType.ARRAY_CONSTRUCTOR_REPLACED_WITH_ARRAY_CREATION, replacement2.getType());
     }
 }
