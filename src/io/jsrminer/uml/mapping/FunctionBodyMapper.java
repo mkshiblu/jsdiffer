@@ -615,8 +615,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                     , this.mappings, this.parentMapper != null);
 
             if (score == 0 && replacements.size() == 1 &&
-                    (replacements.iterator().next().getType().equals(Replacement.ReplacementType.INFIX_OPERATOR)
-                            || replacements.iterator().next().getType().equals(Replacement.ReplacementType.INVERT_CONDITIONAL))) {
+                    (replacements.iterator().next().getType().equals(ReplacementType.INFIX_OPERATOR)
+                            || replacements.iterator().next().getType().equals(ReplacementType.INVERT_CONDITIONAL))) {
                 //special handling when there is only an infix operator or invert conditional replacement, but no children mapped
                 score = 1;
             }
@@ -746,7 +746,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
             if (!key.equals(value) && ReplacementUtil.contains(statement2.getText(), key) && ReplacementUtil.contains(statement1.getText(), value)) {
-                mapping.getReplacements().add(new Replacement(value, key, Replacement.ReplacementType.VARIABLE_NAME));
+                mapping.getReplacements().add(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
             }
         }
         return mapping;
@@ -830,7 +830,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 if (replacement instanceof MethodInvocationReplacement ||
                         replacement instanceof VariableReplacementWithMethodInvocation ||
                         //replacement instanceof ClassInstanceCreationWithMethodInvocationReplacement ||
-                        replacement.getType().equals(Replacement.ReplacementType
+                        replacement.getType().equals(ReplacementType
                                 .ARGUMENT_REPLACED_WITH_RIGHT_HAND_SIDE_OF_ASSIGNMENT_EXPRESSION)) {
                     replacements.add(replacement);
                 }
@@ -1055,7 +1055,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private boolean returnWithVariableReplacement(CodeFragmentMapping mapping) {
         if (mapping.getReplacements().size() == 1) {
             Replacement r = mapping.getReplacements().iterator().next();
-            if (r.getType().equals(Replacement.ReplacementType.VARIABLE_NAME)) {
+            if (r.getType().equals(ReplacementType.VARIABLE_NAME)) {
                 String fragment1 = mapping.fragment1.getText();
                 String fragment2 = mapping.fragment2.getText();
                 if (fragment1.equals("return " + r.getBefore() + JsConfig.STATEMENT_TERMINATOR_CHAR)
@@ -1073,9 +1073,9 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         int methodInvocationReplacementsToIgnore = 0;
         int variableNameReplacementsToIgnore = 0;
         for (Replacement replacement : mapping.getReplacements()) {
-            if (replacement.getType().equals(Replacement.ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION) ||
-                    replacement.getType().equals(Replacement.ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL) ||
-                    (replacement.getType().equals(Replacement.ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE) && (replacement.getBefore().equals("null") || replacement.getAfter().equals("null")))) {
+            if (replacement.getType().equals(ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION) ||
+                    replacement.getType().equals(ReplacementType.VARIABLE_REPLACED_WITH_NULL_LITERAL) ||
+                    (replacement.getType().equals(ReplacementType.ARGUMENT_REPLACED_WITH_VARIABLE) && (replacement.getBefore().equals("null") || replacement.getAfter().equals("null")))) {
                 nullLiteralReplacements++;
             } else if (replacement instanceof MethodInvocationReplacement) {
                 MethodInvocationReplacement invocationReplacement = (MethodInvocationReplacement) replacement;
@@ -1085,7 +1085,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                         invokedOperationBefore.getArguments().size() == invokedOperationAfter.getArguments().size()) {
                     methodInvocationReplacementsToIgnore++;
                 }
-            } else if (replacement.getType().equals(Replacement.ReplacementType.VARIABLE_NAME)) {
+            } else if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)) {
                 variableNameReplacementsToIgnore++;
             }
         }
@@ -1101,8 +1101,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         Set<MethodInvocationReplacement> replacements = new LinkedHashSet<>();
         for (CodeFragmentMapping mapping : getMappings()) {
             for (Replacement replacement : mapping.getReplacements()) {
-                if (replacement.getType().equals(Replacement.ReplacementType.METHOD_INVOCATION_NAME) ||
-                        replacement.getType().equals(Replacement.ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT)) {
+                if (replacement.getType().equals(ReplacementType.METHOD_INVOCATION_NAME) ||
+                        replacement.getType().equals(ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT)) {
                     replacements.add((MethodInvocationReplacement) replacement);
                 }
             }

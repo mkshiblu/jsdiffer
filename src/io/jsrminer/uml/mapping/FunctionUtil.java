@@ -149,5 +149,4 @@ public class FunctionUtil {
     public static boolean invocationsHaveEqualFunctionNames(OperationInvocation invocation1, OperationInvocation invocation2) {
         return invocation1.getFunctionName().equals(invocation2.getFunctionName());
     }
-
 }

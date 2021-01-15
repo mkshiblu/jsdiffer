@@ -5,7 +5,7 @@ import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MethodInvocationReplacement;
-import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import io.rminer.core.api.ISourceFile;
 
 import java.util.ArrayList;
@@ -94,7 +94,7 @@ public class ContainerDiff {
                     .getText().equals("try")) {
                 tryMappings++;
             }
-            if (mapping.containsReplacement(Replacement.ReplacementType.TYPE)) {
+            if (mapping.containsReplacement(ReplacementType.TYPE)) {
                 mappingsWithTypeReplacement++;
             }
         }

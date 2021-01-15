@@ -1,6 +1,7 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import io.rminer.core.api.ITernaryOperatorExpression;
 
 public class TernaryOperatorExpression implements ITernaryOperatorExpression {
@@ -34,20 +35,20 @@ public class TernaryOperatorExpression implements ITernaryOperatorExpression {
 
     public Replacement makeReplacementWithTernaryOnTheRight(String statement) {
         if (getElseExpression().getText().equals(statement)) {
-            return new Replacement(statement, getText(), Replacement.ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_ELSE);
+            return new Replacement(statement, getText(), ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_ELSE);
         }
         if (getThenExpression().getText().equals(statement)) {
-            return new Replacement(statement, getText(), Replacement.ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_THEN);
+            return new Replacement(statement, getText(), ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_THEN);
         }
         return null;
     }
 
     public Replacement makeReplacementWithTernaryOnTheLeft(String statement) {
         if (getElseExpression().getText().equals(statement)) {
-            return new Replacement(getText(), statement, Replacement.ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_ELSE);
+            return new Replacement(getText(), statement, ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_ELSE);
         }
         if (getThenExpression().getText().equals(statement)) {
-            return new Replacement(getText(), statement, Replacement.ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_THEN);
+            return new Replacement(getText(), statement, ReplacementType.EXPRESSION_REPLACED_WITH_TERNARY_THEN);
         }
         return null;
     }

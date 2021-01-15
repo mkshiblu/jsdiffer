@@ -13,8 +13,6 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminer.core.api.IAnonymousFunctionDeclaration;
 
 import java.util.*;
-
-import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 import static java.util.AbstractMap.SimpleEntry;
 

@@ -809,7 +809,7 @@ public class ContainerDiffer {
                         after = after.substring(prefix2.length(), after.length());
                     }
                 }
-                Replacement renamePattern = new Replacement(before, after, Replacement.ReplacementType.VARIABLE_NAME);
+                Replacement renamePattern = new Replacement(before, after, ReplacementType.VARIABLE_NAME);
                 if (renameMap.containsKey(renamePattern)) {
                     renameMap.get(renamePattern).add(candidate);
                 } else {
@@ -1052,7 +1052,7 @@ public class ContainerDiffer {
             if (mapping.fragment1.getText().equals("try") && mapping.fragment2.getText().equals("try")) {
                 tryMappingsCount++;
             }
-            if (mapping.containsReplacement(Replacement.ReplacementType.TYPE)) {
+            if (mapping.containsReplacement(ReplacementType.TYPE)) {
                 mappingsWithTypeReplacement++;
             }
         }

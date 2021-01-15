@@ -6,6 +6,7 @@ import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -63,10 +64,10 @@ public abstract class CodeFragmentMapping {
 
     private boolean containsIdenticalOrCompositeReplacement() {
         for (Replacement r : replacements) {
-            if (r.getType().equals(Replacement.ReplacementType.ARRAY_INITIALIZER_REPLACED_WITH_METHOD_INVOCATION_ARGUMENTS) &&
+            if (r.getType().equals(ReplacementType.ARRAY_INITIALIZER_REPLACED_WITH_METHOD_INVOCATION_ARGUMENTS) &&
                     r.getBefore().equals(r.getAfter())) {
                 return true;
-            } else if (r.getType().equals(Replacement.ReplacementType.COMPOSITE)) {
+            } else if (r.getType().equals(ReplacementType.COMPOSITE)) {
                 return true;
             }
         }
@@ -79,7 +80,7 @@ public abstract class CodeFragmentMapping {
                 fragment1.getText().startsWith("continue;");
     }
 
-    public boolean containsReplacement(Replacement.ReplacementType type) {
+    public boolean containsReplacement(ReplacementType type) {
         for (Replacement replacement : replacements) {
             if (replacement.getType().equals(type)) {
                 return true;

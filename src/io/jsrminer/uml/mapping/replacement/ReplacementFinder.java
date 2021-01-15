@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 
 public class ReplacementFinder {
@@ -242,7 +241,7 @@ public class ReplacementFinder {
             , Map<String, List<? extends Invocation>> methodInvocationMap1
             , ReplacementInfo replacementInfo) {
 
-        ReplacementHeuristic heuristic = new ReplacementHeuristic();
+        //ReplacementHeuristic heuristic = new ReplacementHeuristic();
 
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
@@ -253,46 +252,11 @@ public class ReplacementFinder {
                         : invocationCoveringTheEntireStatement1;
 
         //method invocation is identical
-        if (assignmentInvocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
-            for (String key1 : methodInvocationMap1.keySet()) {
-                for (Invocation invocation1 : methodInvocationMap1.get(key1)) {
+        boolean identicalMethodInvocaiton = ReplacementHeuristic.isIdentificalMethodInvocation(assignmentInvocationCoveringTheEntireStatement1,
+                invocationCoveringTheEntireStatement2, methodInvocationMap1, replacementInfo, statement1, statement2);
+        if (identicalMethodInvocaiton)
+            return true;
 
-//                    if (invocation1.identical(invocationCoveringTheEntireStatement2,
-//                            replacementInfo.getReplacements()) &&
-//                            !assignmentInvocationCoveringTheEntireStatement1.getArguments().contains(key1)) {
-//                        String expression1 = assignmentInvocationCoveringTheEntireStatement1.getExpression();
-//                        if (expression1 == null || !expression1.contains(key1)) {
-//                            return replacementInfo.getReplacements();
-//                        }
-//                    } else if (invocation1.identicalName(invocationCoveringTheEntireStatement2) && invocation1.equalArguments(invocationCoveringTheEntireStatement2) &&
-//                            !assignmentInvocationCoveringTheEntireStatement1.getArguments().contains(key1) && invocationCoveringTheEntireStatement2.getExpression() != null) {
-//                        boolean expressionMatched = false;
-//                        Set<AbstractCodeFragment> additionallyMatchedStatements2 = new LinkedHashSet<AbstractCodeFragment>();
-//                        for (AbstractCodeFragment codeFragment : replacementInfo.statements2) {
-//                            VariableDeclaration variableDeclaration = codeFragment.getVariableDeclaration(invocationCoveringTheEntireStatement2.getExpression());
-//                            OperationInvocation invocationCoveringEntireCodeFragment = codeFragment.invocationCoveringEntireFragment();
-//                            if (variableDeclaration != null && variableDeclaration.getInitializer() != null && invocation1.getExpression() != null && invocation1.getExpression().equals(variableDeclaration.getInitializer().getString())) {
-//                                Replacement r = new Replacement(invocation1.getExpression(), variableDeclaration.getVariableName(), ReplacementType.VARIABLE_REPLACED_WITH_EXPRESSION_OF_METHOD_INVOCATION);
-//                                replacementInfo.getReplacements().add(r);
-//                                additionallyMatchedStatements2.add(codeFragment);
-//                                expressionMatched = true;
-//                            }
-//                            if (invocationCoveringEntireCodeFragment != null && assignmentInvocationCoveringTheEntireStatement1.identicalName(invocationCoveringEntireCodeFragment) &&
-//                                    assignmentInvocationCoveringTheEntireStatement1.equalArguments(invocationCoveringEntireCodeFragment)) {
-//                                additionallyMatchedStatements2.add(codeFragment);
-//                            }
-//                        }
-//                        if (expressionMatched) {
-//                            if (additionallyMatchedStatements2.size() > 0) {
-//                                Replacement r = new CompositeReplacement(statement1.getString(), statement2.getString(), new LinkedHashSet<AbstractCodeFragment>(), additionallyMatchedStatements2);
-//                                replacementInfo.getReplacements().add(r);
-//                            }
-//                            return replacementInfo.getReplacements();
-//                        }
-//                    }
-                }
-            }
-        }
 //        //method invocation is identical with a difference in the expression call chain
 //        if(invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
 //            if(invocationCoveringTheEntireStatement1.identicalWithExpressionCallChainDifference(invocationCoveringTheEntireStatement2)) {
@@ -570,7 +534,7 @@ public class ReplacementFinder {
 //        }
 
         //check if array creation is replaced with data structure creation
-        boolean isCreationReplacedWithArrayDeclaration = heuristic.isObjectCreationReplacedWithArrayDeclaration(statement1, statement2, replacementInfo);
+        boolean isCreationReplacedWithArrayDeclaration = ReplacementHeuristic.isObjectCreationReplacedWithArrayDeclaration(statement1, statement2, replacementInfo);
         if (isCreationReplacedWithArrayDeclaration) {
             return true;
         }

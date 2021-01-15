@@ -1,13 +1,13 @@
 package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.diff.StringDistance;
 
 import java.util.*;
 
 /**
  * Holds metadata between two strings which are subjects to replacements
+ * It acts as a holder for all the replacements going on the statements in variaous steps
  */
 public class ReplacementInfo {
     public final String originalString1;
@@ -74,7 +74,7 @@ public class ReplacementInfo {
         this.appliedReplacements.removeAll(replacementsToBeRemoved);
     }
 
-    public List<Replacement> getReplacementsOfType(Replacement.ReplacementType replacementType) {
+    public List<Replacement> getReplacementsOfType(ReplacementType replacementType) {
         List<Replacement> replacements = new ArrayList<>();
         for (Replacement replacement : this.getReplacements()) {
             if (replacement.getType().equals(replacementType)) {
