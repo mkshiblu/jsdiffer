@@ -70,10 +70,10 @@ public class ExtractOperationRefactoring extends Refactoring {
 
     private String getClassName() {
         if (getRefactoringType().equals(RefactoringType.EXTRACT_AND_MOVE_OPERATION)) {
-            return getSourceOperationBeforeExtraction().getContainerName();
+            return getSourceOperationBeforeExtraction().getParentContainerQualifiedName();
         }
-        String sourceClassName = getSourceOperationBeforeExtraction().getContainerName();
-        String targetClassName = getSourceOperationAfterExtraction().getContainerName();
+        String sourceClassName = getSourceOperationBeforeExtraction().getParentContainerQualifiedName();
+        String targetClassName = getSourceOperationAfterExtraction().getParentContainerQualifiedName();
         return sourceClassName.equals(targetClassName) ? sourceClassName : targetClassName;
     }
 
@@ -160,7 +160,7 @@ public class ExtractOperationRefactoring extends Refactoring {
     }
 
     public RefactoringType getRefactoringType() {
-        if (!getSourceOperationAfterExtraction().getContainerName().equals(getExtractedOperation().getContainerName()))
+        if (!getSourceOperationAfterExtraction().getParentContainerQualifiedName().equals(getExtractedOperation().getParentContainerQualifiedName()))
             return RefactoringType.EXTRACT_AND_MOVE_OPERATION;
         return RefactoringType.EXTRACT_OPERATION;
     }

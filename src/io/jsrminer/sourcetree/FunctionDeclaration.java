@@ -65,7 +65,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         return fullyQualifiedName;
     }
 
-    public List<String> getParameterNames() {
+    public List<String> getParameterNameList() {
         return getParameters().stream().map(parameter -> parameter.name).collect(Collectors.toList());
     }
 
@@ -106,7 +106,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         return this.parameters.size();
     }
 
-    public boolean getIsConstructor() {
+    public boolean isConstructor() {
         return isConstructor;
     }
 
@@ -138,14 +138,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<String> getParameterNameList() {
-        List<String> parameterNameList = new ArrayList<>();
-        for (UMLParameter parameter : parameters) {
-            parameterNameList.add(parameter.name);
-        }
-        return parameterNameList;
     }
 
     public List<String> getAllVariables() {
@@ -180,14 +172,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
         sb.append(commaSeparatedParams);
         sb.append(')');
         return sb.toString();
-    }
-
-    public String getContainerName() {
-        return containerName;
-    }
-
-    public void setContainerName(String containerName) {
-        this.containerName = containerName;
     }
 
     public List<FunctionDeclaration> getOperationsInsideAnonymousFunctionDeclarations(List<IAnonymousFunctionDeclaration> allAddedAnonymousClasses) {

@@ -5,15 +5,14 @@ import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ChildCountMatcher {
 
     static double computeScore(BlockStatement statement1
             , BlockStatement statement2
-            , Map<String, FunctionDeclaration> removedOperations
-            , Map<String, FunctionDeclaration> addedOperations,
+            , List<FunctionDeclaration> removedOperations
+            , List<FunctionDeclaration> addedOperations,
                                Set<CodeFragmentMapping> mappings, boolean hasParentMapper) {
 
         if (statement1.getCodeElementType() == CodeElementType.TRY_STATEMENT
@@ -29,8 +28,8 @@ public class ChildCountMatcher {
     static double tryStatementsChildMatchingScore(TryStatement try1,
                                                   TryStatement try2
             , Set<CodeFragmentMapping> mappings
-            , Map<String, FunctionDeclaration> removedOperations
-            , Map<String, FunctionDeclaration> addedOperations,
+            , List<FunctionDeclaration> removedOperations
+            , List<FunctionDeclaration> addedOperations,
                                                   boolean hasParentMapper) {
 
         double score = compositeChildMatchingScore(try1
@@ -59,8 +58,8 @@ public class ChildCountMatcher {
     static double compositeChildMatchingScore(BlockStatement comp1
             , BlockStatement comp2
             , Set<CodeFragmentMapping> mappings
-            , Map<String, FunctionDeclaration> removedOperations
-            , Map<String, FunctionDeclaration> addedOperations
+            , List<FunctionDeclaration> removedOperations
+            , List<FunctionDeclaration> addedOperations
             , boolean hasParentMapper) {
 
         List<Statement> statements1 = comp1.getStatements();
@@ -153,7 +152,7 @@ public class ChildCountMatcher {
     }
 
     static boolean functionCallsMatchesDeclaration(OperationInvocation invocation,
-                                                   Map<String, FunctionDeclaration> functionDeclarations
+                                                   List<FunctionDeclaration> functionDeclarations
                                                    /*List<FunctionDeclaration> operations/*,
                                                    Map<String, UMLType> variableTypeMap*/) {
 //        for (FunctionDeclaration operation : operations) {
@@ -162,6 +161,12 @@ public class ChildCountMatcher {
 //                return true;
 //        }
 //        return false;
-        return functionDeclarations.containsKey(invocation.getFunctionName());
+
+        for (FunctionDeclaration functionDeclaration : functionDeclarations) {
+            if (invocation.matchesOperation(functionDeclaration)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

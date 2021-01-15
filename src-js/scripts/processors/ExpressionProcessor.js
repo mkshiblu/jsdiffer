@@ -47,6 +47,10 @@ function processExpression(path, expressionResult, statement) {
     }
 }
 
+// interface ArrayExpression<: Expression {
+//     type: "ArrayExpression";
+//     elements: [Expression | SpreadElement | null];
+// }
 function processArrayExpression(path, expressionResult) {
     // This can also be like setting a value
     const isEmptyArrayCreation = path.node.elements && path.node.elements.length == 0;
@@ -81,6 +85,11 @@ function processCallExpression(path, expressionResult, statement) {
     } else if (t.isMemberExpression(callee)) {
         // If the callee has expressions it could be a member expression (a[i].f() , a.f() etc.)
         name = callee.property.name;
+
+        if (!t.isIdentifier(callee.object)) {
+            //            console.log("non-identifier calllee" + String(path.toString()));
+        }
+
         expressionText = path.get('callee').get('object').toString();
         processExpression(path.get('callee').get('object'), expressionResult, statement);
         // Todo find chain method calls
@@ -91,16 +100,9 @@ function processCallExpression(path, expressionResult, statement) {
         // TODO chain call
         processCallExpression(path.get('callee'), expressionResult, statement);
     } else if (t.isFunctionExpression(callee)) {
-
-        // For handling this types of code blocks
-        // (function (global, factory) {
-        //     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-        //         typeof define === 'function' && define.amd ? define(factory) :
-        //             (global.Vue = factory());
-        // }(this, (function () { 
         processExpression(path.get('callee'), expressionResult, statement);
     } else {
-        throw "Unsupported callee: " + path.toString();
+        throw "Unsupported callee: " + String(path.toString());
     }
 
     const result = {
@@ -188,12 +190,22 @@ function processNewExpression(path, expressionResult, statement) {
 
 // TODO remove duplication in newexp and callexp and check arguments type
 function processArgument(argumentPath, statement) {
-    if (statement && (t.isCallExpression(argumentPath.node) || t.isNewExpression(argumentPath.node)
-        || t.isIdentifier(argumentPath.node))) {
-        if (!statement.argumentsWithIdentifier)
-            statement.argumentsWithIdentifier = [];
 
-        statement.argumentsWithIdentifier.push(argumentPath.toString());
+    if (statement && (t.isCallExpression(argumentPath.node) || t.isNewExpression(argumentPath.node)
+        || t.isIdentifier(argumentPath.node))
+        || t.isMemberExpression(argumentPath.node)
+        || t.isLiteral(argumentPath.node)
+        || t.isObjectExpression(argumentPath.node)
+        || t.isFunction(argumentPath.node)
+        || t.isClass(argumentPath.node)) {
+        return;
+    }
+
+    if (statement) {
+        if (!statement.arguments)
+            statement.arguments = [];
+
+        statement.arguments.push(argumentPath.toString());
     }
 }
 
@@ -294,7 +306,7 @@ function processConditionalExpression(path, expressionResult, statement) {
     };
 
     astUtil.mergeArrayProperties(expressionResult, test, consequent, alternate);
-    (expressionResult.ternaryExpressions || []).push(ternaryExpression);
+    expressionResult.ternaryExpressions.push(ternaryExpression);
 }
 
 /* interface AssignmentExpression<: Expression {
@@ -335,6 +347,10 @@ A member expression.If computed is true, the node corresponds to a computed(a[b]
  should be returned. */
 function processMemberExpression(path, expressionResult, statement) {
     const node = path.node;
+    if (node.computed) {
+        //console.log("Member is computed" + String(path.toString()));
+    }
+
     processIdentifier(path.get('object'), expressionResult, statement);
     processIdentifier(path.get('property'), expressionResult, statement);
 }

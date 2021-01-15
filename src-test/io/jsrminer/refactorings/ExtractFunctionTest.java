@@ -7,6 +7,7 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.ObjectCreationReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,7 @@ public class ExtractFunctionTest extends TestBase {
     @Test
     void testRefactoringsCount() {
         assertNotNull(refactorings);
-        assertEquals(4, refactorings.size());
+        assertEquals(6, refactorings.size());
     }
 
     @Test
@@ -57,10 +58,15 @@ public class ExtractFunctionTest extends TestBase {
     @Test
     void testUnmatchedStatementCount() {
         FunctionBodyMapper mapper = extractOperationRefactoring.getBodyMapper();
-        assertEquals(1, mapper.getNonMappedLeavesT1().size());
+        assertEquals(0, mapper.getNonMappedLeavesT1().size());
         assertEquals(1, mapper.getNonMappedLeavesT2().size());
         assertEquals(2, mapper.getNonMappedInnerNodesT1().size());
         assertEquals(0, mapper.getNonMappedInnerNodesT2().size());
+        // Parent mapper
+        assertEquals(0, mapper.getParentMapper().getNonMappedLeavesT1().size());
+        assertEquals(1, mapper.getParentMapper().getNonMappedLeavesT2().size());
+        assertEquals(2, mapper.getParentMapper().getNonMappedInnerNodesT1().size());
+        assertEquals(2, mapper.getParentMapper().getNonMappedInnerNodesT2().size());
     }
 
     @Test
@@ -108,13 +114,13 @@ public class ExtractFunctionTest extends TestBase {
 
         assertEquals("var", replacement1.getBefore());
         assertEquals("let", replacement1.getAfter());
-        assertEquals(Replacement.ReplacementType.KIND, replacement1.getType());
+        assertEquals(ReplacementType.KIND, replacement1.getType());
 
         Replacement replacement2 = replacementIterator.next();
         assertTrue(replacement2 instanceof ObjectCreationReplacement);
 
         assertEquals("new Array(count)", replacement2.getBefore());
         assertEquals("[]", replacement2.getAfter());
-        assertEquals(Replacement.ReplacementType.ARRAY_CONSTRUCTOR_REPLACED_WITH_ARRAY_CREATION, replacement2.getType());
+        assertEquals(ReplacementType.ARRAY_CONSTRUCTOR_REPLACED_WITH_ARRAY_CREATION, replacement2.getType());
     }
 }

@@ -10,7 +10,7 @@ import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.*;
 
@@ -290,7 +290,7 @@ public class ExtractOperationDetection {
         }
         Set<SingleStatement> nonMappedLeavesT2 = operationBodyMapper.getNonMappedLeavesT2();
         return totalMappings.size() == 1 && totalMappings.get(0)
-                .containsReplacement(Replacement.ReplacementType.ARGUMENT_REPLACED_WITH_RETURN_EXPRESSION) &&
+                .containsReplacement(ReplacementType.ARGUMENT_REPLACED_WITH_RETURN_EXPRESSION) &&
                 nonMappedInnerNodesT2.size() == 1 && nonMappedInnerNodesT2.get(0).toString().startsWith("if") &&
                 nonMappedLeavesT2.size() == 1 && nonMappedLeavesT2.iterator().next().toString().startsWith("return ");
     }

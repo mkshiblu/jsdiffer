@@ -1,7 +1,7 @@
-package io.jsrminer.uml.mapping.replacement;
+package io.jsrminer.uml.diff;
 
 import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.uml.mapping.replacement.ReplacementUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,6 +16,8 @@ public class CodeFragmentDiff {
     public final Set<String> stringLiterals2 = new LinkedHashSet<>();
     public final Set<String> numberLiterals1 = new LinkedHashSet<>();
     public final Set<String> numberLiterals2 = new LinkedHashSet<>();
+    public final Set<String> booleanLiterals1 = new LinkedHashSet<>();
+    public final Set<String> booleanLiterals2 = new LinkedHashSet<>();
     public final Set<String> arguments1 = new LinkedHashSet<>();
     public final Set<String> arguments2 = new LinkedHashSet<>();
     public final Set<String> variables1 = new LinkedHashSet<>();
@@ -31,7 +33,8 @@ public class CodeFragmentDiff {
         intersectVariables();
         intersectStringLiterals();
         intersectNumberLiterals();
-        intersectArgumentIdentifiers();
+        intersectBooleanLiterals();
+        intersectArguments();
         intersectArrayAccess();
         intersectPrefixExpressions();
     }
@@ -48,7 +51,7 @@ public class CodeFragmentDiff {
         ReplacementUtil.removeCommonElements(stringLiterals1, stringLiterals2);
     }
 
-    private void intersectArgumentIdentifiers() {
+    private void intersectArguments() {
         this.arguments1.addAll(statement1.getIdentifierArguments());
         this.arguments2.addAll(statement2.getIdentifierArguments());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
@@ -70,6 +73,12 @@ public class CodeFragmentDiff {
         this.arrayAccesses1.addAll(statement1.getArrayAccesses());
         this.arrayAccesses2.addAll(statement2.getArrayAccesses());
         ReplacementUtil.removeCommonElements(arrayAccesses1, arrayAccesses2);
+    }
+
+    private void intersectBooleanLiterals() {
+        this.booleanLiterals1.addAll(statement1.getBooleanLiterals());
+        this.booleanLiterals2.addAll(statement2.getBooleanLiterals());
+        ReplacementUtil.removeCommonElements(this.booleanLiterals1, this.booleanLiterals2);
     }
 
     @Override

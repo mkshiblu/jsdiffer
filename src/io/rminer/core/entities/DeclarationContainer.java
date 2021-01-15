@@ -12,6 +12,8 @@ public abstract class DeclarationContainer extends Container implements IDeclara
      */
     protected String qualifiedName;
 
+    protected String parentContainerQualifiedName;
+
     public DeclarationContainer() {
         super(ContainerType.Declaration);
     }
@@ -28,4 +30,17 @@ public abstract class DeclarationContainer extends Container implements IDeclara
         this.qualifiedName = qualifiedName;
     }
 
+    /**
+     * Returns the container Qualified name under which it was declared
+     *
+     * @return
+     */
+    @Override
+    public String getParentContainerQualifiedName() {
+        return parentContainerQualifiedName;
+    }
+
+    public void setParentContainerQualifiedName(String parentContainerQualifiedName) {
+        this.parentContainerQualifiedName = parentContainerQualifiedName;
+    }
 }

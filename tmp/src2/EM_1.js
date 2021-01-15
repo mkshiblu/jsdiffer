@@ -24,10 +24,7 @@ function createAddress(host, port) {
     return null;
 }
 
-/**
- * Function Constructor
- */
-function Address(host, port) {
-    this.host = host;
-    this.port = port;
+
+function f3(p1){
+    let b = 5;
 }

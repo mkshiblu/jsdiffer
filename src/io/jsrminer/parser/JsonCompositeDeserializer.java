@@ -41,12 +41,12 @@ public class JsonCompositeDeserializer {
         return loadedFunctions.getOrDefault(location.startLine + "," + location.startColumn, null);
     }
 
-    public String getParentContainerName(Container parentContainer) {
+    public String getParentContainerQualifiedName(Container parentContainer) {
         if (parentContainer instanceof DeclarationContainer) {
             return ((DeclarationContainer) parentContainer).getQualifiedName();
         }
 
-        return ((SourceFile) parentContainer).getFilepath();
+        return "";//((SourceFile) parentContainer).getFilepath();
     }
 
     public String generateQualifiedName(String name, Container parentContainer) {
@@ -78,8 +78,10 @@ public class JsonCompositeDeserializer {
 
         function.setName(name);
         function.setQualifiedName(qualifiedName);
-        function.setContainerName(getParentContainerName(parentContainer));
+        function.setParentContainerQualifiedName(getParentContainerQualifiedName(parentContainer));
         function.setFullyQualifiedName(function.getSourceLocation().getFile() + "|" + function.getQualifiedName());
+        function.setIsTopLevel(parentContainer.getContainerType().equals(IContainer.ContainerType.File));
+
         // Params
         List<Any> params = any.get("params").asList();
         for (int i = 0; i < params.size(); i++) {
@@ -318,7 +320,7 @@ public class JsonCompositeDeserializer {
         if (any.keys().contains("identifiers")) {
             populateStringListFromAny(any.get("identifiers"), leaf.getVariables());
         }
-        //endregion
+        //endregion`
 
         // region Variable declarations
         if (any.keys().contains("variableDeclarations")) {
@@ -336,8 +338,8 @@ public class JsonCompositeDeserializer {
         // endregion
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
-        if (any.keys().contains("argumentsWithIdentifier")) {
-            populateStringListFromAny(any.get("argumentsWithIdentifier"), leaf.getIdentifierArguments());
+        if (any.keys().contains("arguments")) {
+            populateStringListFromAny(any.get("arguments"), leaf.getIdentifierArguments());
         }
 
         // region Object Creations
@@ -350,6 +352,15 @@ public class JsonCompositeDeserializer {
         if (any.keys().contains("numericLiterals")) {
             populateStringListFromAny(any.get("numericLiterals"), leaf.getNumberLiterals());
         }
+
+        if (any.keys().contains("stringLiterals")) {
+            populateStringListFromAny(any.get("stringLiterals"), leaf.getNumberLiterals());
+        }
+
+        if (any.keys().contains("booleanLiterals")) {
+            populateStringListFromAny(any.get("booleanLiterals"), leaf.getNumberLiterals());
+        }
+
         if (any.keys().contains("infixOperators")) {
             populateStringListFromAny(any.get("infixOperators"), leaf.getInfixOperators());
         }
@@ -359,6 +370,11 @@ public class JsonCompositeDeserializer {
         if (any.keys().contains("prefixExpressions")) {
             populateStringListFromAny(any.get("prefixExpressions"), leaf.getPrefixExpressions());
         }
+
+        if (any.keys().contains("ternaryExpressions")) {
+            loadTernaryOperatorExpressions(any.get("ternaryExpressions"), leaf.getTernaryOperatorExpressions(), parentContainer);
+        }
+
         //endregion
 
         // Anonymous FunctionDeclarations
@@ -449,5 +465,24 @@ public class JsonCompositeDeserializer {
 
     void populateStringListFromAny(Any any, @NonNull List<String> listToBePopulated) {
         any.asList().forEach(item -> listToBePopulated.add(item.toString()));
+    }
+
+    /**
+     * Loads the conditional statements
+     */
+    public void loadTernaryOperatorExpressions(Any ternaryExpressionsAny, List<TernaryOperatorExpression> ternaryOperatorExpressions, Container parentContainer) {
+        for (Any any : ternaryExpressionsAny.asList()) {
+            TernaryOperatorExpression ternary = createTernaryExpression(any, parentContainer);
+            ternaryOperatorExpressions.add(ternary);
+        }
+    }
+
+    public TernaryOperatorExpression createTernaryExpression(Any any, Container parentContainer) {
+        final String text = any.toString("text");
+        Expression condition = createExpression(any.get("condition"), null, parentContainer);
+        Expression then = createExpression(any.get("then"), null, parentContainer);
+        Expression elseExpression = createExpression(any.get("else"), null, parentContainer);
+        TernaryOperatorExpression ternary = new TernaryOperatorExpression(text, condition, then, elseExpression);
+        return ternary;
     }
 }

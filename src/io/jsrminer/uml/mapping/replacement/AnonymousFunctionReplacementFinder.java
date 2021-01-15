@@ -65,7 +65,7 @@ public class AnonymousFunctionReplacementFinder {
                         }
 
                         if (matchedOperations > 0) {
-                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), Replacement.ReplacementType.ANONYMOUS_CLASS_DECLARATION);
+                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
                             replacementInfo.addReplacement(replacement);
                             return replacementInfo.getReplacements();
                         }
@@ -136,8 +136,8 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     public static boolean equalSignatureWithIdenticalNameIgnoringChangedTypes(IFunctionDeclaration function1, IFunctionDeclaration function2) {
-        if (!(function1.getIsConstructor() &&
-                function2.getIsConstructor() || function1.getName().equals(function2.getName())))
+        if (!(function1.isConstructor() &&
+                function2.isConstructor() || function1.getName().equals(function2.getName())))
             return false;
 //        if (this.isAbstract != operation.isAbstract)
 //            return false;
@@ -225,7 +225,7 @@ public class AnonymousFunctionReplacementFinder {
         String s1AfterReplacements = new String(s1);
 
         for (Replacement replacement : replacements) {
-            if (replacement.getType().equals(Replacement.ReplacementType.VARIABLE_NAME) || replacement.getType().equals(Replacement.ReplacementType.TYPE)) {
+            if (replacement.getType().equals(ReplacementType.VARIABLE_NAME) || replacement.getType().equals(ReplacementType.TYPE)) {
                 s1AfterReplacements = ReplacementUtil.performReplacement(s1AfterReplacements, s2, replacement.getBefore(), replacement.getAfter());
             }
         }

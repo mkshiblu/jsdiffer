@@ -13,8 +13,6 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminer.core.api.IAnonymousFunctionDeclaration;
 
 import java.util.*;
-
-import static io.jsrminer.uml.mapping.replacement.Replacement.ReplacementType;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 import static java.util.AbstractMap.SimpleEntry;
 
@@ -158,7 +156,7 @@ public class VariableReplacementAnalysis {
                     }
                 } else if (replacement instanceof VariableReplacementWithMethodInvocation) {
                     VariableReplacementWithMethodInvocation variableReplacement = (VariableReplacementWithMethodInvocation) replacement;
-                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
+                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, Direction.INVOCATION_TO_VARIABLE);
                 } else if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)) {
                     for (SingleStatement statement : nonMappedLeavesT1) {
                         VariableDeclaration variableDeclaration = statement.getVariableDeclaration(replacement.getBefore());
@@ -168,8 +166,8 @@ public class VariableReplacementAnalysis {
                                 OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(initializer);
                                 if (invocation != null) {
                                     VariableReplacementWithMethodInvocation variableReplacement
-                                            = new VariableReplacementWithMethodInvocation(initializer.getText(), replacement.getAfter(), invocation, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
-                                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
+                                            = new VariableReplacementWithMethodInvocation(initializer.getText(), replacement.getAfter(), invocation, Direction.INVOCATION_TO_VARIABLE);
+                                    processVariableReplacementWithMethodInvocation(variableReplacement, mapping, variableInvocationExpressionMap, Direction.INVOCATION_TO_VARIABLE);
                                 }
                             }
                         }
@@ -452,7 +450,7 @@ public class VariableReplacementAnalysis {
                 RenameVariableRefactoring ref = new RenameVariableRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                 if (!existsConflictingExtractVariableRefactoring(ref) && !existsConflictingMergeVariableRefactoring(ref) && !existsConflictingSplitVariableRefactoring(ref)) {
                     variableRenames.add(ref);
-                    if (!vdReplacement.getVariableDeclaration1().getKind().equals(vdReplacement.getVariableDeclaration2().getKind()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
+                    if (equalsKindExceptGlobalAndNotParameter(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
@@ -509,7 +507,7 @@ public class VariableReplacementAnalysis {
                 //       v1.getKey().isVarargsParameter() == v2.getKey().isVarargsParameter())
                 {
                     variableRenames.add(ref);
-                    if (!v1.getKey().getKind().equals(v2.getKey().getKind())) {
+                    if (equalsKindExceptGlobalAndNotParameter(v1.getKey(), v2.getKey())) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(v1.getKey(), v2.getKey(), v1.getValue(), v2.getValue(), variableReferences);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
@@ -659,7 +657,9 @@ public class VariableReplacementAnalysis {
         Map<Replacement, Set<CodeFragmentMapping>> map = new LinkedHashMap<>();
         for (CodeFragmentMapping mapping : mappings) {
             for (Replacement replacement : mapping.getReplacements()) {
-                if (replacement.getType().equals(ReplacementType.VARIABLE_NAME) && !returnVariableMapping(mapping, replacement) && !mapping.containsReplacement(ReplacementType.CONCATENATION) &&
+                if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)
+                        && !returnVariableMapping(mapping, replacement)
+                        && !mapping.containsReplacement(ReplacementType.CONCATENATION) &&
                         !containsMethodInvocationReplacementWithDifferentExpressionNameAndArguments(mapping.getReplacements()) &&
                         replacementNotInsideMethodSignatureOfAnonymousClass(mapping, replacement)) {
                     AbstractMap.SimpleEntry<VariableDeclaration, FunctionDeclaration> v1 = getVariableDeclaration1(replacement, mapping);
@@ -1126,7 +1126,7 @@ public class VariableReplacementAnalysis {
                 }
                 for (SingleStatement nonMappedStatement : mapper.getNonMappedLeavesT2()) {
                     VariableDeclaration variableDeclaration2 = nonMappedStatement.getVariableDeclaration(v1.getVariableName());
-                    if (variableDeclaration2 != null && variableDeclaration2.getKind().equals(v1.getKind())) {
+                    if (variableDeclaration2 != null && equalsKindExceptGlobal(variableDeclaration2, v1)) {
                         for (CodeFragmentMapping mapping : mapper.getMappings()) {
                             if (mapping.getFragment2().equals(nonMappedStatement.getParent())) {
                                 if (mapping.getFragment1() instanceof BlockStatement) {
@@ -1300,5 +1300,17 @@ public class VariableReplacementAnalysis {
             }
         }
         return null;
+    }
+
+    public boolean equalsKindExceptGlobalAndNotParameter(VariableDeclaration vd1, VariableDeclaration vd2) {
+        return vd1.getKind() != VariableDeclarationKind.GLOBAL
+                && !vd1.isParameter()
+                && !vd2.isParameter()
+                && vd1.getKind().equals(vd2.getKind());
+    }
+
+    public boolean equalsKindExceptGlobal(VariableDeclaration vd1, VariableDeclaration vd2) {
+        return vd1.getKind() != VariableDeclarationKind.GLOBAL
+                && vd1.getKind().equals(vd2.getKind());
     }
 }
