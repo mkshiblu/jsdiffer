@@ -58,10 +58,15 @@ public class ExtractFunctionTest extends TestBase {
     @Test
     void testUnmatchedStatementCount() {
         FunctionBodyMapper mapper = extractOperationRefactoring.getBodyMapper();
-        assertEquals(1, mapper.getNonMappedLeavesT1().size());
+        assertEquals(0, mapper.getNonMappedLeavesT1().size());
         assertEquals(1, mapper.getNonMappedLeavesT2().size());
         assertEquals(2, mapper.getNonMappedInnerNodesT1().size());
         assertEquals(0, mapper.getNonMappedInnerNodesT2().size());
+        // Parent mapper
+        assertEquals(0, mapper.getParentMapper().getNonMappedLeavesT1().size());
+        assertEquals(1, mapper.getParentMapper().getNonMappedLeavesT2().size());
+        assertEquals(2, mapper.getParentMapper().getNonMappedInnerNodesT1().size());
+        assertEquals(2, mapper.getParentMapper().getNonMappedInnerNodesT2().size());
     }
 
     @Test

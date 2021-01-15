@@ -193,6 +193,7 @@ function processArgument(argumentPath, statement) {
 
     if (statement && (t.isCallExpression(argumentPath.node) || t.isNewExpression(argumentPath.node)
         || t.isIdentifier(argumentPath.node))
+        || t.isMemberExpression(argumentPath.node)
         || t.isLiteral(argumentPath.node)
         || t.isObjectExpression(argumentPath.node)
         || t.isFunction(argumentPath.node)

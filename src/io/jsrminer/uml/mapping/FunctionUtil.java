@@ -3,6 +3,7 @@ package io.jsrminer.uml.mapping;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.OperationInvocation;
+import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
@@ -148,5 +149,9 @@ public class FunctionUtil {
 
     public static boolean invocationsHaveEqualFunctionNames(OperationInvocation invocation1, OperationInvocation invocation2) {
         return invocation1.getFunctionName().equals(invocation2.getFunctionName());
+    }
+
+    public static boolean isDirectlyNested(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {
+        return !anonymousFunctionDeclaration.getQualifiedName().contains(".");
     }
 }

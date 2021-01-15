@@ -36,7 +36,7 @@ public class Main {
     }
 
     static void directoryExample() {
-        new JSRefactoringMiner().detectBetweenDirectories("tmp\\s2", "tmp\\s1");
+        new JSRefactoringMiner().detectBetweenDirectories("tmp\\s1", "tmp\\s2");
     }
 
     static void jqueryExample() {
