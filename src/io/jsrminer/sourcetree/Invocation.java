@@ -12,12 +12,14 @@ public abstract class Invocation extends CodeEntity {
         NONE, ONLY_CALL, RETURN_CALL, THROW_CALL, CAST_CALL, VARIABLE_DECLARATION_INITIALIZER_CALL;
     }
 
-    protected String expression;
+    public abstract double normalizedNameDistance(Invocation call);
+
+    protected String expressionText;
     protected List<String> arguments = new ArrayList<>();
     private String functionName;
 
-    public String getExpression() {
-        return expression;
+    public String getExpressionText() {
+        return expressionText;
     }
 
     public String getFunctionName() {
@@ -58,8 +60,8 @@ public abstract class Invocation extends CodeEntity {
         return sb.toString();
     }
 
-    public void setExpression(String expression) {
-        this.expression = expression;
+    public void setExpressionText(String expressionText) {
+        this.expressionText = expressionText;
     }
 
     public List<String> getArguments() {
@@ -68,8 +70,8 @@ public abstract class Invocation extends CodeEntity {
 
     public String actualString() {
         StringBuilder sb = new StringBuilder();
-        if (expression != null) {
-            sb.append(expression).append(".");
+        if (expressionText != null) {
+            sb.append(expressionText).append(".");
         }
         sb.append(functionName);
         sb.append("(");
@@ -187,9 +189,9 @@ public abstract class Invocation extends CodeEntity {
     }
 
     private boolean identicalExpressionAfterTypeReplacements(Invocation call, Set<Replacement> replacements) {
-        if (getExpression() != null && call.getExpression() != null) {
-            String expression1 = getExpression();
-            String expression2 = call.getExpression();
+        if (getExpressionText() != null && call.getExpressionText() != null) {
+            String expression1 = getExpressionText();
+            String expression2 = call.getExpressionText();
             String expression1AfterReplacements = new String(expression1);
             for (Replacement replacement : replacements) {
                 if (replacement.getType().equals(ReplacementType.TYPE)) {
@@ -204,14 +206,108 @@ public abstract class Invocation extends CodeEntity {
     }
 
     public boolean identicalExpression(Invocation call) {
-        return (getExpression() != null && call.getExpression() != null &&
-                getExpression().equals(call.getExpression())) ||
-                (getExpression() == null && call.getExpression() == null);
+        return (getExpressionText() != null && call.getExpressionText() != null &&
+                getExpressionText().equals(call.getExpressionText())) ||
+                (getExpressionText() == null && call.getExpressionText() == null);
     }
 
     public boolean identical(Invocation call, Set<Replacement> replacements) {
         return identicalExpression(call, replacements) &&
                 identicalName(call) &&
                 equalArguments(call);
+    }
+
+    public boolean identicalOrReplacedArguments(Invocation call, Set<Replacement> replacements) {
+        List<String> arguments1 = getArguments();
+        List<String> arguments2 = call.getArguments();
+        if (arguments1.size() != arguments2.size())
+            return false;
+        for (int i = 0; i < arguments1.size(); i++) {
+            String argument1 = arguments1.get(i);
+            String argument2 = arguments2.get(i);
+            boolean argumentReplacement = false;
+            for (Replacement replacement : replacements) {
+                if (replacement.getBefore().equals(argument1) && replacement.getAfter().equals(argument2)) {
+                    argumentReplacement = true;
+                    break;
+                }
+            }
+            if (!argument1.equals(argument2) && !argumentReplacement)
+                return false;
+        }
+        return true;
+    }
+
+    public boolean identicalOrWrappedArguments(Invocation call) {
+        List<String> arguments1 = getArguments();
+        List<String> arguments2 = call.getArguments();
+        if (arguments1.size() != arguments2.size())
+            return false;
+        for (int i = 0; i < arguments1.size(); i++) {
+            String argument1 = arguments1.get(i);
+            String argument2 = arguments2.get(i);
+            boolean argumentWrapped = false;
+            if (argument1.contains("(" + argument2 + ")") ||
+                    argument2.contains("(" + argument1 + ")")) {
+                argumentWrapped = true;
+            }
+            if (!argument1.equals(argument2) && !argumentWrapped)
+                return false;
+        }
+        return true;
+    }
+
+    public boolean renamedWithIdenticalExpressionAndArguments(Invocation call, Set<Replacement> replacements, double distance) {
+        boolean identicalOrReplacedArguments = identicalOrReplacedArguments(call, replacements);
+        boolean allArgumentsReplaced = allArgumentsReplaced(call, replacements);
+        return getExpressionText() != null && call.getExpressionText() != null &&
+                identicalExpression(call, replacements) &&
+                !identicalName(call) &&
+                (equalArguments(call) || (allArgumentsReplaced && normalizedNameDistance(call) <= distance) || (identicalOrReplacedArguments && !allArgumentsReplaced));
+    }
+
+    public boolean allArgumentsReplaced(Invocation call, Set<Replacement> replacements) {
+        int replacedArguments = 0;
+        List<String> arguments1 = getArguments();
+        List<String> arguments2 = call.getArguments();
+        if (arguments1.size() == arguments2.size()) {
+            for (int i = 0; i < arguments1.size(); i++) {
+                String argument1 = arguments1.get(i);
+                String argument2 = arguments2.get(i);
+                for (Replacement replacement : replacements) {
+                    if (replacement.getBefore().equals(argument1) && replacement.getAfter().equals(argument2)) {
+                        replacedArguments++;
+                        break;
+                    }
+                }
+            }
+        }
+        return replacedArguments > 0 && replacedArguments == arguments1.size();
+    }
+
+    public boolean identicalOrConcatenatedArguments(Invocation call) {
+        List<String> arguments1 = getArguments();
+        List<String> arguments2 = call.getArguments();
+        if (arguments1.size() != arguments2.size())
+            return false;
+        for (int i = 0; i < arguments1.size(); i++) {
+            String argument1 = arguments1.get(i);
+            String argument2 = arguments2.get(i);
+            boolean argumentConcatenated = false;
+            if ((argument1.contains("+") || argument2.contains("+")) && !argument1.contains("++") && !argument2.contains("++")) {
+                Set<String> tokens1 = new LinkedHashSet<String>(Arrays.asList(argument1.split(JsConfig.SPLIT_CONCAT_STRING_PATTERN)));
+                Set<String> tokens2 = new LinkedHashSet<String>(Arrays.asList(argument2.split(JsConfig.SPLIT_CONCAT_STRING_PATTERN)));
+                Set<String> intersection = new LinkedHashSet<String>(tokens1);
+                intersection.retainAll(tokens2);
+                int size = intersection.size();
+                int threshold = Math.max(tokens1.size(), tokens2.size()) - size;
+                if (size > 0 && size >= threshold) {
+                    argumentConcatenated = true;
+                }
+            }
+            if (!argument1.equals(argument2) && !argumentConcatenated)
+                return false;
+        }
+        return true;
     }
 }

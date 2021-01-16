@@ -268,7 +268,7 @@ public class JsonCompositeDeserializer {
         creation.setFunctionName(any.toString("typeName"));
 
         if (any.keys().contains("expressionText")) {
-            creation.setExpression(any.toString("expressionText"));
+            creation.setExpressionText(any.toString("expressionText"));
         }
 
 //        any.keys().contains("isArray")
@@ -282,10 +282,22 @@ public class JsonCompositeDeserializer {
         operationInvocation.setFunctionName(any.toString("functionName"));
 
         if (any.keys().contains("expressionText")) {
-            operationInvocation.setExpression(any.toString("expressionText"));
+            operationInvocation.setExpressionText(any.toString("expressionText"));
+     //       loadSubCallsOfOperationInvocations(operationInvocation.getExpressionText()
+       //             , operationInvocation.getText(), operationInvocation.getSubExpressions());
         }
 
         return operationInvocation;
+    }
+
+    public void loadSubCallsOfOperationInvocations(String expressionText, String invocationText, List<String> subExpressions) {
+        // If expression text is method call
+        if (expressionText != null && expressionText.charAt(expressionText.length() - 1) == ')') {
+            String suffix = invocationText.substring(0, expressionText.length() + 1);
+            subExpressions.add(0, suffix);
+            //if(expressionText.length() - suffix.length() > 1 )
+            loadSubCallsOfOperationInvocations(expressionText.substring(0, expressionText.length() - suffix.length()), expressionText, subExpressions);
+        }
     }
 
     /**

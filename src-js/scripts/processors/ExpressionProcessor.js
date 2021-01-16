@@ -80,6 +80,16 @@ function processCallExpression(path, expressionResult, statement) {
     let name;
     let expressionText;
 
+    const result = {
+        text: path.toString(),
+        type: node.type,
+        functionName: '',
+        arguments: [],
+        loc: astUtil.getFormattedLocation(node)
+    };
+
+    expressionResult.functionInvocations.push(result);
+
     if (t.isIdentifier(callee)) {
         name = callee.name;
     } else if (t.isMemberExpression(callee)) {
@@ -105,14 +115,7 @@ function processCallExpression(path, expressionResult, statement) {
         throw "Unsupported callee: " + String(path.toString());
     }
 
-    const result = {
-        text: path.toString(),
-        type: node.type,
-        functionName: name,
-        arguments: [],
-        loc: astUtil.getFormattedLocation(path.node)
-    };
-
+    result.functionName = name;
 
     if (expressionText) {
         result.expressionText = expressionText;
@@ -124,8 +127,6 @@ function processCallExpression(path, expressionResult, statement) {
             result.arguments.push(argumentPath.toString());
             processExpression(argumentPath, expressionResult, statement);
         });
-
-    expressionResult.functionInvocations.push(result);
 }
 
 /* interface NewExpression<: CallExpression {
@@ -351,7 +352,7 @@ function processMemberExpression(path, expressionResult, statement) {
         //console.log("Member is computed" + String(path.toString()));
     }
 
-    processIdentifier(path.get('object'), expressionResult, statement);
+    processExpression(path.get('object'), expressionResult, statement);
     processIdentifier(path.get('property'), expressionResult, statement);
 }
 

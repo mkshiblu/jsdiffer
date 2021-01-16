@@ -1,36 +1,47 @@
 package io.jsrminer.sourcetree;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
+
+import java.util.*;
 
 public class OperationInvocation extends Invocation {
+    private List<String> subExpressions = new ArrayList<>();
+
     public OperationInvocation() {
 
+    }
+    public double normalizedNameDistance(Invocation call) {
+        String s1 = getFunctionName().toLowerCase();
+        String s2 = ((OperationInvocation) call).getFunctionName().toLowerCase();
+        int distance = StringDistance.editDistance(s1, s2);
+        double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
+        return normalized;
     }
 
     public boolean differentExpressionNameAndArguments(OperationInvocation other) {
         boolean differentExpression = false;
-        if (this.expression == null && other.expression != null)
+        if (this.expressionText == null && other.expressionText != null)
             differentExpression = true;
-        if (this.expression != null && other.expression == null)
+        if (this.expressionText != null && other.expressionText == null)
             differentExpression = true;
-        if (this.expression != null && other.expression != null)
-            differentExpression = !this.expression.equals(other.expression) &&
-                    !this.expression.startsWith(other.expression) && !other.expression.startsWith(this.expression);
+        if (this.expressionText != null && other.expressionText != null)
+            differentExpression = !this.expressionText.equals(other.expressionText) &&
+                    !this.expressionText.startsWith(other.expressionText) && !other.expressionText.startsWith(this.expressionText);
         boolean differentName = !this.equalsInovkedFunctionName(other);
         Set<String> argumentIntersection = new LinkedHashSet<String>(this.arguments);
         argumentIntersection.retainAll(other.arguments);
         boolean argumentFoundInExpression = false;
-        if (this.expression != null) {
+        if (this.expressionText != null) {
             for (String argument : other.arguments) {
-                if (this.expression.contains(argument)) {
+                if (this.expressionText.contains(argument)) {
                     argumentFoundInExpression = true;
                 }
             }
         }
-        if (other.expression != null) {
+        if (other.expressionText != null) {
             for (String argument : this.arguments) {
-                if (other.expression.contains(argument)) {
+                if (other.expressionText.contains(argument)) {
                     argumentFoundInExpression = true;
                 }
             }
@@ -39,6 +50,36 @@ public class OperationInvocation extends Invocation {
                 argumentIntersection.isEmpty() && !argumentFoundInExpression;
         return differentExpression && differentName && differentArguments;
     }
+
+//    public boolean identicalWithExpressionCallChainDifference(OperationInvocation other) {
+//        Set<String> subExpressionIntersection = subExpressionIntersection(other);
+//        return identicalName(other) &&
+//                equalArguments(other) &&
+//                subExpressionIntersection.size() > 0 &&
+//                (subExpressionIntersection.size() == this.subExpressions().size() ||
+//                        subExpressionIntersection.size() == other.subExpressions().size());
+//    }
+//
+//    private Set<String> subExpressionIntersection(OperationInvocation other) {
+//        Set<String> subExpressions1 = this.subExpressions();
+//        Set<String> subExpressions2 = other.subExpressions();
+//        Set<String> intersection = new LinkedHashSet<String>(subExpressions1);
+//        intersection.retainAll(subExpressions2);
+//        if (subExpressions1.size() == subExpressions2.size()) {
+//            Iterator<String> it1 = subExpressions1.iterator();
+//            Iterator<String> it2 = subExpressions2.iterator();
+//            while (it1.hasNext()) {
+//                String subExpression1 = it1.next();
+//                String subExpression2 = it2.next();
+//                if (!intersection.contains(subExpression1) && differInThisDot(subExpression1, subExpression2)) {
+//                    intersection.add(subExpression1);
+//                }
+//            }
+//        }
+//        return intersection;
+//    }
+//
+
 
     public boolean matchesOperation(FunctionDeclaration operation/*
             , Map<String, UMLType> variableTypeMap, UMLModelDiff modelDiff*/) {
@@ -116,6 +157,105 @@ public class OperationInvocation extends Invocation {
 
     @Override
     public boolean identicalName(Invocation call) {
-        return getFunctionName().equals(((OperationInvocation)call).getFunctionName());
+        return getFunctionName().equals(((OperationInvocation) call).getFunctionName());
+    }
+
+//    public List<String> getSubExpressions() {
+//        return subExpressions;
+//    }
+
+    public int numberOfSubExpressions() {
+        return subExpressions.size();
+    }
+
+    public boolean identicalWithExpressionCallChainDifference(OperationInvocation other) {
+        Set<String> subExpressionIntersection = subExpressionIntersection(other);
+        return identicalName(other) &&
+                equalArguments(other) &&
+                subExpressionIntersection.size() > 0 &&
+                (subExpressionIntersection.size() == this.subExpressions().size() ||
+                        subExpressionIntersection.size() == other.subExpressions().size());
+    }
+
+    private Set<String> subExpressionIntersection(OperationInvocation other) {
+        Set<String> subExpressions1 = this.subExpressions();
+        Set<String> subExpressions2 = other.subExpressions();
+        Set<String> intersection = new LinkedHashSet<String>(subExpressions1);
+        intersection.retainAll(subExpressions2);
+        if (subExpressions1.size() == subExpressions2.size()) {
+            Iterator<String> it1 = subExpressions1.iterator();
+            Iterator<String> it2 = subExpressions2.iterator();
+            while (it1.hasNext()) {
+                String subExpression1 = it1.next();
+                String subExpression2 = it2.next();
+                if (!intersection.contains(subExpression1)
+                        && differInThisDot(subExpression1, subExpression2)) {
+                    intersection.add(subExpression1);
+                }
+            }
+        }
+        return intersection;
+    }
+
+    private Set<String> subExpressions() {
+        Set<String> subExpressions = new LinkedHashSet<>(this.subExpressions);
+        String thisExpression = this.expressionText;
+        if (thisExpression != null) {
+            if (thisExpression.contains(".")) {
+                int indexOfDot = thisExpression.indexOf(".");
+                String subString = thisExpression.substring(0, indexOfDot);
+                if (!subExpressions.contains(subString) && !dotInsideArguments(indexOfDot, thisExpression)) {
+                    subExpressions.add(subString);
+                }
+            } else if (!subExpressions.contains(thisExpression)) {
+                subExpressions.add(thisExpression);
+            }
+        }
+        return subExpressions;
+    }
+
+    private static boolean dotInsideArguments(int indexOfDot, String thisExpression) {
+        boolean openingParenthesisFound = false;
+        for (int i = indexOfDot; i >= 0; i--) {
+            if (thisExpression.charAt(i) == '(') {
+                openingParenthesisFound = true;
+                break;
+            }
+        }
+        boolean closingParenthesisFound = false;
+        for (int i = indexOfDot; i < thisExpression.length(); i++) {
+            if (thisExpression.charAt(i) == ')') {
+                closingParenthesisFound = true;
+                break;
+            }
+        }
+        return openingParenthesisFound && closingParenthesisFound;
+    }
+
+    private static boolean differInThisDot(String subExpression1, String subExpression2) {
+        if (subExpression1.length() < subExpression2.length()) {
+            String modified = subExpression1;
+            String previousCommonPrefix = "";
+            String commonPrefix = null;
+            while ((commonPrefix = PrefixSuffixUtils.longestCommonPrefix(modified, subExpression2)).length() > previousCommonPrefix.length()) {
+                modified = commonPrefix + "this." + modified.substring(commonPrefix.length(), modified.length());
+                if (modified.equals(subExpression2)) {
+                    return true;
+                }
+                previousCommonPrefix = commonPrefix;
+            }
+        } else if (subExpression1.length() > subExpression2.length()) {
+            String modified = subExpression2;
+            String previousCommonPrefix = "";
+            String commonPrefix = null;
+            while ((commonPrefix = PrefixSuffixUtils.longestCommonPrefix(modified, subExpression1)).length() > previousCommonPrefix.length()) {
+                modified = commonPrefix + "this." + modified.substring(commonPrefix.length(), modified.length());
+                if (modified.equals(subExpression1)) {
+                    return true;
+                }
+                previousCommonPrefix = commonPrefix;
+            }
+        }
+        return false;
     }
 }

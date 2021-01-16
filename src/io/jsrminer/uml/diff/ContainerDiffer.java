@@ -1005,7 +1005,7 @@ public class ContainerDiffer {
                     if (statement.countableStatement()) {
                         for (String parameterName : removedOperation.getParameterNameList()) {
                             OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
-                            if (invocation != null && invocation.getExpression() != null && invocation.getExpression().equals(parameterName)) {
+                            if (invocation != null && invocation.getExpressionText() != null && invocation.getExpressionText().equals(parameterName)) {
                                 statementUsingParameterAsInvoker1 = statement;
                                 break;
                             }
@@ -1018,7 +1018,7 @@ public class ContainerDiffer {
                     if (statement.countableStatement()) {
                         for (String parameterName : addedOperation.getParameterNameList()) {
                             OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
-                            if (invocation != null && invocation.getExpression() != null && invocation.getExpression().equals(parameterName)) {
+                            if (invocation != null && invocation.getExpressionText() != null && invocation.getExpressionText().equals(parameterName)) {
                                 statementUsingParameterAsInvoker2 = statement;
                                 break;
                             }
