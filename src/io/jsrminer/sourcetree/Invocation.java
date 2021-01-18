@@ -1,5 +1,8 @@
 package io.jsrminer.sourcetree;
 
+import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
@@ -22,7 +25,7 @@ public abstract class Invocation extends CodeEntity {
         return expressionText;
     }
 
-    public String getFunctionName() {
+    public String getName() {
         return functionName;
     }
 
@@ -309,5 +312,93 @@ public abstract class Invocation extends CodeEntity {
                 return false;
         }
         return true;
+    }
+
+    public boolean renamedWithIdenticalArgumentsAndNoExpression(Invocation call, double distance, List<FunctionBodyMapper> lambdaMappers) {
+        boolean allExactLambdaMappers = lambdaMappers.size() > 0;
+        for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
+            if (!ContainerDiff.allMappingsAreExactMatches(lambdaMapper)) {
+                allExactLambdaMappers = false;
+                break;
+            }
+        }
+        return this.getExpressionText() == null && call.getExpressionText() == null &&
+                !identicalName(call) &&
+                (normalizedNameDistance(call) <= distance || allExactLambdaMappers) &&
+                equalArguments(call);
+    }
+
+    public boolean renamedWithDifferentExpressionAndIdenticalArguments(Invocation call) {
+        return (this.getName().contains(call.getName()) || call.getName().contains(this.getName())) &&
+                equalArguments(call) && this.arguments.size() > 0 &&
+                ((this.getExpressionText() == null && call.getExpressionText() != null)
+                        || (call.getExpressionText() == null && this.getExpressionText() != null));
+    }
+
+    public boolean renamedWithIdenticalExpressionAndDifferentNumberOfArguments(Invocation call, Set<Replacement> replacements, double distance, List<FunctionBodyMapper> lambdaMappers) {
+        boolean allExactLambdaMappers = lambdaMappers.size() > 0;
+        for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
+            if (!ContainerDiffer.allMappingsAreExactMatches(lambdaMapper)) {
+                allExactLambdaMappers = false;
+                break;
+            }
+        }
+        return getExpressionText() != null && call.getExpressionText() != null &&
+                identicalExpression(call, replacements) &&
+                (normalizedNameDistance(call) <= distance || allExactLambdaMappers) &&
+                !equalArguments(call) &&
+                getArguments().size() != call.getArguments().size();
+    }
+
+    public Replacement makeReplacementForReturnedArgument(String statement) {
+        if (argumentIsReturned(statement)) {
+            return new Replacement(getArguments().get(0), statement.substring(7, statement.length() - 2),
+                    ReplacementType.ARGUMENT_REPLACED_WITH_RETURN_EXPRESSION);
+        } else if (argumentIsEqual(statement)) {
+            return new Replacement(getArguments().get(0), statement.substring(0, statement.length() - 2),
+                    ReplacementType.ARGUMENT_REPLACED_WITH_STATEMENT);
+        }
+        return null;
+    }
+
+    private boolean argumentIsReturned(String statement) {
+        return statement.startsWith("return ") && getArguments().size() == 1 &&
+                //length()-2 to remove ";\n" from the end of the return statement, 7 to remove the prefix "return "
+                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(7, statement.length() - 2));
+    }
+
+    private boolean argumentIsEqual(String statement) {
+        return statement.endsWith(JsConfig.STATEMENT_TERMINATOR_CHAR + "") && getArguments().size() == 1 &&
+                //length()-2 to remove ";\n" from the end of the statement
+                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(0, statement.length() - 2));
+    }
+
+    private static boolean equalsIgnoringExtraParenthesis(String s1, String s2) {
+        if (s1.equals(s2))
+            return true;
+        String parenthesizedS1 = "(" + s1 + ")";
+        if (parenthesizedS1.equals(s2))
+            return true;
+        String parenthesizedS2 = "(" + s2 + ")";
+        if (parenthesizedS2.equals(s1))
+            return true;
+        return false;
+    }
+
+    public Replacement makeReplacementForWrappedCall(String statement) {
+        if (argumentIsReturned(statement)) {
+            return new Replacement(statement.substring(7, statement.length() - 2), getArguments().get(0),
+                    ReplacementType.ARGUMENT_REPLACED_WITH_RETURN_EXPRESSION);
+        } else if (argumentIsEqual(statement)) {
+            return new Replacement(statement.substring(0, statement.length() - 2), getArguments().get(0),
+                    ReplacementType.ARGUMENT_REPLACED_WITH_STATEMENT);
+        }
+        return null;
+    }
+
+    public boolean argumentIsAssigned(String statement) {
+        return getArguments().size() == 1 && statement.contains("=") && statement.endsWith(JsConfig.STATEMENT_TERMINATOR_CHAR + "") &&
+                //length()-2 to remove ";\n" from the end of the assignment statement, indexOf("=")+1 to remove the left hand side of the assignment
+                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(statement.indexOf("=") + 1, statement.length() - 2));
     }
 }

@@ -1088,7 +1088,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 MethodInvocationReplacement invocationReplacement = (MethodInvocationReplacement) replacement;
                 OperationInvocation invokedOperationBefore = invocationReplacement.getInvokedOperationBefore();
                 OperationInvocation invokedOperationAfter = invocationReplacement.getInvokedOperationAfter();
-                if (invokedOperationBefore.getFunctionName().equals(invokedOperationAfter.getFunctionName()) &&
+                if (invokedOperationBefore.getName().equals(invokedOperationAfter.getName()) &&
                         invokedOperationBefore.getArguments().size() == invokedOperationAfter.getArguments().size()) {
                     methodInvocationReplacementsToIgnore++;
                 }

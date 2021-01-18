@@ -2,6 +2,8 @@ package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
+import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.*;
 
@@ -11,9 +13,10 @@ public class OperationInvocation extends Invocation {
     public OperationInvocation() {
 
     }
+
     public double normalizedNameDistance(Invocation call) {
-        String s1 = getFunctionName().toLowerCase();
-        String s2 = ((OperationInvocation) call).getFunctionName().toLowerCase();
+        String s1 = getName().toLowerCase();
+        String s2 = ((OperationInvocation) call).getName().toLowerCase();
         int distance = StringDistance.editDistance(s1, s2);
         double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
         return normalized;
@@ -151,13 +154,13 @@ public class OperationInvocation extends Invocation {
 //            }
 //            i++;
 //        }
-        return this.getFunctionName().equals(operation.getName())
+        return this.getName().equals(operation.getName())
                 /*&& (this.typeArguments == operation.getParameterTypeList().size() || varArgsMatch(operation))*/;
     }
 
     @Override
     public boolean identicalName(Invocation call) {
-        return getFunctionName().equals(((OperationInvocation) call).getFunctionName());
+        return getName().equals(((OperationInvocation) call).getName());
     }
 
 //    public List<String> getSubExpressions() {
@@ -257,5 +260,13 @@ public class OperationInvocation extends Invocation {
             }
         }
         return false;
+    }
+
+    public Replacement makeReplacementForAssignedArgument(String statement) {
+        if (argumentIsAssigned(statement)) {
+            return new Replacement(statement.substring(statement.indexOf("=") + 1, statement.length() - 2),
+                    getArguments().get(0), ReplacementType.ARGUMENT_REPLACED_WITH_RIGHT_HAND_SIDE_OF_ASSIGNMENT_EXPRESSION);
+        }
+        return null;
     }
 }

@@ -143,12 +143,12 @@ public class FunctionUtil {
     }
 
     public static boolean isInvocationsEqual(OperationInvocation invocation1, OperationInvocation invocation2) {
-        return invocation1.getFunctionName().equals(invocation2.getFunctionName())
+        return invocation1.getName().equals(invocation2.getName())
                 && invocation1.getArguments().size() == invocation2.getArguments().size();
     }
 
     public static boolean invocationsHaveEqualFunctionNames(OperationInvocation invocation1, OperationInvocation invocation2) {
-        return invocation1.getFunctionName().equals(invocation2.getFunctionName());
+        return invocation1.getName().equals(invocation2.getName());
     }
 
     public static boolean isDirectlyNested(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {

@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -108,8 +109,8 @@ public class ReplacementHeuristic {
 //                sameArguments = arrayElements1.equals(objectCreationArguments1);
 //            }
 
-            boolean creation2IsArrayConstructor = "Array".equals(creationCoveringTheEntireStatement2.getFunctionName());
-            boolean creation1IsArrayConstructor = "Array".equals(creationCoveringTheEntireStatement1.getFunctionName());
+            boolean creation2IsArrayConstructor = "Array".equals(creationCoveringTheEntireStatement2.getName());
+            boolean creation1IsArrayConstructor = "Array".equals(creationCoveringTheEntireStatement1.getName());
 
 //            boolean creation1IsEmptyArray = "[]".equals(creationCoveringTheEntireStatement1.getText());
             //          boolean creation2IsEmptyArray = "[]".equals(creationCoveringTheEntireStatement2.getText());
@@ -188,9 +189,9 @@ public class ReplacementHeuristic {
         return false;
     }
 
-    public boolean invationisIdenticalIfArgumentsArWrappedOrConcatenateed(OperationInvocation invocationCoveringTheEntireStatement1,
-                                                                          OperationInvocation invocationCoveringTheEntireStatement2,
-                                                                          Map<String, List<? extends Invocation>> methodInvocationMap2) {
+    public boolean invasionsIdenticalIfArgumentsAreWrappedOrConcatenated(OperationInvocation invocationCoveringTheEntireStatement1,
+                                                                         OperationInvocation invocationCoveringTheEntireStatement2,
+                                                                         Map<String, List<? extends Invocation>> methodInvocationMap2) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
                 invocationCoveringTheEntireStatement1.identicalExpression(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()) &&
                 invocationCoveringTheEntireStatement1.identicalName(invocationCoveringTheEntireStatement2)) {
@@ -221,10 +222,276 @@ public class ReplacementHeuristic {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
                 invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()
                         , ContainerDiffer.MAX_OPERATION_NAME_DISTANCE)) {
-            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getFunctionName(),
-                    invocationCoveringTheEntireStatement2.getFunctionName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
+            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
+                    invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
             replacementInfo.addReplacement(replacement);
             return true;
+        }
+        return false;
+    }
+
+    public boolean invocationRenamedButNoExpressionAndIdenticalArguments(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
+        if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalArgumentsAndNoExpression(invocationCoveringTheEntireStatement2, ContainerDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
+                    invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
+            replacementInfo.addReplacement(replacement);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean invocationRenamedOneExpressionIsNullAndidenticalArguments(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2) {
+        if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+                invocationCoveringTheEntireStatement1.renamedWithDifferentExpressionAndIdenticalArguments(invocationCoveringTheEntireStatement2)) {
+            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+                    invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME_AND_EXPRESSION);
+            replacementInfo.addReplacement(replacement);
+            //return replacementInfo.getReplacements();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean invocationRenmadeArgumentsChangedButIdenticalExpressions(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
+        if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), ContainerDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+            ReplacementType type = invocationCoveringTheEntireStatement1.getName().equals(invocationCoveringTheEntireStatement2.getName()) ? ReplacementType.METHOD_INVOCATION_ARGUMENT : ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT;
+            Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+                    invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, type);
+            replacementInfo.addReplacement(replacement);
+            //           return replacementInfo.getReplacements();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean invocationHasDifferentArgumentsCount(OperationInvocation invocationCoveringTheEntireStatement1
+            , OperationInvocation invocationCoveringTheEntireStatement2
+            , Map<String, String> parameterToArgumentMap
+            , Map<String, List<? extends Invocation>> methodInvocationMap1
+            , Set<String> methodInvocations1) {
+        if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null) {
+            if (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+                //return replacementInfo.getReplacements();
+                return true;
+            } else if (invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+                Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+                        invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
+                replacementInfo.addReplacement(replacement);
+                //    return replacementInfo.getReplacements();
+                return true;
+            }
+        }
+
+
+        if (!methodInvocations1.isEmpty() && invocationCoveringTheEntireStatement2 != null) {
+            for (String methodInvocation1 : methodInvocations1) {
+                for (Invocation operationInvocation1 : methodInvocationMap1.get(methodInvocation1)) {
+                    if (operationInvocation1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    } else if (operationInvocation1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+                        Replacement replacement = new MethodInvocationReplacement(operationInvocation1.actualString(),
+                                invocationCoveringTheEntireStatement2.actualString(), (OperationInvocation) operationInvocation1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_ARGUMENT);
+                        replacementInfo.addReplacement(replacement);
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean argumentIsReturnedInSecondStatement(OperationInvocation invocationCoveringTheEntireStatement1, Map<String, List<? extends Invocation>> methodInvocationMap1, Set<String> methodInvocations1) {
+        //        //check if the argument of the method call in the first statement is returned in the second statement
+        Replacement r;
+        if (invocationCoveringTheEntireStatement1 != null
+                && (r = invocationCoveringTheEntireStatement1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+            replacementInfo.addReplacement(r);
+            //   return replacementInfo.getReplacements();
+            return true;
+        }
+        for (String methodInvocation1 : methodInvocations1) {
+            for (Invocation operationInvocation1 : methodInvocationMap1.get(methodInvocation1)) {
+                if (statement1.getText().endsWith(methodInvocation1 + JsConfig.STATEMENT_TERMINATOR_CHAR)
+                        && (r = operationInvocation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+                    if (operationInvocation1.makeReplacementForReturnedArgument(statement2.getText()) != null) {
+                        replacementInfo.addReplacement(r);
+                        //            return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean argumentIsReturnedInFirstStatment(OperationInvocation invocationCoveringTheEntireStatement2,
+                                                     Map<String, List<? extends Invocation>> methodInvocationMap2, Set<String> methodInvocations2) {
+        Replacement r;
+        if (invocationCoveringTheEntireStatement2 != null &&
+                (r = invocationCoveringTheEntireStatement2.makeReplacementForWrappedCall(replacementInfo.getArgumentizedString1())) != null) {
+            replacementInfo.addReplacement(r);
+            //return replacementInfo.getReplacements();
+            return true;
+        }
+        for (String methodInvocation2 : methodInvocations2) {
+            for (Invocation operationInvocation2 : methodInvocationMap2.get(methodInvocation2)) {
+                if (statement2.getText().endsWith(methodInvocation2 + JsConfig.STATEMENT_TERMINATOR_CHAR) && (r = operationInvocation2.makeReplacementForWrappedCall(replacementInfo.getArgumentizedString1())) != null) {
+                    if (operationInvocation2.makeReplacementForWrappedCall(statement1.getText()) != null) {
+                        replacementInfo.addReplacement(r);
+                        //   return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean argumentIsOnRightHandSideInSecondStatement(OperationInvocation invocationCoveringTheEntireStatement2,
+                                                              Map<String, List<? extends Invocation>> methodInvocationMap1) {
+        Replacement r;
+        if (invocationCoveringTheEntireStatement2 != null &&
+                (r = invocationCoveringTheEntireStatement2.makeReplacementForAssignedArgument(replacementInfo.getArgumentizedString1())) != null &&
+                methodInvocationMap1.containsKey(invocationCoveringTheEntireStatement2.getArguments().get(0))) {
+            replacementInfo.addReplacement(r);
+            //return replacementInfo.getReplacements();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean invocatioInSecondIsExpressionOfInvocationInFirst(OperationInvocation invocationCoveringTheEntireStatement2, Map<String, List<? extends Invocation>> methodInvocationMap1, Map<String, List<? extends Invocation>> methodInvocationMap2) {
+        if (invocationCoveringTheEntireStatement2 != null) {
+            for (String key1 : methodInvocationMap1.keySet()) {
+                for (Invocation invocation1 : methodInvocationMap1.get(key1)) {
+                    if (statement1.getText().endsWith(key1 + JsConfig.STATEMENT_TERMINATOR_CHAR) &&
+                            methodInvocationMap2.keySet().contains(invocation1.getExpressionText())) {
+                        Replacement replacement = new MethodInvocationReplacement(invocation1.actualString(),
+                                invocationCoveringTheEntireStatement2.actualString(), (OperationInvocation) invocation1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION);
+                        replacementInfo.addReplacement(replacement);
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean invocationInFirstIsExpressionOfInvocationInSecond(OperationInvocation invocationCoveringTheEntireStatement1, Map<String, List<? extends Invocation>> methodInvocationMap1, Map<String, List<? extends Invocation>> methodInvocationMap2) {
+        if (invocationCoveringTheEntireStatement1 != null) {
+            for (String key2 : methodInvocationMap2.keySet()) {
+                for (Invocation invocation2 : methodInvocationMap2.get(key2)) {
+                    if (statement2.getText().endsWith(key2 + JsConfig.STATEMENT_TERMINATOR_CHAR) &&
+                            methodInvocationMap1.keySet().contains(invocation2.getExpressionText())) {
+                        Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
+                                invocation2.actualString(), invocationCoveringTheEntireStatement1, (OperationInvocation) invocation2, ReplacementType.METHOD_INVOCATION);
+                        replacementInfo.addReplacement(replacement);
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean argumentOfCreationIsExpressionOfInvocationInSecond(ObjectCreation creationCoveringTheEntireStatement1, Map<String, List<? extends Invocation>> methodInvocationMap2) {
+        if (creationCoveringTheEntireStatement1 != null) {
+            for (String key2 : methodInvocationMap2.keySet()) {
+                for (Invocation invocation2 : methodInvocationMap2.get(key2)) {
+                    if (statement2.getText().endsWith(key2 + JsConfig.STATEMENT_TERMINATOR_CHAR) &&
+                            creationCoveringTheEntireStatement1.getArguments().contains(invocation2.getExpressionText())) {
+                        Replacement replacement = new ClassInstanceCreationWithMethodInvocationReplacement(creationCoveringTheEntireStatement1.getName(),
+                                invocation2.getName(), ReplacementType.CLASS_INSTANCE_CREATION_REPLACED_WITH_METHOD_INVOCATION, creationCoveringTheEntireStatement1, (OperationInvocation) invocation2);
+                        replacementInfo.addReplacement(replacement);
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean builderCallChainReplacedWithClassInstanceCreation(OperationInvocation invocationCoveringTheEntireStatement1, ObjectCreation creationCoveringTheEntireStatement2, Map<String, List<? extends Invocation>> methodInvocationMap1) {
+        if (invocationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null) {
+            if (invocationCoveringTheEntireStatement1.getName().equals("build")) {
+                int commonArguments = 0;
+                for (String key1 : methodInvocationMap1.keySet()) {
+                    if (invocationCoveringTheEntireStatement1.actualString().startsWith(key1)) {
+                        for (Invocation invocation1 : methodInvocationMap1.get(key1)) {
+                            Set<String> argumentIntersection = invocation1.argumentIntersection(creationCoveringTheEntireStatement2);
+                            commonArguments += argumentIntersection.size();
+                        }
+                    }
+                }
+                if (commonArguments > 0) {
+                    Replacement replacement = new MethodInvocationWithClassInstanceCreationReplacement(invocationCoveringTheEntireStatement1.getName(),
+                            creationCoveringTheEntireStatement2.getName(), ReplacementType.BUILDER_REPLACED_WITH_CLASS_INSTANCE_CREATION, invocationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2);
+                    replacementInfo.addReplacement(replacement);
+//                    return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+//    public boolean identicalObjectCreations(ObjectCreation creationCoveringTheEntireStatement1, ObjectCreation creationCoveringTheEntireStatement2, Map<String, List<? extends Invocation>> methodInvocationMap1) {
+//        if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
+//                creationCoveringTheEntireStatement1.identical(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+//            boolean identicalArrayInitializer = true;
+//            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray()) {
+//                identicalArrayInitializer = creationCoveringTheEntireStatement1.identicalArrayInitializer(creationCoveringTheEntireStatement2);
+//            }
+//            if (identicalArrayInitializer) {
+//                //return replacementInfo.getReplacements();
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+
+    public boolean objectCreationIsDifferentOnlyByArguments(ObjectCreation creationCoveringTheEntireStatement1, ObjectCreation creationCoveringTheEntireStatement2, Map<String, String> parameterToArgumentMap) {
+        if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null) {
+            if (creationCoveringTheEntireStatement1.identicalWithMergedArguments(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+//                return replacementInfo.getReplacements();
+                return true;
+            } else if (creationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(creationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+                Replacement replacement = new ObjectCreationReplacement(creationCoveringTheEntireStatement1.getName(),
+                        creationCoveringTheEntireStatement2.getName(), creationCoveringTheEntireStatement1, creationCoveringTheEntireStatement2, ReplacementType.CLASS_INSTANCE_CREATION_ARGUMENT);
+                replacementInfo.addReplacement(replacement);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean creationArgumentsAreIdenticalAfterReplacements(ObjectCreation creationCoveringTheEntireStatement1, ObjectCreation creationCoveringTheEntireStatement2, String s1, String s2) {
+        if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
+                creationCoveringTheEntireStatement1.identicalName(creationCoveringTheEntireStatement2) &&
+                creationCoveringTheEntireStatement1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+            String subStringS1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray() &&
+                    subStringS1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
+                    subStringS1.length() > 0) {
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+            String subString2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+            if (!creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray() &&
+                    subString2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
+                    subString2.length() > 0) {
+                //return replacementInfo.getReplacements();
+                return true;
+            }
         }
         return false;
     }

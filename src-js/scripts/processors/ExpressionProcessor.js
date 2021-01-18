@@ -51,7 +51,7 @@ function processExpression(path, expressionResult, statement) {
 //     type: "ArrayExpression";
 //     elements: [Expression | SpreadElement | null];
 // }
-function processArrayExpression(path, expressionResult) {
+function processArrayExpression(path, expressionResult, statement) {
     // This can also be like setting a value
     const isEmptyArrayCreation = path.node.elements && path.node.elements.length == 0;
 
@@ -60,6 +60,10 @@ function processArrayExpression(path, expressionResult) {
         //objectCreation.typeName = "EMPTY_ARRAY_LITERAL";
         objectCreation.isInitializerEmptyArray = true;
         expressionResult.objectCreations.push(objectCreation);
+    }else{
+       path.get('elements').forEach(elementPath => {
+           processExpression(elementPath, expressionResult, statement);
+       });
     }
 
     return {

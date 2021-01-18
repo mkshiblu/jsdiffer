@@ -549,7 +549,7 @@ public class ContainerDiffer {
         removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeAll(newIntersection);
         for (Iterator<OperationInvocation> operationInvocationIterator = removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.iterator(); operationInvocationIterator.hasNext(); ) {
             OperationInvocation invocation = operationInvocationIterator.next();
-            if (invocation.getFunctionName().startsWith("get")) {
+            if (invocation.getName().startsWith("get")) {
                 operationInvocationIterator.remove();
             }
         }
