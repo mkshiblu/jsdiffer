@@ -419,7 +419,37 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         if (leaves1.size() == 0 || leaves2.size() == 0)
             return;
 
-        matchLeavesWithVariableRenames(leaves1, leaves2, parameterToArgumentMap);
+        List<TreeSet<LeafCodeFragmentMapping>> postponedMappingSets = matchLeavesWithVariableRenames(leaves1, leaves2, parameterToArgumentMap);
+
+        for (TreeSet<LeafCodeFragmentMapping> postponed : postponedMappingSets) {
+            Set<LeafCodeFragmentMapping> mappingsToBeAdded = new LinkedHashSet<>();
+            for (LeafCodeFragmentMapping variableDeclarationMapping : postponed) {
+                for (CodeFragmentMapping previousMapping : this.mappings) {
+                    Set<Replacement> intersection
+                            = variableDeclarationMapping.commonReplacements(previousMapping);
+                    if (!intersection.isEmpty()) {
+                        for (Replacement commonReplacement : intersection) {
+                            if (commonReplacement.getType().equals(ReplacementType.VARIABLE_NAME) &&
+                                    variableDeclarationMapping.getFragment1().getVariableDeclaration(commonReplacement.getBefore()) != null &&
+                                    variableDeclarationMapping.getFragment2().getVariableDeclaration(commonReplacement.getAfter()) != null) {
+                                mappingsToBeAdded.add(variableDeclarationMapping);
+                            }
+                        }
+                    }
+                }
+            }
+            if (mappingsToBeAdded.size() == 1) {
+                LeafCodeFragmentMapping minStatementMapping = mappingsToBeAdded.iterator().next();
+                this.mappings.add(minStatementMapping);
+                leaves1.remove(minStatementMapping.getFragment1());
+                leaves2.remove(minStatementMapping.getFragment2());
+            } else {
+                LeafCodeFragmentMapping minStatementMapping = postponed.first();
+                this.mappings.add(minStatementMapping);
+                leaves1.remove(minStatementMapping.getFragment1());
+                leaves2.remove(minStatementMapping.getFragment2());
+            }
+        }
     }
 
     void matchLeavesWithIdenticalText(Set<? extends CodeFragment> leaves1, Set<? extends
@@ -482,7 +512,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         }
     }
 
-    private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends
+    private List<TreeSet<LeafCodeFragmentMapping>> matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends
             CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
         ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
         List<TreeSet<LeafCodeFragmentMapping>> postponedMappingSets = new ArrayList<>();
@@ -560,6 +590,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
         }
+        return postponedMappingSets;
     }
 
     /**
