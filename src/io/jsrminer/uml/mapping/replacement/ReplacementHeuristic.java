@@ -495,4 +495,228 @@ public class ReplacementHeuristic {
         }
         return false;
     }
+
+    public boolean addtionalCreationHeuristics(Set<String> creations1
+            , Map<String, List<? extends Invocation>> creationMap1
+            , ObjectCreation creationCoveringTheEntireStatement1
+            , ObjectCreation creationCoveringTheEntireStatement2
+            , String s1, String s2
+            , Map<String, String> parameterToArgumentMap) {
+
+        Replacement r;
+        if (!creations1.isEmpty() && creationCoveringTheEntireStatement2 != null) {
+            for (String creation1 : creations1) {
+                for (Invocation objectCreation1 : creationMap1.get(creation1)) {
+                    if (objectCreation1.identicalWithMergedArguments(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    } else if (objectCreation1.identicalWithDifferentNumberOfArguments(creationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)) {
+                        Replacement replacement = new ObjectCreationReplacement(objectCreation1.getName(),
+                                creationCoveringTheEntireStatement2.getName(), (ObjectCreation) objectCreation1, creationCoveringTheEntireStatement2, ReplacementType.CLASS_INSTANCE_CREATION_ARGUMENT);
+                        replacementInfo.addReplacement(replacement);
+                        //return replacementInfo.getReplacements();
+                        return true;
+                    }
+                    //check if the argument lists are identical after replacements
+                    if (objectCreation1.identicalName(creationCoveringTheEntireStatement2) &&
+                            objectCreation1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
+                        String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                        if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray() &&
+                                substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
+                                substring1.length() > 0) {
+                            //return replacementInfo.getReplacements();
+                            return true;
+                        }
+                        String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                        if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray() &&
+                                substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
+                                substring2.length() > 0) {
+                            //return replacementInfo.getReplacements();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        if (creationCoveringTheEntireStatement1 != null && (r = creationCoveringTheEntireStatement1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+            replacementInfo.addReplacement(r);
+            //return replacementInfo.getReplacements();
+            return true;
+        }
+        for (String creation1 : creations1) {
+            for (Invocation objectCreation1 : creationMap1.get(creation1)) {
+                if (statement1.getText().endsWith(creation1 + ";\n") && (r = objectCreation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+                    replacementInfo.addReplacement(r);
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean variableDeclarationsHeuristics(String s1, String s2
+            , OperationInvocation invocationCoveringTheEntireStatement1
+            , OperationInvocation invocationCoveringTheEntireStatement2) {
+        VariableDeclaration variableDeclarationWithArrayInitializer1 = ReplacementFinder.findDeclarationWithArrayInitializer(statement1.getVariableDeclarations());
+        VariableDeclaration variableDeclarationWithArrayInitializer2 = ReplacementFinder.findDeclarationWithArrayInitializer(statement2.getVariableDeclarations());
+
+        List<VariableDeclaration> variableDeclarations1 = statement1.getVariableDeclarations();
+        List<VariableDeclaration> variableDeclarations2 = statement2.getVariableDeclarations();
+
+        Replacement r;
+        if (variableDeclarationWithArrayInitializer1 != null
+                && invocationCoveringTheEntireStatement2 != null
+                && variableDeclarations2.isEmpty() &&
+                !ReplacementFinder.containsMethodSignatureOfAnonymousClass(statement1.getText())
+                && !ReplacementFinder.containsMethodSignatureOfAnonymousClass(statement2.getText())) {
+            String args1 = s1.substring(s1.indexOf("{") + 1, s1.lastIndexOf("}"));
+            String args2 = s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"));
+            if (args1.equals(args2)) {
+                r = new Replacement(args1, args2, ReplacementType.ARRAY_INITIALIZER_REPLACED_WITH_METHOD_INVOCATION_ARGUMENTS);
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+        }
+        if (variableDeclarationWithArrayInitializer2 != null
+                && invocationCoveringTheEntireStatement1 != null
+                && variableDeclarations1.isEmpty() &&
+                !ReplacementFinder.containsMethodSignatureOfAnonymousClass(statement1.getText())
+                && !ReplacementFinder.containsMethodSignatureOfAnonymousClass(statement2.getText())) {
+            String args1 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+            String args2 = s2.substring(s2.indexOf("{") + 1, s2.lastIndexOf("}"));
+            if (args1.equals(args2)) {
+                r = new Replacement(args1, args2, ReplacementType.ARRAY_INITIALIZER_REPLACED_WITH_METHOD_INVOCATION_ARGUMENTS);
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean ternaryExpressionHeuristics(OperationInvocation invocationCoveringTheEntireStatement1
+            , OperationInvocation invocationCoveringTheEntireStatement2
+            , ObjectCreation creationCoveringTheEntireStatement1
+            , ObjectCreation creationCoveringTheEntireStatement2
+            , Set<String> creations1, Set<String> creations2
+            , Set<String> creationIntersection
+            , Map<String, List<? extends Invocation>> creationMap1
+            , Map<String, List<? extends Invocation>> creationMap2
+            , Set<String> methodInvocationIntersection) {
+
+        List<TernaryOperatorExpression> ternaryOperatorExpressions1 = statement1.getTernaryOperatorExpressions();
+        List<TernaryOperatorExpression> ternaryOperatorExpressions2 = statement2.getTernaryOperatorExpressions();
+        Replacement r;
+
+        if (ternaryOperatorExpressions1.isEmpty() && ternaryOperatorExpressions2.size() == 1) {
+            TernaryOperatorExpression ternary = ternaryOperatorExpressions2.get(0);
+            for (String creation : creationIntersection) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheRight(creation)) != null) {
+                    replacementInfo.addReplacement(r);
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+            for (String methodInvocation : methodInvocationIntersection) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheRight(methodInvocation)) != null) {
+                    replacementInfo.addReplacement(r);
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+            if (invocationCoveringTheEntireStatement1 != null && (r = ternary.makeReplacementWithTernaryOnTheRight(invocationCoveringTheEntireStatement1.actualString())) != null) {
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+            if (creationCoveringTheEntireStatement1 != null && (r = ternary.makeReplacementWithTernaryOnTheRight(creationCoveringTheEntireStatement1.actualString())) != null) {
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+            for (String creation2 : creations2) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheRight(creation2)) != null) {
+                    for (Invocation c2 : creationMap2.get(creation2)) {
+                        for (String creation1 : creations1) {
+                            for (Invocation c1 : creationMap1.get(creation1)) {
+                                if (
+                                    /*((ObjectCreation) c1).getTypeName().compatibleTypes(((ObjectCreation) c2).getType()) &&*/ c1.equalArguments(c2)) {
+                                    replacementInfo.addReplacement(r);
+                                    // return replacementInfo.getReplacements();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (ternaryOperatorExpressions1.size() == 1 && ternaryOperatorExpressions2.isEmpty()) {
+            TernaryOperatorExpression ternary = ternaryOperatorExpressions1.get(0);
+            for (String creation : creationIntersection) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheLeft(creation)) != null) {
+                    replacementInfo.addReplacement(r);
+                    // return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+            for (String methodInvocation : methodInvocationIntersection) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheLeft(methodInvocation)) != null) {
+                    replacementInfo.addReplacement(r);
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
+            }
+            if (invocationCoveringTheEntireStatement2 != null && (r = ternary.makeReplacementWithTernaryOnTheLeft(invocationCoveringTheEntireStatement2.actualString())) != null) {
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+            if (creationCoveringTheEntireStatement2 != null && (r = ternary.makeReplacementWithTernaryOnTheLeft(creationCoveringTheEntireStatement2.actualString())) != null) {
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+            for (String creation1 : creations1) {
+                if ((r = ternary.makeReplacementWithTernaryOnTheLeft(creation1)) != null) {
+                    for (Invocation c1 : creationMap1.get(creation1)) {
+                        for (String creation2 : creations2) {
+                            for (Invocation c2 : creationMap2.get(creation2)) {
+                                if (/*((ObjectCreation) c1).getType().compatibleTypes(((ObjectCreation) c2).getType())
+                                        &&*/ c1.equalArguments(c2)) {
+                                    replacementInfo.addReplacement(r);
+                                    //return replacementInfo.getReplacements();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean fieldAssignentReplacedWithSetter(OperationInvocation invocationCoveringTheEntireStatement2, Set<String> variables1) {
+        Replacement r;
+        if (invocationCoveringTheEntireStatement2 != null
+                && statement2.getText().equals(invocationCoveringTheEntireStatement2.actualString() + JsConfig.STATEMENT_TERMINATOR_CHAR)
+                &&
+                invocationCoveringTheEntireStatement2.getArguments().size() == 1
+                && statement1.getText().endsWith("=" + invocationCoveringTheEntireStatement2.getArguments().get(0) + JsConfig.STATEMENT_TERMINATOR_CHAR) &&
+                invocationCoveringTheEntireStatement2.expressionIsNullOrThis() && invocationCoveringTheEntireStatement2.getName().startsWith("set")) {
+            String prefix1 = statement1.getText().substring(0, statement1.getText().lastIndexOf("="));
+            if (variables1.contains(prefix1)) {
+                String before = prefix1 + "=" + invocationCoveringTheEntireStatement2.getArguments().get(0);
+                String after = invocationCoveringTheEntireStatement2.actualString();
+                r = new Replacement(before, after, ReplacementType.FIELD_ASSIGNMENT_REPLACED_WITH_SETTER_METHOD_INVOCATION);
+                replacementInfo.addReplacement(r);
+                //return replacementInfo.getReplacements();
+                return true;
+            }
+        }
+        return false;
+    }
 }

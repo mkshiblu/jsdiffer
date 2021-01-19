@@ -75,7 +75,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
-            refactorings.forEach(r -> System.out.println(r));
+            refactorings.forEach(r -> log.info(r.toString()));
             return refactorings;
 
         } catch (Exception e) {

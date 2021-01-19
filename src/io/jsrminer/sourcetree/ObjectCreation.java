@@ -3,13 +3,16 @@ package io.jsrminer.sourcetree;
 import io.jsrminer.uml.diff.StringDistance;
 
 public class ObjectCreation extends Invocation {
+
+    private String typeName;
+
     public ObjectCreation() {
 
     }
 
     public boolean identicalName(Invocation call) {
         // getType().equals(((ObjectCreation)call).getType());
-        return getName().equals(((ObjectCreation) call).getName());
+        return getName().equals(call.getName());
     }
 
     public boolean isArray() {
@@ -24,7 +27,15 @@ public class ObjectCreation extends Invocation {
         return normalized;
     }
 
-//    public boolean identicalArrayInitializer(ObjectCreation other) {
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
+    }
+
+    //    public boolean identicalArrayInitializer(ObjectCreation other) {
 //        if (this.isArray && other.isArray) {
 //            if (this.anonymousClassDeclaration != null && other.anonymousClassDeclaration != null) {
 //                return this.anonymousClassDeclaration.equals(other.anonymousClassDeclaration);

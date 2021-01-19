@@ -401,4 +401,13 @@ public abstract class Invocation extends CodeEntity {
                 //length()-2 to remove ";\n" from the end of the assignment statement, indexOf("=")+1 to remove the left hand side of the assignment
                 equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(statement.indexOf("=") + 1, statement.length() - 2));
     }
+
+    public boolean expressionIsNullOrThis() {
+        if (expressionText == null) {
+            return true;
+        } else if (expressionText.equals("this")) {
+            return true;
+        }
+        return false;
+    }
 }
