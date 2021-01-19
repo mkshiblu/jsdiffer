@@ -43,7 +43,10 @@ function processExpression(path, expressionResult, statement) {
         process(path, expressionResult, statement);
         return expressionResult;
     } else {
-        throw 'Processeor not implemented for : ' + path.node.type;
+
+        if( !t.isTypeAlias(path)
+            && !t.isTypeCastExpression(path))
+        throw 'Processeor not implemented for : ' + String(path.node.type) + " " + String(path.toString());
     }
 }
 
@@ -60,10 +63,10 @@ function processArrayExpression(path, expressionResult, statement) {
         //objectCreation.typeName = "EMPTY_ARRAY_LITERAL";
         objectCreation.isInitializerEmptyArray = true;
         expressionResult.objectCreations.push(objectCreation);
-    }else{
-       path.get('elements').forEach(elementPath => {
-           processExpression(elementPath, expressionResult, statement);
-       });
+    } else {
+        path.get('elements').forEach(elementPath => {
+            processExpression(elementPath, expressionResult, statement);
+        });
     }
 
     return {
