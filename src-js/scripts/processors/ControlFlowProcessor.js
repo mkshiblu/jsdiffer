@@ -1,5 +1,6 @@
 const astProcessor = require("../processors/AstNodeProcessor");
 const templates = require("../parser/Templates");
+const types = require('@babel/types');
 
 // interface ReturnStatement <: Statement {
 //     type: "ReturnStatement";
@@ -30,7 +31,7 @@ exports.processContinueStatement = function (path) {
     let statement = templates.getStatementTemplate(path);
 
     if (path.node.label != null) {
-        throw "Labeled statements are not supported yet: " + path;
+       // throw "Labeled statements are not supported yet: " + path;
     }
 
     return statement;
@@ -50,8 +51,23 @@ exports.processBreakStatement = function (path) {
     let statement = templates.getStatementTemplate(path);
 
     if (path.node.label != null) {
-        throw "Labeled statements are not supported yet: " + path;
+       // throw "Labeled statements are not supported yet: " + path;
     }
 
     return statement;
+}
+
+// interface LabeledStatement<: Statement {
+//     type: "LabeledStatement";
+//     label: Identifier;
+//     body: Statement;
+// }
+exports.processLabeledStatement = function (path, processStatement) {
+    const result = astProcessor.processNodePath(path.get('body'), processStatement);
+
+    if (types.isClassDeclaration(path.node.body) || types.isFunctionDeclaration(path.node.body)) {
+        console.log('Labled function/class declarations are being considered as statement at line. ' + String(path.node.loc.start.line));
+        //return {}
+    }
+    return result;
 }

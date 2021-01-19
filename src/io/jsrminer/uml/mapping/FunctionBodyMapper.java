@@ -526,6 +526,10 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     void matchInnerNodesWithIdenticalText(Set<BlockStatement> innerNodes1
             , Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap
             , boolean ignoreNestingDepth) {
+
+        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
+
         //exact string+depth matching - inner nodes
         for (Iterator<BlockStatement> iterator2 = innerNodes2.iterator(); iterator2.hasNext(); ) {
             BlockStatement statement2 = iterator2.next();
@@ -534,7 +538,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                 BlockStatement statement1 = iterator1.next();
                 double score = ChildCountMatcher.computeScore(statement1, statement2
-                        , this.containerDiff.getRemovedOperations(), this.containerDiff.getAddedOperations()
+                        , removedOperations, addedOperations
                         , this.mappings, this.parentMapper != null);
 
                 String argumentizedString1 = createArgumentizedString(statement1, statement2);
@@ -609,6 +613,9 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
+        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
+
         ReplacementInfo replacementInfo = createReplacementInfo(statement1, statement2, innerNodes1, innerNodes2);
         Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(statement1
                 , statement2
@@ -618,7 +625,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
         if (replacements != null) {
             double score = ChildCountMatcher.computeScore(statement1, statement2
-                    , this.containerDiff.getRemovedOperations(), this.containerDiff.getAddedOperations()
+                    , removedOperations, addedOperations
                     , this.mappings, this.parentMapper != null);
 
             if (score == 0 && replacements.size() == 1 &&
