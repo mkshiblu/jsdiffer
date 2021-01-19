@@ -105,6 +105,14 @@ public abstract class CodeFragmentMapping {
         return equalTextWithArgumentization;
     }
 
+    public Set<ReplacementType> getReplacementTypes() {
+        Set<ReplacementType> types = new LinkedHashSet<>();
+        for (Replacement replacement : replacements) {
+            types.add(replacement.getType());
+        }
+        return types;
+    }
+
     public CodeFragment getFragment1() {
         return this.fragment1;
     }

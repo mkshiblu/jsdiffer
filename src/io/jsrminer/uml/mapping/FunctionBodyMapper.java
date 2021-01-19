@@ -406,6 +406,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     void matchLeaves(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
 
+
         // Exact string+depth matching - leaf nodes
         matchLeavesWithIdenticalText(leaves1, leaves2, false, parameterToArgumentMap);
 
@@ -421,48 +422,78 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         matchLeavesWithVariableRenames(leaves1, leaves2, parameterToArgumentMap);
     }
 
-    void matchLeavesWithIdenticalText(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2,
-                                      boolean ignoreNestingDepth, Map<String, String> parameterToArgumentMap) {
-        //exact string matching
-        for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
+    void matchLeavesWithIdenticalText(Set<? extends CodeFragment> leaves1, Set<? extends
+            CodeFragment> leaves2, boolean ignoreNestingDepth, Map<String, String> parameterToArgumentMap) {
 
-            CodeFragment leaf1 = iterator1.next();
-            TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
+        if (leaves1.size() <= leaves2.size()) {
+            //exact string matching
+            for (ListIterator<? extends CodeFragment> listIterator1 = new ArrayList<>(leaves1).listIterator(); listIterator1.hasNext(); ) {
+                CodeFragment leaf1 = listIterator1.next();
+                TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
-            for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
-                CodeFragment leaf2 = iterator2.next();
+                for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
+                    CodeFragment leaf2 = iterator2.next();
 
-                String argumentizedString1 = createArgumentizedString(leaf1, leaf2);
-                String argumentizedString2 = createArgumentizedString(leaf2, leaf1);
+                    String argumentizedString1 = createArgumentizedString(leaf1, leaf2);
+                    String argumentizedString2 = createArgumentizedString(leaf2, leaf1);
 
-                // Check if strings are identical and they are in same depth
-                if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
-                        && (leaf1.getText().equals(leaf2.getText()) || argumentizedString1.equals(argumentizedString2))) {
-                    LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
-                    mappingSet.add(mapping);
+                    // Check if strings are identical and they are in same depth
+                    if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
+                            && (leaf1.getText().equals(leaf2.getText()) || argumentizedString1.equals(argumentizedString2))) {
+                        LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+                        mappingSet.add(mapping);
+                    }
+                }
+
+                if (!mappingSet.isEmpty()) {
+                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
+                    mappings.add(minStatementMapping);
+
+                    leaves2.remove(minStatementMapping.fragment2);
+                    listIterator1.remove();
+                    leaves1.remove(minStatementMapping.fragment1);
                 }
             }
+        } else {
+            //exact string+depth matching - leaf nodes
+            for (ListIterator<? extends CodeFragment> listIterator2 = new ArrayList<>(leaves2).listIterator(); listIterator2.hasNext(); ) {
+                CodeFragment leaf2 = listIterator2.next();
+                TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
+                for (Iterator<? extends CodeFragment> leafIterator1 = leaves1.iterator(); leafIterator1.hasNext(); ) {
+                    CodeFragment leaf1 = leafIterator1.next();
+                    String argumentizedString1 = createArgumentizedString(leaf1, leaf2);
+                    String argumentizedString2 = createArgumentizedString(leaf2, leaf1);
 
-            if (!mappingSet.isEmpty()) {
-                LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
-                mappings.add(minStatementMapping);
-
-                leaves2.remove(minStatementMapping.fragment2);
-                iterator1.remove();
+                    // Check if strings are identical and they are in same depth
+                    if ((ignoreNestingDepth || leaf1.getDepth() == leaf2.getDepth())
+                            && (leaf1.getText().equals(leaf2.getText()) || argumentizedString1.equals(argumentizedString2))) {
+                        LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
+                        mappingSet.add(mapping);
+                    }
+                }
+                if (!mappingSet.isEmpty()) {
+                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
+                    mappings.add(minStatementMapping);
+                    leaves1.remove(minStatementMapping.getFragment1());
+                    listIterator2.remove();
+                    leaves2.remove(minStatementMapping.getFragment2());
+                }
             }
         }
     }
 
-    private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
+    private void matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends
+            CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
         ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
+        List<TreeSet<LeafCodeFragmentMapping>> postponedMappingSets = new ArrayList<>();
 
         Iterator<? extends CodeFragment> it1 = leaves1.iterator();
         Iterator<? extends CodeFragment> it2 = leaves2.iterator();
 
         // TODO refactor duplicateed code, extract inner for loop to seprate method
         if (leaves1.size() <= leaves2.size()) {
-            for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
-                CodeFragment leaf1 = iterator1.next();
+            for (ListIterator<? extends CodeFragment> listIterator1 = new ArrayList<>(leaves1).listIterator(); listIterator1.hasNext(); ) {
+                CodeFragment leaf1 = listIterator1.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
                 for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
@@ -473,16 +504,30 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                         mappingSet.add(mapping);
                     }
                 }
+
                 if (!mappingSet.isEmpty()) {
-                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
-                    this.mappings.add(minStatementMapping);
-                    leaves2.remove(minStatementMapping.fragment2);
-                    iterator1.remove();
+                    AbstractMap.SimpleEntry<BlockStatement, BlockStatement> switchParentEntry = null;
+                    if (variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
+                        //postpone mapping
+                        postponedMappingSets.add(mappingSet);
+                    } else if ((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
+                        LeafCodeFragmentMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
+                        mappings.add(bestMapping);
+                        leaves2.remove(bestMapping.getFragment2());
+                        listIterator1.remove();
+                        leaves1.remove((bestMapping.getFragment1()));
+                    } else {
+                        LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
+                        mappings.add(minStatementMapping);
+                        leaves2.remove(minStatementMapping.getFragment2());
+                        listIterator1.remove();
+                        leaves1.remove(minStatementMapping.getFragment1());
+                    }
                 }
             }
         } else {
-            for (Iterator<? extends CodeFragment> iterator2 = leaves2.iterator(); iterator2.hasNext(); ) {
-                CodeFragment leaf2 = iterator2.next();
+            for (ListIterator<? extends CodeFragment> listIterator2 = new ArrayList<>(leaves2).listIterator(); listIterator2.hasNext(); ) {
+                CodeFragment leaf2 = listIterator2.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
 
                 for (Iterator<? extends CodeFragment> iterator1 = leaves1.iterator(); iterator1.hasNext(); ) {
@@ -495,69 +540,24 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
                 // Take the best mapping
                 if (!mappingSet.isEmpty()) {
-//                    AbstractMap.SimpleEntry<CompositeStatementObject, CompositeStatementObject> switchParentEntry = null;
-//                    if(variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
-//                        //postpone mapping
-//                        postponedMappingSets.add(mappingSet);
-//                    }
-//                    else if((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
-//                        LeafMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
-//                        mappings.add(bestMapping);
-//                        leaves1.remove(bestMapping.getFragment1());
-//                        leafIterator2.remove();
-//                    }
-//                    else {
-//                        LeafMapping minStatementMapping = mappingSet.first();
-//                        mappings.add(minStatementMapping);
-//                        leaves1.remove(minStatementMapping.getFragment1());
-//                        leafIterator2.remove();
-//                    }
-                    LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
-                    this.mappings.add(minStatementMapping);
-
-                    // Remove the matched statmetns
-                    leaves1.remove(minStatementMapping.fragment1);
-                    iterator2.remove();
+                    AbstractMap.SimpleEntry<BlockStatement, BlockStatement> switchParentEntry = null;
+                    if (variableDeclarationMappingsWithSameReplacementTypes(mappingSet)) {
+                        //postpone mapping
+                        postponedMappingSets.add(mappingSet);
+                    } else if ((switchParentEntry = multipleMappingsUnderTheSameSwitch(mappingSet)) != null) {
+                        CodeFragmentMapping bestMapping = findBestMappingBasedOnMappedSwitchCases(switchParentEntry, mappingSet);
+                        mappings.add(bestMapping);
+                        leaves1.remove(bestMapping.getFragment1());
+                        listIterator2.remove();
+                        leaves2.remove(bestMapping.getFragment2());
+                    } else {
+                        LeafCodeFragmentMapping minStatementMapping = mappingSet.first();
+                        mappings.add(minStatementMapping);
+                        leaves1.remove(minStatementMapping.getFragment1());
+                        listIterator2.remove();
+                        leaves2.remove(minStatementMapping.getFragment2());
+                    }
                 }
-            }
-        }
-    }
-
-    void matchInnerNodesWithIdenticalText(Set<BlockStatement> innerNodes1
-            , Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap
-            , boolean ignoreNestingDepth) {
-
-        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
-        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
-
-        //exact string+depth matching - inner nodes
-        for (Iterator<BlockStatement> iterator2 = innerNodes2.iterator(); iterator2.hasNext(); ) {
-            BlockStatement statement2 = iterator2.next();
-            TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
-
-            for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
-                BlockStatement statement1 = iterator1.next();
-                double score = ChildCountMatcher.computeScore(statement1, statement2
-                        , removedOperations, addedOperations
-                        , this.mappings, this.parentMapper != null);
-
-                String argumentizedString1 = createArgumentizedString(statement1, statement2);
-                String argumentizedString2 = createArgumentizedString(statement2, statement1);
-
-                // Check if strings are identical and they are in same depth (or not)
-                if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
-                        && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
-                        && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                    BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
-                            , parameterToArgumentMap, score);
-                    sortedMappingSet.add(mapping);
-                }
-            }
-            if (!sortedMappingSet.isEmpty()) {
-                BlockCodeFragmentMapping minStatementMapping = sortedMappingSet.first();
-                mappings.add(minStatementMapping);
-                innerNodes1.remove(minStatementMapping.fragment1);
-                iterator2.remove();
             }
         }
     }
@@ -567,49 +567,144 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
      */
     void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap) {
-       /* if (innerNodes1.size() <= innerNodes2.size()) {
-            // TODO
-        } else */
-        {
+        //exact string+depth matching - inner nodes
+        matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, false);
+        matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, true);
+        matchInnerNodesWithVariableRenames(innerNodes1, innerNodes2, parameterToArgumentMap);
+    }
+
+    void matchInnerNodesWithIdenticalText(Set<BlockStatement> innerNodes1
+            , Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap
+            , boolean ignoreNestingDepth) {
+
+        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
+
+        if (innerNodes1.size() <= innerNodes2.size()) {
+            for (ListIterator<BlockStatement> listIterator1 = new ArrayList<>(innerNodes1).listIterator(); listIterator1.hasNext(); ) {
+                BlockStatement statement1 = listIterator1.next();
+                TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
+                for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
+                    BlockStatement statement2 = innerNodeIterator2.next();
+                    double score = ChildCountMatcher.computeScore(statement1, statement2
+                            , removedOperations, addedOperations
+                            , this.mappings, this.parentMapper != null);
+
+                    String argumentizedString1 = createArgumentizedString(statement1, statement2);
+                    String argumentizedString2 = createArgumentizedString(statement2, statement1);
+
+                    // Check if strings are identical and they are in same depth (or not)
+                    if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
+                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
+                            && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
+                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                , parameterToArgumentMap, score);
+                        sortedMappingSet.add(mapping);
+                    }
+                }
+                if (!sortedMappingSet.isEmpty()) {
+                    BlockCodeFragmentMapping minStatementMapping = sortedMappingSet.first();
+                    mappings.add(minStatementMapping);
+                    innerNodes2.remove(minStatementMapping.getFragment2());
+                    listIterator1.remove();
+                    innerNodes1.remove(minStatementMapping.getFragment1());
+                }
+            }
+        } else {
             //exact string+depth matching - inner nodes
-            matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, false);
-            matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, true);
-            matchInnerNodersWithVariableRenames(innerNodes1, innerNodes2, parameterToArgumentMap);
+            for (ListIterator<BlockStatement> listIterator2 = new ArrayList<>(innerNodes2).listIterator(); listIterator2.hasNext(); ) {
+                BlockStatement statement2 = listIterator2.next();
+                TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
+
+                for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
+                    BlockStatement statement1 = iterator1.next();
+                    double score = ChildCountMatcher.computeScore(statement1, statement2
+                            , removedOperations, addedOperations
+                            , this.mappings, this.parentMapper != null);
+
+                    String argumentizedString1 = createArgumentizedString(statement1, statement2);
+                    String argumentizedString2 = createArgumentizedString(statement2, statement1);
+
+                    // Check if strings are identical and they are in same depth (or not)
+                    if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
+                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
+                            && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
+                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                , parameterToArgumentMap, score);
+                        sortedMappingSet.add(mapping);
+                    }
+                }
+                if (!sortedMappingSet.isEmpty()) {
+                    BlockCodeFragmentMapping minStatementMapping = sortedMappingSet.first();
+                    mappings.add(minStatementMapping);
+                    innerNodes1.remove(minStatementMapping.fragment1);
+                    listIterator2.remove();
+                    innerNodes2.remove(minStatementMapping.fragment2);
+                }
+            }
         }
     }
 
-    private void matchInnerNodersWithVariableRenames
+    private void matchInnerNodesWithVariableRenames
             (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
         ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
-        for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
-            BlockStatement statement2 = innerNodeIterator2.next();
-            TreeSet<BlockCodeFragmentMapping> mappingSet = new TreeSet<>();
+        if (innerNodes1.size() <= innerNodes2.size()) {
+            // exact matching - inner nodes - with variable renames
+            for (ListIterator<BlockStatement> listIterator1 = new ArrayList<>(innerNodes1).listIterator(); listIterator1.hasNext(); ) {
+                BlockStatement statement1 = listIterator1.next();
+                TreeSet<BlockCodeFragmentMapping> mappingSet = new TreeSet<>();
+                for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
+                    BlockStatement statement2 = innerNodeIterator2.next();
 
-            for (Iterator<BlockStatement> innerNodeIterator1 = innerNodes1.iterator();
-                 innerNodeIterator1.hasNext(); ) {
-                BlockStatement statement1 = innerNodeIterator1.next();
+                    BlockCodeFragmentMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2,
+                            innerNodes1, innerNodes2
+                            , parameterToArgumentMap, replacementFinder);
 
-                BlockCodeFragmentMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2,
-                        innerNodes1, innerNodes2
-                        , parameterToArgumentMap, replacementFinder);
-
-                if (mapping != null)
-                    mappingSet.add(mapping);
+                    if (mapping != null)
+                        mappingSet.add(mapping);
+                }
+                if (!mappingSet.isEmpty()) {
+                    BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
+                    mappings.add(minStatementMapping);
+                    innerNodes2.remove(minStatementMapping.getFragment2());
+                    listIterator1.remove();
+                    innerNodes1.remove(minStatementMapping.getFragment1());
+                }
             }
+        } else {
+            for (ListIterator<BlockStatement> listIterator2 = new ArrayList<>(innerNodes2).listIterator(); listIterator2.hasNext(); ) {
+                BlockStatement statement2 = listIterator2.next();
+                TreeSet<BlockCodeFragmentMapping> mappingSet = new TreeSet<>();
 
-            if (!mappingSet.isEmpty()) {
-                BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
-                this.mappings.add(minStatementMapping);
-                innerNodes1.remove(minStatementMapping.fragment1);
-                innerNodeIterator2.remove();
+                for (Iterator<BlockStatement> innerNodeIterator1 = innerNodes1.iterator();
+                     innerNodeIterator1.hasNext(); ) {
+                    BlockStatement statement1 = innerNodeIterator1.next();
+
+                    BlockCodeFragmentMapping mapping = getCompositeMappingUsingReplacements(statement1, statement2,
+                            innerNodes1, innerNodes2
+                            , parameterToArgumentMap, replacementFinder);
+
+                    if (mapping != null)
+                        mappingSet.add(mapping);
+                }
+
+                if (!mappingSet.isEmpty()) {
+                    BlockCodeFragmentMapping minStatementMapping = mappingSet.first();
+                    this.mappings.add(minStatementMapping);
+                    innerNodes1.remove(minStatementMapping.fragment1);
+                    listIterator2.remove();
+                    innerNodes2.remove(minStatementMapping.fragment2);
+                }
             }
         }
+
     }
 
-    private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement statement1, BlockStatement
-            statement2
+    private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement
+                                                                                  statement1, BlockStatement
+                                                                                  statement2
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
@@ -1221,6 +1316,127 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     public Set<CandidateMergeVariableRefactoring> getCandidateAttributeMerges() {
         return candidateAttributeMerges;
+    }
+
+    private boolean variableDeclarationMappingsWithSameReplacementTypes(Set<LeafCodeFragmentMapping> mappingSet) {
+        if (mappingSet.size() > 1) {
+            Set<LeafCodeFragmentMapping> variableDeclarationMappings = new LinkedHashSet<>();
+            for (LeafCodeFragmentMapping mapping : mappingSet) {
+                if (mapping.getFragment1().getVariableDeclarations().size() > 0 &&
+                        mapping.getFragment2().getVariableDeclarations().size() > 0) {
+                    variableDeclarationMappings.add(mapping);
+                }
+            }
+            if (variableDeclarationMappings.size() == mappingSet.size()) {
+                Set<ReplacementType> replacementTypes = null;
+                Set<LeafCodeFragmentMapping> mappingsWithSameReplacementTypes = new LinkedHashSet<>();
+                for (LeafCodeFragmentMapping mapping : variableDeclarationMappings) {
+                    if (replacementTypes == null) {
+                        replacementTypes = mapping.getReplacementTypes();
+                        mappingsWithSameReplacementTypes.add(mapping);
+                    } else if (mapping.getReplacementTypes().equals(replacementTypes)) {
+                        mappingsWithSameReplacementTypes.add(mapping);
+                    } else if (mapping.getReplacementTypes().containsAll(replacementTypes) || replacementTypes.containsAll(mapping.getReplacementTypes())) {
+                        OperationInvocation invocation1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(mapping.getFragment1());
+                        OperationInvocation invocation2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(mapping.getFragment2());
+                        if (invocation1 != null && invocation2 != null) {
+                            for (Replacement replacement : mapping.getReplacements()) {
+                                if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)) {
+                                    if (invocation1.getName().equals(replacement.getBefore()) && invocation2.getName().equals(replacement.getAfter())) {
+                                        mappingsWithSameReplacementTypes.add(mapping);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (mappingsWithSameReplacementTypes.size() == mappingSet.size()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private AbstractMap.SimpleEntry<BlockStatement, BlockStatement> multipleMappingsUnderTheSameSwitch(Set<LeafCodeFragmentMapping> mappingSet) {
+        BlockStatement switchParent1 = null;
+        BlockStatement switchParent2 = null;
+        if (mappingSet.size() > 1) {
+            for (LeafCodeFragmentMapping mapping : mappingSet) {
+                CodeFragment fragment1 = mapping.getFragment1();
+                CodeFragment fragment2 = mapping.getFragment2();
+                if (fragment1 instanceof CodeFragment && fragment2 instanceof CodeFragment) {
+                    CodeFragment statement1 = (CodeFragment) fragment1;
+                    CodeFragment statement2 = (CodeFragment) fragment2;
+                    BlockStatement parent1 = statement1.getParent();
+                    BlockStatement parent2 = statement2.getParent();
+                    if (parent1.getCodeElementType().equals(CodeElementType.SWITCH_STATEMENT) &&
+                            parent2.getCodeElementType().equals(CodeElementType.SWITCH_STATEMENT)) {
+                        if (switchParent1 == null && switchParent2 == null) {
+                            switchParent1 = parent1;
+                            switchParent2 = parent2;
+                        } else if (switchParent1 != parent1 || switchParent2 != parent2) {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+        if (switchParent1 != null && switchParent2 != null) {
+            return new AbstractMap.SimpleEntry<>(switchParent1, switchParent2);
+        }
+        return null;
+    }
+
+    private LeafCodeFragmentMapping findBestMappingBasedOnMappedSwitchCases(AbstractMap.SimpleEntry<BlockStatement, BlockStatement> switchParentEntry, TreeSet<LeafCodeFragmentMapping> mappingSet) {
+        BlockStatement switchParent1 = switchParentEntry.getKey();
+        BlockStatement switchParent2 = switchParentEntry.getValue();
+        CodeFragmentMapping currentSwitchCase = null;
+        for (CodeFragmentMapping mapping : this.mappings) {
+            CodeFragment fragment1 = mapping.getFragment1();
+            CodeFragment fragment2 = mapping.getFragment2();
+            if (fragment1 instanceof Statement && fragment2 instanceof Statement) {
+                Statement statement1 = (Statement) fragment1;
+                Statement statement2 = (Statement) fragment2;
+                BlockStatement parent1 = statement1.getParent();
+                BlockStatement parent2 = statement2.getParent();
+                if (parent1 == switchParent1 && parent2 == switchParent2 && mapping.isExact() &&
+                        statement1.getCodeElementType().equals(CodeElementType.SWITCH_CASE) &&
+                        statement2.getCodeElementType().equals(CodeElementType.SWITCH_CASE)) {
+                    currentSwitchCase = mapping;
+                } else if (parent1 == switchParent1 && parent2 == switchParent2 &&
+                        statement1.getCodeElementType().equals(CodeElementType.BREAK_STATEMENT) &&
+                        statement2.getCodeElementType().equals(CodeElementType.BREAK_STATEMENT)) {
+                    if (currentSwitchCase != null) {
+                        for (LeafCodeFragmentMapping leafMapping : mappingSet) {
+                            if (leafMapping.getFragment1().getPositionIndexInParent() > currentSwitchCase.getFragment1().getPositionIndexInParent() &&
+                                    leafMapping.getFragment2().getPositionIndexInParent() > currentSwitchCase.getFragment2().getPositionIndexInParent() &&
+                                    leafMapping.getFragment1().getPositionIndexInParent() < mapping.getFragment1().getPositionIndexInParent() &&
+                                    leafMapping.getFragment2().getPositionIndexInParent() < mapping.getFragment2().getPositionIndexInParent()) {
+                                return leafMapping;
+                            }
+                        }
+                    }
+                } else if (parent1 == switchParent1 && parent2 == switchParent2 &&
+                        statement1.getCodeElementType().equals(CodeElementType.RETURN_STATEMENT) &&
+                        statement2.getCodeElementType().equals(CodeElementType.RETURN_STATEMENT)) {
+                    if (currentSwitchCase != null) {
+                        for (LeafCodeFragmentMapping leafMapping : mappingSet) {
+                            if (leafMapping.getFragment1().getPositionIndexInParent() > currentSwitchCase.getFragment1().getPositionIndexInParent() &&
+                                    leafMapping.getFragment2().getPositionIndexInParent() > currentSwitchCase.getFragment2().getPositionIndexInParent() &&
+                                    leafMapping.getFragment1().getPositionIndexInParent() < mapping.getFragment1().getPositionIndexInParent() &&
+                                    leafMapping.getFragment2().getPositionIndexInParent() < mapping.getFragment2().getPositionIndexInParent()) {
+                                return leafMapping;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return mappingSet.first();
     }
 
     public Set<CandidateSplitVariableRefactoring> getCandidateAttributeSplits() {
