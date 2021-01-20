@@ -16,12 +16,16 @@ import java.util.*;
 /**
  * A deserializer for the program which is in a composite json format
  */
-public class JsonCompositeDeserializer {
+public class JsonCodeDeserializer {
     final String sourcePath;
 
     private HashMap<String, FunctionDeclaration> loadedFunctions = new HashMap<>();
 
-    public JsonCompositeDeserializer(String sourcePath) {
+    public JsonCodeDeserializer() {
+        this.sourcePath = null;
+    }
+
+    public JsonCodeDeserializer(String sourcePath) {
         this.sourcePath = sourcePath;
     }
 
@@ -283,8 +287,8 @@ public class JsonCompositeDeserializer {
 
         if (any.keys().contains("expressionText")) {
             operationInvocation.setExpressionText(any.toString("expressionText"));
-     //       loadSubCallsOfOperationInvocations(operationInvocation.getExpressionText()
-       //             , operationInvocation.getText(), operationInvocation.getSubExpressions());
+            //       loadSubCallsOfOperationInvocations(operationInvocation.getExpressionText()
+            //             , operationInvocation.getText(), operationInvocation.getSubExpressions());
         }
 
         return operationInvocation;

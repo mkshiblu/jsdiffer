@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
@@ -162,15 +164,19 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
+
+                Instant startTime = Instant.now();
                 // TODO Multi thread?
-                log.info("Parsing files of parent commit: " + parentCommit + "...");
+                log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
                 UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
 
                 // TODO multi thread?
-                log.info("Parsing files of current commit: " + parentCommit + "...");
+                log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
+
+                System.out.println("Time taken for parsing and loading models: " + Duration.between(startTime, Instant.now()).toString());
 
                 log.info("Detecting refactorings...");
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);
@@ -205,7 +211,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     private void populateFileContents(Repository repository, RevCommit commit,
                                       List<String> filePaths, Map<String, String> fileContents,
                                       Set<String> repositoryDirectories) throws Exception {
-        log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
+        //log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
         RevTree parentTree = commit.getTree();
         try (TreeWalk treeWalk = new TreeWalk(repository)) {
             treeWalk.addTree(parentTree);

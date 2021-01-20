@@ -1,17 +1,21 @@
 package io.jsrminer.parser.js;
 
-import io.jsrminer.parser.JsonCompositeDeserializer;
+import io.jsrminer.parser.JsonCodeDeserializer;
 import io.jsrminer.uml.UMLModel;
 import io.rminer.core.api.IParser;
 import io.rminer.core.api.ISourceFile;
 import io.rminer.core.entities.SourceFile;
 import org.eclipse.jgit.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JavaScriptParser implements IParser {
+    private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     public static final String SCRIPTS_DIRECTORY_NAME = "src-js/scripts";
 
     @Override
@@ -26,6 +30,7 @@ public class JavaScriptParser implements IParser {
                 final String content = fileContents.get(filepath);
 
                 try {
+                    log.info("Parsing and loading file: " + filepath + "...");
                     SourceFile sourceFile = parse(content, jsEngine, filepath);
                     sourceFile.setFilepath(filepath);
                     sourceModels.put(filepath, sourceFile);
@@ -65,7 +70,7 @@ public class JavaScriptParser implements IParser {
     private SourceFile parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
         // IComposite body = new CompositeFragment();
         final String blockJson = processScript(fileContent, jsEngine);
-        return new JsonCompositeDeserializer(filePath).parseSourceFile(blockJson);
+        return new JsonCodeDeserializer(filePath).parseSourceFile(blockJson);
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {
