@@ -11,6 +11,7 @@ import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -27,8 +28,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
@@ -165,7 +164,10 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
 
-                Instant startTime = Instant.now();
+                //Instant startTime = Instant.now();
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+
                 // TODO Multi thread?
                 log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
@@ -176,7 +178,9 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
 
-                System.out.println("Time taken for parsing and loading models: " + Duration.between(startTime, Instant.now()).toString());
+
+                stopWatch.stop();
+                log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 
                 log.info("Detecting refactorings...");
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);

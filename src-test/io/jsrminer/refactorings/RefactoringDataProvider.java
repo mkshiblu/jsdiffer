@@ -37,22 +37,6 @@ public class RefactoringDataProvider {
     public static List<IRefactoring> getRefactoringsInReverseOfType(RefactoringType type) {
         return refactoringsReversed.stream().filter(r -> r.getRefactoringType() == type).collect(Collectors.toList());
     }
-//
-//    public static List<IRefactoring> getExtractMethodRefactorings() {
-//        return refactorings.stream().filter(r -> r.getRefactoringType() == RefactoringType.EXTRACT_OPERATION).collect(Collectors.toList());
-//    }
-//
-//    public static List<IRefactoring> getInlineMethodRefactorings() {
-//        return refactorings.stream().filter(r -> r.getRefactoringType() == RefactoringType.INLINE_OPERATION).collect(Collectors.toList());
-//    }
-//
-//    public static List<IRefactoring> getRenameMethodRefactorings() {
-//        return refactorings.stream().filter(r -> r.getRefactoringType() == RefactoringType.RENAME_METHOD).collect(Collectors.toList());
-//    }
-//
-//    public static List<IRefactoring> getRenameVariableRefactorings() {
-//        return refactorings.stream().filter(r -> r.getRefactoringType() == RefactoringType.RENAME_VARIABLE).collect(Collectors.toList());
-//    }
 
     public static List<IRefactoring> getRefactoringsOfType(RefactoringType refactoringType) {
         return refactorings.stream().filter(r -> r.getRefactoringType() == refactoringType).collect(Collectors.toList());

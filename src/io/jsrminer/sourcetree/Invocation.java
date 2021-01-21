@@ -1,7 +1,7 @@
 package io.jsrminer.sourcetree;
 
-import io.jsrminer.uml.diff.ContainerDiff;
-import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.diff.SourceFileDiff;
+import io.jsrminer.uml.diff.SourceDiffer;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -317,7 +317,7 @@ public abstract class Invocation extends CodeEntity {
     public boolean renamedWithIdenticalArgumentsAndNoExpression(Invocation call, double distance, List<FunctionBodyMapper> lambdaMappers) {
         boolean allExactLambdaMappers = lambdaMappers.size() > 0;
         for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
-            if (!ContainerDiff.allMappingsAreExactMatches(lambdaMapper)) {
+            if (!SourceFileDiff.allMappingsAreExactMatches(lambdaMapper)) {
                 allExactLambdaMappers = false;
                 break;
             }
@@ -338,7 +338,7 @@ public abstract class Invocation extends CodeEntity {
     public boolean renamedWithIdenticalExpressionAndDifferentNumberOfArguments(Invocation call, Set<Replacement> replacements, double distance, List<FunctionBodyMapper> lambdaMappers) {
         boolean allExactLambdaMappers = lambdaMappers.size() > 0;
         for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
-            if (!ContainerDiffer.allMappingsAreExactMatches(lambdaMapper)) {
+            if (!SourceDiffer.allMappingsAreExactMatches(lambdaMapper)) {
                 allExactLambdaMappers = false;
                 break;
             }

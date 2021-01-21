@@ -5,6 +5,7 @@ import io.jsrminer.uml.UMLModel;
 import io.rminer.core.api.IParser;
 import io.rminer.core.api.ISourceFile;
 import io.rminer.core.entities.SourceFile;
+import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class JavaScriptParser implements IParser {
                 final String content = fileContents.get(filepath);
 
                 try {
-                    log.info("Parsing and loading file: " + filepath + "...");
+                    log.info("Loading... " + filepath);
                     SourceFile sourceFile = parse(content, jsEngine, filepath);
                     sourceFile.setFilepath(filepath);
                     sourceModels.put(filepath, sourceFile);
@@ -68,9 +69,13 @@ public class JavaScriptParser implements IParser {
      * @return
      */
     private SourceFile parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
-        // IComposite body = new CompositeFragment();
         final String blockJson = processScript(fileContent, jsEngine);
-        return new JsonCodeDeserializer(filePath).parseSourceFile(blockJson);
+        StopWatch watch = new StopWatch();
+        watch.start();
+        SourceFile file = new JsonCodeDeserializer(filePath).parseSourceFile(blockJson);
+        watch.stop();
+        log.debug("Model loading time from json: " + watch.toString());
+        return file;
     }
 
     private String processScript(String script, JavaScriptEngine jsEngine) {

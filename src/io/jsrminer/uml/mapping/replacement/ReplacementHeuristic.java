@@ -1,7 +1,7 @@
 package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.diff.SourceDiffer;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.LinkedHashSet;
@@ -221,7 +221,7 @@ public class ReplacementHeuristic {
                                                                        OperationInvocation invocationCoveringTheEntireStatement2) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
                 invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()
-                        , ContainerDiffer.MAX_OPERATION_NAME_DISTANCE)) {
+                        , SourceDiffer.MAX_OPERATION_NAME_DISTANCE)) {
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
                     invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
             replacementInfo.addReplacement(replacement);
@@ -232,7 +232,7 @@ public class ReplacementHeuristic {
 
     public boolean invocationRenamedButNoExpressionAndIdenticalArguments(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                invocationCoveringTheEntireStatement1.renamedWithIdenticalArgumentsAndNoExpression(invocationCoveringTheEntireStatement2, ContainerDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalArgumentsAndNoExpression(invocationCoveringTheEntireStatement2, SourceDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
                     invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
             replacementInfo.addReplacement(replacement);
@@ -255,7 +255,7 @@ public class ReplacementHeuristic {
 
     public boolean invocationRenmadeArgumentsChangedButIdenticalExpressions(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), ContainerDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), SourceDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
             ReplacementType type = invocationCoveringTheEntireStatement1.getName().equals(invocationCoveringTheEntireStatement2.getName()) ? ReplacementType.METHOD_INVOCATION_ARGUMENT : ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT;
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
                     invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, type);

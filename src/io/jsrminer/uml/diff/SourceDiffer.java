@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 /**
  * Diff between two source File?
  */
-public class ContainerDiffer {
+public class SourceDiffer {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
-    public final ContainerDiff containerDiff;
+    public final SourceFileDiff sourceFileDiff;
     public final UMLModelDiff modelDiff;
 
     private Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
@@ -33,14 +33,14 @@ public class ContainerDiffer {
     ISourceFile container1;
     ISourceFile container2;
 
-    public ContainerDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
+    public SourceDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
         this.container1 = container1;
         this.container2 = container2;
-        containerDiff = new ContainerDiff(container1, container2);
+        sourceFileDiff = new SourceFileDiff(container1, container2);
         this.modelDiff = modelDiff;
     }
 
-    public ContainerDiff diff() {
+    public SourceFileDiff diff() {
 
         // Find functiondeclarations
         final FunctionDeclaration[] functions1 = container1.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
@@ -59,15 +59,15 @@ public class ContainerDiffer {
 //                functionMap2.put(function2.getQualifiedName(), function2);
 //            }
 
-            diff(this.containerDiff/*, functionMap1, functionMap2*/);
+            diff(this.sourceFileDiff/*, functionMap1, functionMap2*/);
         }
-        return this.containerDiff;
+        return this.sourceFileDiff;
     }
 
     /**
      * Diff operations between two files
      */
-    private void diff(ContainerDiff sourceDiff/*, final HashMap<String, FunctionDeclaration> functionMap1
+    private void diff(SourceFileDiff sourceDiff/*, final HashMap<String, FunctionDeclaration> functionMap1
             , final HashMap<String, FunctionDeclaration> functionMap2*/) {
         // Process Annotations
         // Process Inheritance
@@ -84,7 +84,7 @@ public class ContainerDiffer {
     /**
      * Reports removed and added anonymous classes
      */
-    protected void processAnonymousFunctions(ContainerDiff sourceDiff) {
+    protected void processAnonymousFunctions(SourceFileDiff sourceDiff) {
 
 //        for (IAnonymousFunctionDeclaration umlAnonymousClass : this.source1.getAnonymousFunctionDeclarations()) {
 //            if (!this.source2.containsAnonymousWithSameAttributesAndOperations(umlAnonymousClass))
@@ -96,7 +96,7 @@ public class ContainerDiffer {
 //        }
     }
 
-    protected void createBodyMapperForCommonNamedFunctions(ContainerDiff sourceDiff) {
+    protected void createBodyMapperForCommonNamedFunctions(SourceFileDiff sourceDiff) {
         final List<IFunctionDeclaration> functions1 = sourceDiff.container1.getFunctionDeclarations();
         final List<IFunctionDeclaration> functions2 = sourceDiff.cotainer2.getFunctionDeclarations();
         // First match by equalsQualified
@@ -140,9 +140,9 @@ public class ContainerDiffer {
                 FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, sourceDiff);
                 mapper.map();
                 operationDiff.setMappings(mapper.getMappings());
-                this.containerDiff.getRefactorings().addAll(operationDiff.getRefactorings());
+                this.sourceFileDiff.getRefactorings().addAll(operationDiff.getRefactorings());
                 // save the mapper TODO
-                this.containerDiff.getBodyMapperList().add(mapper);
+                this.sourceFileDiff.getBodyMapperList().add(mapper);
             }
         }
 
@@ -218,7 +218,7 @@ public class ContainerDiffer {
         sourceDiff.getAddedOperations().removeAll(addedOperationsToBeRemoved);
     }
 
-    private void checkForOperationSignatureChanges(ContainerDiff sourceDiff) {
+    private void checkForOperationSignatureChanges(SourceFileDiff sourceDiff) {
         sourceDiff.setConsistentMethodInvocationRenames(findConsistentMethodInvocationRenames(sourceDiff));
 
         if (sourceDiff.getRemovedOperations().size() <= sourceDiff.getAddedOperations().size()) {
@@ -437,7 +437,7 @@ public class ContainerDiffer {
 
 
     private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff sourceDiff) {
+            , FunctionDeclaration addedOperation, int differenceInPosition, SourceFileDiff sourceDiff) {
         FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
         operationBodyMapper.map();
 
@@ -625,7 +625,7 @@ public class ContainerDiffer {
 //    }
 
     private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper
-                                                                        operationBodyMapper, ContainerDiff sourceDiff) {
+                                                                        operationBodyMapper, SourceFileDiff sourceDiff) {
         Set<SingleStatement> nonMappedLeavesT1 = operationBodyMapper.getNonMappedLeavesT1();
         Set<SingleStatement> nonMappedLeavesT2 = operationBodyMapper.getNonMappedLeavesT2();
         if (nonMappedLeavesT1.size() == 1 && nonMappedLeavesT2.size() == 1) {
@@ -754,7 +754,7 @@ public class ContainerDiffer {
         return Math.abs(index1 - index2);
     }
 
-    private Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(ContainerDiff sourceDiff) {
+    private Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(SourceFileDiff sourceDiff) {
         Set<MethodInvocationReplacement> allConsistentMethodInvocationRenames = new LinkedHashSet<>();
         Set<MethodInvocationReplacement> allInconsistentMethodInvocationRenames = new LinkedHashSet<>();
         for (FunctionBodyMapper bodyMapper : sourceDiff.getBodyMapperList()) {
@@ -766,13 +766,13 @@ public class ContainerDiffer {
         return allConsistentMethodInvocationRenames;
     }
 
-    private void checkForInlinedOperations(ContainerDiff sourceDiff) {
-        List<FunctionDeclaration> removedOperations = containerDiff.getRemovedOperations();
+    private void checkForInlinedOperations(SourceFileDiff sourceDiff) {
+        List<FunctionDeclaration> removedOperations = sourceFileDiff.getRemovedOperations();
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration removedOperation : removedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
-                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.containerDiff, this.modelDiff);
+                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.sourceFileDiff, this.modelDiff);
                 List<InlineOperationRefactoring> refs = detection.check(removedOperation);
                 for (InlineOperationRefactoring refactoring : refs) {
                     sourceDiff.getRefactorings().add(refactoring);
@@ -783,7 +783,7 @@ public class ContainerDiffer {
                 }
             }
         }
-        containerDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
+        sourceFileDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
     }
 
     private void processMapperRefactorings(FunctionBodyMapper mapper, List<IRefactoring> refactorings) {
@@ -947,7 +947,7 @@ public class ContainerDiffer {
         return false;
     }
 
-    private boolean exactMappings(FunctionBodyMapper operationBodyMapper, ContainerDiff sourceDiff) {
+    private boolean exactMappings(FunctionBodyMapper operationBodyMapper, SourceFileDiff sourceDiff) {
         if (allMappingsAreExactMatches(operationBodyMapper)) {
             if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() == 0)
                 return true;
@@ -1069,28 +1069,28 @@ public class ContainerDiffer {
      * Extract is detected by Checking if the already mapped operations contains any calls to
      * any addedOperations.
      */
-    private void checkForExtractedOperations(ContainerDiff sourceDiff) {
-        List<FunctionDeclaration> addedOperations = new ArrayList<>(containerDiff.getAddedOperations());
+    private void checkForExtractedOperations(SourceFileDiff sourceDiff) {
+        List<FunctionDeclaration> addedOperations = new ArrayList<>(sourceFileDiff.getAddedOperations());
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration addedOperation : addedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
-                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, containerDiff, modelDiff);
+                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceFileDiff, modelDiff);
                 List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
                 for (ExtractOperationRefactoring refactoring : refs) {
                     sourceDiff.getRefactorings().add(refactoring);
                     FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
-                    processMapperRefactorings(operationBodyMapper, containerDiff.getRefactorings());
+                    processMapperRefactorings(operationBodyMapper, sourceFileDiff.getRefactorings());
                     mapper.addChildMapper(operationBodyMapper);
                     operationsToBeRemoved.add(addedOperation);
                 }
                 checkForInconsistentVariableRenames(mapper, sourceDiff);
             }
         }
-        containerDiff.getAddedOperations().removeAll(operationsToBeRemoved);
+        sourceFileDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
-    private void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, ContainerDiff sourceDiff) {
+    private void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, SourceFileDiff sourceDiff) {
         if (mapper.getChildMappers().size() > 1) {
             Set<IRefactoring> refactoringsToBeRemoved = new LinkedHashSet<>();
             for (IRefactoring r : sourceDiff.getRefactorings()) {
@@ -1133,7 +1133,7 @@ public class ContainerDiffer {
     }
 
     // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperationsIfNotEquals(ContainerDiff sourceDiff) {
+    private void reportAddedAndRemovedOperationsIfNotEquals(SourceFileDiff sourceDiff) {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
@@ -1169,7 +1169,7 @@ public class ContainerDiffer {
      * Returns true if the mapper's operation one is equal to the test operation
      */
     public boolean containsMapperForOperation(FunctionDeclaration operation) {
-        for (FunctionBodyMapper mapper : containerDiff.getBodyMapperList()) {
+        for (FunctionBodyMapper mapper : sourceFileDiff.getBodyMapperList()) {
 //            if(mapper.getOperation1().equalsQualified(operation)) {
 //                return true;
 //            }

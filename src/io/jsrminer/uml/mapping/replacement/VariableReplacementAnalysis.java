@@ -4,7 +4,7 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.diff.UMLParameterDiff;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
@@ -28,7 +28,7 @@ public class VariableReplacementAnalysis {
     private Set<IRefactoring> refactorings;
     private FunctionDeclaration callSiteOperation;
     private UMLOperationDiff operationDiff;
-    private ContainerDiff containerDiff;
+    private SourceFileDiff sourceFileDiff;
     private Set<RenameVariableRefactoring> variableRenames = new LinkedHashSet<>();
     private Set<MergeVariableRefactoring> variableMerges = new LinkedHashSet<MergeVariableRefactoring>();
     private Set<SplitVariableRefactoring> variableSplits = new LinkedHashSet<SplitVariableRefactoring>();
@@ -37,8 +37,8 @@ public class VariableReplacementAnalysis {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<CandidateSplitVariableRefactoring>();
 
     public VariableReplacementAnalysis(FunctionBodyMapper mapper, Set<IRefactoring> refactorings
-            , ContainerDiff containerDiff) {
-        this.containerDiff = containerDiff;
+            , SourceFileDiff sourceFileDiff) {
+        this.sourceFileDiff = sourceFileDiff;
         this.mappings = mapper.getMappings();
         this.nonMappedLeavesT1 = new ArrayList<>(mapper.getNonMappedLeavesT1());
         this.nonMappedLeavesT2 = new ArrayList<>(mapper.getNonMappedLeavesT2());
@@ -54,7 +54,7 @@ public class VariableReplacementAnalysis {
         }
         this.refactorings = refactorings;
         this.callSiteOperation = mapper.getCallerFunction();
-        this.operationDiff = containerDiff != null ? containerDiff.getOperationDiff(operation1, operation2) : null;
+        this.operationDiff = sourceFileDiff != null ? sourceFileDiff.getOperationDiff(operation1, operation2) : null;
 
         findVariableSplits();
         findVariableMerges();

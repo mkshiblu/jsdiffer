@@ -26,13 +26,13 @@ public class ReplacementFinder {
     final FunctionDeclaration function1;
     final FunctionDeclaration function2;
     final FunctionBodyMapper bodyMapper;
-    final ContainerDiff containerDiff;
+    final SourceFileDiff sourceFileDiff;
 
-    public ReplacementFinder(FunctionBodyMapper bodyMapper, ContainerDiff containerDiff) {
+    public ReplacementFinder(FunctionBodyMapper bodyMapper, SourceFileDiff sourceFileDiff) {
         this.bodyMapper = bodyMapper;
         this.function1 = bodyMapper.function1;
         this.function2 = bodyMapper.function2;
-        this.containerDiff = containerDiff;
+        this.sourceFileDiff = sourceFileDiff;
     }
 
     public Set<Replacement> findReplacementsWithExactMatching(CodeFragment statement1
@@ -1454,7 +1454,7 @@ public class ReplacementFinder {
     }
 
     private boolean equalAfterNewArgumentAdditions(String s1, String s2, ReplacementInfo replacementInfo) {
-        UMLOperationDiff operationDiff = containerDiff == null ? null : this.containerDiff.getOperationDiff(function1, function2);
+        UMLOperationDiff operationDiff = sourceFileDiff == null ? null : this.sourceFileDiff.getOperationDiff(function1, function2);
         if (operationDiff == null) {
             operationDiff = new UMLOperationDiff(function1, function2);
         }
@@ -1568,7 +1568,7 @@ public class ReplacementFinder {
                         }
                     }
                 }
-                if (containerDiff != null) {
+                if (sourceFileDiff != null) {
 //                    List<UMLAttribute> matchingAttributes = new ArrayList<UMLAttribute>();
 //                    for(UMLAttribute attribute : containerDiff.getNextClass().getAttributes()) {
 //                        if(diff2.contains(attribute.getName())) {
