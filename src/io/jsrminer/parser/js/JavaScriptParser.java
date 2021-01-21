@@ -31,7 +31,7 @@ public class JavaScriptParser implements IParser {
                 final String content = fileContents.get(filepath);
 
                 try {
-                    log.info("Loading... " + filepath);
+                    log.info("Processing " + filepath + "...");
                     SourceFile sourceFile = parse(content, jsEngine, filepath);
                     sourceFile.setFilepath(filepath);
                     sourceModels.put(filepath, sourceFile);

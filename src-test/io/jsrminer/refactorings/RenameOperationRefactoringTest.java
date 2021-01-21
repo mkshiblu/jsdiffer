@@ -1,6 +1,6 @@
 package io.jsrminer.refactorings;
 
-import io.jsrminer.TestBase;
+import io.jsrminer.BaseTest;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -15,7 +15,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RenameOperationRefactoringTest extends TestBase {
+public class RenameOperationRefactoringTest extends BaseTest {
     static RenameOperationRefactoring renameOperationRefactoring;
     static List<IRefactoring> refactorings;
 

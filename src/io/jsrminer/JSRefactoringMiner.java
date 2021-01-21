@@ -68,13 +68,23 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
 
-//        System.out.println("Common Files: " + Arrays.deepToString(diff.getCommonSourceFiles()));
-//        System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
-//        System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
-
         try {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
+            List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings.forEach(r -> log.info(r.toString()));
+            return refactorings;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<IRefactoring> detectBetweenFiles(String filePath1, String filePath2) {
+        try {
+            Map<String, String> fileContentsBefore = populateFileContents(new SourceFile[]{new SourceFile(filePath1)});
+            Map<String, String> fileContentsCurrent = populateFileContents(new SourceFile[]{new SourceFile(filePath2)});
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
             refactorings.forEach(r -> log.info(r.toString()));
             return refactorings;

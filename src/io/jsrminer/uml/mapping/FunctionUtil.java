@@ -79,6 +79,11 @@ public class FunctionUtil {
         return function1.getName().equalsIgnoreCase(function2.getName());
     }
 
+    public static boolean nameEqualsIgnoreCaseAndEqualParameterCount(IFunctionDeclaration function1
+            , IFunctionDeclaration function2) {
+        return nameEqualsIgnoreCase(function1, function2) && equalParameterCount(function1, function2);
+    }
+
     /**
      * Returns true if the body does not contain any statmeent
      *

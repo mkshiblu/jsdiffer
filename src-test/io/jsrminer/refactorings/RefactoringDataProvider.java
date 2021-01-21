@@ -1,7 +1,7 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.JSRefactoringMiner;
-import io.jsrminer.TestBase;
+import io.jsrminer.BaseTest;
 import io.jsrminer.api.IRefactoring;
 
 import java.util.ArrayList;
@@ -23,11 +23,11 @@ public class RefactoringDataProvider {
 //        refactoringsReversed = rminer.detectBetweenDirectories(TestBase.getRootResourceDirectory() + "ExtractOrInlineFunction\\src2"
 //                , TestBase.getRootResourceDirectory() + "ExtractOrInlineFunction\\src1");
 
-        refactorings.addAll(rminer.detectBetweenDirectories(TestBase.getRootResourceDirectory() + "src1"
-                , TestBase.getRootResourceDirectory() + "src2"));
+        refactorings.addAll(rminer.detectBetweenDirectories(BaseTest.getRootResourceDirectory() + "src1"
+                , BaseTest.getRootResourceDirectory() + "src2"));
 
-        refactoringsReversed.addAll(rminer.detectBetweenDirectories(TestBase.getRootResourceDirectory() + "src2"
-                , TestBase.getRootResourceDirectory() + "src1"));
+        refactoringsReversed.addAll(rminer.detectBetweenDirectories(BaseTest.getRootResourceDirectory() + "src2"
+                , BaseTest.getRootResourceDirectory() + "src1"));
     }
 
     public static List<IRefactoring> getRefactoringsInReverse() {

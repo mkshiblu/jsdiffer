@@ -1,7 +1,7 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.JSRefactoringMiner;
-import io.jsrminer.TestBase;
+import io.jsrminer.BaseTest;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InlineFunctionTest extends TestBase {
+public class InlineFunctionTest extends BaseTest {
 
     static List<IRefactoring> refactorings;
     static InlineOperationRefactoring inlineOperationRefactoring;

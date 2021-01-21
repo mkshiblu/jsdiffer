@@ -194,7 +194,7 @@ public class SourceDiffer {
                     removedOperationsToBeRemoved.add(removedOperation);
                     addedOperationsToBeRemoved.add(addedOperation);
                 } else*/
-                if (FunctionUtil.nameEqualsIgnoreCase(removedOperation, addedOperation)) {
+                if (FunctionUtil.nameEqualsIgnoreCaseAndEqualParameterCount(removedOperation, addedOperation)) {
 
                     UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
                     FunctionBodyMapper bodyMapper
