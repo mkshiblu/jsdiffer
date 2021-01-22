@@ -100,7 +100,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         for (int i = 0; i < files.length; i++) {
             StringWriter writer = new StringWriter();
             IOUtils.copy(new FileInputStream(files[i].getFile()), writer, Charset.defaultCharset());
-            fileContents.put(files[i].getRelativePathToSourceDirectory(), writer.toString());
+            fileContents.put(files[i].getPathFromSourceDirectory(), writer.toString());
         }
 
         return fileContents;

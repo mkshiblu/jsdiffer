@@ -16,8 +16,8 @@ import java.util.Set;
  * Represents a diff between two containers
  */
 public class SourceFileDiff {
-    public final ISourceFile container1;
-    public final ISourceFile cotainer2;
+    public final ISourceFile source1;
+    public final ISourceFile source2;
 
     private final List<IRefactoring> refactorings = new ArrayList<>();
     private Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
@@ -35,9 +35,9 @@ public class SourceFileDiff {
     private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
     private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
-    public SourceFileDiff(ISourceFile container1, ISourceFile cotainer2) {
-        this.container1 = container1;
-        this.cotainer2 = cotainer2;
+    public SourceFileDiff(ISourceFile source1, ISourceFile source2) {
+        this.source1 = source1;
+        this.source2 = source2;
     }
 
     public void reportAddedOperation(FunctionDeclaration addedOperation) {

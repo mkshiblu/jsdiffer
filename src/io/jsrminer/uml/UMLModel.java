@@ -6,6 +6,7 @@ import io.jsrminer.uml.diff.UMLModelDiff;
 import io.rminer.core.api.ISourceFile;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -14,6 +15,7 @@ import java.util.Map;
 public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
 
     private HashMap<String, ISourceFile> sourceModelMap;
+    LinkedHashSet repositoryDirectories = new LinkedHashSet();
 
     public UMLModelDiff diff(UMLModel umlModel, Map<String, String> renamedFileHints) {
         final UMLModelDiff modelDiff = new UMLModelDiff(this, umlModel);
@@ -21,10 +23,11 @@ public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
         reportAddedAndRemovedSourceFiles(modelDiff, umlModel);
 
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
+        modelDiff.checkForMovedFunctions(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff, umlModel);
-        //  modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.RelaxedMove());
+        //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.RelaxedMove());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.RelaxedRename());
         return modelDiff;
     }
@@ -82,5 +85,9 @@ public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
 
     public void setSourceFileModels(final HashMap<String, ISourceFile> sourceModelMap) {
         this.sourceModelMap = sourceModelMap;
+    }
+
+    public LinkedHashSet getRepositoryDirectories() {
+        return repositoryDirectories;
     }
 }

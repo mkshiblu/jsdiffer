@@ -32,6 +32,7 @@ public class JsonCodeDeserializer {
     public SourceFile parseSourceFile(final String containerJson) {
         Any any = JsonIterator.deserialize(containerJson);
         SourceFile sourceFile = new SourceFile(sourcePath);
+        sourceFile.setQualifiedName(sourcePath);
 
         // Statements is wrapped as a Block Any
         BlockStatement blockBody = createBlockStatement(any, sourceFile);
@@ -50,7 +51,7 @@ public class JsonCodeDeserializer {
             return ((DeclarationContainer) parentContainer).getQualifiedName();
         }
 
-        return "";//((SourceFile) parentContainer).getFilepath();
+        return ((SourceFile) parentContainer).getQualifiedName();
     }
 
     public String generateQualifiedName(String name, Container parentContainer) {

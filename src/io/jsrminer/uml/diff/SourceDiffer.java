@@ -97,8 +97,8 @@ public class SourceDiffer {
     }
 
     protected void createBodyMapperForCommonNamedFunctions(SourceFileDiff sourceDiff) {
-        final List<IFunctionDeclaration> functions1 = sourceDiff.container1.getFunctionDeclarations();
-        final List<IFunctionDeclaration> functions2 = sourceDiff.cotainer2.getFunctionDeclarations();
+        final List<IFunctionDeclaration> functions1 = sourceDiff.source1.getFunctionDeclarations();
+        final List<IFunctionDeclaration> functions2 = sourceDiff.source2.getFunctionDeclarations();
         // First match by equalsQualified
         // (In RM it's equals signature which checks modifiers, qualified name and parameter types
         for (IFunctionDeclaration if1 : functions1) {
@@ -1138,9 +1138,9 @@ public class SourceDiffer {
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
         boolean isEqual;
-        for (IFunctionDeclaration function1 : sourceDiff.container1.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function1 : sourceDiff.source1.getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function2 : sourceDiff.cotainer2.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function2 : sourceDiff.source2.getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function1, function2)) {
                     break;
                 }
@@ -1150,9 +1150,9 @@ public class SourceDiffer {
             if (!isEqual)
                 sourceDiff.reportRemovedOperation((FunctionDeclaration) function1);
         }
-        for (IFunctionDeclaration function2 : sourceDiff.cotainer2.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function2 : sourceDiff.source2.getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function1 : sourceDiff.container1.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function1 : sourceDiff.source1.getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function2, function1)) {
                     break;
                 }
