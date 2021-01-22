@@ -25,7 +25,7 @@ public class UMLModelDiff extends Diff {
 
     private List<ISourceFile> addedFiles = new ArrayList<>();
     private List<ISourceFile> removedFiles = new ArrayList<>();
-    private List<ContainerDiff> commonFilesDiffList = new ArrayList<>();
+    private List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
 
     public UMLModelDiff(UMLModel model1, UMLModel model2) {
         this.model1 = model1;
@@ -53,7 +53,7 @@ public class UMLModelDiff extends Diff {
         Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
         Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap
                 = new LinkedHashMap<>();
-        for (ContainerDiff classDiff : commonFilesDiffList) {
+        for (SourceFileDiff classDiff : commonFilesDiffList) {
             refactorings.addAll(classDiff.getRefactorings());
             //extractMergePatterns(classDiff, mergeMap);
             //extractRenamePatterns(classDiff, renameMap);
@@ -266,7 +266,7 @@ public class UMLModelDiff extends Diff {
         }
     }
 
-    public List<ContainerDiff> getCommonFilesDiffList() {
+    public List<SourceFileDiff> getCommonFilesDiffList() {
         return commonFilesDiffList;
     }
 
@@ -557,7 +557,7 @@ public class UMLModelDiff extends Diff {
 
     private List<FunctionDeclaration> getAddedAndExtractedOperationsInCommonClasses() {
         List<FunctionDeclaration> addedOperations = new ArrayList<>();
-        for (ContainerDiff classDiff : commonFilesDiffList) {
+        for (SourceFileDiff classDiff : commonFilesDiffList) {
             addedOperations.addAll(classDiff.getAddedOperations());
             for (IRefactoring ref : classDiff.getRefactorings()) {
                 if (ref instanceof ExtractOperationRefactoring) {
@@ -637,7 +637,7 @@ public class UMLModelDiff extends Diff {
 
     private List<FunctionDeclaration> getRemovedOperationsInCommonMovedRenamedClasses() {
         List<FunctionDeclaration> removedOperations = new ArrayList<>();
-        for (ContainerDiff classDiff : commonFilesDiffList) {
+        for (SourceFileDiff classDiff : commonFilesDiffList) {
             removedOperations.addAll(classDiff.getRemovedOperations());
         }
 //        for(UMLClassMoveDiff classDiff : classMoveDiffList) {
@@ -674,7 +674,7 @@ public class UMLModelDiff extends Diff {
 
     private boolean movedAndRenamedMethodSignature(FunctionDeclaration
                                                            removedOperation, FunctionDeclaration addedOperation, FunctionBodyMapper mapper) {
-        ContainerDiff removedOperationClassDiff = getUMLClassDiff(removedOperation.getSourceLocation().getFile());
+        SourceFileDiff removedOperationClassDiff = getUMLClassDiff(removedOperation.getSourceLocation().getFile());
 
         if (removedOperationClassDiff != null
                 && containsOperationWithTheSameSignatureInNextClass(removedOperationClassDiff, removedOperation)) {
@@ -687,7 +687,7 @@ public class UMLModelDiff extends Diff {
 //            }
 //        }
         if ((removedOperation.isConstructor() || addedOperation.isConstructor()) && mapper.mappingsWithoutBlocks() > 0) {
-            if (!(ContainerDiff.allMappingsAreExactMatches(mapper) && mapper.nonMappedElementsT1() == 0
+            if (!(SourceFileDiff.allMappingsAreExactMatches(mapper) && mapper.nonMappedElementsT1() == 0
                     && mapper.nonMappedElementsT2() == 0)) {
                 return false;
             }
@@ -718,8 +718,8 @@ public class UMLModelDiff extends Diff {
         return false;
     }
 
-    private ContainerDiff getUMLClassDiff(String fileName) {
-        for (ContainerDiff classDiff : this.commonFilesDiffList) {
+    private SourceFileDiff getUMLClassDiff(String fileName) {
+        for (SourceFileDiff classDiff : this.commonFilesDiffList) {
             if (classDiff.container1.getFilepath().equals(fileName))
                 return classDiff;
         }
@@ -738,8 +738,8 @@ public class UMLModelDiff extends Diff {
         return null;
     }
 
-    public boolean containsOperationWithTheSameSignatureInNextClass(ContainerDiff containerDiff, FunctionDeclaration operation) {
-        for (IFunctionDeclaration originalOperation : containerDiff.cotainer2.getFunctionDeclarations()) {
+    public boolean containsOperationWithTheSameSignatureInNextClass(SourceFileDiff sourceFileDiff, FunctionDeclaration operation) {
+        for (IFunctionDeclaration originalOperation : sourceFileDiff.cotainer2.getFunctionDeclarations()) {
             if (FunctionUtil.isExactSignature(originalOperation, operation)) ;
             return true;
         }
@@ -748,7 +748,7 @@ public class UMLModelDiff extends Diff {
 
     private List<FunctionDeclaration> getAddedOperationsInCommonClasses() {
         List<FunctionDeclaration> addedOperations = new ArrayList<>();
-        for (ContainerDiff classDiff : this.commonFilesDiffList) {
+        for (SourceFileDiff classDiff : this.commonFilesDiffList) {
             addedOperations.addAll(classDiff.getAddedOperations());
         }
         return addedOperations;
@@ -756,7 +756,7 @@ public class UMLModelDiff extends Diff {
 
     private List<FunctionDeclaration> getRemovedOperationsInCommonClasses() {
         List<FunctionDeclaration> removedOperations = new ArrayList<>();
-        for (ContainerDiff classDiff : this.commonFilesDiffList) {
+        for (SourceFileDiff classDiff : this.commonFilesDiffList) {
             removedOperations.addAll(classDiff.getRemovedOperations());
         }
         return removedOperations;
@@ -775,13 +775,13 @@ public class UMLModelDiff extends Diff {
     }
 
     private void deleteRemovedOperation(FunctionDeclaration operation) {
-        ContainerDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
+        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
         if (classDiff != null)
             classDiff.getRemovedOperations().remove(operation);
     }
 
     private void deleteAddedOperation(FunctionDeclaration operation) {
-        ContainerDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
+        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
         if (classDiff != null)
             classDiff.getAddedOperations().remove(operation);
     }

@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * Represents a diff between two containers
  */
-public class ContainerDiff {
+public class SourceFileDiff {
     public final ISourceFile container1;
     public final ISourceFile cotainer2;
 
@@ -35,7 +35,7 @@ public class ContainerDiff {
     private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
     private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
-    public ContainerDiff(ISourceFile container1, ISourceFile cotainer2) {
+    public SourceFileDiff(ISourceFile container1, ISourceFile cotainer2) {
         this.container1 = container1;
         this.cotainer2 = cotainer2;
     }

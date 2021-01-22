@@ -10,7 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class TernaryExpressionReplacer extends BaseReplacer {
-    public static void apply(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo) {
+    public static void apply(CodeFragment statement1, CodeFragment statement2, ReplacementInfo replacementInfo, ReplacementFinder replacementFinder) {
         // region ternaryOpsExp
         if (statement1.getTernaryOperatorExpressions().isEmpty()
                 && !statement2.getTernaryOperatorExpressions().isEmpty()) {
@@ -21,7 +21,7 @@ public class TernaryExpressionReplacer extends BaseReplacer {
                 for (TernaryOperatorExpression ternary : statement2.getTernaryOperatorExpressions()) {
                     ternaryExpressions2.add(ternary.getText());
                 }
-                ReplacementFinder.findAndPerformBestReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+                replacementFinder.findAndPerformBestReplacements(nullLiterals1, ternaryExpressions2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
             }
         } else if (!statement1.getTernaryOperatorExpressions().isEmpty() && statement2.getTernaryOperatorExpressions().isEmpty()) {
             if (!statement2.getNullLiterals().isEmpty()) {
@@ -31,7 +31,7 @@ public class TernaryExpressionReplacer extends BaseReplacer {
                 for (TernaryOperatorExpression ternary : statement1.getTernaryOperatorExpressions()) {
                     ternaryExpressions1.add(ternary.getText());
                 }
-                ReplacementFinder.findAndPerformBestReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
+                replacementFinder.findAndPerformBestReplacements(ternaryExpressions1, nullLiterals2, replacementInfo, ReplacementType.NULL_LITERAL_REPLACED_WITH_CONDITIONAL_EXPRESSION);
             }
         }
     }

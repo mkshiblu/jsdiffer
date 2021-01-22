@@ -1,7 +1,7 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.uml.diff.ContainerDiff;
-import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.diff.SourceFileDiff;
+import io.jsrminer.uml.diff.SourceDiffer;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.rminer.core.api.ISourceFile;
 
@@ -48,8 +48,8 @@ public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
 
             // Check if model2 contains the same file
             if (sourceFileModel2 != null) {
-                ContainerDiffer sourceDiffer = new ContainerDiffer(entry.getValue(), sourceFileModel2, modelDiff);
-                ContainerDiff sourceDiff = sourceDiffer.diff();
+                SourceDiffer sourceDiffer = new SourceDiffer(entry.getValue(), sourceFileModel2, modelDiff);
+                SourceFileDiff sourceDiff = sourceDiffer.diff();
 
                 boolean isEmpty = sourceDiff.getAddedOperations().isEmpty()
                         && sourceDiff.getAddedOperations().isEmpty()

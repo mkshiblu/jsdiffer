@@ -1,21 +1,24 @@
 package io.jsrminer.io;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class SourceFile {
-    private File file;
-    private File sourceDirectory;
-    private String relativePathToSourceDirectory;
+    private final File file;
+    private final String relativePathToSourceDirectory;
+
+    public SourceFile(String filePath) {
+        this(new File(filePath), null);
+    }
 
     public SourceFile(File file, String srcDirPath) {
         this.file = file;
         String path = file.getPath();
-        int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length();
-        relativePathToSourceDirectory =  path.substring(prefixIndex);
+        if (srcDirPath == null) {
+            relativePathToSourceDirectory = file.getName();
+        } else {
+            int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length();
+            relativePathToSourceDirectory = path.substring(prefixIndex);
+        }
     }
 
     public String getRelativePathToSourceDirectory() {

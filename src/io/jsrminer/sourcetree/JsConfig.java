@@ -12,4 +12,7 @@ public class JsConfig {
     public static final int MAXIMUM_NUMBER_OF_COMPARED_METHODS = 100;
     public static final String TEXT_ASSIGNING_TRUE = " = true;";
     public static final String TEXT_ASSIGNING_FALSE = " = false;";
+
+    // Mapper
+    public static final String SPLIT_CONCAT_STRING_PATTERN = "(\\s)*(\\+)(\\s)*";
 }

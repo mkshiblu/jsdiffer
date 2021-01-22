@@ -8,7 +8,7 @@ import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -22,14 +22,14 @@ import java.util.Map;
 public class InlineOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> removedOperations;
-    private ContainerDiff classDiff;
+    private SourceFileDiff classDiff;
     private UMLModelDiff modelDiff;
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     public InlineOperationDetection(FunctionBodyMapper mapper
             , List<FunctionDeclaration> removedOperations
-            , ContainerDiff classDiff, UMLModelDiff modelDiff) {
+            , SourceFileDiff classDiff, UMLModelDiff modelDiff) {
         this.mapper = mapper;
         this.removedOperations = removedOperations;
         this.classDiff = classDiff;

@@ -105,6 +105,20 @@ public abstract class CodeFragmentMapping {
         return equalTextWithArgumentization;
     }
 
+    public Set<Replacement> commonReplacements(CodeFragmentMapping other) {
+        Set<Replacement> intersection = new LinkedHashSet<>(this.replacements);
+        intersection.retainAll(other.replacements);
+        return intersection;
+    }
+
+    public Set<ReplacementType> getReplacementTypes() {
+        Set<ReplacementType> types = new LinkedHashSet<>();
+        for (Replacement replacement : replacements) {
+            types.add(replacement.getType());
+        }
+        return types;
+    }
+
     public CodeFragment getFragment1() {
         return this.fragment1;
     }

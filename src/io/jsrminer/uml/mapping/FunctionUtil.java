@@ -79,6 +79,11 @@ public class FunctionUtil {
         return function1.getName().equalsIgnoreCase(function2.getName());
     }
 
+    public static boolean nameEqualsIgnoreCaseAndEqualParameterCount(IFunctionDeclaration function1
+            , IFunctionDeclaration function2) {
+        return nameEqualsIgnoreCase(function1, function2) && equalParameterCount(function1, function2);
+    }
+
     /**
      * Returns true if the body does not contain any statmeent
      *
@@ -143,12 +148,12 @@ public class FunctionUtil {
     }
 
     public static boolean isInvocationsEqual(OperationInvocation invocation1, OperationInvocation invocation2) {
-        return invocation1.getFunctionName().equals(invocation2.getFunctionName())
+        return invocation1.getName().equals(invocation2.getName())
                 && invocation1.getArguments().size() == invocation2.getArguments().size();
     }
 
     public static boolean invocationsHaveEqualFunctionNames(OperationInvocation invocation1, OperationInvocation invocation2) {
-        return invocation1.getFunctionName().equals(invocation2.getFunctionName());
+        return invocation1.getName().equals(invocation2.getName());
     }
 
     public static boolean isDirectlyNested(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {

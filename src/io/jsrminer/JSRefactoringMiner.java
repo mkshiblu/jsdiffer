@@ -11,6 +11,7 @@ import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -67,15 +68,25 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
 
-//        System.out.println("Common Files: " + Arrays.deepToString(diff.getCommonSourceFiles()));
-//        System.out.println("\nADDED: " + Arrays.deepToString(diff.getAddedFiles()));
-//        System.out.println("\nDeleted: " + Arrays.deepToString(diff.getDeletedFiles()));
-
         try {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
-            refactorings.forEach(r -> System.out.println(r));
+            refactorings.forEach(r -> log.info(r.toString()));
+            return refactorings;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public List<IRefactoring> detectBetweenFiles(String filePath1, String filePath2) {
+        try {
+            Map<String, String> fileContentsBefore = populateFileContents(new SourceFile[]{new SourceFile(filePath1)});
+            Map<String, String> fileContentsCurrent = populateFileContents(new SourceFile[]{new SourceFile(filePath2)});
+            List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings.forEach(r -> log.info(r.toString()));
             return refactorings;
 
         } catch (Exception e) {
@@ -162,15 +173,24 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
+
+                //Instant startTime = Instant.now();
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+
                 // TODO Multi thread?
-                log.info("Parsing files of parent commit: " + parentCommit + "...");
+                log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
                 UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
 
                 // TODO multi thread?
-                log.info("Parsing files of current commit: " + parentCommit + "...");
+                log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
+
+
+                stopWatch.stop();
+                log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 
                 log.info("Detecting refactorings...");
                 UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);
@@ -205,7 +225,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     private void populateFileContents(Repository repository, RevCommit commit,
                                       List<String> filePaths, Map<String, String> fileContents,
                                       Set<String> repositoryDirectories) throws Exception {
-        log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
+        //log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
         RevTree parentTree = commit.getTree();
         try (TreeWalk treeWalk = new TreeWalk(repository)) {
             treeWalk.addTree(parentTree);

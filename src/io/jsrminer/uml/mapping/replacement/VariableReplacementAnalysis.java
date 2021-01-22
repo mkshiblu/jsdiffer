@@ -4,7 +4,7 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.diff.UMLParameterDiff;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
@@ -28,7 +28,7 @@ public class VariableReplacementAnalysis {
     private Set<IRefactoring> refactorings;
     private FunctionDeclaration callSiteOperation;
     private UMLOperationDiff operationDiff;
-    private ContainerDiff containerDiff;
+    private SourceFileDiff sourceFileDiff;
     private Set<RenameVariableRefactoring> variableRenames = new LinkedHashSet<>();
     private Set<MergeVariableRefactoring> variableMerges = new LinkedHashSet<MergeVariableRefactoring>();
     private Set<SplitVariableRefactoring> variableSplits = new LinkedHashSet<SplitVariableRefactoring>();
@@ -37,8 +37,8 @@ public class VariableReplacementAnalysis {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<CandidateSplitVariableRefactoring>();
 
     public VariableReplacementAnalysis(FunctionBodyMapper mapper, Set<IRefactoring> refactorings
-            , ContainerDiff containerDiff) {
-        this.containerDiff = containerDiff;
+            , SourceFileDiff sourceFileDiff) {
+        this.sourceFileDiff = sourceFileDiff;
         this.mappings = mapper.getMappings();
         this.nonMappedLeavesT1 = new ArrayList<>(mapper.getNonMappedLeavesT1());
         this.nonMappedLeavesT2 = new ArrayList<>(mapper.getNonMappedLeavesT2());
@@ -54,7 +54,7 @@ public class VariableReplacementAnalysis {
         }
         this.refactorings = refactorings;
         this.callSiteOperation = mapper.getCallerFunction();
-        this.operationDiff = containerDiff != null ? containerDiff.getOperationDiff(operation1, operation2) : null;
+        this.operationDiff = sourceFileDiff != null ? sourceFileDiff.getOperationDiff(operation1, operation2) : null;
 
         findVariableSplits();
         findVariableMerges();
@@ -183,7 +183,7 @@ public class VariableReplacementAnalysis {
                     if (initializer != null) {
                         OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(initializer);
                         if (invocation != null) {
-                            String expression = invocation.getExpression();
+                            String expression = invocation.getExpressionText();
                             if (expression != null) {
                                 VariableReplacementWithMethodInvocation variableReplacement = new VariableReplacementWithMethodInvocation(initializer.getText(), parameterName, invocation, Direction.INVOCATION_TO_VARIABLE);
                                 processVariableReplacementWithMethodInvocation(variableReplacement, null, variableInvocationExpressionMap, Direction.INVOCATION_TO_VARIABLE);
@@ -235,7 +235,7 @@ public class VariableReplacementAnalysis {
     private void processVariableReplacementWithMethodInvocation(
             VariableReplacementWithMethodInvocation variableReplacement, CodeFragmentMapping mapping,
             Map<String, Map<VariableReplacementWithMethodInvocation, Set<CodeFragmentMapping>>> variableInvocationExpressionMap, VariableReplacementWithMethodInvocation.Direction direction) {
-        String expression = variableReplacement.getInvokedOperation().getExpression();
+        String expression = variableReplacement.getInvokedOperation().getExpressionText();
         if (expression != null && variableReplacement.getDirection().equals(direction)) {
             if (variableInvocationExpressionMap.containsKey(expression)) {
                 Map<VariableReplacementWithMethodInvocation, Set<CodeFragmentMapping>> map = variableInvocationExpressionMap.get(expression);
@@ -625,7 +625,7 @@ public class VariableReplacementAnalysis {
                     MethodInvocationReplacement methodInvocationReplacement = (MethodInvocationReplacement) replacement;
                     OperationInvocation invocation1 = methodInvocationReplacement.getInvokedOperationBefore();
                     OperationInvocation invocation2 = methodInvocationReplacement.getInvokedOperationAfter();
-                    if (invocation1.getFunctionName().equals(invocation2.getFunctionName()) && invocation1.getArguments().size() == invocation2.getArguments().size()) {
+                    if (invocation1.getName().equals(invocation2.getName()) && invocation1.getArguments().size() == invocation2.getArguments().size()) {
                         for (int i = 0; i < invocation1.getArguments().size(); i++) {
                             String argument1 = invocation1.getArguments().get(i);
                             String argument2 = invocation2.getArguments().get(i);

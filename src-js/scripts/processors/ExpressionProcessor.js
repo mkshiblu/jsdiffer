@@ -43,7 +43,10 @@ function processExpression(path, expressionResult, statement) {
         process(path, expressionResult, statement);
         return expressionResult;
     } else {
-        throw 'Processeor not implemented for : ' + path.node.type;
+
+        if( !t.isTypeAlias(path)
+            && !t.isTypeCastExpression(path))
+        throw 'Processeor not implemented for : ' + String(path.node.type) + " " + String(path.toString());
     }
 }
 
@@ -51,7 +54,7 @@ function processExpression(path, expressionResult, statement) {
 //     type: "ArrayExpression";
 //     elements: [Expression | SpreadElement | null];
 // }
-function processArrayExpression(path, expressionResult) {
+function processArrayExpression(path, expressionResult, statement) {
     // This can also be like setting a value
     const isEmptyArrayCreation = path.node.elements && path.node.elements.length == 0;
 
@@ -60,6 +63,10 @@ function processArrayExpression(path, expressionResult) {
         //objectCreation.typeName = "EMPTY_ARRAY_LITERAL";
         objectCreation.isInitializerEmptyArray = true;
         expressionResult.objectCreations.push(objectCreation);
+    } else {
+        path.get('elements').forEach(elementPath => {
+            processExpression(elementPath, expressionResult, statement);
+        });
     }
 
     return {
@@ -79,6 +86,16 @@ function processCallExpression(path, expressionResult, statement) {
     const callee = path.node.callee;
     let name;
     let expressionText;
+
+    const result = {
+        text: path.toString(),
+        type: node.type,
+        functionName: '',
+        arguments: [],
+        loc: astUtil.getFormattedLocation(node)
+    };
+
+    expressionResult.functionInvocations.push(result);
 
     if (t.isIdentifier(callee)) {
         name = callee.name;
@@ -105,14 +122,7 @@ function processCallExpression(path, expressionResult, statement) {
         throw "Unsupported callee: " + String(path.toString());
     }
 
-    const result = {
-        text: path.toString(),
-        type: node.type,
-        functionName: name,
-        arguments: [],
-        loc: astUtil.getFormattedLocation(path.node)
-    };
-
+    result.functionName = name;
 
     if (expressionText) {
         result.expressionText = expressionText;
@@ -124,8 +134,6 @@ function processCallExpression(path, expressionResult, statement) {
             result.arguments.push(argumentPath.toString());
             processExpression(argumentPath, expressionResult, statement);
         });
-
-    expressionResult.functionInvocations.push(result);
 }
 
 /* interface NewExpression<: CallExpression {
@@ -351,7 +359,7 @@ function processMemberExpression(path, expressionResult, statement) {
         //console.log("Member is computed" + String(path.toString()));
     }
 
-    processIdentifier(path.get('object'), expressionResult, statement);
+    processExpression(path.get('object'), expressionResult, statement);
     processIdentifier(path.get('property'), expressionResult, statement);
 }
 

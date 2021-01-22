@@ -1,6 +1,6 @@
 package io.jsrminer.parser;
 
-import io.jsrminer.TestBase;
+import io.jsrminer.BaseTest;
 import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.rminer.core.api.ICodeFragment;
@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class SourceFileModelTest extends TestBase {
+public class SourceFileModelTest extends BaseTest {
     protected static FunctionDeclaration[] functions;
     protected static List<ICodeFragment> statements;
     protected static ISourceFile sourceFile;
