@@ -31,7 +31,7 @@ public class SourceLocation {
         this.end = end;
     }
 
-    public String getFile() {
+    public String getFilePath() {
         return file;
     }
 
@@ -59,10 +59,10 @@ public class SourceLocation {
     }
 
     public boolean equalSourceLocation(SourceLocation other) {
-        if (this.getFile() == null) {
-            if (other.getFile() != null)
+        if (this.getFilePath() == null) {
+            if (other.getFilePath() != null)
                 return false;
-        } else if (!this.getFile().equals(other.getFile()))
+        } else if (!this.getFilePath().equals(other.getFilePath()))
             return false;
 
         return this.equalsLineAndColumn(other);

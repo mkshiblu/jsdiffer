@@ -4,8 +4,11 @@ import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoveFunctionRefactoringTest extends BaseTest {
     static List<IRefactoring> refactorings;
@@ -18,10 +21,10 @@ public class MoveFunctionRefactoringTest extends BaseTest {
        // moveOperationRefactoring = (MoveOperationRefactoring) refactorings.stream().filter(r -> r.getRefactoringType().equals(RefactoringType.MOVE_OPERATION)).findFirst().orElse(null);
     }
 
-//    @Test
-//    void testMovedOperation() {
-//        assertEquals("f1", moveOperationRefactoring.movedOperation.getName());
-//    }
+    @Test
+    void testMovedOperation() {
+        assertEquals("f1", moveOperationRefactoring.movedOperation.getName());
+    }
 //
 //    @Test
 //    void testOriginalOperation() {

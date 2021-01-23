@@ -182,10 +182,10 @@ public class ReplacementUtil {
     }
 
     public static boolean equalsSourceLocation(IContainer container1, IContainer container2) {
-        if (container1.getSourceLocation().getFile() == null) {
-            if (container2.getSourceLocation().getFile() != null)
+        if (container1.getSourceLocation().getFilePath() == null) {
+            if (container2.getSourceLocation().getFilePath() != null)
                 return false;
-        } else if (!container1.getSourceLocation().getFile().equals(container2.getSourceLocation().getFile()))
+        } else if (!container1.getSourceLocation().getFilePath().equals(container2.getSourceLocation().getFilePath()))
             return false;
 
         return container1.getSourceLocation().equalsLineAndColumn(container2.getSourceLocation());

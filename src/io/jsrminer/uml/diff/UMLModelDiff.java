@@ -4,7 +4,7 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.UMLClassMatcher;
+import io.jsrminer.uml.UMLSourceFileMatcher;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -24,8 +24,8 @@ public class UMLModelDiff extends Diff {
     public final UMLModel model1;
     public final UMLModel model2;
 
-    private List<ISourceFile> addedFiles = new ArrayList<>();
-    private List<ISourceFile> removedFiles = new ArrayList<>();
+    private final List<ISourceFile> addedFiles = new ArrayList<>();
+    private final List<ISourceFile> removedFiles = new ArrayList<>();
     private List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
     private List<SourceFileDiff> classMoveDiffList = new ArrayList<>();
 
@@ -252,11 +252,11 @@ public class UMLModelDiff extends Diff {
         return refactorings.stream().collect(Collectors.toList());
     }
 
-    public void checkForMovedFunctions(Map<String, String> renamedFileHints, Set<String> repositoryDirectories, UMLClassMatcher matcher) {
+    public void checkForMovedFiles(Map<String, String> renamedFileHints, Set<String> repositoryDirectories, UMLSourceFileMatcher matcher) {
         LinkedHashSet<String> deletedFolderPaths = new LinkedHashSet<>();
 
         for (Iterator<ISourceFile> removedFilesIterator = this.removedFiles.iterator(); removedFilesIterator.hasNext(); ) {
-            ISourceFile removedClass = removedFilesIterator.next();
+            ISourceFile removedFile = removedFilesIterator.next();
             TreeSet<SourceFileMoveDiff> diffSet = new TreeSet<>((o1, o2) -> {
                 double sourceFolderDistance1 = o1.getMovedFile().normalizedSourceFolderDistance(o1.getOriginalFile());
                 double sourceFolderDistance2 = o2.getMovedFile().normalizedSourceFolderDistance(o2.getOriginalFile());
@@ -264,14 +264,15 @@ public class UMLModelDiff extends Diff {
             });
 
             for (Iterator<ISourceFile> addedFilesIterator = addedFiles.iterator(); addedFilesIterator.hasNext(); ) {
-                ISourceFile addedClass = addedFilesIterator.next();
-                String removedClassSourceFile = removedClass.getFilepath();
+                ISourceFile addedFile = addedFilesIterator.next();
+                String removedClassSourceFile = removedFile.getFilepath();
                 String renamedFile = renamedFileHints.get(removedClassSourceFile);
 //                String removedClassSourceFolder = "";
 //                if (removedClassSourceFile.contains("/")) {
 //                    removedClassSourceFolder = removedClassSourceFile.substring(0, removedClassSourceFile.lastIndexOf("/"));
 //                }
-//                String removedClassSourceFolder = removedClass.getDirectoryPath();
+
+//                String removedClassSourceFolder = removedFile.getDirectoryPath();
 //
 //                if (!repositoryDirectories.contains(removedClassSourceFolder)) {
 //                    deletedFolderPaths.add(removedClassSourceFolder);
@@ -287,12 +288,13 @@ public class UMLModelDiff extends Diff {
 //                }
 
 
-//                if (matcher.match(removedClass, addedClass, renamedFile)) {
-//                    if (!conflictingMoveOfTopLevelClass(removedClass, addedClass)) {
-//                        UMLClassMoveDiff classMoveDiff = new UMLClassMoveDiff(removedClass, addedClass, this);
-//                        diffSet.add(classMoveDiff);
-//                    }
-//                }
+                if (matcher.match(removedFile, addedFile, renamedFile)) {
+                    //if (!conflictingMoveOfTopLevelClass(removedFile, addedFile))
+                    {
+                        SourceFileMoveDiff classMoveDiff = new SourceFileMoveDiff(removedFile, addedFile);
+                        diffSet.add(classMoveDiff);
+                    }
+                }
             }
 //            if (!diffSet.isEmpty()) {
 //                SourceDiffer differ = new SourceDiffer()
@@ -742,7 +744,7 @@ public class UMLModelDiff extends Diff {
 
     private boolean movedAndRenamedMethodSignature(FunctionDeclaration
                                                            removedOperation, FunctionDeclaration addedOperation, FunctionBodyMapper mapper) {
-        SourceFileDiff removedOperationClassDiff = getUMLClassDiff(removedOperation.getSourceLocation().getFile());
+        SourceFileDiff removedOperationClassDiff = getUMLClassDiff(removedOperation.getSourceLocation().getFilePath());
 
         if (removedOperationClassDiff != null
                 && containsOperationWithTheSameSignatureInNextClass(removedOperationClassDiff, removedOperation)) {
@@ -806,6 +808,21 @@ public class UMLModelDiff extends Diff {
         return null;
     }
 
+    private boolean conflictingMoveOfTopLevelClass(FunctionDeclaration removedClass, FunctionDeclaration addedClass) {
+        if(!removedClass.isTopLevel() && !addedClass.isTopLevel()) {
+            //check if classMoveDiffList contains already a move for the outer class to a different target
+//            for(SourceFileMoveDiff diff : classMoveDiffList) {
+//                if((diff.getOriginalClass().getName().startsWith(removedClass.getPackageName()) &&
+//                        !diff.getMovedClass().getName().startsWith(addedClass.getPackageName())) ||
+//                        (!diff.getOriginalClass().getName().startsWith(removedClass.getPackageName()) &&
+//                                diff.getMovedClass().getName().startsWith(addedClass.getPackageName()))) {
+//                    return true;
+//                }
+//            }
+        }
+        return false;
+    }
+
     public boolean containsOperationWithTheSameSignatureInNextClass(SourceFileDiff sourceFileDiff, FunctionDeclaration operation) {
         for (IFunctionDeclaration originalOperation : sourceFileDiff.source2.getFunctionDeclarations()) {
             if (FunctionUtil.isExactSignature(originalOperation, operation)) ;
@@ -843,14 +860,22 @@ public class UMLModelDiff extends Diff {
     }
 
     private void deleteRemovedOperation(FunctionDeclaration operation) {
-        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
+        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFilePath());
         if (classDiff != null)
             classDiff.getRemovedOperations().remove(operation);
     }
 
     private void deleteAddedOperation(FunctionDeclaration operation) {
-        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFile());
+        SourceFileDiff classDiff = getUMLClassDiff(operation.getSourceLocation().getFilePath());
         if (classDiff != null)
             classDiff.getAddedOperations().remove(operation);
+    }
+
+    public List<ISourceFile> getAddedFiles() {
+        return addedFiles;
+    }
+
+    public List<ISourceFile> getRemovedFiles() {
+        return removedFiles;
     }
 }

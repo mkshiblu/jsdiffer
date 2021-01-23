@@ -15,6 +15,8 @@ public class SourceFile extends Container implements ISourceFile {
     protected String qualifiedName;
     private String filepath;
     private String name;
+
+    private String directoryName;
     private String directoryPath;
 
     public SourceFile() {
@@ -27,6 +29,7 @@ public class SourceFile extends Container implements ISourceFile {
         name = FilenameUtils.getName(filepath);
         String dir = filepath.substring(0, filepath.length() - name.length());
         directoryPath = dir.length() > 0 ? dir.substring(0, dir.length() - 1) : dir;
+        directoryName = FilenameUtils.getName(directoryPath);
     }
 
     public String getFilepath() {
@@ -55,6 +58,10 @@ public class SourceFile extends Container implements ISourceFile {
 
     public String getDirectoryPath() {
         return directoryPath;
+    }
+
+    public String getDirectoryName() {
+        return directoryName;
     }
 
     public double normalizedSourceFolderDistance(ISourceFile c) {

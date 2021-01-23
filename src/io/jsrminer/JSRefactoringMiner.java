@@ -5,11 +5,13 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
 import io.jsrminer.io.SourceFile;
+import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLModelFactory;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
+import io.jsrminer.uml.diff.UMLModelDiffer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.lib.ObjectId;
@@ -32,7 +34,7 @@ import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js"}));
+    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{JsConfig.JS_FILE_EXTENSION}));
 
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
@@ -157,7 +159,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
         List<String> filePathsBefore = new ArrayList<String>();
         List<String> filePathsCurrent = new ArrayList<String>();
-        Map<String, String> renamedFilesHint = new HashMap<String, String>();
+        Map<String, String> renamedFilesHint = new HashMap<>();
 
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
@@ -193,7 +195,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 
                 log.info("Detecting refactorings...");
-                UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);
+                UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(renamedFilesHint);
                 refactoringsAtRevision = diff.getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
@@ -215,7 +217,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         // TODO multi thread?
         UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
 
-        UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, new LinkedHashMap<>());
+        UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(new LinkedHashMap<>());
 
         /*, renamedFilesHint*/
         List<IRefactoring> refactorings = diff.getRefactorings();

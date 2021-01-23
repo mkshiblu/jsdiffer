@@ -20,8 +20,8 @@ public class FunctionUtil {
     }
 
     public static boolean isEqualFullyQualifiedParentContainerName(IFunctionDeclaration function1, IFunctionDeclaration function2) {
-        return (function1.getSourceLocation().getFile() + "|" + function1.getParentContainerQualifiedName())
-                .equals(function2.getSourceLocation().getFile() + "|" + function2.getParentContainerQualifiedName());
+        return (function1.getSourceLocation().getFilePath() + "|" + function1.getParentContainerQualifiedName())
+                .equals(function2.getSourceLocation().getFilePath() + "|" + function2.getParentContainerQualifiedName());
     }
 
     /**

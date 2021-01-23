@@ -84,7 +84,7 @@ public class JsonCodeDeserializer {
         function.setName(name);
         function.setQualifiedName(qualifiedName);
         function.setParentContainerQualifiedName(getParentContainerQualifiedName(parentContainer));
-        function.setFullyQualifiedName(function.getSourceLocation().getFile() + "|" + function.getQualifiedName());
+        function.setFullyQualifiedName(function.getSourceLocation().getFilePath() + "|" + function.getQualifiedName());
         function.setIsTopLevel(parentContainer.getContainerType().equals(IContainer.ContainerType.File));
 
         // Params
