@@ -51,8 +51,8 @@ public class UMLModelDiffer {
 
             // Check if model2 contains the same file
             if (sourceFileModel2 != null) {
-                SourceDiffer sourceDiffer = new SourceDiffer(entry.getValue(), sourceFileModel2, modelDiff);
-                SourceFileDiff sourceDiff = sourceDiffer.diff();
+                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(entry.getValue(), sourceFileModel2, modelDiff);
+                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
 
                 boolean isEmpty = sourceDiff.getAddedOperations().isEmpty()
                         && sourceDiff.getAddedOperations().isEmpty()

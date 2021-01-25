@@ -1,6 +1,7 @@
 package io.rminer.core.api;
 
 import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.sourcetree.Statement;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface IContainer {
 
     ContainerType getContainerType();
 
-    List<ICodeFragment> getStatements();
+    List<Statement> getStatements();
 
     List<IFunctionDeclaration> getFunctionDeclarations();
 

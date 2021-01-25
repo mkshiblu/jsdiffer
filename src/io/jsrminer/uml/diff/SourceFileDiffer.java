@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * Diff between two source File?
  */
-public class SourceDiffer {
+public class SourceFileDiffer {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
     public final SourceFileDiff sourceFileDiff;
@@ -33,7 +33,7 @@ public class SourceDiffer {
     ISourceFile container1;
     ISourceFile container2;
 
-    public SourceDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
+    public SourceFileDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
         this.container1 = container1;
         this.container2 = container2;
         sourceFileDiff = new SourceFileDiff(container1, container2);
@@ -79,6 +79,9 @@ public class SourceDiffer {
         checkForOperationSignatureChanges(sourceDiff);
         checkForInlinedOperations(sourceDiff);
         checkForExtractedOperations(sourceDiff);
+        // Match statements declared inside the body directly
+        matchStatements(sourceDiff);
+
     }
 
     /**
@@ -1177,5 +1180,31 @@ public class SourceDiffer {
                 return true;
         }
         return false;
+    }
+
+
+    private void matchStatements(SourceFileDiff sourceDiff) {
+        List<Statement> statements1 = sourceDiff.source1.getStatements();
+        List<Statement> statements2 = sourceDiff.source2.getStatements();
+
+        // ContainerBodyMapper bodyMapper = new ContainerBodyMapper(container1, container2);
+        FunctionBodyMapper mapper = new FunctionBodyMapper(statements1, statements2);
+
+        int mappings = mapper.mappingsWithoutBlocks();
+        if (mappings > 0) {
+//            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
+//            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
+//            if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
+            if (mappings > mapper.nonMappedElementsT1() && mappings > mapper.nonMappedElementsT2()) {
+//                this.mappings.addAll(mapper.mappings);
+//                this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
+//                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
+//                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
+//                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
+                //this.refactorings.addAll(mapper.getRefactorings());
+                sourceDiff.getRefactorings().addAll(mapper.getRefactoringsByVariableAnalysis());
+                sourceDiff.bodyStatementMapper = mapper;
+            }
+        }
     }
 }

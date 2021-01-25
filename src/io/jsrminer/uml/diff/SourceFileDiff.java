@@ -35,6 +35,8 @@ public class SourceFileDiff {
     private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
     private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
+    FunctionBodyMapper bodyStatementMapper;
+
     public SourceFileDiff(ISourceFile source1, ISourceFile source2) {
         this.source1 = source1;
         this.source2 = source2;

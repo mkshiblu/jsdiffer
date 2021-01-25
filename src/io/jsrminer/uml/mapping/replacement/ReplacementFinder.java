@@ -1455,7 +1455,7 @@ public class ReplacementFinder {
 
     private boolean equalAfterNewArgumentAdditions(String s1, String s2, ReplacementInfo replacementInfo) {
         UMLOperationDiff operationDiff = sourceFileDiff == null ? null : this.sourceFileDiff.getOperationDiff(function1, function2);
-        if (operationDiff == null) {
+        if (operationDiff == null && function1 != null) {
             operationDiff = new UMLOperationDiff(function1, function2);
         }
         String commonPrefix = PrefixSuffixUtils.longestCommonPrefix(s1, s2);
@@ -1481,8 +1481,8 @@ public class ReplacementFinder {
                 diff2 = prepend + diff2;
             }
             //if there is a variable replacement diff1 should be empty, otherwise diff1 should include a single variable
-            if (diff1.isEmpty() ||
-                    (function1.getParameterNameList().contains(diff1) && !function2.getParameterNameList().contains(diff1) && !containsMethodSignatureOfAnonymousClass(diff2))
+            if (diff1.isEmpty() || (function1!=null &&
+                    (function1.getParameterNameList().contains(diff1) && !function2.getParameterNameList().contains(diff1) && !containsMethodSignatureOfAnonymousClass(diff2)))
 //                    ||
 //                    (containerDiff.getOriginalClass().containsAttributeWithName(diff1)
 //                            && !classDiff.getNextClass().containsAttributeWithName(diff1)

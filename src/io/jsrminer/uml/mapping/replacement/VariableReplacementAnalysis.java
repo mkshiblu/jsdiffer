@@ -13,6 +13,7 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminer.core.api.IAnonymousFunctionDeclaration;
 
 import java.util.*;
+
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 import static java.util.AbstractMap.SimpleEntry;
 
@@ -824,8 +825,10 @@ public class VariableReplacementAnalysis {
                 allVariableDeclarations1.addAll(comp1.getAllVariableDeclarations());
                 allVariableDeclarations2.addAll(comp2.getAllVariableDeclarations());
             } else {
-                allVariableDeclarations1.addAll(operation1.getAllVariableDeclarations());
-                allVariableDeclarations2.addAll(operation2.getAllVariableDeclarations());
+                if (operation1 != null) {
+                    allVariableDeclarations1.addAll(operation1.getAllVariableDeclarations());
+                    allVariableDeclarations2.addAll(operation2.getAllVariableDeclarations());
+                }
                 break;
             }
         }
@@ -1236,21 +1239,25 @@ public class VariableReplacementAnalysis {
     }
 
     private boolean potentialParameterRename(Replacement replacement, Set<CodeFragmentMapping> set) {
-        int index1 = operation1.getParameterNameList().indexOf(replacement.getBefore());
-        if (index1 == -1 && callSiteOperation != null) {
-            index1 = callSiteOperation.getParameterNameList().indexOf(replacement.getBefore());
+        if (operation1 != null) {
+            int index1 = operation1.getParameterNameList().indexOf(replacement.getBefore());
+            if (index1 == -1 && callSiteOperation != null) {
+                index1 = callSiteOperation.getParameterNameList().indexOf(replacement.getBefore());
+            }
+            int index2 = operation2.getParameterNameList().indexOf(replacement.getAfter());
+            if (index2 == -1 && callSiteOperation != null) {
+                index2 = callSiteOperation.getParameterNameList().indexOf(replacement.getAfter());
+            }
+
+            if (fieldAssignmentToPreviouslyExistingAttribute(set)) {
+                return false;
+            }
+            if (fieldAssignmentWithPreviouslyExistingParameter(set)) {
+                return false;
+            }
+            return index1 >= 0 && index1 == index2;
         }
-        int index2 = operation2.getParameterNameList().indexOf(replacement.getAfter());
-        if (index2 == -1 && callSiteOperation != null) {
-            index2 = callSiteOperation.getParameterNameList().indexOf(replacement.getAfter());
-        }
-        if (fieldAssignmentToPreviouslyExistingAttribute(set)) {
-            return false;
-        }
-        if (fieldAssignmentWithPreviouslyExistingParameter(set)) {
-            return false;
-        }
-        return index1 >= 0 && index1 == index2;
+        return false;
     }
 
     private SimpleEntry<VariableDeclaration, FunctionDeclaration> getVariableDeclaration1(Replacement replacement, CodeFragmentMapping mapping) {

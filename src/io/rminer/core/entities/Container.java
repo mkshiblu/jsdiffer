@@ -1,8 +1,8 @@
 package io.rminer.core.entities;
 
 import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.sourcetree.Statement;
 import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.ICodeFragment;
 import io.rminer.core.api.IContainer;
 import io.rminer.core.api.IFunctionDeclaration;
 
@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class Container implements IContainer {
     protected final ContainerType containerType;
-    protected final List<ICodeFragment> statements = new ArrayList<>();
+    protected final List<Statement> statements = new ArrayList<>();
     protected final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
     protected SourceLocation sourceLocation;
     private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
@@ -26,7 +26,7 @@ public abstract class Container implements IContainer {
     }
 
     @Override
-    public List<ICodeFragment> getStatements() {
+    public List<Statement> getStatements() {
         return statements;
     }
 
@@ -42,4 +42,6 @@ public abstract class Container implements IContainer {
     public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
         return anonymousFunctionDeclarations;
     }
+
+    public abstract String getQualifiedName();
 }

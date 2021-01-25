@@ -1,9 +1,9 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.VariableDeclaration;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
+import io.rminer.core.entities.Container;
 
 import java.util.Set;
 
@@ -11,15 +11,15 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
 
     private VariableDeclaration originalVariable;
     private VariableDeclaration renamedVariable;
-    private FunctionDeclaration operationBefore;
-    private FunctionDeclaration operationAfter;
+    private Container operationBefore;
+    private Container operationAfter;
     private Set<CodeFragmentMapping> variableReferences;
 
     public RenameVariableRefactoring(
             VariableDeclaration originalVariable,
             VariableDeclaration renamedVariable,
-            FunctionDeclaration operationBefore,
-            FunctionDeclaration operationAfter,
+            Container operationBefore,
+            Container operationAfter,
             Set<CodeFragmentMapping> variableReferences) {
         this.originalVariable = originalVariable;
         this.renamedVariable = renamedVariable;
@@ -50,11 +50,11 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
         return renamedVariable;
     }
 
-    public FunctionDeclaration getOperationBefore() {
+    public Container getOperationBefore() {
         return operationBefore;
     }
 
-    public FunctionDeclaration getOperationAfter() {
+    public Container getOperationAfter() {
         return operationAfter;
     }
 
