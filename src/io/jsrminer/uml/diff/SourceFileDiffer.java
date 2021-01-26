@@ -1220,6 +1220,8 @@ public class SourceFileDiffer {
         functionDeclaration.setParentContainerQualifiedName(sourceFile.getDirectoryPath());
         functionDeclaration.setQualifiedName(sourceFile.getQualifiedName());
         functionDeclaration.setName(sourceFile.getName());
+        functionDeclaration.getAnonymousFunctionDeclarations().addAll(sourceFile.getAnonymousFunctionDeclarations());
+        functionDeclaration.getFunctionDeclarations().addAll(sourceFile.getFunctionDeclarations());
         return functionDeclaration;
     }
 }

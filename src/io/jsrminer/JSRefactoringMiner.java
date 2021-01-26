@@ -217,6 +217,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         // TODO multi thread?
         UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
 
+        log.info("Detecting Refactorings...");
         UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(new LinkedHashMap<>());
 
         /*, renamedFilesHint*/

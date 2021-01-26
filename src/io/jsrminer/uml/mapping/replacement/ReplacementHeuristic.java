@@ -478,19 +478,22 @@ public class ReplacementHeuristic {
         if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
                 creationCoveringTheEntireStatement1.identicalName(creationCoveringTheEntireStatement2) &&
                 creationCoveringTheEntireStatement1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
-            String subStringS1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
-            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray() &&
-                    subStringS1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
-                    subStringS1.length() > 0) {
-                //return replacementInfo.getReplacements();
-                return true;
+
+            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray()) {
+                String subStringS1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                if (subStringS1.length() > 0 && subStringS1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
             }
-            String subString2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
-            if (!creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray() &&
-                    subString2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
-                    subString2.length() > 0) {
-                //return replacementInfo.getReplacements();
-                return true;
+
+            if (!creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray()) {
+                String subString2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                if (subString2.length() > 0 &&
+                        subString2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))) {
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
             }
         }
         return false;
@@ -520,19 +523,23 @@ public class ReplacementHeuristic {
                     //check if the argument lists are identical after replacements
                     if (objectCreation1.identicalName(creationCoveringTheEntireStatement2) &&
                             objectCreation1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
-                        String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
-                        if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray() &&
-                                substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
-                                substring1.length() > 0) {
-                            //return replacementInfo.getReplacements();
-                            return true;
+
+                        if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray()) {
+                            String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                            if (substring1.length() > 0 && substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
+                                //return replacementInfo.getReplacements();
+                                return true;
+                            }
                         }
-                        String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
-                        if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray() &&
-                                substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
-                                substring2.length() > 0) {
-                            //return replacementInfo.getReplacements();
-                            return true;
+
+                        if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray()) {
+                            String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                            if (substring2.length() > 0 &&
+                                    substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))
+                            ) {
+                                //return replacementInfo.getReplacements();
+                                return true;
+                            }
                         }
                     }
                 }
@@ -545,7 +552,7 @@ public class ReplacementHeuristic {
         }
         for (String creation1 : creations1) {
             for (Invocation objectCreation1 : creationMap1.get(creation1)) {
-                if (statement1.getText().endsWith(creation1 + ";\n") && (r = objectCreation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+                if (statement1.getText().endsWith(creation1 + JsConfig.STATEMENT_TERMINATOR_CHAR) && (r = objectCreation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
                     replacementInfo.addReplacement(r);
                     //return replacementInfo.getReplacements();
                     return true;
@@ -699,7 +706,8 @@ public class ReplacementHeuristic {
         return false;
     }
 
-    public boolean fieldAssignentReplacedWithSetter(OperationInvocation invocationCoveringTheEntireStatement2, Set<String> variables1) {
+    public boolean fieldAssignentReplacedWithSetter(OperationInvocation
+                                                            invocationCoveringTheEntireStatement2, Set<String> variables1) {
         Replacement r;
         if (invocationCoveringTheEntireStatement2 != null
                 && statement2.getText().equals(invocationCoveringTheEntireStatement2.actualString() + JsConfig.STATEMENT_TERMINATOR_CHAR)
