@@ -8,11 +8,7 @@ import org.apache.commons.io.FilenameUtils;
  * Represents a Source File model
  */
 public class SourceFile extends Container implements ISourceFile {
-    /**
-     * Qualified name excluding the filename but including the parent function name.
-     * For example if function y() is declared inside x(), it will return x.y.
-     */
-    protected String qualifiedName;
+
     private String filepath;
     private String name;
 
@@ -43,17 +39,6 @@ public class SourceFile extends Container implements ISourceFile {
 
     public void setFilepath(String filepath) {
         this.filepath = filepath;
-    }
-
-    /**
-     * Returns the filePath
-     */
-    public String getQualifiedName() {
-        return qualifiedName;
-    }
-
-    public void setQualifiedName(String qualifiedName) {
-        this.qualifiedName = qualifiedName;
     }
 
     public String getDirectoryPath() {

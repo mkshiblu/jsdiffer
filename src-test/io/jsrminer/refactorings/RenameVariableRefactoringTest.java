@@ -18,7 +18,6 @@ public class RenameVariableRefactoringTest extends BaseTest {
     public static void setup() {
         refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src2\\RenameVariable.js"
                 , getRootResourceDirectory() + "src1\\RenameVariable.js");
-
         renameVariableRefactoring = (RenameVariableRefactoring) refactorings.get(0);
 
     }

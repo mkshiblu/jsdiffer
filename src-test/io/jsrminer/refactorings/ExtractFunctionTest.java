@@ -41,7 +41,7 @@ public class ExtractFunctionTest extends BaseTest {
     @Test
     void testRefactoringsCount() {
         assertNotNull(refactorings);
-        assertEquals(6, refactorings.size());
+        assertEquals(8, refactorings.size());
     }
 
     @Test

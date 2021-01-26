@@ -32,4 +32,6 @@ public interface IContainer {
     List<IFunctionDeclaration> getFunctionDeclarations();
 
     List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations();
+
+    String getQualifiedName();
 }

@@ -87,8 +87,13 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     /**
      * Maps two sets of statements similar to lambda body mapper
      */
-    public FunctionBodyMapper(List<Statement> statements1, List<Statement> statements2) {
+    public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2) {
 
+        this.function1 = function1;
+        this.function2 = function2;
+
+        List<Statement> statements1 = function1.getBody().blockStatement.getStatements();
+        List<Statement> statements2 = function2.getBody().blockStatement.getStatements();
         if (statements1.size() > 0 && statements2.size() > 0) {
             // Add all leaves and composite from statements
             LinkedHashSet<SingleStatement> leaves1 = new LinkedHashSet<>();

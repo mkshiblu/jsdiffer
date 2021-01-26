@@ -15,6 +15,11 @@ public abstract class Container implements IContainer {
     protected final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
     protected SourceLocation sourceLocation;
     private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+    /**
+     * Qualified name excluding the filename but including the parent function name.
+     * For example if function y() is declared inside x(), it will return x.y.
+     */
+    protected String qualifiedName;
 
     public Container(ContainerType containerType) {
         this.containerType = containerType;
@@ -43,5 +48,12 @@ public abstract class Container implements IContainer {
         return anonymousFunctionDeclarations;
     }
 
-    public abstract String getQualifiedName();
+    public String getQualifiedName() {
+        return qualifiedName;
+    }
+
+    public void setQualifiedName(String qualifiedName) {
+        this.qualifiedName = qualifiedName;
+    }
+
 }

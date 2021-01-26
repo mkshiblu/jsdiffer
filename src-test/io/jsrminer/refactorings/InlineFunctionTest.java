@@ -33,7 +33,7 @@ public class InlineFunctionTest extends BaseTest {
     @Test
     void testRefactoringsCount() {
         assertNotNull(refactorings);
-        assertTrue(refactorings.size() == 6);
+        assertEquals(8,refactorings.size());
     }
 
     @Test

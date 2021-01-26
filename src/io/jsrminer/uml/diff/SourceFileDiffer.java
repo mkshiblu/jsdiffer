@@ -1182,13 +1182,14 @@ public class SourceFileDiffer {
         return false;
     }
 
-
     private void matchStatements(SourceFileDiff sourceDiff) {
-        List<Statement> statements1 = sourceDiff.source1.getStatements();
-        List<Statement> statements2 = sourceDiff.source2.getStatements();
 
+        // Create  two functions using to statemtens
+        FunctionDeclaration function1 = createLambda(sourceDiff.source1.getStatements(), sourceDiff.source1);
+        FunctionDeclaration function2 = createLambda(sourceDiff.source2.getStatements(), sourceDiff.source2);
         // ContainerBodyMapper bodyMapper = new ContainerBodyMapper(container1, container2);
-        FunctionBodyMapper mapper = new FunctionBodyMapper(statements1, statements2);
+        FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
+
 
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
@@ -1206,5 +1207,19 @@ public class SourceFileDiffer {
                 sourceDiff.bodyStatementMapper = mapper;
             }
         }
+    }
+
+    private FunctionDeclaration createLambda(List<Statement> statements, ISourceFile sourceFile){
+        FunctionDeclaration functionDeclaration = new FunctionDeclaration();
+        BlockStatement block = new BlockStatement();
+        block.getStatements().addAll(statements);
+        block.setSourceLocation(new SourceLocation());
+        FunctionBody body = new FunctionBody(block);
+        functionDeclaration.setBody(body);
+        functionDeclaration.setSourceLocation(new SourceLocation());
+        functionDeclaration.setParentContainerQualifiedName(sourceFile.getDirectoryPath());
+        functionDeclaration.setQualifiedName(sourceFile.getQualifiedName());
+        functionDeclaration.setName(sourceFile.getName());
+        return functionDeclaration;
     }
 }
