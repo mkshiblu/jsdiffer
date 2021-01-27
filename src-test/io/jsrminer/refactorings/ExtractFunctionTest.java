@@ -29,19 +29,22 @@ public class ExtractFunctionTest extends BaseTest {
         IRefactoring refactoring = refactorings.get(0);
         assertEquals(RefactoringType.EXTRACT_OPERATION, refactoring.getRefactoringType());
         extractOperationRefactoring = (ExtractOperationRefactoring) refactoring;
+        //vueExtractRefactoring = (ExtractOperationRefactoring) refactorings.get(2);
     }
+
+
+    @Test
+    void testRefactoringsCount() {
+        assertNotNull(refactorings);
+        assertEquals(10, refactorings.size());
+    }
+
 
     @Test
     void testFunctionNames() {
         assertEquals(extractOperationRefactoring.getExtractedOperation().getName(), "createAddress");
         assertEquals(extractOperationRefactoring.getSourceOperationAfterExtraction().getName(), "createAddresses");
         assertEquals(extractOperationRefactoring.getSourceOperationBeforeExtraction().getName(), "createAddresses");
-    }
-
-    @Test
-    void testRefactoringsCount() {
-        assertNotNull(refactorings);
-        assertEquals(8, refactorings.size());
     }
 
     @Test
@@ -52,7 +55,7 @@ public class ExtractFunctionTest extends BaseTest {
 
     @Test
     void testReplacements() {
-        assertEquals(0, extractOperationRefactoring.getReplacements().size());
+        assertEquals(2, extractOperationRefactoring.getReplacements().size());
     }
 
     @Test

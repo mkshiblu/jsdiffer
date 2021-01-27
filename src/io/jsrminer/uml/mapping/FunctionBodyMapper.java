@@ -410,7 +410,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
             //compare leaves from T1 with leaves from T2
-            matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
+            if (leaves1.size() > 0 && leaves2.size() > 0)
+                matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
 
             //adding innerNodes that were mapped with replacements
             for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
@@ -948,14 +949,14 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private LeafCodeFragmentMapping createLeafMapping(CodeFragment leaf1, CodeFragment
             leaf2, Map<String, String> parameterToArgumentMap) {
-//        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
-//        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
+        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.function1;
+        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.function2;
         LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2, function1, function2, argumentizer);
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
-//            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
-//                mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
-//            }
+            if (!key.equals(value) && ReplacementUtil.contains(leaf2.getText(), key) && ReplacementUtil.contains(leaf1.getText(), value)) {
+                mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
+            }
         }
         return mapping;
     }

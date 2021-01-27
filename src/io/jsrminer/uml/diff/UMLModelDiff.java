@@ -55,7 +55,7 @@ public class UMLModelDiff extends Diff {
         Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap
                 = new LinkedHashMap<>();
         for (SourceFileDiff classDiff : commonFilesDiffList) {
-            refactorings.addAll(classDiff.getRefactorings());
+            refactorings.addAll(classDiff.getAllRefactorings());
             //extractMergePatterns(classDiff, mergeMap);
             //extractRenamePatterns(classDiff, renameMap);
         }
@@ -629,7 +629,7 @@ public class UMLModelDiff extends Diff {
         List<FunctionDeclaration> addedOperations = new ArrayList<>();
         for (SourceFileDiff classDiff : commonFilesDiffList) {
             addedOperations.addAll(classDiff.getAddedOperations());
-            for (IRefactoring ref : classDiff.getRefactorings()) {
+            for (IRefactoring ref : classDiff.getAllRefactorings()) {
                 if (ref instanceof ExtractOperationRefactoring) {
                     ExtractOperationRefactoring extractRef = (ExtractOperationRefactoring) ref;
                     addedOperations.add(extractRef.getExtractedOperation());
