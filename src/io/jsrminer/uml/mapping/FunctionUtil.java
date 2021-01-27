@@ -1,12 +1,12 @@
 package io.jsrminer.uml.mapping;
 
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.CodeElementType;
-import io.jsrminer.sourcetree.OperationInvocation;
+import io.jsrminer.sourcetree.*;
 import io.rminer.core.api.IAnonymousFunctionDeclaration;
 import io.rminer.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains helper for function signature matching
@@ -158,5 +158,36 @@ public class FunctionUtil {
 
     public static boolean isDirectlyNested(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {
         return !anonymousFunctionDeclaration.getQualifiedName().contains(".");
+    }
+
+    public static OperationInvocation isDelegate(FunctionDeclaration functionDeclaration) {
+        if (functionDeclaration.getBody() != null) {
+            List<Statement> statements = functionDeclaration.getBody().blockStatement.getStatements();
+            if (statements.size() == 1 && statements.get(0) instanceof SingleStatement) {
+                SingleStatement statement = (SingleStatement) statements.get(0);
+                Map<String, List<OperationInvocation>> operationInvocationMap = statement.getMethodInvocationMap();
+                for (String key : operationInvocationMap.keySet()) {
+                    List<OperationInvocation> operationInvocations = operationInvocationMap.get(key);
+                    for (OperationInvocation operationInvocation : operationInvocations) {
+                        if (operationInvocation.matchesOperation(functionDeclaration/*, this.variableTypeMap(), null*/)
+                                || operationInvocation.getName().equals(functionDeclaration.getName())) {
+                            return operationInvocation;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean containsInvocation(FunctionDeclaration originalOperation, OperationInvocation addedOperationInvocation) {
+        for (OperationInvocation invocation : originalOperation.getBody().getAllOperationInvocations()) {
+            if (invocation.getName().equals(addedOperationInvocation.getName()) &&
+                    invocation.getArguments().size() == addedOperationInvocation.getArguments().size()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

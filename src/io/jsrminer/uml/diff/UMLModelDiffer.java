@@ -55,7 +55,7 @@ public class UMLModelDiffer {
                 SourceFileDiff sourceDiff = sourceFileDiffer.diff();
 
                 boolean isEmpty = sourceDiff.getAddedOperations().isEmpty()
-                        && sourceDiff.getAddedOperations().isEmpty()
+                        && sourceDiff.getRemovedOperations().isEmpty()
                         //&& addedAttributes.isEmpty() && removedAttributes.isEmpty() &&
                         // addedEnumConstants.isEmpty() && removedEnumConstants.isEmpty()
                         && sourceDiff.getOperationDiffList().isEmpty()
