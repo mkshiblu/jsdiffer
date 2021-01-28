@@ -23,17 +23,17 @@ public class ExtractFunctionTest2 extends BaseTest {
 
     @BeforeAll
     public static void setup() {
-        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "ExtractOrInlineFunction\\src1\\vue_runtime.js"
-                , getRootResourceDirectory() + "ExtractOrInlineFunction\\src2\\vue_runtime.js");
+        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src1\\ExtractFunction.js"
+                , getRootResourceDirectory() + "src2\\ExtractFunction.js");
 
-        IRefactoring refactoring = refactorings.get(1);
+        IRefactoring refactoring = refactorings.get(0);
         assertEquals(RefactoringType.EXTRACT_OPERATION, refactoring.getRefactoringType());
         extractOperationRefactoring = (ExtractOperationRefactoring) refactoring;
     }
 
     @Test
     void testRefactoringsCount() {
-        assertEquals(6, refactorings.size());
+        assertEquals(4, refactorings.size());
     }
 
     @Test

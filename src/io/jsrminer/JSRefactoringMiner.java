@@ -43,7 +43,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             RevCommit commit = GitUtil.getRevCommit(repository, commitId);
             Iterable<RevCommit> walk = List.of(commit);
             refactorings = detect(repository, null, walk);
-            log.info("RefCount + " + refactorings.size());
+            log.info("RefCount: " + refactorings.size());
             refactorings.forEach(r -> log.info(r.toString()));
         } catch (IOException e) {
             e.printStackTrace();

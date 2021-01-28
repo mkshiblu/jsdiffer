@@ -1074,11 +1074,7 @@ public class ReplacementFinder {
             Double normalizedDistance = bestReplacements.firstEntry().getKey();
             if (normalizedDistance == 0) {
                 for (Replacement replacement : bestReplacements.firstEntry().getValue()) {
-
                     replacementInfo.addReplacement(replacement);
-                    //replacementInfo.addReplacement(replacement);
-                    //replacementInfo.setArgumentizedString1(ReplacementUtil
-                    //      .performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
                     strAfterReplacement = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter());
                     replacementInfo.setArgumentizedString1(strAfterReplacement);
 
