@@ -14,7 +14,7 @@ public class SourceLocation {
     public final int end;
 
     public SourceLocation() {
-        this(-1, -1, -1, -1, -1, -1);
+        this(0, 0, 0, 0, 0, 0);
     }
 
     public SourceLocation(String file, int startLine, int startColumn, int endLine, int endColumn, int start, int end) {

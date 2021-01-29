@@ -1,6 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
-import io.jsrminer.parser.JsonModelLoader;
+import io.jsrminer.parser.JsonFileLoader;
 import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.uml.UMLModel;
 import io.rminer.core.api.ISourceFile;
@@ -72,7 +72,7 @@ public class BabelParser extends JavaScriptParser {
         final String blockJson = processScript(fileContent, jsEngine);
         StopWatch watch = new StopWatch();
         watch.start();
-        SourceFile file = new JsonModelLoader(filePath).parseSourceFile(blockJson);
+        SourceFile file = new JsonFileLoader(filePath).parseSourceFile(blockJson);
         watch.stop();
         log.debug("Model loading time from json: " + watch.toString());
         return file;

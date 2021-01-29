@@ -13,8 +13,8 @@ public abstract class CodeFragment extends CodeEntity {
     //    protected SourceLocation sourceLocation;
 //    protected String text;
 //    protected CodeElementType type;
-    protected int positionIndexInParent = -1;
-    protected int depth = -1;
+    protected int positionIndexInParent = 0;
+    protected int depth = 0;
 
     public CodeFragment() {
     }

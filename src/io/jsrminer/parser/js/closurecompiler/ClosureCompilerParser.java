@@ -26,6 +26,7 @@ public class ClosureCompilerParser extends JavaScriptParser {
 
     private boolean enableStrictMode;
     private Parser.Config.Mode compatibility;
+    ModelLoader modelLoader = new ModelLoader();
 
     public ClosureCompilerParser() {
         //  this.strictMode = Config.StrictMode.SLOPPY;
@@ -42,11 +43,11 @@ public class ClosureCompilerParser extends JavaScriptParser {
 
                 try {
                     log.info("Processing " + filepath + "...");
-                    SourceFile sourceFile = parse(content, filepath);
+                    SourceFile sourceFile = parseAndLoadSourceFile(content, filepath);
                     sourceFile.setFilepath(filepath);
                     sourceModels.put(filepath, sourceFile);
                 } catch (Exception ex) {
-                    System.out.println("Ignoring and removing file " + filepath + " due to exception" + ex.toString());
+                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
                     fileContents.remove(filepath);
                 }
             }
@@ -62,7 +63,7 @@ public class ClosureCompilerParser extends JavaScriptParser {
             throw new NullPointerException("filepath cannot be null");
         try {
 
-            SourceFile source = parse(content, filepath);
+            SourceFile source = parseAndLoadSourceFile(content, filepath);
             source.setFilepath(filepath);
             return source;
         } catch (Exception e) {
@@ -75,17 +76,32 @@ public class ClosureCompilerParser extends JavaScriptParser {
      *
      * @return
      */
-    private SourceFile parse(String fileContent, String filePath) {
+    private SourceFile parseAndLoadSourceFile(String fileContent, String filePath) {
         SourceFile file = new SourceFile();
+        file.setFilepath(filePath);
+        file.setQualifiedName(filePath);
+
         StopWatch watch = new StopWatch();
         watch.start();
-        ParseResult result = processFile(fileContent, filePath, this.enableStrictMode);
+
+        // Get AST
+        ParseResult result = parseAndMakeAst(filePath, fileContent, this.enableStrictMode);
+        result.errors.forEach(error -> log.debug(error.toString()));
+        result.warnings.forEach(warning -> log.debug(warning.toString()));
+
+        // Traverse AST and load model
+        if (result.getProgramAST() == null) {
+            throw new RuntimeException("Error parsing " + filePath);
+        } else {
+            modelLoader.loadFromAst(result.getProgramAST(), file);
+        }
+
         watch.stop();
         log.debug("Parse and Load time: " + watch.toString());
         return file;
     }
 
-    private ParseResult processFile(String fileName, String fileContent, boolean enableStrictMode) {
+    public ParseResult parseAndMakeAst(String fileName, String fileContent, boolean enableStrictMode) {
         final List<SyntaxMessage> warnings = new LinkedList<>();
         final List<SyntaxMessage> errors = new LinkedList<>();
 

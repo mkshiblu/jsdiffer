@@ -1,6 +1,6 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.parser.js.JavaScriptParser;
+import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
 import io.rminer.core.api.IParser;
 import org.apache.commons.io.FilenameUtils;
 
@@ -14,7 +14,7 @@ public class UMLModelFactory {
 //    }
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
-        IParser parser = new JavaScriptParser();
+        IParser parser = new ClosureCompilerParser();
         UMLModel model = parser.parse(fileContents);
 
         // Populate repository directories

@@ -50,6 +50,8 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      */
     private boolean isConstructor;
 
+    private boolean isStatic;
+
     public FunctionDeclaration() {
     }
 
@@ -189,5 +191,13 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
             }
         }
         return operationsInsideAnonymousClass;
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = isStatic;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
     }
 }
