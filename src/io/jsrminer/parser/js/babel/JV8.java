@@ -1,4 +1,4 @@
-package io.jsrminer.parser.js;
+package io.jsrminer.parser.js.babel;
 
 import com.eclipsesource.v8.V8Array;
 

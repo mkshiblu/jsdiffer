@@ -13,10 +13,10 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            //commitExample();
-              directoryExample();
+            commitExample();
+//              directoryExample();
             //jqueryExample();
-//            vueExample();
+            //vueExample();
             //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
         } catch (Exception e) {

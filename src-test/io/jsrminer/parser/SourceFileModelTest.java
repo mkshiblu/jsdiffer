@@ -1,7 +1,7 @@
 package io.jsrminer.parser;
 
 import io.jsrminer.BaseTest;
-import io.jsrminer.parser.js.JavaScriptParser;
+import io.jsrminer.parser.js.babel.BabelParser;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.Statement;
 import io.rminer.core.api.IParser;
@@ -25,7 +25,7 @@ public class SourceFileModelTest extends BaseTest {
 
     @BeforeAll
     public static void setup() throws IOException {
-        IParser parser = new JavaScriptParser();
+        IParser parser = new BabelParser();
         String sourceContent = Files.readString(Path.of(getRootResourceDirectory(), "source_model.js"));
         sourceFile = parser.parseSource(sourceContent, "source_model.js");
         functions = sourceFile.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);

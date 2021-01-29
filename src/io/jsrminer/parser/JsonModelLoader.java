@@ -16,16 +16,16 @@ import java.util.*;
 /**
  * A deserializer for the program which is in a composite json format
  */
-public class JsonCodeDeserializer {
+public class JsonModelLoader {
     final String sourcePath;
 
     private HashMap<String, FunctionDeclaration> loadedFunctions = new HashMap<>();
 
-    public JsonCodeDeserializer() {
+    public JsonModelLoader() {
         this.sourcePath = null;
     }
 
-    public JsonCodeDeserializer(String sourcePath) {
+    public JsonModelLoader(String sourcePath) {
         this.sourcePath = sourcePath;
     }
 
