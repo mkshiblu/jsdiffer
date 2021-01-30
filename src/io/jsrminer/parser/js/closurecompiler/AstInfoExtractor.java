@@ -1,9 +1,11 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
-import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
+import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.Expression;
+import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.SourceLocation;
 import io.rminer.core.api.IContainer;
 import io.rminer.core.api.ISourceFile;
 
@@ -20,27 +22,10 @@ public class AstInfoExtractor {
         );
     }
 
-    /**
-     * A variable declaration Node
-     */
-    protected static VariableDeclaration createVariableDeclaration(VariableDeclarationTree tree, VariableDeclarationKind kind, IContainer container) {
-        String variableName = "#4";
-
-        var variableDeclaration = new VariableDeclaration(variableName, kind);
-        return variableDeclaration;
+    public static SourceLocation createSourceLocation(ParseTree tree) {
+        return createSourceLocation(tree.location);
     }
 
-    static SingleStatement createSingleStatement(String text
-            , SourceLocation sourceLocation
-            , int positionIndexInParent
-            , int depth) {
-        var singleStatement = new SingleStatement();
-        singleStatement.setText(text);
-        singleStatement.setSourceLocation(sourceLocation);
-        singleStatement.setPositionIndexInParent(positionIndexInParent);
-        singleStatement.setDepth(depth);
-        return singleStatement;
-    }
 
     public static String generateNameForAnonymousContainer(IContainer parentContainer) {
         return parentContainer.getAnonymousFunctionDeclarations().size() + 1 + "";
@@ -72,4 +57,11 @@ public class AstInfoExtractor {
 
         // Function Body
     }
+
+    static Expression createBaseExpression(ParseTree tree) {
+        var expression = new Expression();
+        expression.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));
+        return expression;
+    }
+
 }

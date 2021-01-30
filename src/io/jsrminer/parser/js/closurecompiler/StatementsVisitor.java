@@ -1,28 +1,14 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
 import io.jsrminer.sourcetree.*;
 import io.rminer.core.api.IContainer;
 
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createBaseExpression;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createSourceLocation;
+
 public class StatementsVisitor {
-//
-//    public static SingleStatement createVariableDeclarationStatement(VariableStatementTree tree, CodeFragment parent, IContainer container) {
-//        function.setSourceLocation(NodeProcessor.createSourceLocation(tree.location));
-//
-//        // Name
-//        String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
-//        function.setName(name);
-//        function.setQualifiedName(generateQualifiedName(function.getName(), container));
-//        function.setFullyQualifiedName(function.getSourceLocation().getFilePath() + "|" + function.getQualifiedName());
-//        function.setParentContainerQualifiedName(container.getQualifiedName());
-//
-//        function.setIsTopLevel(container instanceof ISourceFile);
-//        //function.setIsConstructor(function.);
-//
-//        // Parameter
-//
-//        // Function Body
-//    }
 
     public static final NodeProcessor<SingleStatement, VariableStatementTree, BlockStatement> variableStatementProcessor
             = new NodeProcessor<>() {
@@ -38,9 +24,42 @@ public class StatementsVisitor {
             CodeElementType type;
             var leaf = new SingleStatement();// AstInfoExtractor.createSingleStatement(text, tree.location, );
 
+            VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
+            for (var declarationTree : tree.declarations.declarations) {
+                VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container);
+                leaf.getVariableDeclarations().add(vd);
+                leaf.getVariables().add(vd.variableName);
+            }
             //leaf.getVariableDeclarations().add()
             //return leaf;
             return leaf;
         }
     };
+
+
+    /**
+     * A variable declaration Node
+     */
+    protected static VariableDeclaration processVariableDeclaration(VariableDeclarationTree tree
+            , VariableDeclarationKind kind
+            , IContainer container) {
+        String variableName = tree.lvalue.asIdentifierExpression().identifierToken.value;
+        var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+        // Text
+        String text = tree.toString();
+        variableDeclaration.setText(text);
+        variableDeclaration.setSourceLocation(createSourceLocation(tree));
+
+        // Set Scope (TODO set body source location
+        variableDeclaration.setScope(container.getSourceLocation());
+
+        // Process initializer
+
+        //if(ParseTree)
+        Expression expression = createBaseExpression(tree.initializer);
+        Visitor.visit(tree.initializer, expression, container);
+        variableDeclaration.setInitializer(expression);
+        return variableDeclaration;
+    }
 }

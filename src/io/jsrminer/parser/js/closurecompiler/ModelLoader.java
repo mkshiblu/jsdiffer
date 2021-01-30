@@ -1,31 +1,17 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.CodeEntity;
-import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.sourcetree.*;
 import io.rminer.core.entities.Container;
-import org.apache.commons.lang3.NotImplementedException;
 import org.eclipse.jgit.annotations.NonNull;
 
-import java.util.EnumMap;
 import java.util.List;
-
-import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
 
 /**
  * Populates a SourceModel Using the ProgramTree
  */
 public class ModelLoader {
-    private final static EnumMap<ParseTreeType, INodeProcessor<CodeEntity, ParseTree, CodeFragment>> nodeProcessors
-            = new EnumMap(ParseTreeType.class) {{
-        put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
-        put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
-        put(IDENTIFIER_EXPRESSION, ExpressionsVisitor.identifierProcessor);
-    }};
 
     /**
      * Loads the sourceFile model using the Ast Tree
@@ -41,27 +27,20 @@ public class ModelLoader {
 
     private void process(List<? extends ParseTree> trees, CodeFragment parent, Container container) {
         for (ParseTree tree : trees) {
-            process(tree, parent, container);
+            Visitor.visit(tree, parent, container);
         }
     }
 
-    protected void process(ParseTree tree, CodeFragment parent, Container container) {
-        var processor = nodeProcessors.get(tree.type);
 
-        if (processor == null) {
-            throw new NotImplementedException("Processor not implemented for " + tree.type);
-        }
-
-        enter(tree, parent, container);
-        processor.process(tree, parent, container);
-        exit(tree, parent, container);
-    }
-
-    protected void enter(ParseTree tree, CodeFragment parent, Container container) {
-
-    }
-
-    protected void exit(ParseTree tree, CodeFragment parent, Container container) {
-
+    static SingleStatement createSingleStatement(String text
+            , SourceLocation sourceLocation
+            , int positionIndexInParent
+            , int depth) {
+        var singleStatement = new SingleStatement();
+        singleStatement.setText(text);
+        singleStatement.setSourceLocation(sourceLocation);
+        singleStatement.setPositionIndexInParent(positionIndexInParent);
+        singleStatement.setDepth(depth);
+        return singleStatement;
     }
 }

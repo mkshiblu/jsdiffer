@@ -32,8 +32,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Holds the body of the function
      */
     private FunctionBody body;
-
-    private String containerName;
+    
     /**
      * Stores whether the body of the function is empty or not
      */
