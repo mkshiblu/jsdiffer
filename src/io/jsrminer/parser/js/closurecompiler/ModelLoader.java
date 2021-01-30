@@ -14,17 +14,17 @@ import org.eclipse.jgit.annotations.NonNull;
 import java.util.EnumMap;
 import java.util.List;
 
-import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.FUNCTION_DECLARATION;
-import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.IDENTIFIER_EXPRESSION;
+import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
 
 /**
  * Populates a SourceModel Using the ProgramTree
  */
 public class ModelLoader {
-    private final static EnumMap<ParseTreeType, INodeProcessor<CodeEntity, ParseTree>> nodeProcessors
+    private final static EnumMap<ParseTreeType, INodeProcessor<CodeEntity, ParseTree, CodeFragment>> nodeProcessors
             = new EnumMap(ParseTreeType.class) {{
-        put(FUNCTION_DECLARATION, DeclarationProcessor.functionDeclarationProcessor);
-        put(IDENTIFIER_EXPRESSION, ExpressionProcessor.identifierProcessor);
+        put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
+        put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
+        put(IDENTIFIER_EXPRESSION, ExpressionsVisitor.identifierProcessor);
     }};
 
     /**

@@ -4,8 +4,8 @@ import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import io.jsrminer.sourcetree.CodeFragment;
 import io.rminer.core.api.IContainer;
 
-public interface INodeProcessor<R, T extends ParseTree> {
-    R process(T tree, CodeFragment parent, IContainer container);
+public interface INodeProcessor<R, T extends ParseTree, C extends CodeFragment> {
+    R process(T tree, C parent, IContainer container);
 
 //    default R process(T tree, SingleStatement singleStatement, IContainer container) {
 //        throw new NotImplementedException();
