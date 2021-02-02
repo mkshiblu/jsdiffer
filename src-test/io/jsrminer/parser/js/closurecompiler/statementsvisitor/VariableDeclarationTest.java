@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StatementsVisitorTest extends BaseTest {
+public class StatementsVisitor_VariableDeclarationTest extends BaseTest {
 
     static ProgramTree programTree;
     static SourceFile container;
