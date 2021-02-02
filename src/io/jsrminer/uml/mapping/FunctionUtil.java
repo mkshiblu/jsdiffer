@@ -16,7 +16,7 @@ public class FunctionUtil {
         return blockStatement.getCodeElementType().equals(CodeElementType.ENHANCED_FOR_STATEMENT) ||
                 blockStatement.getCodeElementType().equals(CodeElementType.FOR_STATEMENT) ||
                 blockStatement.getCodeElementType().equals(CodeElementType.WHILE_STATEMENT) ||
-                blockStatement.getCodeElementType().equals(CodeElementType.DD_WHILE_STATEMENT);
+                blockStatement.getCodeElementType().equals(CodeElementType.DO_WHILE_STATEMENT);
     }
 
     public static boolean isEqualFullyQualifiedParentContainerName(IFunctionDeclaration function1, IFunctionDeclaration function2) {

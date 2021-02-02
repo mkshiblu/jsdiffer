@@ -22,7 +22,7 @@ public enum CodeElementType {
     FOR_STATEMENT("ForStatement"),
     LABELED_STATEMENT("LabeledStatement"),
     VARIABLE_DECLARATION("VariableDeclaration"),
-    DD_WHILE_STATEMENT("DoWhileStatement"),
+    DO_WHILE_STATEMENT("DoWhileStatement"),
     BREAK_STATEMENT("BreakStatement"),
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
