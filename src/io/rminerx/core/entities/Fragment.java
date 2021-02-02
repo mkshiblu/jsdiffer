@@ -1,6 +1,5 @@
 package io.rminerx.core.entities;
 
-import io.rminer.core.api.*;
 import io.rminerx.core.api.*;
 
 import java.util.ArrayList;
