@@ -5,6 +5,7 @@ import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import com.google.javascript.jscomp.parsing.parser.util.ErrorReporter;
 import com.google.javascript.jscomp.parsing.parser.util.SourcePosition;
 import io.jsrminer.parser.js.JavaScriptParser;
+import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 import io.rminer.core.api.ISourceFile;
 import io.rminer.core.entities.SourceFile;

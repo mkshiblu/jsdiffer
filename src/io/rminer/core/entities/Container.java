@@ -56,4 +56,7 @@ public abstract class Container implements IContainer {
         this.qualifiedName = qualifiedName;
     }
 
+    public void setSourceLocation(SourceLocation sourceLocation) {
+        this.sourceLocation = sourceLocation;
+    }
 }

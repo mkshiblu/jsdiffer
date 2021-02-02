@@ -3,6 +3,7 @@ package io.jsrminer.parser.js.closurecompiler;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
+import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.Expression;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceLocation;
@@ -64,4 +65,13 @@ public class AstInfoExtractor {
         return expression;
     }
 
+    static String getTextInSource(ParseTree tree) {
+        return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+    }
+
+    static CodeElementType getCodeElementType(ParseTree tree){
+        //tree.type.toString()
+        //return CodeElementType.getFromTitleCase();
+        return null;
+    }
 }

@@ -5,11 +5,13 @@ import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
 import io.jsrminer.sourcetree.*;
 import io.rminer.core.api.IContainer;
 
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createBaseExpression;
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createSourceLocation;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 public class StatementsVisitor {
 
+    /**
+     * A Variable declaration Statement e.g. let x = "4";
+     */
     public static final NodeProcessor<SingleStatement, VariableStatementTree, BlockStatement> variableStatementProcessor
             = new NodeProcessor<>() {
         @Override
@@ -17,11 +19,13 @@ public class StatementsVisitor {
             if (!(parent instanceof BlockStatement))
                 throw new RuntimeException("VDS is not inside of a block");
 
-            String text;
-            int depth;
-            int indexInParent;
-            SourceLocation location;
-            CodeElementType type;
+            String text = getTextInSource(tree);
+            SourceLocation location = createSourceLocation(tree);
+
+            int depth = parent.getDepth() + 1;
+            int indexInParent = parent.getStatements().size();
+
+            CodeElementType type =  getCodeElementType(tree);
             var leaf = new SingleStatement();// AstInfoExtractor.createSingleStatement(text, tree.location, );
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
@@ -36,7 +40,6 @@ public class StatementsVisitor {
         }
     };
 
-
     /**
      * A variable declaration Node
      */
@@ -46,20 +49,19 @@ public class StatementsVisitor {
         String variableName = tree.lvalue.asIdentifierExpression().identifierToken.value;
         var variableDeclaration = new VariableDeclaration(variableName, kind);
 
-        // Text
-        String text = tree.toString();
-        variableDeclaration.setText(text);
         variableDeclaration.setSourceLocation(createSourceLocation(tree));
 
         // Set Scope (TODO set body source location
         variableDeclaration.setScope(container.getSourceLocation());
 
         // Process initializer
+        if (tree.initializer != null) {
+            Expression expression = createBaseExpression(tree.initializer);
+            Visitor.visit(tree.initializer, expression, container);
+            variableDeclaration.setInitializer(expression);
 
-        //if(ParseTree)
-        Expression expression = createBaseExpression(tree.initializer);
-        Visitor.visit(tree.initializer, expression, container);
-        variableDeclaration.setInitializer(expression);
+            // TODO add info to the statement?
+        }
         return variableDeclaration;
     }
 }
