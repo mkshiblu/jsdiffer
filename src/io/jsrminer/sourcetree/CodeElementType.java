@@ -27,7 +27,8 @@ public enum CodeElementType {
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
     SWITCH_STATEMENT("SwitchStatement"),
-    WHILE_STATEMENT("WhileStatement");
+    WHILE_STATEMENT("WhileStatement"),
+    VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement");
 
 
     public final String titleCase;

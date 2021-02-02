@@ -5,7 +5,6 @@ import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeFragment;
-import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.entities.Container;
@@ -28,6 +27,30 @@ public class ModelLoader {
 //    ModelLoader(String fileContent) {
 //        this.fileContent = fileContent;
 //    }
+
+//    public Container loadFromAst(@NonNull ProgramTree programTree) {
+//        SourceFile container = new SourceFile();
+//        container.setFilepath("unnamed.js");
+//        container.setQualifiedName("unnamed.js");
+//
+//        CodeFragment dummyBodyBlock = new BlockStatement();
+//        // Set the source location of the block parent to the end of the file
+//        SourceRange lastElementLocation = programTree.sourceElements.get(programTree.sourceElements.size() - 1).location;
+//        dummyBodyBlock.setText("{");
+//
+//        if (container.getSourceLocation() == null) {
+//            container.setSourceLocation(new SourceLocation(programTree.location.start.source.name
+//                    , 0, 0
+//                    , lastElementLocation.end.line, lastElementLocation.end.column
+//                    , 0, lastElementLocation.end.offset));
+//        }
+//
+//        dummyBodyBlock.setSourceLocation(container.getSourceLocation());
+//        process(programTree.sourceElements, dummyBodyBlock, container);
+//
+//        return container;
+//    }
+
 
     /**
      * Loads the sourceFile model using the Ast Tree
@@ -56,17 +79,5 @@ public class ModelLoader {
         for (ParseTree tree : trees) {
             Visitor.visit(tree, parent, container);
         }
-    }
-
-    static SingleStatement createSingleStatement(String text
-            , SourceLocation sourceLocation
-            , int positionIndexInParent
-            , int depth) {
-        var singleStatement = new SingleStatement();
-        singleStatement.setText(text);
-        singleStatement.setSourceLocation(sourceLocation);
-        singleStatement.setPositionIndexInParent(positionIndexInParent);
-        singleStatement.setDepth(depth);
-        return singleStatement;
     }
 }

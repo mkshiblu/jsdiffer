@@ -4,15 +4,11 @@ import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
-import io.jsrminer.sourcetree.CodeElementType;
-import io.jsrminer.sourcetree.Expression;
-import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ISourceFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
 
 public class AstInfoExtractor {
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {
@@ -73,7 +69,7 @@ public class AstInfoExtractor {
         return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
     }
 
-    public final static Map<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new HashMap() {{
+    public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
         put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
 
         put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
@@ -105,13 +101,44 @@ public class AstInfoExtractor {
         put(ParseTreeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT);
         put(ParseTreeType.RETURN_STATEMENT, CodeElementType.RETURN_STATEMENT);
 
+        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
         put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);
     }};
 
     static CodeElementType getCodeElementType(ParseTree tree) {
-        if (parseTreeTypeCodeElementTypeMap.get(tree) == null)
+        if (parseTreeTypeCodeElementTypeMap.get(tree.type) == null)
             throw new RuntimeException("ParseTreeType " + tree.type + " not mapped to CodeElement yet");
 
         return parseTreeTypeCodeElementTypeMap.get(tree.type);
+    }
+
+
+    static SingleStatement createSingleStatementAndPopulateCommonData(ParseTree tree, BlockStatement parent) {
+        var singleStatement = new SingleStatement();
+        populateLeafData(tree, singleStatement, parent);
+        singleStatement.setParent(parent);
+        parent.addStatement(singleStatement);
+        return singleStatement;
+    }
+//
+//    static SingleStatement createSingleStatementWithTextLocationIndexDepthType(ParseTree tree, BlockStatement parent) {
+//        String text = getTextInSource(tree);
+//        SourceLocation location = createSourceLocation(tree);
+//        int depth = parent.getDepth() + 1;
+//        int indexInParent = parent.getStatements().size();
+//        CodeElementType type = getCodeElementType(tree);
+//        return createSingleStatement(text, type, location, indexInParent, depth);
+//    }
+
+    /**
+     * Populates text, sourceLocation, type, depth, index in parent.
+     */
+    static <T extends CodeFragment> void populateLeafData(ParseTree tree, T fragment, BlockStatement parent) {
+        fragment.setText(getTextInSource(tree));
+        fragment.setSourceLocation(createSourceLocation(tree));
+        fragment.setDepth(parent.getDepth() + 1);
+        fragment.setPositionIndexInParent(parent.getStatements().size());
+        fragment.setType(getCodeElementType(tree));
+
     }
 }

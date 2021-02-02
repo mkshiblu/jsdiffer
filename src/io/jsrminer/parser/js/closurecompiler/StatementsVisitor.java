@@ -19,14 +19,7 @@ public class StatementsVisitor {
             if (!(parent instanceof BlockStatement))
                 throw new RuntimeException("VDS is not inside of a block");
 
-            String text = getTextInSource(tree);
-            SourceLocation location = createSourceLocation(tree);
-
-            int depth = parent.getDepth() + 1;
-            int indexInParent = parent.getStatements().size();
-
-            CodeElementType type =  getCodeElementType(tree);
-            var leaf = new SingleStatement();// AstInfoExtractor.createSingleStatement(text, tree.location, );
+            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
             for (var declarationTree : tree.declarations.declarations) {
