@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.ICodeFragment;
+import io.rminerx.core.api.ICodeFragment;
 
 import java.util.List;
 

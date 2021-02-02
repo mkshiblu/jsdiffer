@@ -1,6 +1,7 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
 import io.rminer.core.api.*;
+import io.rminerx.core.api.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

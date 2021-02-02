@@ -1,9 +1,9 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
-import io.rminer.core.entities.DeclarationContainer;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.entities.DeclarationContainer;
 
 import java.util.ArrayList;
 import java.util.List;

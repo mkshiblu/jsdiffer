@@ -7,8 +7,8 @@ import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.Expression;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SourceLocation;
-import io.rminer.core.api.IContainer;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ISourceFile;
 
 public class AstInfoExtractor {
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {

@@ -1,6 +1,6 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
-import io.rminer.core.api.ILeafFragment;
+import io.rminerx.core.api.ILeafFragment;
 
 public class LeafFragment extends Fragment implements ILeafFragment {
 //    @Override

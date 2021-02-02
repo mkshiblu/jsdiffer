@@ -9,7 +9,7 @@ import io.jsrminer.uml.MapperRefactoringProcessor;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.*;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
 

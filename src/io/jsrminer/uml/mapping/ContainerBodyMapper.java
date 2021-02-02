@@ -9,7 +9,7 @@ import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.diff.ContainerDiff;
-import io.rminer.core.entities.Container;
+import io.rminerx.core.entities.Container;
 
 import java.util.*;
 

@@ -10,7 +10,7 @@ import io.jsrminer.uml.diff.UMLParameterDiff;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 
 import java.util.*;
 

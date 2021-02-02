@@ -1,8 +1,8 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.ICompositeFragment;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.ICompositeFragment;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 

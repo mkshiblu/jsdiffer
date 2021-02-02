@@ -1,6 +1,6 @@
 package io.jsrminer.uml;
 
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.ISourceFile;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;

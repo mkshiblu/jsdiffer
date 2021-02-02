@@ -1,7 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.uml.UMLModel;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.ISourceFile;
 
 import java.util.List;
 import java.util.Map;

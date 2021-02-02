@@ -3,7 +3,7 @@ package io.jsrminer.refactorings;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.sourcetree.VariableDeclaration;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
-import io.rminer.core.entities.Container;
+import io.rminerx.core.entities.Container;
 
 import java.util.Set;
 

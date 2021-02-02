@@ -1,6 +1,6 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
-import io.rminer.core.api.IDeclarationContainer;
+import io.rminerx.core.api.IDeclarationContainer;
 
 /**
  * A container type declaration such as a function declaration or a class declaration

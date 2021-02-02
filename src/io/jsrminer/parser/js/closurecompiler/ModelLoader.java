@@ -7,8 +7,8 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.sourcetree.SourceLocation;
-import io.rminer.core.api.IContainer;
-import io.rminer.core.entities.Container;
+import io.rminerx.core.api.IContainer;
+import io.rminerx.core.entities.Container;
 import org.eclipse.jgit.annotations.NonNull;
 
 import java.util.List;

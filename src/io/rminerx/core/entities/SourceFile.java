@@ -1,7 +1,7 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
 import io.jsrminer.uml.diff.StringDistance;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.ISourceFile;
 import org.apache.commons.io.FilenameUtils;
 
 /**

@@ -12,8 +12,8 @@ import io.jsrminer.uml.mapping.FunctionUtil;
 import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
-import io.rminer.core.api.IFunctionDeclaration;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
 import java.util.stream.Collectors;

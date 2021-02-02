@@ -1,8 +1,8 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
 import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.rminer.core.api.ICompositeFragment;
-import io.rminer.core.api.IVariableDeclaration;
+import io.rminerx.core.api.ICompositeFragment;
+import io.rminerx.core.api.IVariableDeclaration;
 
 import java.util.List;
 

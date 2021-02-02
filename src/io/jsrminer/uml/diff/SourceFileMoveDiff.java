@@ -1,6 +1,6 @@
 package io.jsrminer.uml.diff;
 
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.ISourceFile;
 
 public class SourceFileMoveDiff extends SourceFileDiff {
 

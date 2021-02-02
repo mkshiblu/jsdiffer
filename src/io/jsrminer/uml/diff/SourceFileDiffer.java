@@ -10,8 +10,8 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
-import io.rminer.core.api.IFunctionDeclaration;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ISourceFile;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;

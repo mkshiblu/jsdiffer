@@ -2,7 +2,7 @@ package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
-import io.rminer.core.api.ITernaryOperatorExpression;
+import io.rminerx.core.api.ITernaryOperatorExpression;
 
 public class TernaryOperatorExpression implements ITernaryOperatorExpression {
     private Expression condition;

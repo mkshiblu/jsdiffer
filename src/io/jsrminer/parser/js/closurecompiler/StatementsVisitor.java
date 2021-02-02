@@ -3,7 +3,7 @@ package io.jsrminer.parser.js.closurecompiler;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
 import io.jsrminer.sourcetree.*;
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 

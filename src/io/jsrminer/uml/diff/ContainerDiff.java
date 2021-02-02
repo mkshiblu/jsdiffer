@@ -1,6 +1,6 @@
 package io.jsrminer.uml.diff;
 
-import io.rminer.core.entities.Container;
+import io.rminerx.core.entities.Container;
 
 public class ContainerDiff {
     Container container1;

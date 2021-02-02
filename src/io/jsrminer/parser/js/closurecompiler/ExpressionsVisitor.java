@@ -3,7 +3,7 @@ package io.jsrminer.parser.js.closurecompiler;
 import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.LiteralExpressionTree;
 import io.jsrminer.sourcetree.CodeFragment;
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 
 public class ExpressionsVisitor {
     public static final NodeProcessor<String, IdentifierExpressionTree, CodeFragment> identifierProcessor

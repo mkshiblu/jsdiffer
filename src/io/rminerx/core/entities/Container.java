@@ -1,10 +1,10 @@
-package io.rminer.core.entities;
+package io.rminerx.core.entities;
 
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.Statement;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IContainer;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.ArrayList;
 import java.util.List;

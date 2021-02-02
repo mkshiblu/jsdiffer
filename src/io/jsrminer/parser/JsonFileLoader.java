@@ -4,10 +4,10 @@ import com.jsoniter.JsonIterator;
 import com.jsoniter.any.Any;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.rminer.core.api.IContainer;
-import io.rminer.core.entities.Container;
-import io.rminer.core.entities.DeclarationContainer;
-import io.rminer.core.entities.SourceFile;
+import io.rminerx.core.api.IContainer;
+import io.rminerx.core.entities.Container;
+import io.rminerx.core.entities.DeclarationContainer;
+import io.rminerx.core.entities.SourceFile;
 import org.eclipse.jgit.annotations.NonNull;
 import org.eclipse.jgit.util.StringUtils;
 

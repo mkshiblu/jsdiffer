@@ -1,8 +1,8 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.uml.mapping.FunctionUtil;
-import io.rminer.core.api.IFunctionDeclaration;
-import io.rminer.core.api.ISourceFile;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ISourceFile;
 
 public interface UMLSourceFileMatcher {
     //public boolean match(IFunctionDeclaration removedClass, IFunctionDeclaration addedClass, String renamedFile);

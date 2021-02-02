@@ -1,6 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -4,7 +4,7 @@ import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import io.jsrminer.sourcetree.CodeEntity;
 import io.jsrminer.sourcetree.CodeFragment;
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.EnumMap;

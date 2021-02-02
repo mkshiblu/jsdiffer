@@ -1,8 +1,8 @@
 package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.*;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
 import java.util.List;

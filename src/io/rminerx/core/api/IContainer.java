@@ -1,4 +1,4 @@
-package io.rminer.core.api;
+package io.rminerx.core.api;
 
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.Statement;

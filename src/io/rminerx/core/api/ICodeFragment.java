@@ -1,4 +1,4 @@
-package io.rminer.core.api;
+package io.rminerx.core.api;
 
 import java.util.List;
 

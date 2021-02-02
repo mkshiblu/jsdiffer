@@ -1,7 +1,7 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
-import io.rminer.core.api.IParser;
+import io.rminerx.core.api.IParser;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.Map;

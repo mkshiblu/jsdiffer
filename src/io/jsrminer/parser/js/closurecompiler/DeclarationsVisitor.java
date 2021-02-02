@@ -4,7 +4,7 @@ import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree
 import io.jsrminer.sourcetree.AnonymousFunctionDeclaration;
 import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.FunctionDeclaration;
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 
 class DeclarationsVisitor {
 
