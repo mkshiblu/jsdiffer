@@ -47,7 +47,8 @@ public class ClosureCompilerParser extends JavaScriptParser {
                     sourceFile.setFilepath(filepath);
                     sourceModels.put(filepath, sourceFile);
                 } catch (Exception ex) {
-                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
+                    ex.printStackTrace();
+                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString() + );
                     fileContents.remove(filepath);
                 }
             }

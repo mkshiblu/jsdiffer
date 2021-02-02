@@ -59,9 +59,17 @@ public class AstInfoExtractor {
         // Function Body
     }
 
-    static Expression createBaseExpression(ParseTree tree) {
+    static Expression createBaseExpressionWithoutSettingOwner(ParseTree tree) {
         var expression = new Expression();
-        expression.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));
+        populateLeafTextLocationAndType(tree, expression);
+        return expression;
+    }
+
+    static Expression createExpressionAndPopulateCommonInfo(ParseTree tree, BlockStatement parent) {
+        var expression = new Expression();
+        populateExpressionData(tree, expression, parent);
+        expression.setOwnerBlock(parent);
+        parent.addExpression(expression);
         return expression;
     }
 
@@ -103,6 +111,8 @@ public class AstInfoExtractor {
 
         put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
         put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);
+
+        put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
     }};
 
     static CodeElementType getCodeElementType(ParseTree tree) {
@@ -115,30 +125,76 @@ public class AstInfoExtractor {
 
     static SingleStatement createSingleStatementAndPopulateCommonData(ParseTree tree, BlockStatement parent) {
         var singleStatement = new SingleStatement();
-        populateLeafData(tree, singleStatement, parent);
+        populateSingleStatementData(tree, singleStatement, parent);
         singleStatement.setParent(parent);
         parent.addStatement(singleStatement);
         return singleStatement;
     }
-//
-//    static SingleStatement createSingleStatementWithTextLocationIndexDepthType(ParseTree tree, BlockStatement parent) {
-//        String text = getTextInSource(tree);
-//        SourceLocation location = createSourceLocation(tree);
-//        int depth = parent.getDepth() + 1;
-//        int indexInParent = parent.getStatements().size();
-//        CodeElementType type = getCodeElementType(tree);
-//        return createSingleStatement(text, type, location, indexInParent, depth);
-//    }
+
+    static CodeFragment copyLeafData(CodeFragment leaf1, CodeFragment leaf2) {
+        leaf1.getVariables().addAll(leaf2.getVariables());
+        leaf1.getNullLiterals().addAll(leaf2.getNullLiterals());
+        leaf1.getNumberLiterals().addAll(leaf2.getNumberLiterals());
+        leaf1.getStringLiterals().addAll(leaf2.getStringLiterals());
+        leaf1.getBooleanLiterals().addAll(leaf2.getBooleanLiterals());
+        leaf1.getInfixOperators().addAll(leaf2.getInfixOperators());
+        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
+
+        leaf1.getPostfixExpressions().addAll(leaf2.getPostfixExpressions());
+        leaf1.getTernaryOperatorExpressions().addAll(leaf2.getTernaryOperatorExpressions());
+        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
+        leaf1.getVariableDeclarations().addAll(leaf2.getVariableDeclarations());
+        leaf1.getIdentifierArguments().addAll(leaf2.getIdentifierArguments());
+
+
+        for (var entry : leaf2.getMethodInvocationMap().entrySet()) {
+            var invocations1 = leaf1.getMethodInvocationMap().get(entry.getKey());
+            if (invocations1 == null) {
+                leaf1.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
+            } else {
+                invocations1.addAll(entry.getValue());
+            }
+        }
+
+        //leaf1.getMethodInvocationMap().addAll(leaf2.getVariableDeclarations());
+        //leaf1.getCreationMap().addAll(leaf2.getVariableDeclarations());
+
+        for (var entry : leaf2.getCreationMap().entrySet()) {
+            var creations1 = leaf1.getCreationMap().get(entry.getKey());
+            if (creations1 == null) {
+                leaf1.getCreationMap().put(entry.getKey(), entry.getValue());
+            } else {
+                creations1.addAll(entry.getValue());
+            }
+        }
+
+        return leaf1;
+    }
 
     /**
      * Populates text, sourceLocation, type, depth, index in parent.
      */
-    static <T extends CodeFragment> void populateLeafData(ParseTree tree, T fragment, BlockStatement parent) {
-        fragment.setText(getTextInSource(tree));
-        fragment.setSourceLocation(createSourceLocation(tree));
+    static void populateSingleStatementData(ParseTree tree, SingleStatement fragment, BlockStatement parent) {
+        populateLeafTextLocationAndType(tree, fragment);
         fragment.setDepth(parent.getDepth() + 1);
         fragment.setPositionIndexInParent(parent.getStatements().size());
-        fragment.setType(getCodeElementType(tree));
+    }
 
+    /**
+     * Populates text, sourceLocation, type, depth, index in parent.
+     */
+    static void populateExpressionData(ParseTree tree, Expression fragment, BlockStatement parent) {
+        populateLeafTextLocationAndType(tree, fragment);
+        fragment.setDepth(parent.getDepth());
+        fragment.setPositionIndexInParent(parent.getPositionIndexInParent());
+    }
+
+    /**
+     * Populates text, sourceLocation, type, depth, index in parent.
+     */
+    static <T extends CodeFragment> void populateLeafTextLocationAndType(ParseTree tree, T fragment) {
+        fragment.setText(getTextInSource(tree));
+        fragment.setSourceLocation(createSourceLocation(tree));
+        fragment.setType(getCodeElementType(tree));
     }
 }

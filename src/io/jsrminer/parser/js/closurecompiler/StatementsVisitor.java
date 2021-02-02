@@ -1,5 +1,7 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.CommaExpressionTree;
+import com.google.javascript.jscomp.parsing.parser.trees.ExpressionStatementTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
 import io.jsrminer.sourcetree.*;
@@ -8,6 +10,18 @@ import io.rminerx.core.api.IContainer;
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 public class StatementsVisitor {
+    /**
+     * An expression statement such as x = "4";
+     */
+    public static final NodeProcessor<SingleStatement, ExpressionStatementTree, BlockStatement> expressionStatementProcessor
+            = new NodeProcessor<>() {
+        @Override
+        public SingleStatement process(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
+            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
+            Visitor.visit(tree.expression, leaf, container);
+            return leaf;
+        }
+    };
 
     /**
      * A Variable declaration Statement e.g. let x = "4";
@@ -16,9 +30,6 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public SingleStatement process(VariableStatementTree tree, BlockStatement parent, IContainer container) {
-            if (!(parent instanceof BlockStatement))
-                throw new RuntimeException("VDS is not inside of a block");
-
             var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
@@ -26,9 +37,29 @@ public class StatementsVisitor {
                 VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container);
                 leaf.getVariableDeclarations().add(vd);
                 leaf.getVariables().add(vd.variableName);
+
+                if (vd.getInitializer() != null) {
+                    copyLeafData(leaf, vd.getInitializer());
+                }
             }
-            //leaf.getVariableDeclarations().add()
-            //return leaf;
+
+            return leaf;
+        }
+    };
+
+
+    /**
+     * A comma expression Statement e.g. d, x = "4";
+     */
+    public static final NodeProcessor<SingleStatement, CommaExpressionTree, BlockStatement> commaStatementProcessor
+            = new NodeProcessor<>() {
+        @Override
+        public SingleStatement process(CommaExpressionTree tree, BlockStatement parent, IContainer container) {
+            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
+
+            tree.expressions.forEach(expressionTree -> {
+                Visitor.visit(expressionTree, leaf, container);
+            });
             return leaf;
         }
     };
@@ -49,11 +80,9 @@ public class StatementsVisitor {
 
         // Process initializer
         if (tree.initializer != null) {
-            Expression expression = createBaseExpression(tree.initializer);
+            Expression expression = createBaseExpressionWithoutSettingOwner(tree.initializer);
             Visitor.visit(tree.initializer, expression, container);
             variableDeclaration.setInitializer(expression);
-
-            // TODO add info to the statement?
         }
         return variableDeclaration;
     }

@@ -1,15 +1,15 @@
 package io.jsrminer.sourcetree;
 
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
-import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SingleStatement extends Statement implements ICodeFragment {
+public class SingleStatement extends Statement implements ILeafFragment {
     // private List<AbstractExpression> expressionList;
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();

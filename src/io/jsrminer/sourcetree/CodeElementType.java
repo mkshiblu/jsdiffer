@@ -28,6 +28,8 @@ public enum CodeElementType {
     SWITCH_CASE("SwitchCase"),
     SWITCH_STATEMENT("SwitchStatement"),
     WHILE_STATEMENT("WhileStatement"),
+    LITERAL_EXPRESSION("LiteralExpression"),
+    COMMA_EXPRESSION("CommaExpression"),
     VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement");
 
 

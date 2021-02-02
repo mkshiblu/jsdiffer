@@ -59,7 +59,7 @@ public class ModelLoader {
      */
     public void loadFromAst(@NonNull ProgramTree programTree, @NonNull Container container) {
         // Create a dummy Block parent for the file
-        CodeFragment dummyBodyBlock = new BlockStatement();
+        BlockStatement dummyBodyBlock = new BlockStatement();
         // Set the source location of the block parent to the end of the file
         SourceRange lastElementLocation = programTree.sourceElements.get(programTree.sourceElements.size() - 1).location;
         dummyBodyBlock.setText("{");
@@ -73,6 +73,10 @@ public class ModelLoader {
 
         dummyBodyBlock.setSourceLocation(container.getSourceLocation());
         process(programTree.sourceElements, dummyBodyBlock, container);
+
+        container.getStatements().addAll(dummyBodyBlock.getStatements());
+        container.getFunctionDeclarations().addAll(dummyBodyBlock.getFunctionDeclarations());
+        //container.getAnonymousFunctionDeclarations().addAll(dummyBodyBlock.getAnonymousFunctionDeclarations().getAllAnonymousFunctionDeclarations());
     }
 
     private void process(List<? extends ParseTree> trees, CodeFragment parent, IContainer container) {

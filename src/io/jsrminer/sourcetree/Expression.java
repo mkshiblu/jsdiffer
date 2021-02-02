@@ -2,13 +2,14 @@ package io.jsrminer.sourcetree;
 
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Expression extends CodeFragment {
+public class Expression extends CodeFragment implements ILeafFragment {
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();

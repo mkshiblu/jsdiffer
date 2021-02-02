@@ -48,7 +48,7 @@ public class SourceLocation {
 
     @Override
     public String toString() {
-        return this.file + "(" + startLine + "," + startColumn + ")";
+        return this.file + "(" + startLine + "," + startColumn + ") - (" + endLine + "," + endColumn + ")";
     }
 
     public boolean subsumes(SourceLocation other) {
