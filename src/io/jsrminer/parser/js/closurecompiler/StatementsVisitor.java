@@ -18,10 +18,7 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public BlockStatement process(BlockTree tree, BlockStatement parent, IContainer container) {
-            var blockStatement = createBlockStatementAndPopulateCommonData(tree, parent);
-
-            blockStatement.setParent(parent);
-            parent.addStatement(blockStatement);
+            var blockStatement = createBlockStatementPopulateAndAddToParent(tree, parent);
 
             // Parse statements
             tree.statements.forEach(statementTree -> {
@@ -39,7 +36,7 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public SingleStatement process(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
-            var leaf = createSingleStatementAndPopulateCommonDataAddToParent(tree, parent);
+            var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
             Visitor.visitExpression(tree.expression, leaf, container);
             return leaf;
         }
@@ -52,7 +49,7 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public SingleStatement process(VariableStatementTree tree, BlockStatement parent, IContainer container) {
-            var leaf = createSingleStatementAndPopulateCommonDataAddToParent(tree, parent);
+            var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
             for (var declarationTree : tree.declarations.declarations) {

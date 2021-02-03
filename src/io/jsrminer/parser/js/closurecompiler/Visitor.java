@@ -19,6 +19,7 @@ public class Visitor {
         put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
         put(BLOCK, StatementsVisitor.blockStatementProcessor);
+        put(IF_STATEMENT, ChoiceStatementsVisitor.ifStatementProcessor);
         put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);

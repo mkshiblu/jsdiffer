@@ -5,8 +5,8 @@ import java.util.Map;
 
 public enum CodeElementType {
     EXPRESSION_STATEMENT("ExpressionStatement"),
-    IF_STATEMENT("IfStatement"),
-    BLOCK_STATEMENT("BlockStatement"),
+    IF_STATEMENT("IfStatement", "if"),
+    BLOCK_STATEMENT("BlockStatement", "{"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     EMPTY_STATEMENT("EmptyStatement"),
     FUNCTION_INVOCATION("CallExpression"),
@@ -14,29 +14,36 @@ public enum CodeElementType {
     SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
     OBJECT_CREATION("NewExpression"),
     RETURN_STATEMENT("ReturnStatement"),
-    TRY_STATEMENT("TryStatement"),
-    CATCH_CLAUSE("CatchClause"),
+    TRY_STATEMENT("TryStatement", "try"),
+    CATCH_CLAUSE("CatchClause", "catch"),
     THROW_STATEMENT("ThrowStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
     ENHANCED_FOR_STATEMENT("ForInStatement"), // TODO revisit
-    FOR_STATEMENT("ForStatement"),
+    FOR_STATEMENT("ForStatement", "for"),
     LABELED_STATEMENT("LabeledStatement"),
     VARIABLE_DECLARATION("VariableDeclaration"),
     DO_WHILE_STATEMENT("DoWhileStatement"),
     BREAK_STATEMENT("BreakStatement"),
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
-    SWITCH_STATEMENT("SwitchStatement"),
-    WHILE_STATEMENT("WhileStatement"),
+    SWITCH_STATEMENT("SwitchStatement", "switch"),
+    WHILE_STATEMENT("WhileStatement", "while"),
     LITERAL_EXPRESSION("LiteralExpression"),
     COMMA_EXPRESSION("CommaExpression"),
     VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement");
 
 
     public final String titleCase;
+    public final String keyword;
 
     private CodeElementType(String titleCase) {
         this.titleCase = titleCase;
+        this.keyword = null;
+    }
+
+    private CodeElementType(String titleCase, String keyword) {
+        this.titleCase = titleCase;
+        this.keyword = keyword;
     }
 
     private static Map<String, CodeElementType> typeTitleCaseMap = new HashMap<>();

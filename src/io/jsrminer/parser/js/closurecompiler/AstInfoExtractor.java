@@ -11,6 +11,44 @@ import io.rminerx.core.api.ISourceFile;
 import java.util.EnumMap;
 
 public class AstInfoExtractor {
+    public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
+        put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
+
+        put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
+        put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
+
+        put(ParseTreeType.BLOCK, CodeElementType.BLOCK_STATEMENT);
+        put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
+        put(ParseTreeType.EMPTY_STATEMENT, CodeElementType.EMPTY_STATEMENT);
+        put(ParseTreeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION);
+        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.CONSTRUCTOR_INVOCATION);
+        //put(ParseTreeType., CodeElementType.SUPER_CONSTRUCTOR_INVOCATION);
+
+//        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.OBJECT_CREATION);
+
+        put(ParseTreeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT);
+        put(ParseTreeType.CATCH, CodeElementType.CATCH_CLAUSE);
+        put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
+
+        //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
+        put(ParseTreeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT);
+        put(ParseTreeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
+        //put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
+        put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);
+        put(ParseTreeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT);
+
+        put(ParseTreeType.CONTINUE_STATEMENT, CodeElementType.CONTINUE_STATEMENT);
+        put(ParseTreeType.BREAK_STATEMENT, CodeElementType.BREAK_STATEMENT);
+
+        put(ParseTreeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT);
+        put(ParseTreeType.RETURN_STATEMENT, CodeElementType.RETURN_STATEMENT);
+
+        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
+        put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);
+
+        put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
+    }};
+
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {
         return new SourceLocation(
                 sourceRange.start.source.name
@@ -65,74 +103,25 @@ public class AstInfoExtractor {
         return expression;
     }
 
-    static Expression createExpressionAndPopulateCommonInfo(ParseTree tree, BlockStatement parent) {
+    static Expression createExpressionPopulateAndAddToParent(ParseTree tree, BlockStatement parent) {
         var expression = new Expression();
-        populateExpressionData(tree, expression, parent);
-        expression.setOwnerBlock(parent);
-        parent.addExpression(expression);
+        populateExpressionData(tree, expression);
+        addExpression(expression, parent);
         return expression;
     }
 
-    static String getTextInSource(ParseTree tree) {
-        return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
-    }
 
-    public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
-        put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
-
-        put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
-        put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
-
-        put(ParseTreeType.BLOCK, CodeElementType.BLOCK_STATEMENT);
-        put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
-        put(ParseTreeType.EMPTY_STATEMENT, CodeElementType.EMPTY_STATEMENT);
-        put(ParseTreeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION);
-        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.CONSTRUCTOR_INVOCATION);
-        //put(ParseTreeType., CodeElementType.SUPER_CONSTRUCTOR_INVOCATION);
-
-//        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.OBJECT_CREATION);
-
-        put(ParseTreeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT);
-        put(ParseTreeType.CATCH, CodeElementType.CATCH_CLAUSE);
-        put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
-
-        //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
-        put(ParseTreeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT);
-        put(ParseTreeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
-        //put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
-        put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);
-        put(ParseTreeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT);
-
-        put(ParseTreeType.CONTINUE_STATEMENT, CodeElementType.CONTINUE_STATEMENT);
-        put(ParseTreeType.BREAK_STATEMENT, CodeElementType.BREAK_STATEMENT);
-
-        put(ParseTreeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT);
-        put(ParseTreeType.RETURN_STATEMENT, CodeElementType.RETURN_STATEMENT);
-
-        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
-        put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);
-
-        put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
-    }};
-
-    static CodeElementType getCodeElementType(ParseTree tree) {
-        if (parseTreeTypeCodeElementTypeMap.get(tree.type) == null)
-            throw new RuntimeException("ParseTreeType " + tree.type + " not mapped to CodeElement yet");
-
-        return parseTreeTypeCodeElementTypeMap.get(tree.type);
-    }
-
-    static BlockStatement createBlockStatementAndPopulateCommonData(ParseTree tree, BlockStatement parent) {
+    static BlockStatement createBlockStatementPopulateAndAddToParent(ParseTree tree, BlockStatement parent) {
         var blockStatement = new BlockStatement();
-        populateBlockStatementData(tree, blockStatement, parent);
+        populateBlockStatementData(tree, blockStatement);
+        addStatement(blockStatement, parent);
         return blockStatement;
     }
 
-    static SingleStatement createSingleStatementAndPopulateCommonDataAddToParent(ParseTree tree, BlockStatement parent) {
+    static SingleStatement createSingleStatementPopulateAndAddToParent(ParseTree tree, BlockStatement parent) {
         var singleStatement = new SingleStatement();
-        populateSingleStatementData(tree, singleStatement, parent);
-        singleStatement.setParent(parent);
-        parent.addStatement(singleStatement);
+        populateSingleStatementData(tree, singleStatement);
+        addStatement(singleStatement, parent);
         return singleStatement;
     }
 
@@ -179,28 +168,26 @@ public class AstInfoExtractor {
     /**
      *
      */
-    static void populateBlockStatementData(ParseTree tree, BlockStatement blockStatement, BlockStatement parent) {
+    static void populateBlockStatementData(ParseTree tree, BlockStatement blockStatement) {
         populateLocationAndType(tree, blockStatement);
-        blockStatement.setDepth(parent.getDepth() + 1);
-        blockStatement.setPositionIndexInParent(parent.getStatements().size());
+        blockStatement.setText(blockStatement.getCodeElementType().keyword);
+        if (blockStatement.getText() == null) {
+            throw new RuntimeException("Block text was not populated for type " + blockStatement.getCodeElementType().toString());
+        }
     }
 
     /**
      * Populates text, sourceLocation, type, depth, index in parent.
      */
-    static void populateSingleStatementData(ParseTree tree, SingleStatement fragment, BlockStatement parent) {
+    static void populateSingleStatementData(ParseTree tree, SingleStatement fragment) {
         populateTextLocationAndType(tree, fragment);
-        fragment.setDepth(parent.getDepth() + 1);
-        fragment.setPositionIndexInParent(parent.getStatements().size());
     }
 
     /**
      * Populates text, sourceLocation, type, depth, index in parent.
      */
-    static void populateExpressionData(ParseTree tree, Expression fragment, BlockStatement parent) {
+    static void populateExpressionData(ParseTree tree, Expression fragment) {
         populateTextLocationAndType(tree, fragment);
-        fragment.setDepth(parent.getDepth());
-        fragment.setPositionIndexInParent(parent.getPositionIndexInParent());
     }
 
     /**
@@ -217,5 +204,31 @@ public class AstInfoExtractor {
     static <T extends CodeFragment> void populateLocationAndType(ParseTree tree, T fragment) {
         fragment.setSourceLocation(createSourceLocation(tree));
         fragment.setType(getCodeElementType(tree));
+    }
+
+    static void addStatement(Statement statement, BlockStatement parent) {
+        statement.setPositionIndexInParent(parent.getStatements().size());
+        parent.addStatement(statement);
+        statement.setParent(parent);
+    }
+
+    static void addExpression(Expression expression, BlockStatement parent) {
+        //an expression has the same index and depth as the composite statement it belong to
+        expression.setDepth(parent.getDepth());
+        expression.setPositionIndexInParent(parent.getPositionIndexInParent());
+        parent.getExpressions().add(expression);
+        expression.setOwnerBlock(parent);
+    }
+
+
+    static String getTextInSource(ParseTree tree) {
+        return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+    }
+
+    static CodeElementType getCodeElementType(ParseTree tree) {
+        if (parseTreeTypeCodeElementTypeMap.get(tree.type) == null)
+            throw new RuntimeException("ParseTreeType " + tree.type + " not mapped to CodeElement yet");
+
+        return parseTreeTypeCodeElementTypeMap.get(tree.type);
     }
 }
