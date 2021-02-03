@@ -1,6 +1,7 @@
 package io.jsrminer.sourcetree;
 
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map;
 /**
  * Base class for all the code elements that has apis  to provide all the variables, identifiers appeared in the code
  */
-public abstract class CodeFragment extends CodeEntity {
+public abstract class CodeFragment extends CodeEntity implements ICodeFragment {
     //    protected SourceLocation sourceLocation;
 //    protected String text;
 //    protected CodeElementType type;

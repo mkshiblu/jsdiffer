@@ -2,7 +2,7 @@ package io.jsrminer.uml;
 
 import io.rminerx.core.api.ISourceFile;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
 
-    private HashMap<String, ISourceFile> sourceModelMap;
+    private LinkedHashMap<String, ISourceFile> sourceModelMap = new LinkedHashMap<>();
     LinkedHashSet repositoryDirectories = new LinkedHashSet();
 
     public boolean containsSourceFileModel(String file) {
@@ -24,10 +24,6 @@ public class UMLModel /*implements Diffable<UMLModel, UMLModelDiff>*/ {
 
     public Map<String, ISourceFile> getSourceFileModels() {
         return sourceModelMap;
-    }
-
-    public void setSourceFileModels(final HashMap<String, ISourceFile> sourceModelMap) {
-        this.sourceModelMap = sourceModelMap;
     }
 
     public LinkedHashSet getRepositoryDirectories() {

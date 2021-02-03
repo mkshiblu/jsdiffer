@@ -4,7 +4,6 @@ import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.CodeFragment;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.entities.Container;
@@ -51,7 +50,6 @@ public class ModelLoader {
 //        return container;
 //    }
 
-
     /**
      * Loads the sourceFile model using the Ast Tree
      *
@@ -79,9 +77,9 @@ public class ModelLoader {
         //container.getAnonymousFunctionDeclarations().addAll(dummyBodyBlock.getAnonymousFunctionDeclarations().getAllAnonymousFunctionDeclarations());
     }
 
-    private void process(List<? extends ParseTree> trees, CodeFragment parent, IContainer container) {
+    private void process(List<? extends ParseTree> trees, BlockStatement parent, IContainer container) {
         for (ParseTree tree : trees) {
-            Visitor.visit(tree, parent, container);
+            Visitor.visitStatement(tree, parent, container);
         }
     }
 }

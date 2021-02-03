@@ -1,10 +1,10 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
-import io.jsrminer.sourcetree.CodeFragment;
+import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 
-public interface INodeProcessor<R, T extends ParseTree, C extends CodeFragment> {
+public interface INodeProcessor<R, T extends ParseTree, C extends ICodeFragment> {
     R process(T tree, C parent, IContainer container);
 
 //    default R process(T tree, SingleStatement singleStatement, IContainer container) {

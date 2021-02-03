@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BabelParser extends JavaScriptParser {
@@ -21,7 +19,6 @@ public class BabelParser extends JavaScriptParser {
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
-        final HashMap<String, ISourceFile> sourceModels = new LinkedHashMap<>();
         final UMLModel umlModel = new UMLModel();
 
         try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
@@ -34,7 +31,7 @@ public class BabelParser extends JavaScriptParser {
                     log.info("Processing " + filepath + "...");
                     SourceFile sourceFile = parse(content, jsEngine, filepath);
                     sourceFile.setFilepath(filepath);
-                    sourceModels.put(filepath, sourceFile);
+                    umlModel.getSourceFileModels().put(filepath, sourceFile);
                 } catch (Exception ex) {
                     System.out.println("Ignoring and removing file " + filepath + " due to exception" + ex.toString());
                     fileContents.remove(filepath);
@@ -43,7 +40,6 @@ public class BabelParser extends JavaScriptParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        umlModel.setSourceFileModels(sourceModels);
         return umlModel;
     }
 

@@ -35,7 +35,6 @@ public class ClosureCompilerParser extends JavaScriptParser {
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
-        final HashMap<String, ISourceFile> sourceModels = new LinkedHashMap<>();
         final UMLModel umlModel = new UMLModel();
         try {
             for (String filepath : fileContents.keySet()) {
@@ -45,10 +44,10 @@ public class ClosureCompilerParser extends JavaScriptParser {
                     log.info("Processing " + filepath + "...");
                     SourceFile sourceFile = parseAndLoadSourceFile(content, filepath);
                     sourceFile.setFilepath(filepath);
-                    sourceModels.put(filepath, sourceFile);
+                    umlModel.getSourceFileModels().put(filepath, sourceFile);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString() + );
+                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
                     fileContents.remove(filepath);
                 }
             }

@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.CommaExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ExpressionStatementTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
@@ -18,7 +17,7 @@ public class StatementsVisitor {
         @Override
         public SingleStatement process(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
             var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
-            Visitor.visit(tree.expression, leaf, container);
+            Visitor.visitExpression(tree.expression, leaf, container);
             return leaf;
         }
     };
@@ -48,21 +47,6 @@ public class StatementsVisitor {
     };
 
 
-    /**
-     * A comma expression Statement e.g. d, x = "4";
-     */
-    public static final NodeProcessor<SingleStatement, CommaExpressionTree, BlockStatement> commaStatementProcessor
-            = new NodeProcessor<>() {
-        @Override
-        public SingleStatement process(CommaExpressionTree tree, BlockStatement parent, IContainer container) {
-            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
-
-            tree.expressions.forEach(expressionTree -> {
-                Visitor.visit(expressionTree, leaf, container);
-            });
-            return leaf;
-        }
-    };
 
     /**
      * A variable declaration Node
@@ -81,7 +65,7 @@ public class StatementsVisitor {
         // Process initializer
         if (tree.initializer != null) {
             Expression expression = createBaseExpressionWithoutSettingOwner(tree.initializer);
-            Visitor.visit(tree.initializer, expression, container);
+            Visitor.visitExpression(tree.initializer, expression, container);
             variableDeclaration.setInitializer(expression);
         }
         return variableDeclaration;
