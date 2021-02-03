@@ -22,7 +22,10 @@ public class Visitor {
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);
         put(IDENTIFIER_EXPRESSION, ExpressionsVisitor.identifierProcessor);
-        put(LITERAL_EXPRESSION, ExpressionsVisitor.literalExpressionProcessor);
+        put(LITERAL_EXPRESSION, LiteralsProcessor.literalExpressionProcessor);
+
+        put(NEW_EXPRESSION, InvocationsProcessor.newExpression);
+        put(CALL_EXPRESSION, InvocationsProcessor.callExpression);
 
         put(BINARY_OPERATOR, ExpressionsVisitor.binaryOperatorProcessor);
     }};

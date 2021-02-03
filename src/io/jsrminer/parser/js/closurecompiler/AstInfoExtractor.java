@@ -87,10 +87,10 @@ public class AstInfoExtractor {
         put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
         put(ParseTreeType.EMPTY_STATEMENT, CodeElementType.EMPTY_STATEMENT);
         put(ParseTreeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION);
-        //put(ParseTreeType.NEW_EXPRESSION, CodeElementType.CONSTRUCTOR_INVOCATION);
+        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.CONSTRUCTOR_INVOCATION);
         //put(ParseTreeType., CodeElementType.SUPER_CONSTRUCTOR_INVOCATION);
 
-        //put(ParseTreeType.NEW_EXPRESSION, CodeElementType.OBJECT_CREATION);
+//        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.OBJECT_CREATION);
 
         put(ParseTreeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT);
         put(ParseTreeType.CATCH, CodeElementType.CATCH_CLAUSE);
