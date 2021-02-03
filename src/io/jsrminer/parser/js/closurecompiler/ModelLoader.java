@@ -4,6 +4,7 @@ import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.entities.Container;
@@ -61,6 +62,8 @@ public class ModelLoader {
         // Set the source location of the block parent to the end of the file
         SourceRange lastElementLocation = programTree.sourceElements.get(programTree.sourceElements.size() - 1).location;
         dummyBodyBlock.setText("{");
+        dummyBodyBlock.setType(CodeElementType.BLOCK_STATEMENT);
+        //dummyBodyBlock.setDepth(-1);
 
         if (container.getSourceLocation() == null) {
             container.setSourceLocation(new SourceLocation(programTree.location.start.source.name

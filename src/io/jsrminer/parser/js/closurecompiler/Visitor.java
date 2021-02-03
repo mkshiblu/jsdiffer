@@ -18,6 +18,7 @@ public class Visitor {
             = new EnumMap(ParseTreeType.class) {{
         put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
+        put(BLOCK, StatementsVisitor.blockStatementProcessor);
         put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);

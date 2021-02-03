@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ExpressionStatementTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
@@ -9,6 +10,28 @@ import io.rminerx.core.api.IContainer;
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 public class StatementsVisitor {
+
+    /**
+     * A Block Statement
+     */
+    public static final INodeProcessor<BlockStatement, BlockTree, BlockStatement> blockStatementProcessor
+            = new NodeProcessor<>() {
+        @Override
+        public BlockStatement process(BlockTree tree, BlockStatement parent, IContainer container) {
+            var blockStatement = createBlockStatementAndPopulateCommonData(tree, parent);
+
+            blockStatement.setParent(parent);
+            parent.addStatement(blockStatement);
+
+            // Parse statements
+            tree.statements.forEach(statementTree -> {
+                Visitor.visitStatement(statementTree, blockStatement, container);
+            });
+
+            return blockStatement;
+        }
+    };
+
     /**
      * An expression statement such as x = "4";
      */
@@ -16,7 +39,7 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public SingleStatement process(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
-            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
+            var leaf = createSingleStatementAndPopulateCommonDataAddToParent(tree, parent);
             Visitor.visitExpression(tree.expression, leaf, container);
             return leaf;
         }
@@ -29,7 +52,7 @@ public class StatementsVisitor {
             = new NodeProcessor<>() {
         @Override
         public SingleStatement process(VariableStatementTree tree, BlockStatement parent, IContainer container) {
-            var leaf = createSingleStatementAndPopulateCommonData(tree, parent);
+            var leaf = createSingleStatementAndPopulateCommonDataAddToParent(tree, parent);
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
             for (var declarationTree : tree.declarations.declarations) {
@@ -45,8 +68,6 @@ public class StatementsVisitor {
             return leaf;
         }
     };
-
-
 
     /**
      * A variable declaration Node

@@ -61,7 +61,7 @@ public class AstInfoExtractor {
 
     static Expression createBaseExpressionWithoutSettingOwner(ParseTree tree) {
         var expression = new Expression();
-        populateLeafTextLocationAndType(tree, expression);
+        populateTextLocationAndType(tree, expression);
         return expression;
     }
 
@@ -122,8 +122,13 @@ public class AstInfoExtractor {
         return parseTreeTypeCodeElementTypeMap.get(tree.type);
     }
 
+    static BlockStatement createBlockStatementAndPopulateCommonData(ParseTree tree, BlockStatement parent) {
+        var blockStatement = new BlockStatement();
+        populateBlockStatementData(tree, blockStatement, parent);
+        return blockStatement;
+    }
 
-    static SingleStatement createSingleStatementAndPopulateCommonData(ParseTree tree, BlockStatement parent) {
+    static SingleStatement createSingleStatementAndPopulateCommonDataAddToParent(ParseTree tree, BlockStatement parent) {
         var singleStatement = new SingleStatement();
         populateSingleStatementData(tree, singleStatement, parent);
         singleStatement.setParent(parent);
@@ -172,10 +177,19 @@ public class AstInfoExtractor {
     }
 
     /**
+     *
+     */
+    static void populateBlockStatementData(ParseTree tree, BlockStatement blockStatement, BlockStatement parent) {
+        populateLocationAndType(tree, blockStatement);
+        blockStatement.setDepth(parent.getDepth() + 1);
+        blockStatement.setPositionIndexInParent(parent.getStatements().size());
+    }
+
+    /**
      * Populates text, sourceLocation, type, depth, index in parent.
      */
     static void populateSingleStatementData(ParseTree tree, SingleStatement fragment, BlockStatement parent) {
-        populateLeafTextLocationAndType(tree, fragment);
+        populateTextLocationAndType(tree, fragment);
         fragment.setDepth(parent.getDepth() + 1);
         fragment.setPositionIndexInParent(parent.getStatements().size());
     }
@@ -184,7 +198,7 @@ public class AstInfoExtractor {
      * Populates text, sourceLocation, type, depth, index in parent.
      */
     static void populateExpressionData(ParseTree tree, Expression fragment, BlockStatement parent) {
-        populateLeafTextLocationAndType(tree, fragment);
+        populateTextLocationAndType(tree, fragment);
         fragment.setDepth(parent.getDepth());
         fragment.setPositionIndexInParent(parent.getPositionIndexInParent());
     }
@@ -192,8 +206,15 @@ public class AstInfoExtractor {
     /**
      * Populates text, sourceLocation, type, depth, index in parent.
      */
-    static <T extends CodeFragment> void populateLeafTextLocationAndType(ParseTree tree, T fragment) {
+    static <T extends CodeFragment> void populateTextLocationAndType(ParseTree tree, T fragment) {
         fragment.setText(getTextInSource(tree));
+        populateLocationAndType(tree, fragment);
+    }
+
+    /**
+     * Populates text, sourceLocation, type, depth, index in parent.
+     */
+    static <T extends CodeFragment> void populateLocationAndType(ParseTree tree, T fragment) {
         fragment.setSourceLocation(createSourceLocation(tree));
         fragment.setType(getCodeElementType(tree));
     }
