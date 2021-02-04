@@ -34,6 +34,7 @@ public class InvocationsProcessor {
                     name = callee.asIdentifierExpression().identifierToken.value;
                     break;
                 case FUNCTION_DECLARATION:
+                case MEMBER_EXPRESSION:
                     Visitor.visitExpression(callee, leaf, container);
                     break;
                 default:
@@ -79,6 +80,7 @@ public class InvocationsProcessor {
                     name = callee.asIdentifierExpression().identifierToken.value;
                     break;
                 case FUNCTION_DECLARATION:
+                case MEMBER_EXPRESSION:
                     Visitor.visitExpression(callee, leaf, container);
                     break;
                 default:

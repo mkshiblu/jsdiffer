@@ -93,7 +93,7 @@ public abstract class CodeFragment extends CodeEntity implements ICodeFragment {
     public abstract List<String> getNullLiterals();
 
     public abstract List<String> getBooleanLiterals();
-
+    public abstract List<String> getInfixExpressions();
     public abstract List<String> getInfixOperators();
 
     public abstract List<String> getArrayAccesses();

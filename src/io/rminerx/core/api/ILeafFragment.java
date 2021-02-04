@@ -16,6 +16,7 @@ public interface ILeafFragment extends ICodeFragment {
     List<String> getNumberLiterals();
     List<String> getNullLiterals();
     List<String> getBooleanLiterals();
+    List<String> getInfixExpressions();
     List<String> getInfixOperators();
     List<String> getArrayAccesses();
     List<String> getPrefixExpressions();

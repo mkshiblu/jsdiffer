@@ -1,10 +1,12 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
+import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ISourceFile;
 
@@ -97,9 +99,15 @@ public class AstInfoExtractor {
         // Function Body
     }
 
-    static Expression createBaseExpressionWithoutSettingOwner(ParseTree tree) {
+    static Expression createBaseExpression(ParseTree tree) {
+        return createBaseExpressionWithCustomType(tree, getCodeElementType(tree));
+    }
+
+    static Expression createBaseExpressionWithCustomType(ParseTree tree, CodeElementType type) {
         var expression = new Expression();
-        populateTextLocationAndType(tree, expression);
+        ///populateTextLocationAndType(tree, expression);
+        populateTextAndLocation(tree, expression);
+        expression.setType(type);
         return expression;
     }
 
@@ -198,15 +206,18 @@ public class AstInfoExtractor {
         populateLocationAndType(tree, fragment);
     }
 
-    /**
-     * Populates text, sourceLocation, type, depth, index in parent.
-     */
     static <T extends CodeFragment> void populateLocationAndType(ParseTree tree, T fragment) {
         fragment.setSourceLocation(createSourceLocation(tree));
         fragment.setType(getCodeElementType(tree));
     }
 
+    static <T extends CodeFragment> void populateTextAndLocation(ParseTree tree, T fragment) {
+        fragment.setSourceLocation(createSourceLocation(tree));
+        fragment.setText(getTextInSource(tree));
+    }
+
     static void addStatement(Statement statement, BlockStatement parent) {
+        statement.setDepth(parent.getDepth() + 1);
         statement.setPositionIndexInParent(parent.getStatements().size());
         parent.addStatement(statement);
         statement.setParent(parent);
@@ -230,5 +241,30 @@ public class AstInfoExtractor {
             throw new RuntimeException("ParseTreeType " + tree.type + " not mapped to CodeElement yet");
 
         return parseTreeTypeCodeElementTypeMap.get(tree.type);
+    }
+
+    static SourceLocation createVariableScope(ParseTree variable, IContainer container) {
+        final SourceLocation parentLocation = container.getSourceLocation();
+        return new SourceLocation(parentLocation.getFilePath(),
+                variable.getStart().line,
+                variable.getStart().column,
+                parentLocation.endLine,
+                parentLocation.endColumn,
+                variable.getStart().offset,
+                parentLocation.end
+        );
+    }
+
+    static UMLParameter createUmlParameter(IdentifierExpressionTree parameterTree, FunctionDeclaration functionDeclaration) {
+        String name = parameterTree.identifierToken.value;
+        UMLParameter parameter = new UMLParameter(name);
+        parameter.setSourceLocation(createSourceLocation(parameterTree));
+        parameter.setIndexPositionInParent(functionDeclaration.getParameters().size());
+        VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.VAR);
+        vd.setIsParameter(true);
+        vd.setScope(createVariableScope(parameterTree, functionDeclaration));
+        vd.setSourceLocation(parameter.getSourceLocation());
+        parameter.setVariableDeclaration(vd);
+        return parameter;
     }
 }

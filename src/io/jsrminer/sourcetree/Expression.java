@@ -19,6 +19,7 @@ public class Expression extends CodeFragment implements ILeafFragment {
     public List<String> numberLiterals = new ArrayList<>();
     public List<String> nullLiterals = new ArrayList<>();
     public List<String> booleanLiterals = new ArrayList<>();
+    private final List<String> infixExpressions = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
@@ -86,6 +87,11 @@ public class Expression extends CodeFragment implements ILeafFragment {
     @Override
     public List<String> getPrefixExpressions() {
         return prefixExpressions;
+    }
+
+    @Override
+    public List<String> getInfixExpressions() {
+        return infixExpressions;
     }
 
     /**

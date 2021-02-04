@@ -30,18 +30,24 @@ public enum CodeElementType {
     WHILE_STATEMENT("WhileStatement", "while"),
     LITERAL_EXPRESSION("LiteralExpression"),
     COMMA_EXPRESSION("CommaExpression"),
-    VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement");
-
+    VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement"),
+    IF_STATEMENT_CONDITION,
+    VARIABLE_DECLARATION_INITIALIZER;
 
     public final String titleCase;
     public final String keyword;
 
-    private CodeElementType(String titleCase) {
+    CodeElementType() {
+        this.titleCase = null;
+        this.keyword = null;
+    }
+
+    CodeElementType(String titleCase) {
         this.titleCase = titleCase;
         this.keyword = null;
     }
 
-    private CodeElementType(String titleCase, String keyword) {
+    CodeElementType(String titleCase, String keyword) {
         this.titleCase = titleCase;
         this.keyword = keyword;
     }

@@ -21,6 +21,7 @@ public class SingleStatement extends Statement implements ILeafFragment {
     public List<String> numberLiterals = new ArrayList<>();
     public List<String> nullLiterals = new ArrayList<>();
     public List<String> booleanLiterals = new ArrayList<>();
+    private List<String> infixExpressions = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
@@ -115,9 +116,12 @@ public class SingleStatement extends Statement implements ILeafFragment {
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
-
     }
 
+    @Override
+    public List<String> getInfixExpressions() {
+        return infixExpressions;
+    }
     //    @Override
 //    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
 //        return this.anonymousClassDeclarations;

@@ -210,6 +210,15 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
+    public List<String> getInfixExpressions() {
+        List<String> infixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            infixExpressions.addAll(expression.getInfixExpressions());
+        }
+        return infixExpressions;
+    }
+
+    @Override
     public List<String> getInfixOperators() {
         List<String> infixOperators = new ArrayList<>();
         for (Expression expression : this.expressions) {

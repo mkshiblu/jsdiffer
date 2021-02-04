@@ -30,6 +30,12 @@ public class Visitor {
         put(CALL_EXPRESSION, InvocationsProcessor.callExpression);
 
         put(BINARY_OPERATOR, ExpressionsVisitor.binaryOperatorProcessor);
+        put(UNARY_EXPRESSION, ExpressionsVisitor.unaryExpression);
+        put(MEMBER_LOOKUP_EXPRESSION, ExpressionsVisitor.memberLookupExpression);
+        put(MEMBER_EXPRESSION, ExpressionsVisitor.memberExpression);
+
+        // Control Flow
+        put(RETURN_STATEMENT, ControlFlowStatementsVisitor.returnStatementProcessor);
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {
@@ -39,7 +45,7 @@ public class Visitor {
             throw new NotImplementedException("Processor not implemented for " + tree.type);
         }
 
-        //  enter(tree, leaf, container);
+        // enter(tree, leaf, container);
         processor.process(tree, leaf, container);
         //exit(tree, leaf, container);
     }
@@ -51,16 +57,16 @@ public class Visitor {
             throw new NotImplementedException("Processor not implemented for " + tree.type);
         }
 
-        enter(tree, parent, container);
+        enterStatement(tree, parent, container);
         processor.process(tree, parent, container);
-        exit(tree, parent, container);
+        exitStatement(tree, parent, container);
     }
 
-    static void enter(ParseTree tree, ICodeFragment parent, IContainer container) {
+    static void enterStatement(ParseTree tree, BlockStatement parent, IContainer container) {
 
     }
 
-    static void exit(ParseTree tree, ICodeFragment parent, IContainer container) {
+    static void exitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
 
     }
 }

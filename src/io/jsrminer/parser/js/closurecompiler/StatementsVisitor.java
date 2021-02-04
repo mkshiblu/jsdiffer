@@ -78,11 +78,11 @@ public class StatementsVisitor {
         variableDeclaration.setSourceLocation(createSourceLocation(tree));
 
         // Set Scope (TODO set body source location
-        variableDeclaration.setScope(container.getSourceLocation());
+        variableDeclaration.setScope(createVariableScope(tree, container));
 
         // Process initializer
         if (tree.initializer != null) {
-            Expression expression = createBaseExpressionWithoutSettingOwner(tree.initializer);
+            Expression expression = createBaseExpressionWithCustomType(tree.initializer, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             Visitor.visitExpression(tree.initializer, expression, container);
             variableDeclaration.setInitializer(expression);
         }

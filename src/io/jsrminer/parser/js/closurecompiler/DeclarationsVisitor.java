@@ -3,14 +3,17 @@ package io.jsrminer.parser.js.closurecompiler;
 import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
+
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 class DeclarationsVisitor {
 
     protected static FunctionDeclaration loadMemberFunction(FunctionDeclarationTree tree) {
         FunctionDeclaration function = new FunctionDeclaration();
-        function.setSourceLocation(AstInfoExtractor.createSourceLocation(tree.location));
+        function.setSourceLocation(createSourceLocation(tree.location));
         function.setName(tree.name.value);
         return function;
     }
@@ -18,7 +21,7 @@ class DeclarationsVisitor {
 
     protected static FunctionDeclaration loadArrowFunctionDeclaration(FunctionDeclarationTree tree) {
         AnonymousFunctionDeclaration function = new AnonymousFunctionDeclaration();
-        function.setSourceLocation(AstInfoExtractor.createSourceLocation(tree.location));
+        function.setSourceLocation(createSourceLocation(tree.location));
         function.setName(tree.name.value);
         return function;
     }
@@ -62,6 +65,10 @@ class DeclarationsVisitor {
             AstInfoExtractor.loadFunctionInfo(tree, function, container);
 
             // Load parameters
+            tree.formalParameterList.parameters.forEach(parameterTree -> {
+                UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
+                function.getParameters().add(parameter);
+            });
 
             // Load functionBody by passing the function as the new container
             if (tree.functionBody != null) {
