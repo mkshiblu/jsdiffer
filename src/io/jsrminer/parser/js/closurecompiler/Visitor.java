@@ -14,9 +14,13 @@ import java.util.EnumMap;
 import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
 
 public class Visitor {
-    private final static EnumMap<ParseTreeType, INodeProcessor<CodeEntity, ParseTree, ICodeFragment>> nodeProcessors
+    private final static EnumMap<ParseTreeType, INodeVisitor<CodeEntity, ParseTree, ICodeFragment>> nodeProcessors
             = new EnumMap(ParseTreeType.class) {{
+
+        //Declarations
         put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
+        put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
+
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
         put(BLOCK, StatementsVisitor.blockStatementProcessor);
         put(IF_STATEMENT, ChoiceStatementsVisitor.ifStatementProcessor);
@@ -46,7 +50,7 @@ public class Visitor {
         }
 
         // enter(tree, leaf, container);
-        processor.process(tree, leaf, container);
+        processor.visit(tree, leaf, container);
         //exit(tree, leaf, container);
     }
 
@@ -58,7 +62,7 @@ public class Visitor {
         }
 
         enterStatement(tree, parent, container);
-        processor.process(tree, parent, container);
+        processor.visit(tree, parent, container);
         exitStatement(tree, parent, container);
     }
 

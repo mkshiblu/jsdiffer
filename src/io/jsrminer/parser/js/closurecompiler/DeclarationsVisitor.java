@@ -44,10 +44,10 @@ class DeclarationsVisitor {
 //        return function;
 //    }
 
-    public static final NodeProcessor<FunctionDeclaration, FunctionDeclarationTree, CodeFragment> functionDeclarationProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<FunctionDeclaration, FunctionDeclarationTree, CodeFragment> functionDeclarationProcessor
+            = new NodeVisitor<>() {
         @Override
-        public FunctionDeclaration process(FunctionDeclarationTree tree, CodeFragment parent, IContainer container) {
+        public FunctionDeclaration visit(FunctionDeclarationTree tree, CodeFragment parent, IContainer container) {
 
             final boolean isAnonymous = parent instanceof ILeafFragment;
             FunctionDeclaration function;

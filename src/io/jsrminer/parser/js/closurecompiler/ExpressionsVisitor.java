@@ -11,10 +11,10 @@ public class ExpressionsVisitor {
     /**
      * Has Token operator and ParseTree operand;
      */
-    public static final NodeProcessor<String, UnaryExpressionTree, ILeafFragment> unaryExpression
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<String, UnaryExpressionTree, ILeafFragment> unaryExpression
+            = new NodeVisitor<>() {
         @Override
-        public String process(UnaryExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public String visit(UnaryExpressionTree tree, ILeafFragment leaf, IContainer container) {
             String text = getTextInSource(tree);
             String operator = tree.operator.type.toString();
             boolean isPrefixOperator = text.startsWith(operator);
@@ -30,10 +30,10 @@ public class ExpressionsVisitor {
         }
     };
 
-    public static final INodeProcessor<String, BinaryOperatorTree, ILeafFragment> binaryOperatorProcessor
-            = new INodeProcessor<>() {
+    public static final INodeVisitor<String, BinaryOperatorTree, ILeafFragment> binaryOperatorProcessor
+            = new INodeVisitor<>() {
         @Override
-        public String process(BinaryOperatorTree tree, ILeafFragment leaf, IContainer container) {
+        public String visit(BinaryOperatorTree tree, ILeafFragment leaf, IContainer container) {
             String text = getTextInSource(tree);
             var operator = tree.operator.toString();
 
@@ -50,10 +50,10 @@ public class ExpressionsVisitor {
      * E.g. config.keyCodes[key]
      * Has ParseTree operand (config.keyCodes) & ParseTree memberExpression (key)
      */
-    public static final NodeProcessor<Void, MemberLookupExpressionTree, ILeafFragment> memberLookupExpression
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<Void, MemberLookupExpressionTree, ILeafFragment> memberLookupExpression
+            = new NodeVisitor<>() {
         @Override
-        public Void process(MemberLookupExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public Void visit(MemberLookupExpressionTree tree, ILeafFragment leaf, IContainer container) {
 
             Visitor.visitExpression(tree.operand, leaf, container);
             Visitor.visitExpression(tree.memberExpression, leaf, container);
@@ -64,10 +64,10 @@ public class ExpressionsVisitor {
     /**
      * Has ParseTree operand & IdentifierToken memberName;
      */
-    public static final NodeProcessor<Void, MemberExpressionTree, ILeafFragment> memberExpression
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<Void, MemberExpressionTree, ILeafFragment> memberExpression
+            = new NodeVisitor<>() {
         @Override
-        public Void process(MemberExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public Void visit(MemberExpressionTree tree, ILeafFragment leaf, IContainer container) {
 
             Visitor.visitExpression(tree.operand, leaf, container);
             leaf.getVariables().add(tree.memberName.value);
@@ -75,10 +75,10 @@ public class ExpressionsVisitor {
         }
     };
 
-    public static final NodeProcessor<Void, IdentifierExpressionTree, ILeafFragment> identifierProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<Void, IdentifierExpressionTree, ILeafFragment> identifierProcessor
+            = new NodeVisitor<>() {
         @Override
-        public Void process(IdentifierExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public Void visit(IdentifierExpressionTree tree, ILeafFragment leaf, IContainer container) {
             leaf.getVariables().add(tree.identifierToken.value);
             return null;
         }
@@ -87,10 +87,10 @@ public class ExpressionsVisitor {
     /**
      * A comma expression d, x = "4";
      */
-    public static final INodeProcessor<String, CommaExpressionTree, ILeafFragment> commaExpressionProcessor
-            = new NodeProcessor<>() {
+    public static final INodeVisitor<String, CommaExpressionTree, ILeafFragment> commaExpressionProcessor
+            = new NodeVisitor<>() {
         @Override
-        public String process(CommaExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public String visit(CommaExpressionTree tree, ILeafFragment leaf, IContainer container) {
             tree.expressions.forEach(expressionTree -> {
                 Visitor.visitExpression(expressionTree, leaf, container);
             });

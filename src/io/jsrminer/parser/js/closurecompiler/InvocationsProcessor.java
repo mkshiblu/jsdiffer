@@ -18,10 +18,10 @@ public class InvocationsProcessor {
      * A New expression e.g. new Person("John");
      * has properties operand, arguments and hasTrailingComma
      */
-    public static final INodeProcessor<Void, NewExpressionTree, ILeafFragment> newExpression
-            = new NodeProcessor<>() {
+    public static final INodeVisitor<Void, NewExpressionTree, ILeafFragment> newExpression
+            = new NodeVisitor<>() {
         @Override
-        public Void process(NewExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public Void visit(NewExpressionTree tree, ILeafFragment leaf, IContainer container) {
             if (tree.hasTrailingComma) {
                 throw new RuntimeException("New Expression Tree with trailing comma found" + tree.location.toString());
             }
@@ -68,10 +68,10 @@ public class InvocationsProcessor {
      * A Call expression e.g. get("John");
      * has properties operand, arguments
      */
-    public static final INodeProcessor<Void, CallExpressionTree, ILeafFragment> callExpression
-            = new NodeProcessor<>() {
+    public static final INodeVisitor<Void, CallExpressionTree, ILeafFragment> callExpression
+            = new NodeVisitor<>() {
         @Override
-        public Void process(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public Void visit(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
             String name = null;
             ParseTree callee = tree.operand;
             //TODO expression text

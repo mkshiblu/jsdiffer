@@ -13,10 +13,10 @@ public class ChoiceStatementsVisitor {
      * An If Condition Statement
      * Has condition, ifClause, elseClause
      */
-    public static final INodeProcessor<BlockStatement, IfStatementTree, BlockStatement> ifStatementProcessor
-            = new NodeProcessor<>() {
+    public static final INodeVisitor<BlockStatement, IfStatementTree, BlockStatement> ifStatementProcessor
+            = new NodeVisitor<>() {
         @Override
-        public BlockStatement process(IfStatementTree tree, BlockStatement parent, IContainer container) {
+        public BlockStatement visit(IfStatementTree tree, BlockStatement parent, IContainer container) {
             var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
 
             // Parse condition

@@ -14,10 +14,10 @@ public class StatementsVisitor {
     /**
      * A Block Statement
      */
-    public static final INodeProcessor<BlockStatement, BlockTree, BlockStatement> blockStatementProcessor
-            = new NodeProcessor<>() {
+    public static final INodeVisitor<BlockStatement, BlockTree, BlockStatement> blockStatementProcessor
+            = new NodeVisitor<>() {
         @Override
-        public BlockStatement process(BlockTree tree, BlockStatement parent, IContainer container) {
+        public BlockStatement visit(BlockTree tree, BlockStatement parent, IContainer container) {
             var blockStatement = createBlockStatementPopulateAndAddToParent(tree, parent);
 
             // Parse statements
@@ -32,10 +32,10 @@ public class StatementsVisitor {
     /**
      * An expression statement such as x = "4";
      */
-    public static final NodeProcessor<SingleStatement, ExpressionStatementTree, BlockStatement> expressionStatementProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<SingleStatement, ExpressionStatementTree, BlockStatement> expressionStatementProcessor
+            = new NodeVisitor<>() {
         @Override
-        public SingleStatement process(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
+        public SingleStatement visit(ExpressionStatementTree tree, BlockStatement parent, IContainer container) {
             var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
             Visitor.visitExpression(tree.expression, leaf, container);
             return leaf;
@@ -45,10 +45,10 @@ public class StatementsVisitor {
     /**
      * A Variable declaration Statement e.g. let x = "4";
      */
-    public static final NodeProcessor<SingleStatement, VariableStatementTree, BlockStatement> variableStatementProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<SingleStatement, VariableStatementTree, BlockStatement> variableStatementProcessor
+            = new NodeVisitor<>() {
         @Override
-        public SingleStatement process(VariableStatementTree tree, BlockStatement parent, IContainer container) {
+        public SingleStatement visit(VariableStatementTree tree, BlockStatement parent, IContainer container) {
             var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
 
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());

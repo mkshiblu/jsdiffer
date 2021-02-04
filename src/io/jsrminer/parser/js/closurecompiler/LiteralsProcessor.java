@@ -9,10 +9,10 @@ import java.util.List;
 
 public class LiteralsProcessor {
 
-    public static final NodeProcessor<String, LiteralExpressionTree, CodeFragment> literalExpressionProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<String, LiteralExpressionTree, CodeFragment> literalExpressionProcessor
+            = new NodeVisitor<>() {
         @Override
-        public String process(LiteralExpressionTree tree, CodeFragment fragment, IContainer container) {
+        public String visit(LiteralExpressionTree tree, CodeFragment fragment, IContainer container) {
             if (fragment instanceof BlockStatement) {
                 throw new RuntimeException("Fragment should be a leaf" + fragment);
             }

@@ -20,8 +20,8 @@ public class VariableDeclarationStatementTest extends StatementsVisitorTest {
     public static void setup() {
 
         var letA = programTree.sourceElements.get(0);
-        letAStatement = StatementsVisitor.variableStatementProcessor.process(letA.asVariableStatement(), bodyBlock, container);
-        vdWithLiteralInitializer = StatementsVisitor.variableStatementProcessor.process(programTree.sourceElements.get(1).asVariableStatement(), bodyBlock, container);
+        letAStatement = StatementsVisitor.variableStatementProcessor.visit(letA.asVariableStatement(), bodyBlock, container);
+        vdWithLiteralInitializer = StatementsVisitor.variableStatementProcessor.visit(programTree.sourceElements.get(1).asVariableStatement(), bodyBlock, container);
         //   vdWithAnonymousFunctionInitializer = StatementsVisitor.variableStatementProcessor.process(programTree.sourceElements.get(2).asVariableStatement(), dummyBodyBlock, container);
         // multipleVdsStatements = StatementsVisitor.variableStatementProcessor.process(programTree.sourceElements.get(3).asVariableStatement(), dummyBodyBlock, container);
     }

@@ -11,10 +11,10 @@ public class ControlFlowStatementsVisitor {
     /**
      * A return statement. Has expression
      */
-    public static final NodeProcessor<SingleStatement, ReturnStatementTree, BlockStatement> returnStatementProcessor
-            = new NodeProcessor<>() {
+    public static final NodeVisitor<SingleStatement, ReturnStatementTree, BlockStatement> returnStatementProcessor
+            = new NodeVisitor<>() {
         @Override
-        public SingleStatement process(ReturnStatementTree tree, BlockStatement parent, IContainer container) {
+        public SingleStatement visit(ReturnStatementTree tree, BlockStatement parent, IContainer container) {
             var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
             if (tree.expression != null)
                 Visitor.visitExpression(tree.expression, leaf, container);
