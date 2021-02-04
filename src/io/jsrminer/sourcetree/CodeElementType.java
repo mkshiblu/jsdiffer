@@ -32,7 +32,9 @@ public enum CodeElementType {
     COMMA_EXPRESSION("CommaExpression"),
     VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement"),
     IF_STATEMENT_CONDITION,
-    VARIABLE_DECLARATION_INITIALIZER;
+    VARIABLE_DECLARATION_INITIALIZER,
+    FOR_STATEMENT_INITIALIZER,
+    ;
 
     public final String titleCase;
     public final String keyword;

@@ -20,7 +20,7 @@ public class ChoiceStatementsVisitor {
             var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
 
             // Parse condition
-            Expression conditionExpression = createBaseExpressionWithCustomType(tree.condition, CodeElementType.IF_STATEMENT_CONDITION);
+            Expression conditionExpression = createBaseExpressionWithRMType(tree.condition, CodeElementType.IF_STATEMENT_CONDITION);
             Visitor.visitExpression(tree.condition, conditionExpression, container);
             addExpression(conditionExpression, composite);
 
@@ -31,13 +31,6 @@ public class ChoiceStatementsVisitor {
             if (tree.elseClause != null) {
                 Visitor.visitStatement(tree.elseClause, composite, container);
             }
-//            AbstractExpression abstractExpression = new AbstractExpression(cu, filePath, ifStatement.getExpression(), CodeElementType.IF_STATEMENT_CONDITION);
-//            child.addExpression(abstractExpression);
-//            processStatement(cu, filePath, child, ifStatement.getThenStatement());
-//            if(ifStatement.getElseStatement() != null) {
-//                processStatement(cu, filePath, child, ifStatement.getElseStatement());
-//            }
-//
             return composite;
         }
     };

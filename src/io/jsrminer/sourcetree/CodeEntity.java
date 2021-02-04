@@ -1,9 +1,11 @@
 package io.jsrminer.sourcetree;
 
+import io.rminerx.core.api.INode;
+
 /**
  * A complete entity such as functionDeclarations, VariableDeclarations etc.
  */
-public class CodeEntity {
+public class CodeEntity implements INode {
     protected SourceLocation sourceLocation;
     protected String text;
     protected CodeElementType type;

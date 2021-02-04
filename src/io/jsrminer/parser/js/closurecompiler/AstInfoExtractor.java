@@ -1,13 +1,12 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
-import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
+import com.google.javascript.jscomp.parsing.parser.trees.*;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.EnumMap;
@@ -100,10 +99,10 @@ public class AstInfoExtractor {
     }
 
     static Expression createBaseExpression(ParseTree tree) {
-        return createBaseExpressionWithCustomType(tree, getCodeElementType(tree));
+        return createBaseExpressionWithRMType(tree, getCodeElementType(tree));
     }
 
-    static Expression createBaseExpressionWithCustomType(ParseTree tree, CodeElementType type) {
+    static Expression createBaseExpressionWithRMType(ParseTree tree, CodeElementType type) {
         var expression = new Expression();
         ///populateTextLocationAndType(tree, expression);
         populateTextAndLocation(tree, expression);
@@ -133,7 +132,7 @@ public class AstInfoExtractor {
         return singleStatement;
     }
 
-    static CodeFragment copyLeafData(CodeFragment leaf1, CodeFragment leaf2) {
+    static ILeafFragment copyLeafData(ILeafFragment leaf1, ILeafFragment leaf2) {
         leaf1.getVariables().addAll(leaf2.getVariables());
         leaf1.getNullLiterals().addAll(leaf2.getNullLiterals());
         leaf1.getNumberLiterals().addAll(leaf2.getNumberLiterals());
@@ -243,8 +242,8 @@ public class AstInfoExtractor {
         return parseTreeTypeCodeElementTypeMap.get(tree.type);
     }
 
-    static SourceLocation createVariableScope(ParseTree variable, IContainer container) {
-        final SourceLocation parentLocation = container.getSourceLocation();
+    static SourceLocation createVariableScope(ParseTree variable, INode scopeNode) {
+        final SourceLocation parentLocation = scopeNode.getSourceLocation();
         return new SourceLocation(parentLocation.getFilePath(),
                 variable.getStart().line,
                 variable.getStart().column,
@@ -266,5 +265,13 @@ public class AstInfoExtractor {
         vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;
+    }
+
+    static BlockStatement createDummyBodyBlock(BlockTree blockTree) {
+        BlockStatement dummyParent = new BlockStatement();
+        dummyParent.setText("{");
+        AstInfoExtractor.populateLocationAndType(blockTree, dummyParent);
+        dummyParent.setDepth(-1);
+        return dummyParent;
     }
 }

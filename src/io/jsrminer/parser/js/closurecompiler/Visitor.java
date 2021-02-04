@@ -19,7 +19,9 @@ public class Visitor {
 
         //Declarations
         put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
+        put(VARIABLE_DECLARATION_LIST, DeclarationsVisitor.variableDeclarationsList);
         put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
+
 
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
         put(BLOCK, StatementsVisitor.blockStatementProcessor);
@@ -35,11 +37,16 @@ public class Visitor {
 
         put(BINARY_OPERATOR, ExpressionsVisitor.binaryOperatorProcessor);
         put(UNARY_EXPRESSION, ExpressionsVisitor.unaryExpression);
+        put(UPDATE_EXPRESSION, ExpressionsVisitor.updateExpression);
         put(MEMBER_LOOKUP_EXPRESSION, ExpressionsVisitor.memberLookupExpression);
         put(MEMBER_EXPRESSION, ExpressionsVisitor.memberExpression);
 
         // Control Flow
         put(RETURN_STATEMENT, ControlFlowStatementsVisitor.returnStatementProcessor);
+
+
+        // Loops
+        put(FOR_STATEMENT, LoopStatementsVisitor.forStatementProcessor);
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {

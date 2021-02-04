@@ -1,21 +1,18 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.LiteralExpressionTree;
-import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.CodeFragment;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
 
 import java.util.List;
 
 public class LiteralsProcessor {
 
-    public static final NodeVisitor<String, LiteralExpressionTree, CodeFragment> literalExpressionProcessor
+    public static final NodeVisitor<String, LiteralExpressionTree, ILeafFragment> literalExpressionProcessor
             = new NodeVisitor<>() {
         @Override
-        public String visit(LiteralExpressionTree tree, CodeFragment fragment, IContainer container) {
-            if (fragment instanceof BlockStatement) {
-                throw new RuntimeException("Fragment should be a leaf" + fragment);
-            }
+        public String visit(LiteralExpressionTree tree, ILeafFragment fragment, IContainer container) {
+
 
             List<String> literals;
             switch (tree.literalToken.type) {

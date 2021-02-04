@@ -9,6 +9,33 @@ import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.getTextInSo
 public class ExpressionsVisitor {
 
     /**
+     * Represents UpdateExpression productions from the spec.
+     *
+     * <pre><code>
+     * UpdateExpression :=
+     *     { ++ | -- } UnaryExpression
+     *     LeftHandSideExpression [no LineTerminator here] { ++ | -- }
+     * </code></pre>
+     */
+    public static final NodeVisitor<String, UpdateExpressionTree, ILeafFragment> updateExpression
+            = new NodeVisitor<>() {
+        @Override
+        public String visit(UpdateExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            String text = getTextInSource(tree);
+            boolean isPrefixOperator = tree.operatorPosition == UpdateExpressionTree.OperatorPosition.PREFIX;
+
+            if (isPrefixOperator) {
+                leaf.getPrefixExpressions().add(text);
+            } else {
+                leaf.getPostfixExpressions().add(text);
+            }
+
+            Visitor.visitExpression(tree.operand, leaf, container);
+            return text;
+        }
+    };
+
+    /**
      * Has Token operator and ParseTree operand;
      */
     public static final NodeVisitor<String, UnaryExpressionTree, ILeafFragment> unaryExpression
@@ -97,5 +124,4 @@ public class ExpressionsVisitor {
             return getTextInSource(tree);
         }
     };
-
 }

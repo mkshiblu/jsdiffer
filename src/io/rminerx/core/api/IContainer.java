@@ -1,6 +1,5 @@
 package io.rminerx.core.api;
 
-import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.Statement;
 
 import java.util.List;
@@ -8,8 +7,8 @@ import java.util.List;
 /**
  * Represents a code container such as FunctionDeclrations, Class Declarations or a File
  */
-public interface IContainer {
-    SourceLocation getSourceLocation();
+public interface IContainer extends INode {
+    //SourceLocation getSourceLocation();
 
     /**
      * Represents a container type such s File or Declaration

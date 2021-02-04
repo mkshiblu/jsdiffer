@@ -2,7 +2,6 @@ package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ExpressionStatementTree;
-import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
@@ -50,42 +49,8 @@ public class StatementsVisitor {
         @Override
         public SingleStatement visit(VariableStatementTree tree, BlockStatement parent, IContainer container) {
             var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
-
-            VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarations.declarationType.toString());
-            for (var declarationTree : tree.declarations.declarations) {
-                VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container);
-                leaf.getVariableDeclarations().add(vd);
-                leaf.getVariables().add(vd.variableName);
-
-                if (vd.getInitializer() != null) {
-                    copyLeafData(leaf, vd.getInitializer());
-                }
-            }
-
+            Visitor.visitExpression(tree.declarations, leaf, container);
             return leaf;
         }
     };
-
-    /**
-     * A variable declaration Node
-     */
-    protected static VariableDeclaration processVariableDeclaration(VariableDeclarationTree tree
-            , VariableDeclarationKind kind
-            , IContainer container) {
-        String variableName = tree.lvalue.asIdentifierExpression().identifierToken.value;
-        var variableDeclaration = new VariableDeclaration(variableName, kind);
-
-        variableDeclaration.setSourceLocation(createSourceLocation(tree));
-
-        // Set Scope (TODO set body source location
-        variableDeclaration.setScope(createVariableScope(tree, container));
-
-        // Process initializer
-        if (tree.initializer != null) {
-            Expression expression = createBaseExpressionWithCustomType(tree.initializer, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
-            Visitor.visitExpression(tree.initializer, expression, container);
-            variableDeclaration.setInitializer(expression);
-        }
-        return variableDeclaration;
-    }
 }

@@ -1,8 +1,6 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.CallExpressionTree;
-import com.google.javascript.jscomp.parsing.parser.trees.NewExpressionTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
+import com.google.javascript.jscomp.parsing.parser.trees.*;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.rminerx.core.api.IContainer;
@@ -34,9 +32,17 @@ public class InvocationsProcessor {
                     name = callee.asIdentifierExpression().identifierToken.value;
                     break;
                 case FUNCTION_DECLARATION:
-                case MEMBER_EXPRESSION:
+                    FunctionDeclarationTree functionDeclarationTree = callee.asFunctionDeclaration();
+                    if (functionDeclarationTree.name != null) {
+                        name = functionDeclarationTree.name.value;
+                    } else {
+                        name = AstInfoExtractor.generateNameForAnonymousContainer(container);
+                    }
                     Visitor.visitExpression(callee, leaf, container);
                     break;
+//                case MEMBER_EXPRESSION:
+//                    Visitor.visitExpression(callee, leaf, container);
+//                    break;
                 default:
                     throw new RuntimeException("Unsupported NewExpression Operand of type " + callee.type + " at " + callee.location.toString());
             }
@@ -45,7 +51,9 @@ public class InvocationsProcessor {
             creation.setText(getTextInSource(tree));
             creation.setSourceLocation(createSourceLocation(tree));
             creation.setType(getCodeElementType(tree));
-            creation.setFunctionName(name);
+
+            String qualifiedName = generateQualifiedName(name, container);
+            creation.setFunctionName(qualifiedName);
             //creation.setExpressionText();
 
             // Add to the list
@@ -73,22 +81,26 @@ public class InvocationsProcessor {
         @Override
         public Void visit(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
             String name = null;
+            String expressionText = null;
             ParseTree callee = tree.operand;
             //TODO expression text
             switch (callee.type) {
                 case IDENTIFIER_EXPRESSION:
                     name = callee.asIdentifierExpression().identifierToken.value;
                     break;
-                case FUNCTION_DECLARATION:
+
                 case MEMBER_EXPRESSION:
-                    Visitor.visitExpression(callee, leaf, container);
+                    MemberExpressionTree calleeAsMember = callee.asMemberExpression();
+                    name = calleeAsMember.memberName.value;
+                    expressionText = getTextInSource(calleeAsMember.operand);
                     break;
                 default:
-                    throw new RuntimeException("Unsupported NewExpression Operand of type " + callee.type + " at " + callee.location.toString());
+                    throw new RuntimeException("Unsupported CalExpression Operand of type " + callee.type + " at " + callee.location.toString());
             }
 
             final OperationInvocation invocation = new OperationInvocation();
             invocation.setText(getTextInSource(tree));
+            invocation.setExpressionText(expressionText);
             invocation.setSourceLocation(createSourceLocation(tree));
             invocation.setType(getCodeElementType(tree));
             invocation.setFunctionName(name);
