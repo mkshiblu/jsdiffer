@@ -6,7 +6,7 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.rminerx.core.entities.SourceFile;
 
 public class StatementsVisitorTest extends BaseTest {
-    static ProgramTree programTree = StatementsDataProvider.INSTANCE.getProgramTree();
-    static SourceFile container = StatementsDataProvider.INSTANCE.getContainer();
-    static BlockStatement bodyBlock = StatementsDataProvider.INSTANCE.getDummyBodyBlock();
+    static ProgramTree programTree = StatementsDataProvider.VARIABLE_DECLARATIONS.getProgramTree();
+    static SourceFile container = StatementsDataProvider.VARIABLE_DECLARATIONS.getContainer();
+    static BlockStatement bodyBlock = StatementsDataProvider.VARIABLE_DECLARATIONS.getDummyBodyBlock();
 }
