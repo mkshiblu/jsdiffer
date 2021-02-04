@@ -10,18 +10,19 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.entities.SourceFile;
 
 public enum StatementsDataProvider {
-
-    INSTANCE;
+    LOOPS("loops.js"),
+    VARIABLE_DECLARATIONS("variable_declarations.js");
     ProgramTree programTree;
     SourceFile container;
     BlockStatement dummyBodyBlock;
 
-    private StatementsDataProvider() {
+    private StatementsDataProvider(String fileName) {
         container = new SourceFile();
-        container.setFilepath("unnamed.js");
-        container.setQualifiedName("unnamed.js");
+        container.setFilepath(fileName);
+        container.setQualifiedName(fileName);
+
         var parser = new ClosureCompilerParser();
-        var parseResult = parser.parseAndMakeAst("test", FileUtil.readFileContent(BaseTest.getRootResourceDirectory() + "parser/variable_declarations.js"),
+        var parseResult = parser.parseAndMakeAst(fileName, FileUtil.readFileContent(BaseTest.getRootResourceDirectory() + "parser/" + fileName),
                 false);
         programTree = parseResult.getProgramAST();
         dummyBodyBlock = new BlockStatement();
@@ -30,7 +31,7 @@ public enum StatementsDataProvider {
         SourceRange lastElementLocation = programTree.sourceElements.get(programTree.sourceElements.size() - 1).location;
         dummyBodyBlock.setSourceLocation(new SourceLocation(lastElementLocation.start.source.name, 0, 0, lastElementLocation.end.line, lastElementLocation.end.column, 0, lastElementLocation.end.offset));
         dummyBodyBlock.setText("{");
-
+        container.setSourceLocation(dummyBodyBlock.getSourceLocation());
     }
 
     public ProgramTree getProgramTree() {

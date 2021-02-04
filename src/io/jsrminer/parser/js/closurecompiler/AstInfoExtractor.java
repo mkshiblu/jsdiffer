@@ -34,7 +34,7 @@ public class AstInfoExtractor {
         //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
         put(ParseTreeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT);
         put(ParseTreeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
-        //put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
+        put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
         put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);
         put(ParseTreeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT);
 

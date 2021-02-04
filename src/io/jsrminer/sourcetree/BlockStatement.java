@@ -13,7 +13,7 @@ import java.util.*;
 public class BlockStatement extends Statement implements ICompositeFragment {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
-    //private List<VariableDeclaration> variableDeclarations;
+    private List<VariableDeclaration> enhancedForVariableDeclarations = new ArrayList<>();
     // exp
     // vd
 
@@ -28,6 +28,9 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         this.expressions.add(expression);
     }
 
+    public void addEnhancedForVariableDeclaration(VariableDeclaration variableDeclaration) {
+        this.enhancedForVariableDeclarations.add(variableDeclaration);
+    }
 
     /**
      * Returns all the single statements including children's of children in a bottom up fashion
@@ -276,7 +279,7 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     public List<VariableDeclaration> getVariableDeclarations() {
         List<VariableDeclaration> variableDeclarations = new ArrayList<>();
         //special handling for enhanced-for formal parameter
-        // variableDeclarations.addAll(this.variableDeclarations);
+        variableDeclarations.addAll(this.enhancedForVariableDeclarations);
         for (Expression expression : this.getExpressions()) {
             variableDeclarations.addAll(expression.getVariableDeclarations());
         }
@@ -462,6 +465,10 @@ public class BlockStatement extends Statement implements ICompositeFragment {
             return getExpressions().contains(fragment);
         }
         return false;
+    }
+
+    public List<VariableDeclaration> getEnhancedForVariableDeclarations() {
+        return enhancedForVariableDeclarations;
     }
 
     @Override

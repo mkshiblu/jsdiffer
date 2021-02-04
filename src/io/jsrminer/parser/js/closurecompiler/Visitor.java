@@ -44,9 +44,12 @@ public class Visitor {
         // Control Flow
         put(RETURN_STATEMENT, ControlFlowStatementsVisitor.returnStatementProcessor);
 
-
         // Loops
         put(FOR_STATEMENT, LoopStatementsVisitor.forStatementProcessor);
+        put(FOR_IN_STATEMENT, LoopStatementsVisitor.forInStatementProcessor);
+        put(FOR_OF_STATEMENT, LoopStatementsVisitor.forOfStatementProcessor);
+        put(WHILE_STATEMENT, LoopStatementsVisitor.whileStatementProcessor);
+        put(DO_WHILE_STATEMENT, LoopStatementsVisitor.doWhileStatementProcessor);
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {

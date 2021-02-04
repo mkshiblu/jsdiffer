@@ -13,7 +13,6 @@ public class LiteralsProcessor {
         @Override
         public String visit(LiteralExpressionTree tree, ILeafFragment fragment, IContainer container) {
 
-
             List<String> literals;
             switch (tree.literalToken.type) {
                 case NUMBER:

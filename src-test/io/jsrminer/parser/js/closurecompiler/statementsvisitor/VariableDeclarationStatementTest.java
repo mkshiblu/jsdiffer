@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class VariableDeclarationStatementTest extends StatementsVisitorTest {
+public class VariableDeclarationStatementTest extends StatementsTest {
 
     static SingleStatement letAStatement;
     static SingleStatement vdWithLiteralInitializer;
@@ -19,9 +19,10 @@ public class VariableDeclarationStatementTest extends StatementsVisitorTest {
     @BeforeAll
     public static void setup() {
 
-        var letA = programTree.sourceElements.get(0);
-        letAStatement = StatementsVisitor.variableStatementProcessor.visit(letA.asVariableStatement(), bodyBlock, container);
-        vdWithLiteralInitializer = StatementsVisitor.variableStatementProcessor.visit(programTree.sourceElements.get(1).asVariableStatement(), bodyBlock, container);
+        AstInfo ast = new AstInfo(StatementsDataProvider.VARIABLE_DECLARATIONS);
+        var letA = ast.programTree.sourceElements.get(0);
+        letAStatement = StatementsVisitor.variableStatementProcessor.visit(letA.asVariableStatement(), ast.bodyBlock, ast.container);
+        vdWithLiteralInitializer = StatementsVisitor.variableStatementProcessor.visit(ast.programTree.sourceElements.get(1).asVariableStatement(), ast.bodyBlock, ast.container);
         //   vdWithAnonymousFunctionInitializer = StatementsVisitor.variableStatementProcessor.process(programTree.sourceElements.get(2).asVariableStatement(), dummyBodyBlock, container);
         // multipleVdsStatements = StatementsVisitor.variableStatementProcessor.process(programTree.sourceElements.get(3).asVariableStatement(), dummyBodyBlock, container);
     }

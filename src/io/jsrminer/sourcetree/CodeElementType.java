@@ -18,11 +18,11 @@ public enum CodeElementType {
     CATCH_CLAUSE("CatchClause", "catch"),
     THROW_STATEMENT("ThrowStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
-    ENHANCED_FOR_STATEMENT("ForInStatement"), // TODO revisit
+    ENHANCED_FOR_STATEMENT("EnhancedForStatement", "for"), // TODO revisit
     FOR_STATEMENT("ForStatement", "for"),
     LABELED_STATEMENT("LabeledStatement"),
     VARIABLE_DECLARATION("VariableDeclaration"),
-    DO_WHILE_STATEMENT("DoWhileStatement"),
+    DO_WHILE_STATEMENT("DoWhileStatement", "do"),
     BREAK_STATEMENT("BreakStatement"),
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
@@ -34,6 +34,12 @@ public enum CodeElementType {
     IF_STATEMENT_CONDITION,
     VARIABLE_DECLARATION_INITIALIZER,
     FOR_STATEMENT_INITIALIZER,
+    FOR_STATEMENT_CONDITION,
+    FOR_STATEMENT_UPDATER,
+    ENHANCED_FOR_STATEMENT_INITIALIZER, // SAME as RM EFS parameter
+    ENHANCED_FOR_STATEMENT_EXPRESSION,
+    WHILE_STATEMENT_CONDITION,
+    DO_STATEMENT_CONDITION,
     ;
 
     public final String titleCase;
