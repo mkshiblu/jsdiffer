@@ -1,12 +1,13 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ArrayLiteralExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.LiteralExpressionTree;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
 import java.util.List;
 
-public class LiteralsProcessor {
+public class LiteralsExpressionsVisitor {
 
     public static final NodeVisitor<String, LiteralExpressionTree, ILeafFragment> literalExpressionProcessor
             = new NodeVisitor<>() {
@@ -34,6 +35,21 @@ public class LiteralsProcessor {
 
             literals.add(tree.literalToken.toString());
             return tree.literalToken.toString();
+        }
+    };
+
+    /**
+     * Has elements and optionally hasTrailing commas
+     */
+    public static final NodeVisitor<Void, ArrayLiteralExpressionTree, ILeafFragment> arrayLiteralExpression
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(ArrayLiteralExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            tree.elements.forEach(element -> {
+                Visitor.visitExpression(element, leaf, container);
+            });
+
+            return null;
         }
     };
 }

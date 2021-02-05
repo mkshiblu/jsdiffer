@@ -168,6 +168,14 @@ public class ExpressionsVisitor {
         }
     };
 
+    public static final NodeVisitor<Void, NullTree, ILeafFragment> nullNodeProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(NullTree tree, ILeafFragment leaf, IContainer container) {
+            return null;
+        }
+    };
+
     /**
      * A comma expression d, x = "4";
      */

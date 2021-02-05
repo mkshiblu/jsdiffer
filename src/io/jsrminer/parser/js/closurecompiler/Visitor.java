@@ -35,7 +35,10 @@ public class Visitor {
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);
         put(IDENTIFIER_EXPRESSION, ExpressionsVisitor.identifierProcessor);
-        put(LITERAL_EXPRESSION, LiteralsProcessor.literalExpressionProcessor);
+
+        put(LITERAL_EXPRESSION, LiteralsExpressionsVisitor.literalExpressionProcessor);
+        put(ARRAY_LITERAL_EXPRESSION, LiteralsExpressionsVisitor.arrayLiteralExpression);
+        put(NULL, ExpressionsVisitor.nullNodeProcessor);
 
         put(NEW_EXPRESSION, InvocationsProcessor.newExpression);
         put(CALL_EXPRESSION, InvocationsProcessor.callExpression);
