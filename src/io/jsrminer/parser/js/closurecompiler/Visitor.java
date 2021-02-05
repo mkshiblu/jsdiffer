@@ -54,6 +54,8 @@ public class Visitor {
         // Control Flow
         put(RETURN_STATEMENT, ControlFlowStatementsVisitor.returnStatementProcessor);
         put(BREAK_STATEMENT, ControlFlowStatementsVisitor.breakStatementProcessor);
+        put(CONTINUE_STATEMENT, ControlFlowStatementsVisitor.continueStatementProcessor);
+        put(LABELLED_STATEMENT, ControlFlowStatementsVisitor.labelledStatementProcessor);
 
         // Loops
         put(FOR_STATEMENT, LoopStatementsVisitor.forStatementProcessor);

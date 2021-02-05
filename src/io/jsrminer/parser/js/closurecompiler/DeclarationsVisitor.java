@@ -23,6 +23,7 @@ class DeclarationsVisitor {
                 AnonymousFunctionDeclaration anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
                 function = anonymousFunctionDeclaration;
                 parent.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+                anonymousFunctionDeclaration.setText(getTextInSource(tree));
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);
@@ -40,18 +41,19 @@ class DeclarationsVisitor {
             // Load functionBody by passing the function as the new container
             if (tree.functionBody != null) {
                 BlockTree blockTree = tree.functionBody.asBlock();
-
-                BlockStatement dummyParent = createDummyBodyBlock(blockTree);
-                Visitor.visitStatement(blockTree, dummyParent, function);
-                BlockStatement bodyBlock = (BlockStatement) dummyParent.getStatements().get(0);
-                bodyBlock.setParent(null);
+                BlockStatement bodyBlock = new BlockStatement();
+                bodyBlock.setText("{");
+                populateBlockStatementData(blockTree, bodyBlock);
                 function.setBody(new FunctionBody(bodyBlock));
+
+                blockTree.statements.forEach(statementTree -> {
+                    Visitor.visitStatement(statementTree, bodyBlock, function);
+                });
+
             } else {
                 throw new RuntimeException("Null function body not handled for "
                         + function.getQualifiedName() + " at " + tree.location.toString());
             }
-
-
             return function;
         }
     };

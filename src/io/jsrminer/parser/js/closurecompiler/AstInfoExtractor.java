@@ -232,7 +232,6 @@ public class AstInfoExtractor {
         expression.setOwnerBlock(parent);
     }
 
-
     static String getTextInSource(ParseTree tree) {
         return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
     }
