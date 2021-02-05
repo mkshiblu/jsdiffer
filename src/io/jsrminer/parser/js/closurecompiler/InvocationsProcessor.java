@@ -52,8 +52,8 @@ public class InvocationsProcessor {
             creation.setSourceLocation(createSourceLocation(tree));
             creation.setType(getCodeElementType(tree));
 
-            String qualifiedName = generateQualifiedName(name, container);
-            creation.setFunctionName(qualifiedName);
+            //String qualifiedName = generateQualifiedName(name, container);
+            creation.setFunctionName(name);
             //creation.setExpressionText();
 
             // Add to the list

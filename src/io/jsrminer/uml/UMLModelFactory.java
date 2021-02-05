@@ -1,7 +1,6 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
-import io.rminerx.core.api.IParser;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.Map;
@@ -14,7 +13,8 @@ public class UMLModelFactory {
 //    }
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
-        IParser parser = new ClosureCompilerParser();
+        ClosureCompilerParser parser = new ClosureCompilerParser();
+        parser.setEnableStrictMode(true);
         UMLModel model = parser.parse(fileContents);
 
         // Populate repository directories

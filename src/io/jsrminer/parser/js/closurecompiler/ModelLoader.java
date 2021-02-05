@@ -16,41 +16,6 @@ import java.util.List;
  * Populates a SourceModel Using the ProgramTree
  */
 public class ModelLoader {
-
-//    private String fileContent;
-//
-//    /**
-//     * File content is needed to get the Text from the source since GCC stores only the position not the text
-//     *
-//     * @param fileContent
-//     */
-//    ModelLoader(String fileContent) {
-//        this.fileContent = fileContent;
-//    }
-
-//    public Container loadFromAst(@NonNull ProgramTree programTree) {
-//        SourceFile container = new SourceFile();
-//        container.setFilepath("unnamed.js");
-//        container.setQualifiedName("unnamed.js");
-//
-//        CodeFragment dummyBodyBlock = new BlockStatement();
-//        // Set the source location of the block parent to the end of the file
-//        SourceRange lastElementLocation = programTree.sourceElements.get(programTree.sourceElements.size() - 1).location;
-//        dummyBodyBlock.setText("{");
-//
-//        if (container.getSourceLocation() == null) {
-//            container.setSourceLocation(new SourceLocation(programTree.location.start.source.name
-//                    , 0, 0
-//                    , lastElementLocation.end.line, lastElementLocation.end.column
-//                    , 0, lastElementLocation.end.offset));
-//        }
-//
-//        dummyBodyBlock.setSourceLocation(container.getSourceLocation());
-//        process(programTree.sourceElements, dummyBodyBlock, container);
-//
-//        return container;
-//    }
-
     /**
      * Loads the sourceFile model using the Ast Tree
      *
