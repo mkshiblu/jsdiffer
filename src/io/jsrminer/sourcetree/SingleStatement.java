@@ -15,7 +15,7 @@ public class SingleStatement extends Statement implements ILeafFragment {
     private List<String> variables = new ArrayList<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
-    private List<String> identifierArguments = new ArrayList<>();
+    private List<String> arguments = new ArrayList<>();
 
     public List<String> stringLiterals = new ArrayList<>();
     public List<String> numberLiterals = new ArrayList<>();
@@ -106,8 +106,8 @@ public class SingleStatement extends Statement implements ILeafFragment {
      * Returns arguments which are Invocations
      */
     @Override
-    public List<String> getIdentifierArguments() {
-        return identifierArguments;
+    public List<String> getArguments() {
+        return arguments;
     }
 
     /**

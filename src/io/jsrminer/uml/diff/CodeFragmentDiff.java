@@ -52,8 +52,8 @@ public class CodeFragmentDiff {
     }
 
     private void intersectArguments() {
-        this.arguments1.addAll(statement1.getIdentifierArguments());
-        this.arguments2.addAll(statement2.getIdentifierArguments());
+        this.arguments1.addAll(statement1.getArguments());
+        this.arguments2.addAll(statement2.getArguments());
         ReplacementUtil.removeCommonElements(arguments1, arguments2);
     }
 

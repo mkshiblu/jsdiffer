@@ -356,7 +356,7 @@ public class JsonFileLoader {
 
         // TODO check contents of invocationArguments (i.e. could it be variable?
         if (any.keys().contains("arguments")) {
-            populateStringListFromAny(any.get("arguments"), leaf.getIdentifierArguments());
+            populateStringListFromAny(any.get("arguments"), leaf.getArguments());
         }
 
         // region Object Creations

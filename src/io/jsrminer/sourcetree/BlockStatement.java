@@ -267,10 +267,10 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
-    public List<String> getIdentifierArguments() {
+    public List<String> getArguments() {
         List<String> arguments = new ArrayList<String>();
         for (Expression expression : expressions) {
-            arguments.addAll(expression.getIdentifierArguments());
+            arguments.addAll(expression.getArguments());
         }
         return arguments;
     }

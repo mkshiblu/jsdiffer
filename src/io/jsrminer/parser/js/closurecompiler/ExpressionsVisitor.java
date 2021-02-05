@@ -1,12 +1,60 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.*;
+import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.Expression;
+import io.jsrminer.sourcetree.TernaryOperatorExpression;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.getTextInSource;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 public class ExpressionsVisitor {
+
+    /**
+     * A conditional expression with condition, left and right
+     * Can be consider as a ternary operator expression
+     */
+    public static final NodeVisitor<ILeafFragment, ConditionalExpressionTree, ILeafFragment> conditionalExpression
+            = new NodeVisitor<>() {
+        @Override
+        public ILeafFragment visit(ConditionalExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            String text = getTextInSource(tree);
+            Expression expression = createBaseExpressionWithRMType(tree.condition, CodeElementType.TERNARY_OPERATOR_CONDITION);
+            Expression thenExpression = createBaseExpressionWithRMType(tree.left, CodeElementType.TERNARY_OPERATOR_THEN_EXPRESSION);
+            Expression elseExpression = createBaseExpressionWithRMType(tree.right, CodeElementType.TERNARY_OPERATOR_ELSE_EXPRESSION);
+
+            TernaryOperatorExpression ternaryOperatorExpression
+                    = new TernaryOperatorExpression(text, expression, thenExpression, elseExpression);
+            leaf.getTernaryOperatorExpressions().add(ternaryOperatorExpression);
+
+            Visitor.visitExpression(tree.condition, expression, container);
+            Visitor.visitExpression(tree.left, thenExpression, container);
+            Visitor.visitExpression(tree.right, elseExpression, container);
+
+            return leaf;
+        }
+    };
+
+    public static final NodeVisitor<String, ThisExpressionTree, ILeafFragment> thisExpression
+            = new NodeVisitor<>() {
+        @Override
+        public String visit(ThisExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            return getTextInSource(tree);
+        }
+    };
+
+    /**
+     * An expression with parenthesis such as case clause of switch
+     */
+    public static final NodeVisitor<Void, ParenExpressionTree, ILeafFragment> parenExpression
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(ParenExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            Visitor.visitExpression(tree.expression, leaf, container);
+            return null;
+        }
+    };
 
     /**
      * Represents UpdateExpression productions from the spec.
@@ -64,8 +112,11 @@ public class ExpressionsVisitor {
             String text = getTextInSource(tree);
             var operator = tree.operator.toString();
 
-            leaf.getInfixOperators().add(operator);
-            leaf.getInfixExpressions().add(text);
+            // TODO should treated as infix if =?
+            if (operator != "=") {
+                leaf.getInfixOperators().add(operator);
+                leaf.getInfixExpressions().add(text);
+            }
 
             Visitor.visitExpression(tree.left, leaf, container);
             Visitor.visitExpression(tree.right, leaf, container);
@@ -84,6 +135,9 @@ public class ExpressionsVisitor {
 
             Visitor.visitExpression(tree.operand, leaf, container);
             Visitor.visitExpression(tree.memberExpression, leaf, container);
+
+            // Treat as array access
+            leaf.getArrayAccesses().add(getTextInSource(tree));
             return null;
         }
     };
@@ -95,9 +149,12 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public Void visit(MemberExpressionTree tree, ILeafFragment leaf, IContainer container) {
-
             Visitor.visitExpression(tree.operand, leaf, container);
-            leaf.getVariables().add(tree.memberName.value);
+            String variableName = tree.memberName.value;
+            if (tree.operand.type == ParseTreeType.THIS_EXPRESSION) {
+                variableName = "this." + variableName;
+            }
+            leaf.getVariables().add(variableName);
             return null;
         }
     };

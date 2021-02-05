@@ -28,6 +28,7 @@ public enum CodeElementType {
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
     SWITCH_STATEMENT("SwitchStatement", "switch"),
+
     WHILE_STATEMENT("WhileStatement", "while"),
     LITERAL_EXPRESSION("LiteralExpression"),
     COMMA_EXPRESSION("CommaExpression"),
@@ -41,7 +42,11 @@ public enum CodeElementType {
     ENHANCED_FOR_STATEMENT_EXPRESSION,
     WHILE_STATEMENT_CONDITION,
     DO_STATEMENT_CONDITION,
-    CATCH_CLAUSE_EXCEPTION_NAME
+    CATCH_CLAUSE_EXCEPTION_NAME,
+    SWITCH_STATEMENT_CONDITION,
+    TERNARY_OPERATOR_CONDITION,
+    TERNARY_OPERATOR_THEN_EXPRESSION,
+    TERNARY_OPERATOR_ELSE_EXPRESSION,
     ;
 
     public final String titleCase;

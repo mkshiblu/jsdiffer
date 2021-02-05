@@ -22,10 +22,15 @@ public class Visitor {
         put(VARIABLE_DECLARATION_LIST, DeclarationsVisitor.variableDeclarationsList);
         put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
 
-
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
         put(BLOCK, StatementsVisitor.blockStatementProcessor);
+
+        // Choices
         put(IF_STATEMENT, ChoiceStatementsVisitor.ifStatementProcessor);
+        put(SWITCH_STATEMENT, ChoiceStatementsVisitor.switchStatementProcessor);
+        put(CASE_CLAUSE, ChoiceStatementsVisitor.caseStatementProcessor);
+        put(CONDITIONAL_EXPRESSION, ExpressionsVisitor.conditionalExpression);
+
         put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);
@@ -40,9 +45,12 @@ public class Visitor {
         put(UPDATE_EXPRESSION, ExpressionsVisitor.updateExpression);
         put(MEMBER_LOOKUP_EXPRESSION, ExpressionsVisitor.memberLookupExpression);
         put(MEMBER_EXPRESSION, ExpressionsVisitor.memberExpression);
+        put(PAREN_EXPRESSION, ExpressionsVisitor.parenExpression);
+        put(THIS_EXPRESSION, ExpressionsVisitor.thisExpression);
 
         // Control Flow
         put(RETURN_STATEMENT, ControlFlowStatementsVisitor.returnStatementProcessor);
+        put(BREAK_STATEMENT, ControlFlowStatementsVisitor.breakStatementProcessor);
 
         // Loops
         put(FOR_STATEMENT, LoopStatementsVisitor.forStatementProcessor);

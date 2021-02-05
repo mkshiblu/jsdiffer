@@ -38,9 +38,19 @@ public class TypeChecker {
                 && tree.asLiteralExpression().literalToken.type == TokenType.STRING;
     }
 
-//        public static boolean isBooleanLiteral(ParseTree tree) {
-//            return isLiteralExpression(tree)
-//                    && tree.asLiteralExpression().literalToken.type == TokenType.;
-//        }
+    public static boolean isBooleanLiteral(ParseTree tree) {
+        if (isLiteralExpression(tree)) {
+            var type = tree.asLiteralExpression().literalToken.type;
+            return type == TokenType.TRUE || type == TokenType.FALSE;
+        }
+        return false;
+    }
+
+    /**
+     * Similar to array Access
+     */
+    public static boolean isMemberLookupExpression(ParseTree tree) {
+        return tree.type == ParseTreeType.MEMBER_LOOKUP_EXPRESSION;
+    }
 }
 

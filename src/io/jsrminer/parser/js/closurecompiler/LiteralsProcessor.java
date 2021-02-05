@@ -24,6 +24,10 @@ public class LiteralsProcessor {
                 case NULL:
                     literals = fragment.getNullLiterals();
                     break;
+                case TRUE:
+                case FALSE:
+                    literals = fragment.getBooleanLiterals();
+                    break;
                 default:
                     throw new RuntimeException("Literal type: " + tree.literalToken.type + " not handled");
             }

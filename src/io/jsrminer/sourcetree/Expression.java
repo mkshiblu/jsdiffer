@@ -98,7 +98,7 @@ public class Expression extends CodeFragment implements ILeafFragment {
      * Returns arguments which are Invocations
      */
     @Override
-    public List<String> getIdentifierArguments() {
+    public List<String> getArguments() {
         return identifierArguments;
     }
 

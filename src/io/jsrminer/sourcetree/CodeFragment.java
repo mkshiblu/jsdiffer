@@ -104,7 +104,7 @@ public abstract class CodeFragment extends CodeEntity implements ICodeFragment {
 
     public abstract List<TernaryOperatorExpression> getTernaryOperatorExpressions();
 
-    public abstract List<String> getIdentifierArguments();
+    public abstract List<String> getArguments();
 
     public abstract List<VariableDeclaration> getVariableDeclarations();
 

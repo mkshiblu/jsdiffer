@@ -93,6 +93,7 @@ public class InvocationsProcessor {
                     MemberExpressionTree calleeAsMember = callee.asMemberExpression();
                     name = calleeAsMember.memberName.value;
                     expressionText = getTextInSource(calleeAsMember.operand);
+                    Visitor.visitExpression(calleeAsMember.operand, leaf, container);
                     break;
                 default:
                     throw new RuntimeException("Unsupported CalExpression Operand of type " + callee.type + " at " + callee.location.toString());
@@ -122,10 +123,11 @@ public class InvocationsProcessor {
 
     static void processArgument(ParseTree argument, ILeafFragment leaf) {
         if (TypeChecker.isIdentifier(argument)
-                || TypeChecker.isCallExpression(argument)
-                || TypeChecker.isNewExpression(argument)
                 || TypeChecker.isStringLiteral(argument)
-                || TypeChecker.isFunctionDeclaration(argument))
+                || TypeChecker.isBooleanLiteral(argument)
+                || TypeChecker.isMemberLookupExpression(argument)
+                || TypeChecker.isFunctionDeclaration(argument)
+                || TypeChecker.isObjectLiteralExpression(argument))
             return;
 
 //            if(argument instanceof SuperMethodInvocation ||
@@ -145,6 +147,6 @@ public class InvocationsProcessor {
 //                || t.isClass(argumentPath.node)) {
 //            return;
 //        }
-        leaf.getIdentifierArguments().add(AstInfoExtractor.getTextInSource(argument));
+        leaf.getArguments().add(AstInfoExtractor.getTextInSource(argument));
     }
 }

@@ -20,7 +20,7 @@ public interface ILeafFragment extends ICodeFragment {
     List<String> getPrefixExpressions();
     List<String> getPostfixExpressions();
     List<TernaryOperatorExpression> getTernaryOperatorExpressions();
-    List<String> getIdentifierArguments();
+    List<String> getArguments();
     List<VariableDeclaration> getVariableDeclarations();
     VariableDeclaration getVariableDeclaration(String variableName);
     VariableDeclaration findVariableDeclarationIncludingParent(String variableName);

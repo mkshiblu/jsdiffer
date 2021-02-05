@@ -17,6 +17,7 @@ public class AstInfoExtractor {
 
         put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
         put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
+        put(ParseTreeType.CASE_CLAUSE, CodeElementType.SWITCH_CASE);
 
         put(ParseTreeType.BLOCK, CodeElementType.BLOCK_STATEMENT);
         put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
@@ -146,7 +147,7 @@ public class AstInfoExtractor {
         leaf1.getTernaryOperatorExpressions().addAll(leaf2.getTernaryOperatorExpressions());
         leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
         leaf1.getVariableDeclarations().addAll(leaf2.getVariableDeclarations());
-        leaf1.getIdentifierArguments().addAll(leaf2.getIdentifierArguments());
+        leaf1.getArguments().addAll(leaf2.getArguments());
 
 
         for (var entry : leaf2.getMethodInvocationMap().entrySet()) {
