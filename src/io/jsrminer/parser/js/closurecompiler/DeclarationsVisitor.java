@@ -1,9 +1,6 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
-import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
-import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationListTree;
-import com.google.javascript.jscomp.parsing.parser.trees.VariableDeclarationTree;
+import com.google.javascript.jscomp.parsing.parser.trees.*;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
@@ -88,20 +85,31 @@ class DeclarationsVisitor {
             , VariableDeclarationKind kind
             , IContainer container
             , INode scopeNode) {
-        String variableName = tree.lvalue.asIdentifierExpression().identifierToken.value;
-        var variableDeclaration = new VariableDeclaration(variableName, kind);
 
-        variableDeclaration.setSourceLocation(createSourceLocation(tree));
-
-        // Set Scope (TODO set body source location
-        variableDeclaration.setScope(createVariableScope(tree, scopeNode == null ? container : scopeNode));
-
+        var variableDeclaration = createVariableDeclarationFromIdentifier(tree.lvalue.asIdentifierExpression()
+                , kind
+                , scopeNode == null ? container : scopeNode);
         // Process initializer
         if (tree.initializer != null) {
             Expression expression = createBaseExpressionWithRMType(tree.initializer, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             Visitor.visitExpression(tree.initializer, expression, container);
             variableDeclaration.setInitializer(expression);
         }
+
+        return variableDeclaration;
+    }
+
+    static VariableDeclaration createVariableDeclarationFromIdentifier(IdentifierExpressionTree tree
+            , VariableDeclarationKind kind
+            , INode scopeNode) {
+        String variableName = tree.identifierToken.value;
+        var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+        variableDeclaration.setSourceLocation(createSourceLocation(tree));
+
+        // Set Scope (TODO set body source location
+        variableDeclaration.setScope(createVariableScope(tree, scopeNode));
+
         return variableDeclaration;
     }
 }

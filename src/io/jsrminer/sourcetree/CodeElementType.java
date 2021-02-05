@@ -16,6 +16,7 @@ public enum CodeElementType {
     RETURN_STATEMENT("ReturnStatement"),
     TRY_STATEMENT("TryStatement", "try"),
     CATCH_CLAUSE("CatchClause", "catch"),
+    FINALLY_BLOCK("Finally", "finally"),
     THROW_STATEMENT("ThrowStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
     ENHANCED_FOR_STATEMENT("EnhancedForStatement", "for"), // TODO revisit
@@ -40,6 +41,7 @@ public enum CodeElementType {
     ENHANCED_FOR_STATEMENT_EXPRESSION,
     WHILE_STATEMENT_CONDITION,
     DO_STATEMENT_CONDITION,
+    CATCH_CLAUSE_EXCEPTION_NAME
     ;
 
     public final String titleCase;

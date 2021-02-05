@@ -467,7 +467,7 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         return false;
     }
 
-    public List<VariableDeclaration> getEnhancedForVariableDeclarations() {
+    public List<VariableDeclaration> getOwnVariableDeclarations() {
         return enhancedForVariableDeclarations;
     }
 

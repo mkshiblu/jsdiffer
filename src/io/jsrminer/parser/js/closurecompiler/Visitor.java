@@ -50,6 +50,11 @@ public class Visitor {
         put(FOR_OF_STATEMENT, LoopStatementsVisitor.forOfStatementProcessor);
         put(WHILE_STATEMENT, LoopStatementsVisitor.whileStatementProcessor);
         put(DO_WHILE_STATEMENT, LoopStatementsVisitor.doWhileStatementProcessor);
+
+        // Exceptions
+        put(TRY_STATEMENT, ExceptionStatementsVisitor.tryStatementProcessor);
+        put(CATCH, ExceptionStatementsVisitor.catchStatementProcessor);
+        put(FINALLY, ExceptionStatementsVisitor.finallyStatementProcessor);
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {
@@ -64,7 +69,7 @@ public class Visitor {
         //exit(tree, leaf, container);
     }
 
-    static void visitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
+    static Object visitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
         var processor = nodeProcessors.get(tree.type);
 
         if (processor == null) {
@@ -72,8 +77,9 @@ public class Visitor {
         }
 
         enterStatement(tree, parent, container);
-        processor.visit(tree, parent, container);
+        Object result = processor.visit(tree, parent, container);
         exitStatement(tree, parent, container);
+        return result;
     }
 
     static void enterStatement(ParseTree tree, BlockStatement parent, IContainer container) {

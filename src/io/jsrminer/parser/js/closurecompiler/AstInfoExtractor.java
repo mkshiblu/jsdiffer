@@ -29,6 +29,7 @@ public class AstInfoExtractor {
 
         put(ParseTreeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT);
         put(ParseTreeType.CATCH, CodeElementType.CATCH_CLAUSE);
+        put(ParseTreeType.FINALLY, CodeElementType.FINALLY_BLOCK);
         put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
 
         //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
