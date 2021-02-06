@@ -68,6 +68,7 @@ public class Visitor {
         put(TRY_STATEMENT, ExceptionStatementsVisitor.tryStatementProcessor);
         put(CATCH, ExceptionStatementsVisitor.catchStatementProcessor);
         put(FINALLY, ExceptionStatementsVisitor.finallyStatementProcessor);
+        put(THROW_STATEMENT, ExceptionStatementsVisitor.throwStatementProcessor);
     }};
 
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {

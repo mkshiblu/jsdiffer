@@ -76,13 +76,18 @@ public class InvocationsProcessor {
      * A Call expression e.g. get("John");
      * has properties operand, arguments
      */
-    public static final INodeVisitor<Void, CallExpressionTree, ILeafFragment> callExpression
+    public static final INodeVisitor<OperationInvocation, CallExpressionTree, ILeafFragment> callExpression
             = new NodeVisitor<>() {
         @Override
-        public Void visit(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
+        public OperationInvocation visit(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            String text = getTextInSource(tree);
             String name = null;
             String expressionText = null;
             ParseTree callee = tree.operand;
+
+            final OperationInvocation invocation = new OperationInvocation();
+            addOperationInvocation(text, invocation, leaf);
+
             //TODO expression text
             switch (callee.type) {
                 case IDENTIFIER_EXPRESSION:
@@ -92,23 +97,48 @@ public class InvocationsProcessor {
                 case MEMBER_EXPRESSION:
                     MemberExpressionTree calleeAsMember = callee.asMemberExpression();
                     name = calleeAsMember.memberName.value;
+                    processCalleeExpression(calleeAsMember.operand, invocation);
                     expressionText = getTextInSource(calleeAsMember.operand);
+
+
                     Visitor.visitExpression(calleeAsMember.operand, leaf, container);
                     break;
+                case MEMBER_LOOKUP_EXPRESSION:
+                    //dispatchListeners[i](event, dispatchInstances[i])
+                    var calleeAsMemberLookupExpression = callee.asMemberLookupExpression();
+                    // Take remove text before the last "." if any from name
+                    int lastDotIndex = text.lastIndexOf(".");
+                    if (lastDotIndex >= 0) {
+                        name = text.substring(lastDotIndex + 1, text.length());
+                        expressionText = text.substring(0, lastDotIndex);
+                    } else {
+                        name = text;
+                    }
+
+                    processCalleeExpression(calleeAsMemberLookupExpression.operand, invocation);
+                    Visitor.visitExpression(calleeAsMemberLookupExpression.operand, leaf, container);
+                    break;
+//                case CALL_EXPRESSION:
+//                    var calleeAsCallExpression = callee.asCallExpression();
+//
+//                    break;
+                case PAREN_EXPRESSION:
+                    // Can happen with self invoking function such as (function(p1, p2){ })();
+                    var calleeAsParenExpression = callee.asParenExpression();
+                    Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
+//                    name = ""; // IT could be the name of the anonymous function
+                    break;
+
+
                 default:
-                    throw new RuntimeException("Unsupported CalExpression Operand of type " + callee.type + " at " + callee.location.toString());
+                    throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.type + " at " + callee.location.toString());
             }
 
-            final OperationInvocation invocation = new OperationInvocation();
             invocation.setText(getTextInSource(tree));
             invocation.setExpressionText(expressionText);
             invocation.setSourceLocation(createSourceLocation(tree));
             invocation.setType(getCodeElementType(tree));
             invocation.setFunctionName(name);
-            //creation.setExpressionText();
-
-            // Add to the list
-            leaf.getMethodInvocationMap().computeIfAbsent(invocation.getText(), key -> new ArrayList<>()).add(invocation);
 
             if (tree.arguments != null) {
                 tree.arguments.arguments.forEach(argumentTree -> {
@@ -117,9 +147,20 @@ public class InvocationsProcessor {
                     Visitor.visitExpression(argumentTree, leaf, container);
                 });
             }
-            return null;
+            return invocation;
         }
     };
+
+    static void addOperationInvocation(String text, OperationInvocation invocation, ILeafFragment leaf) {
+        // Add to the list
+        leaf.getMethodInvocationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(invocation);
+    }
+
+    static OperationInvocation processCalleeExpression(ParseTree operand, OperationInvocation invocation) {
+
+
+        return null;
+    }
 
     static void processArgument(ParseTree argument, ILeafFragment leaf) {
         if (TypeChecker.isIdentifier(argument)
@@ -129,24 +170,6 @@ public class InvocationsProcessor {
                 || TypeChecker.isFunctionDeclaration(argument)
                 || TypeChecker.isObjectLiteralExpression(argument))
             return;
-
-//            if(argument instanceof SuperMethodInvocation ||
-//                    argument instanceof Name ||
-//                    argument instanceof StringLiteral ||
-//                    argument instanceof BooleanLiteral ||
-//                    (argument instanceof FieldAccess && ((FieldAccess)argument).getExpression() instanceof ThisExpression) ||
-//                    (argument instanceof ArrayAccess && invalidArrayAccess((ArrayAccess)argument)) ||
-//                    (argument instanceof InfixExpression && invalidInfix((InfixExpression)argument)))
-//                return;
-//        if (leaf && (t.isCallExpression(argumentPath.node) || t.isNewExpression(argumentPath.node)
-//                || t.isIdentifier(argumentPath.node))
-//                || t.isMemberExpression(argumentPath.node)
-//                || t.isLiteral(argumentPath.node)
-//                || t.isObjectExpression(argumentPath.node)
-//                || t.isFunction(argumentPath.node)
-//                || t.isClass(argumentPath.node)) {
-//            return;
-//        }
         leaf.getArguments().add(AstInfoExtractor.getTextInSource(argument));
     }
 }

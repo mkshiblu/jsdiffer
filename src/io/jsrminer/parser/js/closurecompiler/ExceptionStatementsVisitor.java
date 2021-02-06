@@ -2,6 +2,7 @@ package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.CatchTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FinallyTree;
+import com.google.javascript.jscomp.parsing.parser.trees.ThrowStatementTree;
 import com.google.javascript.jscomp.parsing.parser.trees.TryStatementTree;
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
@@ -78,6 +79,16 @@ public class ExceptionStatementsVisitor {
             var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
             Visitor.visitStatement(tree.block, composite, container);
             return composite;
+        }
+    };
+
+    public static final INodeVisitor<SingleStatement, ThrowStatementTree, BlockStatement> throwStatementProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public SingleStatement visit(ThrowStatementTree tree, BlockStatement parent, IContainer container) {
+            var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
+            Visitor.visitExpression(tree.value, leaf, container);
+            return leaf;
         }
     };
 }
