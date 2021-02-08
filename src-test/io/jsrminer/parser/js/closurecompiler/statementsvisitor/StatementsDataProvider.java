@@ -17,10 +17,7 @@ public enum StatementsDataProvider {
     BlockStatement dummyBodyBlock;
 
     private StatementsDataProvider(String fileName) {
-        container = new SourceFile();
-        container.setFilepath(fileName);
-        container.setQualifiedName(fileName);
-
+        container = new SourceFile(fileName);
         var parser = new ClosureCompilerParser();
         var parseResult = parser.parseAndMakeAst(fileName, FileUtil.readFileContent(BaseTest.getRootResourceDirectory() + "parser/" + fileName),
                 false);
