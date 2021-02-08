@@ -29,6 +29,7 @@ public class Visitor {
         put(IF_STATEMENT, ChoiceStatementsVisitor.ifStatementProcessor);
         put(SWITCH_STATEMENT, ChoiceStatementsVisitor.switchStatementProcessor);
         put(CASE_CLAUSE, ChoiceStatementsVisitor.caseStatementProcessor);
+        put(DEFAULT_CLAUSE, ChoiceStatementsVisitor.defaultClauseStatementProcessor);
         put(CONDITIONAL_EXPRESSION, ExpressionsVisitor.conditionalExpression);
 
         put(VARIABLE_STATEMENT, StatementsVisitor.variableStatementProcessor);
@@ -74,7 +75,7 @@ public class Visitor {
     static void visitExpression(ParseTree tree, ILeafFragment leaf, IContainer container) {
         var processor = nodeProcessors.get(tree.type);
 
-        if (processor == null) {
+        if (processor == null && !isIgnored(tree)) {
             throw new NotImplementedException("Processor not implemented for " + tree.type);
         }
 
@@ -86,7 +87,7 @@ public class Visitor {
     static Object visitStatement(ParseTree tree, BlockStatement parent, IContainer container) {
         var processor = nodeProcessors.get(tree.type);
 
-        if (processor == null) {
+        if (processor == null && !isIgnored(tree)) {
             throw new NotImplementedException("Processor not implemented for " + tree.type);
         }
 
@@ -94,6 +95,10 @@ public class Visitor {
         Object result = processor.visit(tree, parent, container);
         exitStatement(tree, parent, container);
         return result;
+    }
+
+    public static boolean isIgnored(ParseTree parseTree) {
+        return Config.ignoredNodes.contains(parseTree.type);
     }
 
     static void enterStatement(ParseTree tree, BlockStatement parent, IContainer container) {

@@ -47,8 +47,7 @@ public class ClosureCompilerParser extends JavaScriptParser {
                     umlModel.getSourceFileModels().put(filepath, sourceFile);
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
-                    fileContents.remove(filepath);
+                    //System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
                 }
             }
         } catch (Exception e) {
@@ -84,8 +83,12 @@ public class ClosureCompilerParser extends JavaScriptParser {
 
         // Get AST
         ParseResult result = parseAndMakeAst(filePath, fileContent, this.enableStrictMode);
-        result.errors.forEach(error -> log.debug(error.toString()));
-        result.warnings.forEach(warning -> log.debug(warning.toString()));
+
+        if (result.errors.size() > 0)
+            System.out.println(result.errors.size() + " error(s) found.");
+
+        //result.errors.forEach(error -> log.trace(error.toString()));
+        //result.warnings.forEach(warning -> log.trace(warning.toString()));
 
         // Traverse AST and load model
         if (result.getProgramAST() == null) {

@@ -23,6 +23,7 @@ public class LiteralsExpressionsVisitor {
                     literals = fragment.getNumberLiterals();
                     break;
                 case STRING:
+                case REGULAR_EXPRESSION:
                     literals = fragment.getStringLiterals();
                     break;
                 case NULL:

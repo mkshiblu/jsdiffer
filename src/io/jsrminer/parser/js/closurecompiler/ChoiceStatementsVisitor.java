@@ -1,6 +1,7 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.CaseClauseTree;
+import com.google.javascript.jscomp.parsing.parser.trees.DefaultClauseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.IfStatementTree;
 import com.google.javascript.jscomp.parsing.parser.trees.SwitchStatementTree;
 import io.jsrminer.sourcetree.BlockStatement;
@@ -73,6 +74,20 @@ public class ChoiceStatementsVisitor {
             // Load expression data
             Visitor.visitExpression(tree.expression, leaf, container);
 
+            // load the statements
+            tree.statements.forEach(statementTree -> Visitor.visitStatement(statementTree, parent, container));
+            return leaf;
+        }
+    };
+
+    /**
+     * A default clause for switch statement. Has statements
+     */
+    public static final INodeVisitor<SingleStatement, DefaultClauseTree, BlockStatement> defaultClauseStatementProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public SingleStatement visit(DefaultClauseTree tree, BlockStatement parent, IContainer container) {
+            var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
             // load the statements
             tree.statements.forEach(statementTree -> Visitor.visitStatement(statementTree, parent, container));
             return leaf;

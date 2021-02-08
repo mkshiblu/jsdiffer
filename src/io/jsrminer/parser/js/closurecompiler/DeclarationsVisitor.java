@@ -22,7 +22,7 @@ class DeclarationsVisitor {
             if (isAnonymous) {
                 AnonymousFunctionDeclaration anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
                 function = anonymousFunctionDeclaration;
-                ((ILeafFragment)fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+                ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
                 anonymousFunctionDeclaration.setText(getTextInSource(tree));
             } else {
                 function = new FunctionDeclaration();
@@ -69,6 +69,7 @@ class DeclarationsVisitor {
         public Void visit(VariableDeclarationListTree tree, ILeafFragment leaf, IContainer container) {
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarationType.toString());
             for (var declarationTree : tree.declarations) {
+
                 VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container, leaf.getParent());
                 leaf.getVariableDeclarations().add(vd);
                 leaf.getVariables().add(vd.variableName);
@@ -88,10 +89,23 @@ class DeclarationsVisitor {
             , VariableDeclarationKind kind
             , IContainer container
             , INode scopeNode) {
+        VariableDeclaration variableDeclaration;
+        switch (tree.lvalue.type) {
+            case IDENTIFIER_EXPRESSION:
+                variableDeclaration = createVariableDeclarationFromIdentifier(tree.lvalue.asIdentifierExpression()
+                        , kind
+                        , scopeNode == null ? container : scopeNode);
+                break;
+            case OBJECT_PATTERN:
+                variableDeclaration = createVariableDeclarationFromObjectPattern(tree.lvalue.asObjectPattern()
+                        , kind
+                        , scopeNode == null ? container : scopeNode);
+                break;
+            default:
+                throw new RuntimeException(tree.location + " Variable declaration type : " + tree.type + " Not handled");
+        }
 
-        var variableDeclaration = createVariableDeclarationFromIdentifier(tree.lvalue.asIdentifierExpression()
-                , kind
-                , scopeNode == null ? container : scopeNode);
+
         // Process initializer
         if (tree.initializer != null) {
             Expression expression = createBaseExpressionWithRMType(tree.initializer, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
@@ -106,6 +120,20 @@ class DeclarationsVisitor {
             , VariableDeclarationKind kind
             , INode scopeNode) {
         String variableName = tree.identifierToken.value;
+        var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+        variableDeclaration.setSourceLocation(createSourceLocation(tree));
+
+        // Set Scope (TODO set body source location
+        variableDeclaration.setScope(createVariableScope(tree, scopeNode));
+
+        return variableDeclaration;
+    }
+
+    static VariableDeclaration createVariableDeclarationFromObjectPattern(ObjectPatternTree tree
+            , VariableDeclarationKind kind
+            , INode scopeNode) {
+        String variableName = getTextInSource(tree.fields.get(0));
         var variableDeclaration = new VariableDeclaration(variableName, kind);
 
         variableDeclaration.setSourceLocation(createSourceLocation(tree));
