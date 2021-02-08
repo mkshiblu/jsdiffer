@@ -14,19 +14,20 @@ class DeclarationsVisitor {
     public static final NodeVisitor<FunctionDeclaration, FunctionDeclarationTree, CodeFragment> functionDeclarationProcessor
             = new NodeVisitor<>() {
         @Override
-        public FunctionDeclaration visit(FunctionDeclarationTree tree, CodeFragment parent, IContainer container) {
+        public FunctionDeclaration visit(FunctionDeclarationTree tree, CodeFragment fragment, IContainer container) {
 
-            final boolean isAnonymous = parent instanceof ILeafFragment;
+            final boolean isAnonymous = fragment instanceof ILeafFragment;
             FunctionDeclaration function;
 
             if (isAnonymous) {
                 AnonymousFunctionDeclaration anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
                 function = anonymousFunctionDeclaration;
-                parent.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+                ((ILeafFragment)fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
                 anonymousFunctionDeclaration.setText(getTextInSource(tree));
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);
+                //fragment.getFunctionDeclarations().add(function);
             }
 
             // Load function info

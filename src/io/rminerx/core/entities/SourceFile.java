@@ -15,14 +15,11 @@ public class SourceFile extends Container implements ISourceFile {
     private String directoryName;
     private String directoryPath;
 
-    public SourceFile() {
-        super(ContainerType.File);
-    }
-
     public SourceFile(String filepath) {
-        this();
+        super(ContainerType.File);
         this.filepath = filepath;
         name = FilenameUtils.getName(filepath);
+        qualifiedName = name;
         String dir = filepath.substring(0, filepath.length() - name.length());
         directoryPath = dir.length() > 0 ? dir.substring(0, dir.length() - 1) : dir;
         directoryName = FilenameUtils.getName(directoryPath);

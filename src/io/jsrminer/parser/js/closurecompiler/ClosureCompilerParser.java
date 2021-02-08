@@ -77,9 +77,7 @@ public class ClosureCompilerParser extends JavaScriptParser {
      * @return
      */
     private SourceFile parseAndLoadSourceFile(String fileContent, String filePath) {
-        SourceFile file = new SourceFile();
-        file.setFilepath(filePath);
-        file.setQualifiedName(filePath);
+        SourceFile file = new SourceFile(filePath);
 
         StopWatch watch = new StopWatch();
         watch.start();

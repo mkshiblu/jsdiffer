@@ -68,7 +68,6 @@ public class AstInfoExtractor {
         return createSourceLocation(tree.location);
     }
 
-
     public static String generateNameForAnonymousContainer(IContainer parentContainer) {
         return parentContainer.getAnonymousFunctionDeclarations().size() + 1 + "";
     }

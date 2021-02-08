@@ -100,7 +100,6 @@ public class InvocationsProcessor {
                     processCalleeExpression(calleeAsMember.operand, invocation);
                     expressionText = getTextInSource(calleeAsMember.operand);
 
-
                     Visitor.visitExpression(calleeAsMember.operand, leaf, container);
                     break;
                 case MEMBER_LOOKUP_EXPRESSION:
@@ -125,8 +124,12 @@ public class InvocationsProcessor {
                 case PAREN_EXPRESSION:
                     // Can happen with self invoking function such as (function(p1, p2){ })();
                     var calleeAsParenExpression = callee.asParenExpression();
+                    if (calleeAsParenExpression.expression.type == ParseTreeType.FUNCTION_DECLARATION) {
+                        name = leaf.getAnonymousFunctionDeclarations().size() + 1 + "";
+                    }else {
+                        throw  new RuntimeException("Paren expression except function is not handled: " + tree.location.toString());
+                    }
                     Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
-//                    name = ""; // IT could be the name of the anonymous function
                     break;
 
 

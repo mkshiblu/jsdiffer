@@ -41,7 +41,7 @@ public class ModelLoader {
         process(programTree.sourceElements, dummyBodyBlock, container);
 
         container.getStatements().addAll(dummyBodyBlock.getStatements());
-        container.getFunctionDeclarations().addAll(dummyBodyBlock.getFunctionDeclarations());
+        //container.getFunctionDeclarations().addAll(dummyBodyBlock.getFunctionDeclarations());
         container.getAnonymousFunctionDeclarations().addAll(dummyBodyBlock.getAllAnonymousFunctionDeclarations());
     }
 

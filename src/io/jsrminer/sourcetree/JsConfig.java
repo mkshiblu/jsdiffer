@@ -15,4 +15,9 @@ public class JsConfig {
 
     // Mapper
     public static final String SPLIT_CONCAT_STRING_PATTERN = "(\\s)*(\\+)(\\s)*";
+
+    // Parser specifics
+
+    // If true, Functions of a leaf will be added to its parent containers list of anonymous function declarations too
+    public static final boolean addLeafAnonymousFunctionsToParentContainerAlso = true;
 }
