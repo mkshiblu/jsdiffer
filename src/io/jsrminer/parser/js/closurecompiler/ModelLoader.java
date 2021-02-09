@@ -42,7 +42,7 @@ public class ModelLoader {
 
         container.getStatements().addAll(dummyBodyBlock.getStatements());
         //container.getFunctionDeclarations().addAll(dummyBodyBlock.getFunctionDeclarations());
-        container.getAnonymousFunctionDeclarations().addAll(dummyBodyBlock.getAllAnonymousFunctionDeclarations());
+        //container.getAnonymousFunctionDeclarations().addAll(dummyBodyBlock.getAllAnonymousFunctionDeclarations());
     }
 
     private void process(List<? extends ParseTree> trees, BlockStatement parent, IContainer container) {

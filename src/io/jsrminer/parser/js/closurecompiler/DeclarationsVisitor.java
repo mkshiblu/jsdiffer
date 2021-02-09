@@ -24,6 +24,7 @@ class DeclarationsVisitor {
                 function = anonymousFunctionDeclaration;
                 ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
                 anonymousFunctionDeclaration.setText(getTextInSource(tree));
+                container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);

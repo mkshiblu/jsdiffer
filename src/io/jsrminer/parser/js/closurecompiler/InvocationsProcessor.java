@@ -24,10 +24,10 @@ public class InvocationsProcessor {
             if (tree.hasTrailingComma) {
                 throw new RuntimeException("New Expression Tree with trailing comma found" + tree.location.toString());
             }
-
+            String text = getTextInSource(tree);
             final ObjectCreation creation = new ObjectCreation();
             // Add to the list
-            leaf.getCreationMap().computeIfAbsent(creation.getText(), key -> new ArrayList<>()).add(creation);
+            leaf.getCreationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(creation);
             processInvocation(tree, leaf, container, creation);
             return creation;
         }
@@ -92,7 +92,16 @@ public class InvocationsProcessor {
                 Visitor.visitExpression(calleeAsMemberLookupExpression.operand, leaf, container);
                 break;
             case THIS_EXPRESSION:
-                name =  "this";
+                name = "this";
+                break;
+            case FUNCTION_DECLARATION:
+                FunctionDeclarationTree functionDeclarationTree = callee.asFunctionDeclaration();
+                if (functionDeclarationTree.name != null) {
+                    name = functionDeclarationTree.name.value;
+                } else {
+                    name = AstInfoExtractor.generateNameForAnonymousContainer(container);
+                }
+                Visitor.visitExpression(callee, leaf, container);
                 break;
             case PAREN_EXPRESSION:
                 // Can happen with self invoking function such as (function(p1, p2){ })();

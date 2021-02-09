@@ -84,8 +84,8 @@ public class ClosureCompilerParser extends JavaScriptParser {
         // Get AST
         ParseResult result = parseAndMakeAst(filePath, fileContent, this.enableStrictMode);
 
-        if (result.errors.size() > 0)
-            System.out.println(result.errors.size() + " error(s) found.");
+        //if (result.errors.size() > 0)
+            //System.out.println(result.errors.size() + " error(s) found.");
 
         //result.errors.forEach(error -> log.trace(error.toString()));
         //result.warnings.forEach(warning -> log.trace(warning.toString()));
