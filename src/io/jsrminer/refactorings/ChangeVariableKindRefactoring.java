@@ -67,13 +67,13 @@ public class ChangeVariableKindRefactoring extends Refactoring implements IRefac
     public String toString() {
         StringBuilder sb = new StringBuilder();
         //boolean qualified = originalVariable.getKind().equals(changedTypeVariable.getKind()) && !originalVariable.getType().equalsQualified(changedTypeVariable.getType());
-        sb.append(getName()).append("\t");
+        sb.append(getName());
         //b.append(qualified ? originalVariable.toQualifiedString() : originalVariable.toString());
         sb.append(originalVariable.toString());
         sb.append(" to ");
         //sb.append(qualified ? changedTypeVariable.toQualifiedString() : changedTypeVariable.toString());
         sb.append(changedTypeVariable.toString());
-        sb.append(" in method ");
+        sb.append(" in function ");
         //
         sb.append(operationAfter.toString());
         sb.append(" at ").append(operationAfter.getFullyQualifiedName());

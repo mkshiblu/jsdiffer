@@ -18,6 +18,7 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     // vd
 
     public BlockStatement() {
+        this.setCodeElementType(CodeElementType.BLOCK_STATEMENT);
     }
 
     public void addStatement(Statement statement) {

@@ -6,7 +6,6 @@ import java.util.Map;
 public enum VariableDeclarationKind {
 
     VAR("var"), LET("let"),
-    GLOBAL(""),
     CONST("const");
 
     public final String keywordName;

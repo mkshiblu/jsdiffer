@@ -60,10 +60,6 @@ public class VariableDeclaration extends CodeEntity {
         this.isParameter = isParameter;
     }
 
-    public boolean isGlobal() {
-        return this.kind.equals(VariableDeclarationKind.GLOBAL);
-    }
-
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(variableName);//.append(" : ").append(kind.name());

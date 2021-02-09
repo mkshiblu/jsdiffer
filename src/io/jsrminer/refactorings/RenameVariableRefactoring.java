@@ -29,10 +29,10 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
     }
 
     public RefactoringType getRefactoringType() {
-//        if (originalVariable.isParameter() && renamedVariable.isParameter())
-//            return RefactoringType.RENAME_PARAMETER;
-//        if (!originalVariable.isParameter() && renamedVariable.isParameter())
-//            return RefactoringType.PARAMETERIZE_VARIABLE;
+        if (originalVariable.isParameter() && renamedVariable.isParameter())
+            return RefactoringType.RENAME_PARAMETER;
+        if (!originalVariable.isParameter() && renamedVariable.isParameter())
+            return RefactoringType.PARAMETERIZE_VARIABLE;
 //        if (!originalVariable.isAttribute() && renamedVariable.isAttribute())
 //            return RefactoringType.REPLACE_VARIABLE_WITH_ATTRIBUTE;
         return RefactoringType.RENAME_VARIABLE;
@@ -64,7 +64,7 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getName()).append("\t");
+        sb.append(getName()).append(" ");
         sb.append(originalVariable);
         sb.append(" to ");
         sb.append(renamedVariable);

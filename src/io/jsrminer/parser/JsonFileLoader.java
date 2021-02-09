@@ -111,7 +111,7 @@ public class JsonFileLoader {
         String name = any.toString("name");
         UMLParameter parameter = new UMLParameter(name);
         parameter.setSourceLocation(createSourceLocation(any.get("loc")));
-        VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.LET);
+        VariableDeclaration vd = new VariableDeclaration(name, null);
         vd.setIsParameter(true);
         vd.setScope(scope);
         vd.setSourceLocation(parameter.getSourceLocation());
@@ -460,7 +460,7 @@ public class JsonFileLoader {
 
     public VariableDeclaration createVariableDeclaration(Any any, BlockStatement owner, Container parentContainer) {
 
-        VariableDeclarationKind kind = VariableDeclarationKind.GLOBAL;
+        VariableDeclarationKind kind = null;
         if (any.keys().contains("kind")) {
             kind = VariableDeclarationKind.fromName(any.toString("kind"));
         }

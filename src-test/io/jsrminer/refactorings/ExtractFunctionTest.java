@@ -32,13 +32,10 @@ public class ExtractFunctionTest extends BaseTest {
         //vueExtractRefactoring = (ExtractOperationRefactoring) refactorings.get(2);
     }
 
-
     @Test
     void testRefactoringsCount() {
-        assertNotNull(refactorings);
-        assertEquals(10, refactorings.size());
+        assertEquals(7, refactorings.size());
     }
-
 
     @Test
     void testFunctionNames() {

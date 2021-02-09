@@ -16,7 +16,7 @@ public class ReplacementUtil {
      * after or before and the there are compatible character before and after respectively
      **/
     public static String performReplacement(String completeString1, String completeString2, String subString1, String subString2) {
-        String temp = completeString1;
+        String temp = new String(completeString1);
         boolean replacementOccurred = false;
 
         for (String character : SPECIAL_CHARACTERS) {
