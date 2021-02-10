@@ -24,7 +24,6 @@ class DeclarationsVisitor {
                 function = anonymousFunctionDeclaration;
                 ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
                 anonymousFunctionDeclaration.setText(getTextInSource(tree));
-                container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);
@@ -33,6 +32,9 @@ class DeclarationsVisitor {
 
             // Load function info
             AstInfoExtractor.loadFunctionInfo(tree, function, container);
+            if (isAnonymous) {
+                container.getAnonymousFunctionDeclarations().add((AnonymousFunctionDeclaration) function);
+            }
 
             // Load parameters
             tree.formalParameterList.parameters.forEach(parameterTree -> {

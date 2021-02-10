@@ -106,6 +106,7 @@ public class InvocationsProcessor {
             case PAREN_EXPRESSION:
                 // Can happen with self invoking function such as (function(p1, p2){ })();
                 var calleeAsParenExpression = callee.asParenExpression();
+
                 if (calleeAsParenExpression.expression.type == ParseTreeType.FUNCTION_DECLARATION) {
                     name = leaf.getAnonymousFunctionDeclarations().size() + 1 + "";
                 } else {
