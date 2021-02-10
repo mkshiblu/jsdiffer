@@ -24,7 +24,7 @@ public class InvocationsProcessor {
             if (tree.hasTrailingComma) {
                 throw new RuntimeException("New Expression Tree with trailing comma found" + tree.location.toString());
             }
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             final ObjectCreation creation = new ObjectCreation();
             // Add to the list
             leaf.getCreationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(creation);
@@ -41,7 +41,7 @@ public class InvocationsProcessor {
             = new NodeVisitor<>() {
         @Override
         public OperationInvocation visit(CallExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             final OperationInvocation invocation = new OperationInvocation();
             addOperationInvocation(text, invocation, leaf);
             processInvocation(tree, leaf, container, invocation);
@@ -56,7 +56,7 @@ public class InvocationsProcessor {
 
     static void processInvocation(ParseTree tree, ILeafFragment leaf
             , IContainer container, Invocation invocation) {
-        String text = getTextInSource(tree);
+        String text = getTextInSource(tree, false);
         String name = null;
         String expressionText = null;
 
@@ -72,7 +72,7 @@ public class InvocationsProcessor {
                 MemberExpressionTree calleeAsMember = callee.asMemberExpression();
                 name = calleeAsMember.memberName.value;
                 getSubExpression(calleeAsMember.operand, invocation);
-                expressionText = getTextInSource(calleeAsMember.operand);
+                expressionText = getTextInSource(calleeAsMember.operand, false);
 
                 Visitor.visitExpression(calleeAsMember.operand, leaf, container);
                 break;
@@ -118,7 +118,7 @@ public class InvocationsProcessor {
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.type + " at " + callee.location.toString());
         }
 
-        invocation.setText(getTextInSource(tree));
+        invocation.setText(getTextInSource(tree, false));
         invocation.setExpressionText(expressionText);
         invocation.setSourceLocation(createSourceLocation(tree));
         invocation.setType(getCodeElementType(tree));
@@ -131,7 +131,7 @@ public class InvocationsProcessor {
         if (arguments != null) {
             arguments.arguments.forEach(argumentTree -> {
                 processArgument(argumentTree, leaf);
-                invocation.getArguments().add(getTextInSource(argumentTree));
+                invocation.getArguments().add(getTextInSource(argumentTree, false));
                 Visitor.visitExpression(argumentTree, leaf, container);
             });
         }
@@ -149,6 +149,6 @@ public class InvocationsProcessor {
                 || TypeChecker.isFunctionDeclaration(argument)
                 || TypeChecker.isObjectLiteralExpression(argument))
             return;
-        leaf.getArguments().add(AstInfoExtractor.getTextInSource(argument));
+        leaf.getArguments().add(AstInfoExtractor.getTextInSource(argument, false));
     }
 }

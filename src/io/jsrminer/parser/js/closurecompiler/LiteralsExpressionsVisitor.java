@@ -58,7 +58,7 @@ public class LiteralsExpressionsVisitor {
                 // Empty array creation
                 ObjectCreation creation = new ObjectCreation();
                 creation.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));
-                creation.setText(AstInfoExtractor.getTextInSource(tree));
+                creation.setText(AstInfoExtractor.getTextInSource(tree, false));
                 creation.setType(CodeElementType.ARRAY_EXPRESSION);
                 creation.setFunctionName("");
                 leaf.getCreationMap().computeIfAbsent(creation.getText(), key -> new ArrayList<>()).add(creation);

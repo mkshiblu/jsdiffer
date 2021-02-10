@@ -15,6 +15,9 @@ import io.rminerx.core.api.ISourceFile;
 import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
+
+    private static final PrettyPrinter prettyPrinter = new PrettyPrinter();
+
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {
         return new SourceLocation(
                 sourceRange.start.source.name
@@ -165,7 +168,7 @@ public class AstInfoExtractor {
      * Populates text, sourceLocation, type, depth, index in parent.
      */
     static <T extends CodeFragment> void populateTextLocationAndType(ParseTree tree, T fragment) {
-        fragment.setText(getTextInSource(tree));
+        fragment.setText(getTextInSource(tree, fragment instanceof SingleStatement));
         populateLocationAndType(tree, fragment);
     }
 
@@ -176,7 +179,7 @@ public class AstInfoExtractor {
 
     static <T extends CodeFragment> void populateTextAndLocation(ParseTree tree, T fragment) {
         fragment.setSourceLocation(createSourceLocation(tree));
-        fragment.setText(getTextInSource(tree));
+        fragment.setText(getTextInSource(tree, fragment instanceof SingleStatement));
     }
 
     static void addStatement(Statement statement, BlockStatement parent) {
@@ -194,8 +197,11 @@ public class AstInfoExtractor {
         expression.setOwnerBlock(parent);
     }
 
-    static String getTextInSource(ParseTree tree) {
-        return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+    static String getTextInSource(ParseTree tree, boolean isStatement) {
+        String astString = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+
+        //String pretty = prettyPrinter.prettify(astString, false);
+        return astString;
     }
 
     static CodeElementType getCodeElementType(ParseTree tree) {

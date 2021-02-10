@@ -19,7 +19,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public ILeafFragment visit(ConditionalExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             Expression expression = createBaseExpressionWithRMType(tree.condition, CodeElementType.TERNARY_OPERATOR_CONDITION);
             Expression thenExpression = createBaseExpressionWithRMType(tree.left, CodeElementType.TERNARY_OPERATOR_THEN_EXPRESSION);
             Expression elseExpression = createBaseExpressionWithRMType(tree.right, CodeElementType.TERNARY_OPERATOR_ELSE_EXPRESSION);
@@ -40,7 +40,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public String visit(ThisExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            return getTextInSource(tree);
+            return getTextInSource(tree, false);
         }
     };
 
@@ -69,7 +69,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public String visit(UpdateExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             boolean isPrefixOperator = tree.operatorPosition == UpdateExpressionTree.OperatorPosition.PREFIX;
 
             if (isPrefixOperator) {
@@ -90,7 +90,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public String visit(UnaryExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             String operator = tree.operator.type.toString();
             boolean isPrefixOperator = text.startsWith(operator);
 
@@ -109,7 +109,7 @@ public class ExpressionsVisitor {
             = new INodeVisitor<>() {
         @Override
         public String visit(BinaryOperatorTree tree, ILeafFragment leaf, IContainer container) {
-            String text = getTextInSource(tree);
+            String text = getTextInSource(tree, false);
             var operator = tree.operator.toString();
 
             // TODO should treated as infix if =?
@@ -137,7 +137,7 @@ public class ExpressionsVisitor {
             Visitor.visitExpression(tree.memberExpression, leaf, container);
 
             // Treat as array access
-            leaf.getArrayAccesses().add(getTextInSource(tree));
+            leaf.getArrayAccesses().add(getTextInSource(tree, false));
             return null;
         }
     };
@@ -186,7 +186,7 @@ public class ExpressionsVisitor {
             tree.expressions.forEach(expressionTree -> {
                 Visitor.visitExpression(expressionTree, leaf, container);
             });
-            return getTextInSource(tree);
+            return getTextInSource(tree, false);
         }
     };
 }

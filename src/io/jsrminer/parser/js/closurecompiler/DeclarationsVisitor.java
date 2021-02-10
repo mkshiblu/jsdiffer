@@ -23,7 +23,7 @@ class DeclarationsVisitor {
                 AnonymousFunctionDeclaration anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
                 function = anonymousFunctionDeclaration;
                 ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
-                anonymousFunctionDeclaration.setText(getTextInSource(tree));
+                anonymousFunctionDeclaration.setText(getTextInSource(tree, false));
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);
@@ -150,7 +150,7 @@ class DeclarationsVisitor {
     static VariableDeclaration createVariableDeclarationFromObjectPattern(ObjectPatternTree tree
             , VariableDeclarationKind kind
             , INode scopeNode) {
-        String variableName = getTextInSource(tree.fields.get(0));
+        String variableName = getTextInSource(tree.fields.get(0), false);
         var variableDeclaration = new VariableDeclaration(variableName, kind);
 
         variableDeclaration.setSourceLocation(createSourceLocation(tree));
