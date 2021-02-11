@@ -28,7 +28,11 @@ public class InvocationsProcessor {
             final ObjectCreation creation = new ObjectCreation();
             // Add to the list
             leaf.getCreationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(creation);
-            processInvocation(tree, leaf, container, creation);
+            boolean success = processInvocation(tree, leaf, container, creation);
+            if (!success) {
+                leaf.getCreationMap().get(text).remove(creation);
+            }
+
             return creation;
         }
     };
@@ -44,7 +48,11 @@ public class InvocationsProcessor {
             String text = getTextInSource(tree, false);
             final OperationInvocation invocation = new OperationInvocation();
             addOperationInvocation(text, invocation, leaf);
-            processInvocation(tree, leaf, container, invocation);
+            boolean success = processInvocation(tree, leaf, container, invocation);
+
+            if (!success) {
+                leaf.getMethodInvocationMap().get(text).remove(invocation);
+            }
             return invocation;
         }
     };
@@ -54,14 +62,18 @@ public class InvocationsProcessor {
         leaf.getMethodInvocationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(invocation);
     }
 
-    static void processInvocation(ParseTree tree, ILeafFragment leaf
+    static boolean processInvocation(ParseTree tree, ILeafFragment leaf
             , IContainer container, Invocation invocation) {
         String text = getTextInSource(tree, false);
+
         String name = null;
         String expressionText = null;
 
+        boolean parsedProperly = true;
+
         boolean isNewExpression = tree instanceof NewExpressionTree;
         ParseTree callee = isNewExpression ? ((NewExpressionTree) tree).operand : ((CallExpressionTree) tree).operand;
+        String calleeText = getTextInSource(callee, false);
 
         switch (callee.type) {
             case IDENTIFIER_EXPRESSION:
@@ -80,16 +92,20 @@ public class InvocationsProcessor {
                 //dispatchListeners[i](event, dispatchInstances[i])
                 var calleeAsMemberLookupExpression = callee.asMemberLookupExpression();
                 // Take remove text before the last "." if any from name
-                int lastDotIndex = text.lastIndexOf(".");
+                //String str = calleeText.replaceAll()
+                int lastDotIndex = calleeText.lastIndexOf(".");
                 if (lastDotIndex >= 0) {
-                    name = text.substring(lastDotIndex + 1, text.length());
-                    expressionText = text.substring(0, lastDotIndex);
+                    name = calleeText.substring(lastDotIndex + 1, calleeText.length());
+                    expressionText = calleeText.substring(0, lastDotIndex);
                 } else {
-                    name = text;
+                    name = calleeText;
                 }
 
                 getSubExpression(calleeAsMemberLookupExpression.operand, invocation);
                 Visitor.visitExpression(calleeAsMemberLookupExpression.operand, leaf, container);
+                Visitor.visitExpression(calleeAsMemberLookupExpression.memberExpression, leaf, container);
+
+                parsedProperly = false;
                 break;
             case THIS_EXPRESSION:
                 name = "this";
@@ -114,6 +130,18 @@ public class InvocationsProcessor {
                 }
                 Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
                 break;
+
+            case CALL_EXPRESSION:
+//                var calleeAsCallExpression = callee.asCallExpression();
+//                if (treatCallExpressionOperandAsTheFunctionName) {
+//                    name = getTextInSource(calleeAsCallExpression, false);
+//                    if (calleeAsCallExpression.operand != null) {
+//                        expressionText = getTextInSource(calleeAsCallExpression.operand, false);
+//                    }
+//                }
+                Visitor.visitExpression(callee, leaf, container);
+                parsedProperly = false;
+                break;
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.type + " at " + callee.location.toString());
         }
@@ -135,6 +163,8 @@ public class InvocationsProcessor {
                 Visitor.visitExpression(argumentTree, leaf, container);
             });
         }
+
+        return parsedProperly;
     }
 
     static void getSubExpression(ParseTree operand, Invocation invocation) {

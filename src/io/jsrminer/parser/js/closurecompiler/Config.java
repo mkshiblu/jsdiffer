@@ -55,4 +55,10 @@ public class Config {
 
         put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
     }};
+
+    /**
+     *
+     * require('./core/core.js')(p1, p2)
+     */
+    public static boolean treatCallExpressionOperandAsTheFunctionName = true;
 }

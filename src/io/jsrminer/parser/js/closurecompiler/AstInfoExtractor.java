@@ -200,7 +200,7 @@ public class AstInfoExtractor {
     static String getTextInSource(ParseTree tree, boolean isStatement) {
         String astString = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
 
-        //String pretty = prettyPrinter.prettify(astString, false);
+        String pretty = prettyPrinter.prettify(astString, false);
         return astString;
     }
 
