@@ -71,7 +71,7 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
         sb.append(" in ");
         sb.append(operationAfter);
         sb.append(" at ");
-        sb.append(operationAfter.getQualifiedName());
+        sb.append(operationAfter.getFullyQualifiedName());
 //        sb.append(" in class ").append(operationAfter.getClassName());
         return sb.toString();
     }

@@ -1,6 +1,8 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.parser.js.UMDHandler;
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
+import io.jsrminer.sourcetree.JsConfig;
 import org.apache.commons.io.FilenameUtils;
 
 import java.util.Map;
@@ -25,6 +27,15 @@ public class UMLModelFactory {
 //                //umlModel.repositoryDirectories.add(directory);
 //            }
             allDirectoriesInPath(path, model.repositoryDirectories);
+        }
+
+        UMDHandler umdHandler = new UMDHandler();
+        // filter UMD if enabled
+        if (JsConfig.treatUMDAsSourceFile) {
+            for (var sourceFile : model.getSourceFileModels().values()) {
+                if (umdHandler.isUMD(sourceFile))
+                    umdHandler.hoistUMDCodeToSourceFileLevel(sourceFile);
+            }
         }
 
         return model;

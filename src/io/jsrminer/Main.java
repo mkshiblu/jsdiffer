@@ -5,6 +5,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 
 public class Main {
@@ -13,10 +14,14 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            commitExample();
-//              directoryExample();
+            vueExample();
+//            socketIoExample();
+//            commitExample();
+    //        directoryExample();
+            //fileExample();
+//              chartJsExample();
             //jqueryExample();
-            //vueExample();
+
             //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
         } catch (Exception e) {
@@ -35,6 +40,18 @@ public class Main {
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 
+    private static void chartJsExample() throws Exception {
+        String repoPath = "E:\\PROJECTS_REPO\\chart-js";
+        String commitId = "35dcfe00b1ae7199f8ed6c3748a72f4700c9876d";
+
+        Repository repo = GitUtil.openRepository(repoPath);
+        String folder = "tmp";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+    }
+
+    static void fileExample() {
+        new JSRefactoringMiner().detectBetweenFiles("tmp\\s1\\f1.js", "tmp\\s2\\f1.js");
+    }
     static void directoryExample() {
         new JSRefactoringMiner().detectBetweenDirectories("tmp\\s1", "tmp\\s2");
     }
@@ -44,8 +61,19 @@ public class Main {
         new JSRefactoringMiner().detectBetweenDirectories(root, root);
     }
 
-    static void vueExample() {
-        String root = "resources\\real-projects\\vue";
-        new JSRefactoringMiner().detectBetweenDirectories(root + "\\src1", root + "\\src2");
+    static void vueExample() throws IOException {
+        String repoPath = "E:\\PROJECTS_REPO\\vue";
+        String commitId = "9edcc6b6c7612efc15e4bfc5079279533190a2f2";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+    }
+
+    static void vueRuntimeExample() throws IOException {
+        new JSRefactoringMiner().detectBetweenFiles("tmp\\s1\\vue_run_removed.js", "tmp\\s2\\vue_run_removed.js");
+    }
+
+    static void socketIoExample() throws IOException {
+        String repoPath = "E:\\PROJECTS_REPO\\socket.io";
+        String commitId = "3aa3213b13e914a668a76bc5eab1cef80708bf01";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 }

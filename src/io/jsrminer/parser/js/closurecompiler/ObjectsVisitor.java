@@ -7,6 +7,7 @@ import io.jsrminer.sourcetree.Expression;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.entities.DeclarationContainer;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.LinkedHashMap;
 
@@ -57,6 +58,11 @@ public class ObjectsVisitor {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        @Override
+        public String getFullyQualifiedName() {
+            throw new NotImplementedException();
         }
     }
 }

@@ -39,17 +39,39 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
         try {
+            StopWatch watch = new StopWatch();
+            watch.start();
             Repository repository = GitUtil.openRepository(gitRepositoryPath);
             RevCommit commit = GitUtil.getRevCommit(repository, commitId);
             Iterable<RevCommit> walk = List.of(commit);
             refactorings = detect(repository, null, walk);
             log.info("RefCount: " + refactorings.size());
-            refactorings.forEach(r -> log.info(r.toString()));
+
+            printRefactorings(
+                    gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf('\\')
+                            , gitRepositoryPath.length()), commitId, refactorings);
+
+            watch.stop();
+            log.info("Time taken: " + watch.toString());
+
         } catch (IOException e) {
             e.printStackTrace();
             log.error(e.toString());
         }
         return refactorings;
+    }
+
+    private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
+        System.out.println("project\tcommitId\tRefactoringName\tRefactoring");
+        refactorings.forEach(r -> {
+            System.out.print(project);
+            System.out.print("\t");
+            System.out.print(r.getName());
+            System.out.print("\t");
+            System.out.print(commitId);
+            System.out.print("\t");
+            System.out.println(r.toString());
+        });
     }
 
     @Override

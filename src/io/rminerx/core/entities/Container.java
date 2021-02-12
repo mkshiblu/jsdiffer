@@ -59,4 +59,6 @@ public abstract class Container implements IContainer {
     public void setSourceLocation(SourceLocation sourceLocation) {
         this.sourceLocation = sourceLocation;
     }
+
+    public abstract String getFullyQualifiedName();
 }

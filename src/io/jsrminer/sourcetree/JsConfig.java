@@ -20,4 +20,5 @@ public class JsConfig {
 
     // If true, Functions of a leaf will be added to its parent containers list of anonymous function declarations too
     public static final boolean addLeafAnonymousFunctionsToParentContainerAlso = true;
+    public static boolean treatUMDAsSourceFile = true;
 }

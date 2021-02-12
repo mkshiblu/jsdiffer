@@ -126,7 +126,8 @@ public class InvocationsProcessor {
                 if (calleeAsParenExpression.expression.type == ParseTreeType.FUNCTION_DECLARATION) {
                     name = leaf.getAnonymousFunctionDeclarations().size() + 1 + "";
                 } else {
-                    throw new RuntimeException("Paren expression except function is not handled: " + tree.location.toString());
+                    parsedProperly =false;
+                    //throw new RuntimeException("Paren expression except function is not handled: " + tree.location.toString());
                 }
                 Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
                 break;
