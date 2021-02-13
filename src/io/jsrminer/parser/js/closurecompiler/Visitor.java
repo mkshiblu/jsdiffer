@@ -84,7 +84,7 @@ public class Visitor {
         var processor = nodeProcessors.get(tree.type);
         if (processor == null) {
             if (!isIgnored(tree))
-            throw new NotImplementedException("Processor not implemented for " + tree.type);
+                throw new NotImplementedException("Processor not implemented for " + tree.type);
         } else {
             Object result = processor.visit(tree, parent, container);
             return result;

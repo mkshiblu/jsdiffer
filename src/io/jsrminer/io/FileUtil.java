@@ -51,7 +51,14 @@ public class FileUtil {
             return k;
         });
     }
+    public static String getMemberExtension(String filename) {
+        int dotIndex = filename.indexOf(".");
 
+        if (dotIndex >= 0) {
+            return filename.substring(filename.lastIndexOf(".") + 1, filename.length());
+        }
+        return null;
+    }
     public static String getExtension(String filename) {
         return FilenameUtils.getExtension(filename);
     }

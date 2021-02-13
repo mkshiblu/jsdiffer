@@ -35,6 +35,7 @@ import java.util.*;
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{JsConfig.JS_FILE_EXTENSION}));
+    private final Set<String> ignoredExtensions = new HashSet<>(Arrays.asList(JsConfig.IGNORED_FILE_EXTENSIONS));
 
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
@@ -47,9 +48,8 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             refactorings = detect(repository, null, walk);
             log.info("RefCount: " + refactorings.size());
 
-            printRefactorings(
-                    gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf('\\')
-                            , gitRepositoryPath.length()), commitId, refactorings);
+            printRefactorings(gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
+                    gitRepositoryPath.length()), commitId, refactorings);
 
             watch.stop();
             log.info("Time taken: " + watch.toString());
@@ -62,13 +62,13 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
-        System.out.println("project\tcommitId\tRefactoringName\tRefactoring");
+        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
         refactorings.forEach(r -> {
             System.out.print(project);
             System.out.print("\t");
-            System.out.print(r.getName());
-            System.out.print("\t");
             System.out.print(commitId);
+            System.out.print("\t");
+            System.out.print(r.getName());
             System.out.print("\t");
             System.out.println(r.toString());
         });
@@ -257,7 +257,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             treeWalk.setRecursive(true);
             while (treeWalk.next()) {
                 String pathString = treeWalk.getPathString();
-                if (filePaths.contains(pathString)) {
+                if (isExtensionAllowed(pathString) && filePaths.contains(pathString)) {
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
                     StringWriter writer = new StringWriter();
@@ -279,6 +279,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     protected boolean isExtensionAllowed(String path) {
-        return supportedExtensions.contains(FileUtil.getExtension(path).toLowerCase());
+        String extension = FileUtil.getExtension(path).toLowerCase();
+        return !path.toLowerCase().endsWith("min.js") && supportedExtensions.contains(extension);
     }
 }

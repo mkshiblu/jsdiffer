@@ -103,8 +103,9 @@ public class ExtractOperationDetection {
         }
         FunctionBodyMapper operationBodyMapper = createMapperForExtractedMethod(mapper
                 , mapper.function1, addedOperation, addedOperationInvocation);
-        operationBodyMapper.mapAddedOperation();
+
         if (operationBodyMapper != null) {
+            operationBodyMapper.mapAddedOperation();
             List<CodeFragmentMapping> additionalExactMatches = new ArrayList<>();
             List<CallTreeNode> nodesInBreadthFirstOrder = callTree.getNodesInBreadthFirstOrder();
 
@@ -112,8 +113,8 @@ public class ExtractOperationDetection {
                 CallTreeNode node = nodesInBreadthFirstOrder.get(i);
                 if (matchingInvocations(node.getInvokedOperation(), this.operationInvocations).size() == 0) {
                     FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper, node.getOriginalOperation(), node.getInvokedOperation(), node.getInvocation());
-                    nestedMapper.mapAddedOperation();
                     if (nestedMapper != null) {
+                        nestedMapper.mapAddedOperation();
                         additionalExactMatches.addAll(nestedMapper.getExactMatches());
                         if (extractMatchCondition(nestedMapper, new ArrayList<>())
                                 && extractMatchCondition(operationBodyMapper, additionalExactMatches)) {

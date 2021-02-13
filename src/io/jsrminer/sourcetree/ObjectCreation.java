@@ -12,7 +12,7 @@ public class ObjectCreation extends Invocation {
 
     public boolean identicalName(Invocation call) {
         // getType().equals(((ObjectCreation)call).getType());
-        return getName().equals(call.getName());
+        return getName() != null && getName().equals(call.getName());
     }
 
     public boolean isArray() {

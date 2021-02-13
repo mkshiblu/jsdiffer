@@ -2155,6 +2155,11 @@ public class ReplacementFinder {
                                                              ReplacementInfo replacementInfo) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();
+
+        if (!string1.endsWith("\n") && !string2.endsWith("\n")) {
+            return false;
+        }
+
         if (containsMethodSignatureOfAnonymousClass(string1)) {
             string1 = string1.substring(0, string1.indexOf("\n"));
         }
@@ -2251,6 +2256,11 @@ public class ReplacementFinder {
                                                                 ReplacementInfo replacementInfo, Map<String, String> parameterToArgumentMap) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();
+
+        if (!string1.endsWith("\n") || !string2.endsWith("\n")) {
+            return false;
+        }
+
         if (containsMethodSignatureOfAnonymousClass(string1)) {
             string1 = string1.substring(0, string1.indexOf("\n"));
         }

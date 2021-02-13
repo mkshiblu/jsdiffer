@@ -13,6 +13,7 @@ public class Config {
         add(ParseTreeType.EXPORT_DECLARATION);
         add(ParseTreeType.MISSING_PRIMARY_EXPRESSION);
         add(ParseTreeType.EMPTY_STATEMENT);
+        add(ParseTreeType.TEMPLATE_LITERAL_EXPRESSION);
     }};
 
     public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{

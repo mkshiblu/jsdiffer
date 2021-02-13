@@ -59,12 +59,16 @@ public class ExtractOperationRefactoring extends Refactoring {
         sb.append(extractedOperation);
         sb.append(" extracted from ");
         sb.append(sourceOperationBeforeExtraction);
-        sb.append(" in class ");
+        sb.append(" in  ");
         sb.append(getClassName());
+
         if (getRefactoringType().equals(RefactoringType.EXTRACT_AND_MOVE_OPERATION)) {
             sb.append(" & moved to ");
             sb.append(extractedOperation.getFullyQualifiedName());
+        } else {
+            sb.append(" in file " + extractedOperation.getSourceLocation().getFilePath());
         }
+
         return sb.toString();
     }
 

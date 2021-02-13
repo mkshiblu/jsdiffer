@@ -31,6 +31,9 @@ public class InvocationsProcessor {
             boolean success = processInvocation(tree, leaf, container, creation);
             if (!success) {
                 leaf.getCreationMap().get(text).remove(creation);
+                if(leaf.getCreationMap().get(text).size() == 0){
+                    leaf.getCreationMap().remove(text);
+                }
             }
 
             return creation;
@@ -49,9 +52,11 @@ public class InvocationsProcessor {
             final OperationInvocation invocation = new OperationInvocation();
             addOperationInvocation(text, invocation, leaf);
             boolean success = processInvocation(tree, leaf, container, invocation);
-
             if (!success) {
                 leaf.getMethodInvocationMap().get(text).remove(invocation);
+                if(leaf.getMethodInvocationMap().get(text).size() == 0){
+                    leaf.getMethodInvocationMap().remove(text);
+                }
             }
             return invocation;
         }
@@ -142,6 +147,9 @@ public class InvocationsProcessor {
 //                }
                 Visitor.visitExpression(callee, leaf, container);
                 parsedProperly = false;
+                break;
+            case MISSING_PRIMARY_EXPRESSION:
+                parsedProperly =false;
                 break;
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.type + " at " + callee.location.toString());

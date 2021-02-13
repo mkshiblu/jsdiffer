@@ -36,7 +36,7 @@ public class UMDHandler {
 
     public boolean isUMD(ISourceFile sourceFile) {
         boolean hasNoFunctionDeclarations = sourceFile.getFunctionDeclarations().size() == 0;
-        if (hasNoFunctionDeclarations && sourceFile.getStatements().size() == 1) {
+        if (hasNoFunctionDeclarations && (sourceFile.getStatements().size() == 1 || sourceFile.getStatements().size() == 2)) {
             var statement = sourceFile.getStatements().get(0);
             if (!(statement instanceof SingleStatement))
                 return false;

@@ -64,7 +64,7 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getName()).append(" ");
+        sb.append(getName()).append("\t");
         sb.append(originalVariable);
         sb.append(" to ");
         sb.append(renamedVariable);
