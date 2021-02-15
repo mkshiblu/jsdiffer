@@ -150,11 +150,14 @@ public class ExpressionsVisitor {
         @Override
         public Void visit(MemberExpressionTree tree, ILeafFragment leaf, IContainer container) {
             Visitor.visitExpression(tree.operand, leaf, container);
-            String variableName = tree.memberName.value;
-            if (tree.operand.type == ParseTreeType.THIS_EXPRESSION) {
-                variableName = "this." + variableName;
+
+            if (tree.memberName != null) {
+                String variableName = tree.memberName.value;
+                if (tree.operand.type == ParseTreeType.THIS_EXPRESSION) {
+                    variableName = "this." + variableName;
+                }
+                leaf.getVariables().add(variableName);
             }
-            leaf.getVariables().add(variableName);
             return null;
         }
     };

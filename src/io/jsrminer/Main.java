@@ -14,7 +14,8 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            vueExample();
+     //       vueExample();
+     reactNativeExample();
 //            socketIoExample();
 //            commitExample();
     //        directoryExample();
@@ -40,6 +41,11 @@ public class Main {
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 
+    private static void reactNativeExample() throws Exception{
+        String repoPath = "E:\\PROJECTS_REPO\\react-native";
+        String commitId = "166264d63b28582e31d083fab96ef46bc02ea469";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+    }
     private static void chartJsExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\chart-js";
         String commitId = "35dcfe00b1ae7199f8ed6c3748a72f4700c9876d";
@@ -63,7 +69,7 @@ public class Main {
 
     static void vueExample() throws IOException {
         String repoPath = "E:\\PROJECTS_REPO\\vue";
-        String commitId = "9edcc6b6c7612efc15e4bfc5079279533190a2f2";
+        String commitId = "9bded22a83b6fb9a89a32009e7f47f6201e167a3";
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 
