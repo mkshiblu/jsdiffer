@@ -12,11 +12,12 @@ import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 
+import static io.jsrminer.parser.js.closurecompiler.Config.appendSemicolonToStatementIfNotPresent;
 import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
 
-    private static final PrettyPrinter prettyPrinter = new PrettyPrinter();
+    static PrettyPrinter prettyPrinter;
 
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {
         return new SourceLocation(
@@ -198,10 +199,15 @@ public class AstInfoExtractor {
     }
 
     static String getTextInSource(ParseTree tree, boolean isStatement) {
-        String astString = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+        StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
 
-        String pretty = prettyPrinter.prettify(astString, false);
-        return astString;
+        if (isStatement
+                && appendSemicolonToStatementIfNotPresent
+                && sb.charAt(sb.length() - 1) != ';') {
+            sb.append(';');
+        }
+
+        return sb.toString();
     }
 
     static CodeElementType getCodeElementType(ParseTree tree) {

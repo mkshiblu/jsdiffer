@@ -16,7 +16,7 @@ public class UMLModelFactory {
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
         ClosureCompilerParser parser = new ClosureCompilerParser();
-        parser.setEnableStrictMode(true);
+        //parser.setEnableStrictMode(true);
         UMLModel model = parser.parse(fileContents);
 
         // Populate repository directories

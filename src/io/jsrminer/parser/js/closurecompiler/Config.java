@@ -63,4 +63,6 @@ public class Config {
      * require('./core/core.js')(p1, p2)
      */
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;
+
+    public static boolean appendSemicolonToStatementIfNotPresent = true;
 }
