@@ -4,18 +4,22 @@ import com.google.javascript.jscomp.jarjar.com.google.common.collect.ImmutableLi
 import com.google.javascript.jscomp.parsing.parser.trees.Comment;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PrettyPrinter {
     String sourceContent;
     Comment[] comments;
-    boolean[] isCommentChar;
+    Set<Integer> commentCharIndex;
 
     public PrettyPrinter(String sourceContent, ImmutableList<Comment> comments) {
         this.sourceContent = sourceContent;
+        this.commentCharIndex = new HashSet<>(comments.size());
         init(comments);
     }
 
     private void init(ImmutableList<Comment> commentsList) {
-        isCommentChar = new boolean[sourceContent.length()];
+        //isCommentChar = new boolean[sourceContent.length()];
         comments = new Comment[commentsList.size()];
         int commentIndex = 0, start, end;
 
@@ -25,19 +29,22 @@ public class PrettyPrinter {
             end = comment.location.end.offset;
 
             for (int i = start; i < end; i++) {
-                isCommentChar[i] = true;
+           //     isCommentChar[i] = true;
+                commentCharIndex.add(i);
             }
             commentIndex++;
         }
     }
 
     StringBuilder getTextWithoutCommentsAndWhitespaces(SourceRange location) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(location.end.offset - location.start.offset);
         char previousAppendedChar = '\0', currentChar;
 
         for (int i = location.start.offset; i < location.end.offset; i++) {
             currentChar = sourceContent.charAt(i);
-            if (!isCommentChar[i] && !(previousAppendedChar == ' ' && currentChar == ' ')) {
+            if (/*!isCommentChar[i]*/
+            !commentCharIndex.contains(i)
+                    && !(previousAppendedChar == ' ' && currentChar == ' ')) {
                 sb.append(currentChar);
                 previousAppendedChar = currentChar;
             }

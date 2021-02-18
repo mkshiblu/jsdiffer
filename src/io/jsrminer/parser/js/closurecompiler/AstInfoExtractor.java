@@ -12,7 +12,6 @@ import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 
-import static io.jsrminer.parser.js.closurecompiler.Config.appendSemicolonToStatementIfNotPresent;
 import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
@@ -199,15 +198,16 @@ public class AstInfoExtractor {
     }
 
     static String getTextInSource(ParseTree tree, boolean isStatement) {
-        StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
-
-        if (isStatement
-                && appendSemicolonToStatementIfNotPresent
-                && sb.charAt(sb.length() - 1) != ';') {
-            sb.append(';');
-        }
-
-        return sb.toString();
+//        StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
+//
+//        if (isStatement
+//                && appendSemicolonToStatementIfNotPresent
+//                && sb.charAt(sb.length() - 1) != ';') {
+//            sb.append(';');
+//        }
+//
+//        return sb.toString();
+        return tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
     }
 
     static CodeElementType getCodeElementType(ParseTree tree) {
