@@ -860,12 +860,21 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<? extends CodeFragment> leaves2
             , Map<String, String> parameterToArgumentMap
             , ReplacementFinder replacementFinder) {
-        ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
-        Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
-                , leaf2
-                , parameterToArgumentMap
-                , replacementInfo,
-                argumentizer);
+        Set<Replacement> replacements = null;
+
+        if (leaf1.getAnonymousFunctionDeclarations().size() > 0 || leaf2.getAnonymousFunctionDeclarations().size() > 0) {
+            // region annonymous
+            AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, this);
+            //replacements = anonymousReplacer.replaceInAnonymousFunctions(leaf1, leaf2, function1, function2);
+
+        } else {
+            ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
+            replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
+                    , leaf2
+                    , parameterToArgumentMap
+                    , replacementInfo,
+                    argumentizer);
+        }
         if (replacements != null) {
             LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);

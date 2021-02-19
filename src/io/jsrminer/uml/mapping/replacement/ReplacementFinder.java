@@ -175,13 +175,7 @@ public class ReplacementFinder {
             return replacementInfo.getReplacements();
         }
 
-        // region annonymous
-        AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, bodyMapper);
-        Set<Replacement> replacements = anonymousReplacer.replaceInAnonymousFunctions(statement1, statement2, function1, function2,
-                replacementInfo);
-        if (replacements != null) {
-            return replacements;
-        }
+
         // endregion
 
         // region lambda

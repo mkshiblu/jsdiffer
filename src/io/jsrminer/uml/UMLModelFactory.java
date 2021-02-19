@@ -29,9 +29,9 @@ public class UMLModelFactory {
             allDirectoriesInPath(path, model.repositoryDirectories);
         }
 
-        UMDHandler umdHandler = new UMDHandler();
         // filter UMD if enabled
         if (JsConfig.treatUMDAsSourceFile) {
+            UMDHandler umdHandler = new UMDHandler();
             for (var sourceFile : model.getSourceFileModels().values()) {
                 if (umdHandler.isUMD(sourceFile))
                     umdHandler.hoistUMDCodeToSourceFileLevel(sourceFile);
