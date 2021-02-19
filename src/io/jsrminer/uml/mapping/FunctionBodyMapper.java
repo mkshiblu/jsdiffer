@@ -491,7 +491,6 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     void matchLeaves(Set<? extends CodeFragment> leaves1, Set<? extends CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
 
-
         // Exact string+depth matching - leaf nodes
         matchLeavesWithIdenticalText(leaves1, leaves2, false, parameterToArgumentMap);
 
@@ -541,7 +540,6 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             CodeFragment> leaves2, boolean ignoreNestingDepth, Map<String, String> parameterToArgumentMap) {
 
         if (leaves1.size() <= leaves2.size()) {
-            //exact string matching
             for (ListIterator<? extends CodeFragment> listIterator1 = new ArrayList<>(leaves1).listIterator(); listIterator1.hasNext(); ) {
                 CodeFragment leaf1 = listIterator1.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
@@ -570,7 +568,6 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
         } else {
-            //exact string+depth matching - leaf nodes
             for (ListIterator<? extends CodeFragment> listIterator2 = new ArrayList<>(leaves2).listIterator(); listIterator2.hasNext(); ) {
                 CodeFragment leaf2 = listIterator2.next();
                 TreeSet<LeafCodeFragmentMapping> mappingSet = new TreeSet<>();
@@ -815,7 +812,6 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
         }
-
     }
 
     private BlockCodeFragmentMapping getCompositeMappingUsingReplacements(BlockStatement
@@ -827,12 +823,12 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         List<FunctionDeclaration> removedOperations = sourceFileDiff != null ? sourceFileDiff.getRemovedOperations() : new ArrayList<>();
         List<FunctionDeclaration> addedOperations = sourceFileDiff != null ? sourceFileDiff.getAddedOperations() : new ArrayList<>();
 
-        ReplacementInfo replacementInfo = createReplacementInfo(statement1, statement2, innerNodes1, innerNodes2);
         Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(statement1
                 , statement2
                 , parameterToArgumentMap
-                , replacementInfo,
-                this.argumentizer);
+                , innerNodes1
+                , innerNodes2
+                , this.argumentizer);
 
         if (replacements != null) {
             double score = ChildCountMatcher.computeScore(statement1, statement2
@@ -862,19 +858,12 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , ReplacementFinder replacementFinder) {
         Set<Replacement> replacements = null;
 
-        if (leaf1.getAnonymousFunctionDeclarations().size() > 0 || leaf2.getAnonymousFunctionDeclarations().size() > 0) {
-            // region annonymous
-            AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, this);
-            //replacements = anonymousReplacer.replaceInAnonymousFunctions(leaf1, leaf2, function1, function2);
-
-        } else {
-            ReplacementInfo replacementInfo = createReplacementInfo(leaf1, leaf2, leaves1, leaves2);
-            replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
-                    , leaf2
-                    , parameterToArgumentMap
-                    , replacementInfo,
-                    argumentizer);
-        }
+        replacements = replacementFinder.findReplacementsWithExactMatching(leaf1
+                , leaf2
+                , parameterToArgumentMap
+                , leaves1
+                , leaves2
+                , argumentizer);
         if (replacements != null) {
             LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);
@@ -903,20 +892,6 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return null;
     }
 
-    private ReplacementInfo createReplacementInfo(CodeFragment statement1
-            , CodeFragment statement2
-            , Set<? extends CodeFragment> statements1
-            , Set<? extends CodeFragment> statements2) {
-        List<? extends CodeFragment> unmatchedStatments1 = new ArrayList<>(statements1);
-        unmatchedStatments1.remove(statement1);
-        List<? extends CodeFragment> unmatchedStatements2 = new ArrayList<>(statements2);
-        unmatchedStatements2.remove(statement2);
-        return new ReplacementInfo(
-                createArgumentizedString(statement1, statement2),
-                createArgumentizedString(statement2, statement1),
-                unmatchedStatments1, unmatchedStatements2);
-    }
-
     public Set<IRefactoring> getRefactoringsAfterPostProcessing() {
         return refactorings;
     }
@@ -942,7 +917,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     // TODO: Similar to processInput
-    private String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
+    public String createArgumentizedString(CodeFragment statement1, CodeFragment statement2) {
         String argumentizedString = argumentizer.getArgumentizedString(statement1);
 
 

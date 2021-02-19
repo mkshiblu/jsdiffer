@@ -35,12 +35,34 @@ public class ReplacementFinder {
         this.sourceFileDiff = sourceFileDiff;
     }
 
+    private ReplacementInfo createReplacementInfo(CodeFragment statement1
+            , CodeFragment statement2
+            , Set<? extends CodeFragment> statements1
+            , Set<? extends CodeFragment> statements2) {
+        List<? extends CodeFragment> unmatchedStatments1 = new ArrayList<>(statements1);
+        unmatchedStatments1.remove(statement1);
+        List<? extends CodeFragment> unmatchedStatements2 = new ArrayList<>(statements2);
+        unmatchedStatements2.remove(statement2);
+        return new ReplacementInfo(
+                this.bodyMapper.createArgumentizedString(statement1, statement2),
+                this.bodyMapper.createArgumentizedString(statement2, statement1),
+                unmatchedStatments1, unmatchedStatements2);
+    }
+
     public Set<Replacement> findReplacementsWithExactMatching(CodeFragment statement1
             , CodeFragment statement2
             , Map<String, String> parameterToArgumentMap
-            , ReplacementInfo replacementInfo
+            , Set<? extends CodeFragment> statements1
+            , Set<? extends CodeFragment> statements2
             , Argumentizer argumentizer) {
 
+        // Since anonymous functions or class can be potentially huge, we need to separately match them
+        if (statement1.getAnonymousFunctionDeclarations().size() > 0 || statement2.getAnonymousFunctionDeclarations().size() > 0) {
+            AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, this.bodyMapper);
+            return anonymousReplacer.replaceInAnonymousFunctions(statement1, statement2, function1, function2);
+        }
+
+        ReplacementInfo replacementInfo = createReplacementInfo(statement1, statement2, statements1, statements2);
         final CodeFragmentDiff diff = new CodeFragmentDiff(statement1, statement2);
 
         // Intersect variables

@@ -7,10 +7,7 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AnonymousFunctionReplacementFinder {
 
@@ -25,50 +22,49 @@ public class AnonymousFunctionReplacementFinder {
     public Set<Replacement> replaceInAnonymousFunctions(CodeFragment statement1
             , CodeFragment statement2
             , FunctionDeclaration function1
-            , FunctionDeclaration function2
-            , ReplacementInfo replacementInfo) {
+            , FunctionDeclaration function2) {
+
+        var replacements = new LinkedHashSet<Replacement>();
 
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
         List<IAnonymousFunctionDeclaration> anonymousClassDeclarations1 = statement1.getAnonymousFunctionDeclarations();
         List<IAnonymousFunctionDeclaration> anonymousClassDeclarations2 = statement2.getAnonymousFunctionDeclarations();
 
-        if (!anonymousClassDeclarations2.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
-            for (int i = 0; i < anonymousClassDeclarations1.size(); i++) {
-                for (int j = 0; j < anonymousClassDeclarations2.size(); j++) {
-                    IAnonymousFunctionDeclaration anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
-                    IAnonymousFunctionDeclaration anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
+        for (int i = 0; i < anonymousClassDeclarations1.size(); i++) {
+            for (int j = 0; j < anonymousClassDeclarations2.size(); j++) {
+                IAnonymousFunctionDeclaration anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
+                IAnonymousFunctionDeclaration anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
 
-                    String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, function1);
-                    String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
+                String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, function1);
+                String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
 
-                    if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
-                            identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacementInfo.getReplacements())
-                            || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                            (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()) ||
-                                    invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)))) {
+                if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
+                        identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacements)
+                        || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
+                        (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacements) ||
+                                invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacements, parameterToArgumentMap)))) {
 
-                        IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
-                        IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
-                        int matchedOperations = 0;
-                        for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
-                            for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
-                                if (operation1.equals(operation2)
-                                        || equalSignature(operation1, operation2)
-                                        || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
-                                ) {
-                                    boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
-                                    if (isMatched)
-                                        matchedOperations++;
-                                }
+                    IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
+                    IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
+                    int matchedOperations = 0;
+                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
+                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
+                            if (operation1.equals(operation2)
+                                    || equalSignature(operation1, operation2)
+                                    || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
+                            ) {
+                                boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
+                                if (isMatched)
+                                    matchedOperations++;
                             }
                         }
+                    }
 
-                        if (matchedOperations > 0) {
-                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
-                            replacementInfo.addReplacement(replacement);
-                            return replacementInfo.getReplacements();
-                        }
+                    if (matchedOperations > 0) {
+                        Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
+                        replacements.add(replacement);
+                        return replacements;
                     }
                 }
             }
