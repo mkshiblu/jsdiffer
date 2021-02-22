@@ -1,10 +1,17 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.rminerx.core.entities.Container;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ContainerDiff {
     Container container1;
     Container container2;
+
+    private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
+    private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
     public ContainerDiff(Container container1, Container container2) {
         this.container1 = container1;
@@ -17,5 +24,21 @@ public class ContainerDiff {
 
     public Container getContainer2() {
         return container2;
+    }
+
+    public void reportAddedOperation(FunctionDeclaration addedOperation){
+        this.addedOperations.add(addedOperation);
+    }
+
+    public void reportRemovedOperation(FunctionDeclaration removedOperation){
+        this.removedOperations.add(removedOperation);
+    }
+
+    public List<FunctionDeclaration> getAddedOperations() {
+        return addedOperations;
+    }
+
+    public List<FunctionDeclaration> getRemovedOperations() {
+        return removedOperations;
     }
 }

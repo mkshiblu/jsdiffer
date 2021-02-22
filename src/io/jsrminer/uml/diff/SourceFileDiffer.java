@@ -108,35 +108,24 @@ public class SourceFileDiffer {
                     .orElse(null);
 
             if (function2 != null) {
+                if (getModelDiff() != null) {
+                    List<FunctionBodyMapper> mappers
+                            = getModelDiff().findMappersWithMatchingSignature2(function2);
+                    if (mappers.size() > 0) {
+                        var operation1 = mappers.get(0).getOperation1();
+                        if (!FunctionUtil.equalNameAndParameterCount(operation1, function1)//operation1.equalSignature(function1)
+                                && getModelDiff().commonlyImplementedOperations(operation1, function2, this)) {
+                            if (!sourceDiff.getRemovedOperations().contains(function1)) {
+                                sourceDiff.getRemovedOperations().add(function1);
+                            }
+                            break;
+                        }
+                    }
+                }
 
-                //region commented code of modelDiff chck
-//                if (getModelDiff() != null) {
-//                    List<UMLOperationBodyMapper> mappers
-//                            = getModelDiff().findMappersWithMatchingSignature2(nextOperation);
-//                    if (mappers.size() > 0) {
-//                        UMLOperation operation1 = mappers.get(0).getOperation1();
-//                        if (!operation1.equalSignature(originalOperation) &&
-//                                getModelDiff().commonlyImplementedOperations(operation1, nextOperation, this)) {
-//                            if (!removedOperations.contains(originalOperation)) {
-//                                removedOperations.add(originalOperation);
-//                            }
-//                            break;
-//                        }
-//                    }
-//                }
-//
-//                FunctionBodyMapper operationBodyMapper
-//                        = new FunctionBodyMapper(originalOperation, nextOperation, this);
-//                UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(originalOperation, nextOperation, operationBodyMapper.getMappings());
-//                refactorings.addAll(operationSignatureDiff.getRefactorings());
-//                this.addOperationBodyMapper(operationBodyMapper);
-//endregion
-
-                // TODO Check for move in Modediff?
                 // Map and find refactorings between two functions
                 UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
                 FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, sourceDiff);
-                mapper.map();
                 operationDiff.setMappings(mapper.getMappings());
                 this.sourceFileDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
                 // save the mapper TODO
@@ -173,7 +162,6 @@ public class SourceFileDiffer {
                 UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
                 FunctionBodyMapper bodyMapper
                         = new FunctionBodyMapper(operationDiff, sourceDiff);
-                bodyMapper.map();
                 operationDiff.setMappings(bodyMapper.getMappings());
                 sourceDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
                 sourceDiff.getBodyMapperList().add(bodyMapper);
@@ -197,7 +185,6 @@ public class SourceFileDiffer {
                     UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
                     FunctionBodyMapper bodyMapper
                             = new FunctionBodyMapper(operationDiff, sourceDiff);
-                    bodyMapper.map();
                     operationDiff.setMappings(bodyMapper.getMappings());
                     sourceDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
 
@@ -437,7 +424,6 @@ public class SourceFileDiffer {
     private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
             , FunctionDeclaration addedOperation, int differenceInPosition, SourceFileDiff sourceDiff) {
         FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
-        operationBodyMapper.map();
 
         List<CodeFragmentMapping> totalMappings = new ArrayList<>(operationBodyMapper.getMappings());
         int mappings = operationBodyMapper.mappingsWithoutBlocks();
@@ -1058,5 +1044,9 @@ public class SourceFileDiffer {
         functionDeclaration.getAnonymousFunctionDeclarations().addAll(sourceFile.getAnonymousFunctionDeclarations());
         functionDeclaration.getFunctionDeclarations().addAll(sourceFile.getFunctionDeclarations());
         return functionDeclaration;
+    }
+
+    public UMLModelDiff getModelDiff() {
+        return modelDiff;
     }
 }

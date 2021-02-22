@@ -360,7 +360,6 @@ public class UMLModelDiff extends Diff {
                     FunctionDeclaration removedOperation = removedOperationIterator.next();
 
                     FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, null);
-                    operationBodyMapper.map();
 
                     int mappings = operationBodyMapper.mappingsWithoutBlocks();
                     if (mappings > 0 && mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper)) {
@@ -447,8 +446,6 @@ public class UMLModelDiff extends Diff {
                     FunctionDeclaration addedOperation = addedOperationIterator.next();
 
                     FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, null);
-                    operationBodyMapper.map();
-
                     int mappings = operationBodyMapper.mappingsWithoutBlocks();
                     if (mappings > 0 && mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper)) {
                         int exactMatches = operationBodyMapper.getExactMatches().size();
@@ -809,7 +806,7 @@ public class UMLModelDiff extends Diff {
     }
 
     private boolean conflictingMoveOfTopLevelClass(FunctionDeclaration removedClass, FunctionDeclaration addedClass) {
-        if(!removedClass.isTopLevel() && !addedClass.isTopLevel()) {
+        if (!removedClass.isTopLevel() && !addedClass.isTopLevel()) {
             //check if classMoveDiffList contains already a move for the outer class to a different target
 //            for(SourceFileMoveDiff diff : classMoveDiffList) {
 //                if((diff.getOriginalClass().getName().startsWith(removedClass.getPackageName()) &&
@@ -877,5 +874,51 @@ public class UMLModelDiff extends Diff {
 
     public List<ISourceFile> getRemovedFiles() {
         return removedFiles;
+    }
+
+    public List<FunctionBodyMapper> findMappersWithMatchingSignature2(IFunctionDeclaration operation2) {
+        List<FunctionBodyMapper> mappers = new ArrayList<>();
+        for (var classDiff : this.commonFilesDiffList) {
+            var mapper = classDiff.findMapperWithMatchingSignature2(operation2);
+            if (mapper != null) {
+                mappers.add(mapper);
+            }
+        }
+//        for (UMLClassMoveDiff classDiff : classMoveDiffList) {
+//            UMLOperationBodyMapper mapper = classDiff.findMapperWithMatchingSignature2(operation2);
+//            if (mapper != null) {
+//                mappers.add(mapper);
+//            }
+//        }
+//        for (UMLClassMoveDiff classDiff : innerClassMoveDiffList) {
+//            UMLOperationBodyMapper mapper = classDiff.findMapperWithMatchingSignature2(operation2);
+//            if (mapper != null) {
+//                mappers.add(mapper);
+//            }
+//        }
+//        for (UMLClassRenameDiff classDiff : classRenameDiffList) {
+//            UMLOperationBodyMapper mapper = classDiff.findMapperWithMatchingSignature2(operation2);
+//            if (mapper != null) {
+//                mappers.add(mapper);
+//            }
+//        }
+//
+        return mappers;
+    }
+
+    public boolean commonlyImplementedOperations(IFunctionDeclaration operation1, IFunctionDeclaration operation2, SourceFileDiffer classDiff2) {
+//        var classDiff1 = getUMLClassDiff(operation1.getSourceLocation().getFilePath());
+//        if(classDiff1 != null) {
+//      //      Set<UMLType> commonInterfaces = classDiff1.nextClassCommonInterfaces(classDiff2);
+//            for(UMLType commonInterface : commonInterfaces) {
+//                UMLClassBaseDiff interfaceDiff = getUMLClassDiff(commonInterface);
+//                if(interfaceDiff != null &&
+//                        interfaceDiff.containsOperationWithTheSameSignatureInOriginalClass(operation1) &&
+//                        interfaceDiff.containsOperationWithTheSameSignatureInNextClass(operation2)) {
+//                    return true;
+//                }
+//            }
+//        }
+        return false;
     }
 }

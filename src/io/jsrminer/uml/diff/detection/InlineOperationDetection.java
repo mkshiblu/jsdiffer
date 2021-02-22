@@ -117,8 +117,7 @@ public class InlineOperationDetection {
             parameterToArgumentMap.put(parameters.get(i).name, arguments.get(i));
         }
 
-        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, mapper, classDiff);
-        operationBodyMapper.mapRemovedOperation(parameterToArgumentMap);
+        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, mapper, parameterToArgumentMap, classDiff);
         return operationBodyMapper;
     }
 

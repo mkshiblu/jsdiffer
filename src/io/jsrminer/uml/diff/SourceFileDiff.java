@@ -8,7 +8,9 @@ import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.MapperRefactoringProcessor;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
+import io.jsrminer.uml.mapping.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
+import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
@@ -83,6 +85,7 @@ public class SourceFileDiff {
 
     /**
      * Similar to Rminer UMLBaseClass.getRefactoring()
+     *
      * @return
      */
     public List<IRefactoring> getAllRefactorings() {
@@ -242,5 +245,14 @@ public class SourceFileDiff {
             return true;
         }
         return false;
+    }
+
+    public FunctionBodyMapper findMapperWithMatchingSignature2(IFunctionDeclaration operation2) {
+        for (var mapper : this.bodyMapperList) {
+            if (FunctionUtil.equalNameAndParameterCount(mapper.function1, operation2)) {
+                return mapper;
+            }
+        }
+        return null;
     }
 }

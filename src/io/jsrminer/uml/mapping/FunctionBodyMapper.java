@@ -50,6 +50,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
         this.sourceFileDiff = sourceFileDiff;
+        map();
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
@@ -72,16 +73,18 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         this.parentMapper = mapper;
         this.parameterToArgumentMap1 = parameterToArgumentMap1;
         this.parameterToArgumentMap2 = parameterToArgumentMap2;
+        mapAddedOperation();
     }
 
     public FunctionBodyMapper(FunctionDeclaration removedOperation, FunctionBodyMapper operationBodyMapper
-            /*, Map<String, String> parameterToArgumentMap*/, SourceFileDiff classDiff) {
+            , Map<String, String> parameterToArgumentMap, SourceFileDiff classDiff) {
         this.parentMapper = operationBodyMapper;
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;
         this.callerFunction = operationBodyMapper.function1;
         this.sourceFileDiff = classDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
+        mapRemovedOperation(parameterToArgumentMap);
     }
 
     /**
@@ -168,10 +171,15 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return innerNodes;
     }
 
+    private void mapChildFunctionDeclarations(FunctionDeclaration function1, FunctionDeclaration function2) {
+        // Maps the functions that are immediately declared into this mapper
+
+    }
+
     /**
      * Maps funciton1 with funciton2
      */
-    public void map() {
+    private void map() {
         FunctionBody body1 = function1.getBody();
         FunctionBody body2 = function2.getBody();
 
@@ -216,7 +224,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         }
     }
 
-    public void mapRemovedOperation(Map<String, String> parameterToArgumentMap) {
+    private void mapRemovedOperation(Map<String, String> parameterToArgumentMap) {
         FunctionDeclaration removedOperation = function1;
         FunctionBodyMapper operationBodyMapper = this.parentMapper;
 
@@ -336,7 +344,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     /**
      * Maps added operation to function1
      */
-    public void mapAddedOperation() {
+    private void mapAddedOperation() {
 
         FunctionBody addedOperationBody = function2.getBody();
         FunctionBodyMapper operationBodyMapper = this.parentMapper;
