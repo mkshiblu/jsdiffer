@@ -1,14 +1,15 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Expression extends CodeFragment {
+public class Expression extends CodeFragment implements ILeafFragment {
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
@@ -18,6 +19,7 @@ public class Expression extends CodeFragment {
     public List<String> numberLiterals = new ArrayList<>();
     public List<String> nullLiterals = new ArrayList<>();
     public List<String> booleanLiterals = new ArrayList<>();
+    private final List<String> infixExpressions = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
@@ -87,11 +89,16 @@ public class Expression extends CodeFragment {
         return prefixExpressions;
     }
 
+    @Override
+    public List<String> getInfixExpressions() {
+        return infixExpressions;
+    }
+
     /**
      * Returns arguments which are Invocations
      */
     @Override
-    public List<String> getIdentifierArguments() {
+    public List<String> getArguments() {
         return identifierArguments;
     }
 

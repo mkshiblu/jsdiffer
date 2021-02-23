@@ -4,7 +4,7 @@ import io.jsrminer.uml.diff.StringDistance;
 
 public class ObjectCreation extends Invocation {
 
-    private String typeName;
+    //private String typeName;
 
     public ObjectCreation() {
 
@@ -12,7 +12,7 @@ public class ObjectCreation extends Invocation {
 
     public boolean identicalName(Invocation call) {
         // getType().equals(((ObjectCreation)call).getType());
-        return getName().equals(call.getName());
+        return getName() != null && getName().equals(call.getName());
     }
 
     public boolean isArray() {
@@ -27,13 +27,13 @@ public class ObjectCreation extends Invocation {
         return normalized;
     }
 
-    public String getTypeName() {
-        return typeName;
-    }
-
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
-    }
+//    public String getTypeName() {
+//        return typeName;
+//    }
+//
+//    public void setTypeName(String typeName) {
+//        this.typeName = typeName;
+//    }
 
     //    public boolean identicalArrayInitializer(ObjectCreation other) {
 //        if (this.isArray && other.isArray) {

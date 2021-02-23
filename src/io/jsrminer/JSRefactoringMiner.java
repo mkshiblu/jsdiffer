@@ -5,11 +5,13 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.io.GitUtil;
 import io.jsrminer.io.SourceFile;
+import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLModelFactory;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
+import io.jsrminer.uml.diff.UMLModelDiffer;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.lib.ObjectId;
@@ -32,22 +34,44 @@ import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{"js"}));
+    private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{JsConfig.JS_FILE_EXTENSION}));
+    private final Set<String> ignoredExtensions = new HashSet<>(Arrays.asList(JsConfig.IGNORED_FILE_EXTENSIONS));
 
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
         try {
+            StopWatch watch = new StopWatch();
+            watch.start();
             Repository repository = GitUtil.openRepository(gitRepositoryPath);
             RevCommit commit = GitUtil.getRevCommit(repository, commitId);
             Iterable<RevCommit> walk = List.of(commit);
             refactorings = detect(repository, null, walk);
-            log.info("RefCount + " + refactorings.size());
-            refactorings.forEach(r -> log.info(r.toString()));
+            log.info("RefCount: " + refactorings.size());
+
+            printRefactorings(gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
+                    gitRepositoryPath.length()), commitId, refactorings);
+
+            watch.stop();
+            log.info("Time taken: " + watch.toString());
+
         } catch (IOException e) {
             e.printStackTrace();
             log.error(e.toString());
         }
         return refactorings;
+    }
+
+    private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
+        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
+        refactorings.forEach(r -> {
+            System.out.print(project);
+            System.out.print("\t");
+            System.out.print(commitId);
+            System.out.print("\t");
+            System.out.print(r.getName());
+            System.out.print("\t");
+            System.out.println(r.toString());
+        });
     }
 
     @Override
@@ -100,7 +124,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         for (int i = 0; i < files.length; i++) {
             StringWriter writer = new StringWriter();
             IOUtils.copy(new FileInputStream(files[i].getFile()), writer, Charset.defaultCharset());
-            fileContents.put(files[i].getRelativePathToSourceDirectory(), writer.toString());
+            fileContents.put(files[i].getPathFromSourceDirectory(), writer.toString());
         }
 
         return fileContents;
@@ -157,7 +181,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
         List<String> filePathsBefore = new ArrayList<String>();
         List<String> filePathsCurrent = new ArrayList<String>();
-        Map<String, String> renamedFilesHint = new HashMap<String, String>();
+        Map<String, String> renamedFilesHint = new HashMap<>();
 
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
@@ -193,7 +217,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 
                 log.info("Detecting refactorings...");
-                UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, renamedFilesHint);
+                UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(renamedFilesHint);
                 refactoringsAtRevision = diff.getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
             } else {
@@ -215,7 +239,8 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         // TODO multi thread?
         UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
 
-        UMLModelDiff diff = umlModelBefore.diff(umlModelCurrent, new LinkedHashMap<>());
+        log.info("Detecting Refactorings...");
+        UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(new LinkedHashMap<>());
 
         /*, renamedFilesHint*/
         List<IRefactoring> refactorings = diff.getRefactorings();
@@ -232,7 +257,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             treeWalk.setRecursive(true);
             while (treeWalk.next()) {
                 String pathString = treeWalk.getPathString();
-                if (filePaths.contains(pathString)) {
+                if (isExtensionAllowed(pathString) && filePaths.contains(pathString)) {
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
                     StringWriter writer = new StringWriter();
@@ -254,6 +279,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     protected boolean isExtensionAllowed(String path) {
-        return supportedExtensions.contains(FileUtil.getExtension(path).toLowerCase());
+        String extension = FileUtil.getExtension(path).toLowerCase();
+        return !path.toLowerCase().endsWith("min.js") && supportedExtensions.contains(extension);
     }
 }

@@ -1,9 +1,9 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.VariableDeclaration;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
+import io.rminerx.core.entities.Container;
 
 import java.util.Set;
 
@@ -11,15 +11,15 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
 
     private VariableDeclaration originalVariable;
     private VariableDeclaration renamedVariable;
-    private FunctionDeclaration operationBefore;
-    private FunctionDeclaration operationAfter;
+    private Container operationBefore;
+    private Container operationAfter;
     private Set<CodeFragmentMapping> variableReferences;
 
     public RenameVariableRefactoring(
             VariableDeclaration originalVariable,
             VariableDeclaration renamedVariable,
-            FunctionDeclaration operationBefore,
-            FunctionDeclaration operationAfter,
+            Container operationBefore,
+            Container operationAfter,
             Set<CodeFragmentMapping> variableReferences) {
         this.originalVariable = originalVariable;
         this.renamedVariable = renamedVariable;
@@ -29,10 +29,10 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
     }
 
     public RefactoringType getRefactoringType() {
-//        if (originalVariable.isParameter() && renamedVariable.isParameter())
-//            return RefactoringType.RENAME_PARAMETER;
-//        if (!originalVariable.isParameter() && renamedVariable.isParameter())
-//            return RefactoringType.PARAMETERIZE_VARIABLE;
+        if (originalVariable.isParameter() && renamedVariable.isParameter())
+            return RefactoringType.RENAME_PARAMETER;
+        if (!originalVariable.isParameter() && renamedVariable.isParameter())
+            return RefactoringType.PARAMETERIZE_VARIABLE;
 //        if (!originalVariable.isAttribute() && renamedVariable.isAttribute())
 //            return RefactoringType.REPLACE_VARIABLE_WITH_ATTRIBUTE;
         return RefactoringType.RENAME_VARIABLE;
@@ -50,11 +50,11 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
         return renamedVariable;
     }
 
-    public FunctionDeclaration getOperationBefore() {
+    public Container getOperationBefore() {
         return operationBefore;
     }
 
-    public FunctionDeclaration getOperationAfter() {
+    public Container getOperationAfter() {
         return operationAfter;
     }
 
@@ -71,7 +71,7 @@ public class RenameVariableRefactoring extends Refactoring implements IRefactori
         sb.append(" in ");
         sb.append(operationAfter);
         sb.append(" at ");
-        sb.append(operationAfter.getQualifiedName());
+        sb.append(operationAfter.getFullyQualifiedName());
 //        sb.append(" in class ").append(operationAfter.getClassName());
         return sb.toString();
     }

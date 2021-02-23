@@ -10,9 +10,10 @@ import io.jsrminer.uml.diff.UMLParameterDiff;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 
 import java.util.*;
+
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 import static java.util.AbstractMap.SimpleEntry;
 
@@ -450,7 +451,7 @@ public class VariableReplacementAnalysis {
                 RenameVariableRefactoring ref = new RenameVariableRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                 if (!existsConflictingExtractVariableRefactoring(ref) && !existsConflictingMergeVariableRefactoring(ref) && !existsConflictingSplitVariableRefactoring(ref)) {
                     variableRenames.add(ref);
-                    if (equalsKindExceptGlobalAndNotParameter(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
+                    if (!equalsKindIncludingNull(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
@@ -507,7 +508,7 @@ public class VariableReplacementAnalysis {
                 //       v1.getKey().isVarargsParameter() == v2.getKey().isVarargsParameter())
                 {
                     variableRenames.add(ref);
-                    if (equalsKindExceptGlobalAndNotParameter(v1.getKey(), v2.getKey())) {
+                    if (!equalsKindIncludingNull(v1.getKey(), v2.getKey())) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(v1.getKey(), v2.getKey(), v1.getValue(), v2.getValue(), variableReferences);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
@@ -632,16 +633,19 @@ public class VariableReplacementAnalysis {
                             if (argument1.contains("[") || argument2.contains("[")) {
                                 String before = argument1.contains("[") ? argument1.substring(0, argument1.indexOf("[")) : argument1;
                                 String after = argument2.contains("[") ? argument2.substring(0, argument2.indexOf("[")) : argument2;
-                                Replacement variableReplacement = new Replacement(before, after, ReplacementType.VARIABLE_NAME);
-                                if (!returnVariableMapping(mapping, replacement) &&
-                                        !containsMethodInvocationReplacementWithDifferentExpressionNameAndArguments(mapping.getReplacements()) &&
-                                        replacementNotInsideMethodSignatureOfAnonymousClass(mapping, replacement)) {
-                                    if (map.containsKey(variableReplacement)) {
-                                        map.get(variableReplacement).add(mapping);
-                                    } else {
-                                        Set<CodeFragmentMapping> list = new LinkedHashSet<>();
-                                        list.add(mapping);
-                                        map.put(variableReplacement, list);
+                                if (!before.equals(after)) {
+                                    Replacement variableReplacement = new Replacement(before, after, ReplacementType.VARIABLE_NAME);
+                                    if (!returnVariableMapping(mapping, replacement) &&
+                                            !containsMethodInvocationReplacementWithDifferentExpressionNameAndArguments(mapping.getReplacements()) &&
+                                            replacementNotInsideMethodSignatureOfAnonymousClass(mapping, replacement)) {
+
+                                        if (map.containsKey(variableReplacement)) {
+                                            map.get(variableReplacement).add(mapping);
+                                        } else {
+                                            var list = new LinkedHashSet<CodeFragmentMapping>();
+                                            list.add(mapping);
+                                            map.put(variableReplacement, list);
+                                        }
                                     }
                                 }
                             }
@@ -824,8 +828,10 @@ public class VariableReplacementAnalysis {
                 allVariableDeclarations1.addAll(comp1.getAllVariableDeclarations());
                 allVariableDeclarations2.addAll(comp2.getAllVariableDeclarations());
             } else {
-                allVariableDeclarations1.addAll(operation1.getAllVariableDeclarations());
-                allVariableDeclarations2.addAll(operation2.getAllVariableDeclarations());
+                if (operation1 != null) {
+                    allVariableDeclarations1.addAll(operation1.getAllVariableDeclarations());
+                    allVariableDeclarations2.addAll(operation2.getAllVariableDeclarations());
+                }
                 break;
             }
         }
@@ -1126,7 +1132,7 @@ public class VariableReplacementAnalysis {
                 }
                 for (SingleStatement nonMappedStatement : mapper.getNonMappedLeavesT2()) {
                     VariableDeclaration variableDeclaration2 = nonMappedStatement.getVariableDeclaration(v1.getVariableName());
-                    if (variableDeclaration2 != null && equalsKindExceptGlobal(variableDeclaration2, v1)) {
+                    if (variableDeclaration2 != null && equalsKind(variableDeclaration2, v1)) {
                         for (CodeFragmentMapping mapping : mapper.getMappings()) {
                             if (mapping.getFragment2().equals(nonMappedStatement.getParent())) {
                                 if (mapping.getFragment1() instanceof BlockStatement) {
@@ -1236,21 +1242,25 @@ public class VariableReplacementAnalysis {
     }
 
     private boolean potentialParameterRename(Replacement replacement, Set<CodeFragmentMapping> set) {
-        int index1 = operation1.getParameterNameList().indexOf(replacement.getBefore());
-        if (index1 == -1 && callSiteOperation != null) {
-            index1 = callSiteOperation.getParameterNameList().indexOf(replacement.getBefore());
+        if (operation1 != null) {
+            int index1 = operation1.getParameterNameList().indexOf(replacement.getBefore());
+            if (index1 == -1 && callSiteOperation != null) {
+                index1 = callSiteOperation.getParameterNameList().indexOf(replacement.getBefore());
+            }
+            int index2 = operation2.getParameterNameList().indexOf(replacement.getAfter());
+            if (index2 == -1 && callSiteOperation != null) {
+                index2 = callSiteOperation.getParameterNameList().indexOf(replacement.getAfter());
+            }
+
+            if (fieldAssignmentToPreviouslyExistingAttribute(set)) {
+                return false;
+            }
+            if (fieldAssignmentWithPreviouslyExistingParameter(set)) {
+                return false;
+            }
+            return index1 >= 0 && index1 == index2;
         }
-        int index2 = operation2.getParameterNameList().indexOf(replacement.getAfter());
-        if (index2 == -1 && callSiteOperation != null) {
-            index2 = callSiteOperation.getParameterNameList().indexOf(replacement.getAfter());
-        }
-        if (fieldAssignmentToPreviouslyExistingAttribute(set)) {
-            return false;
-        }
-        if (fieldAssignmentWithPreviouslyExistingParameter(set)) {
-            return false;
-        }
-        return index1 >= 0 && index1 == index2;
+        return false;
     }
 
     private SimpleEntry<VariableDeclaration, FunctionDeclaration> getVariableDeclaration1(Replacement replacement, CodeFragmentMapping mapping) {
@@ -1302,15 +1312,11 @@ public class VariableReplacementAnalysis {
         return null;
     }
 
-    public boolean equalsKindExceptGlobalAndNotParameter(VariableDeclaration vd1, VariableDeclaration vd2) {
-        return vd1.getKind() != VariableDeclarationKind.GLOBAL
-                && !vd1.isParameter()
-                && !vd2.isParameter()
-                && vd1.getKind().equals(vd2.getKind());
+    public boolean equalsKindIncludingNull(VariableDeclaration vd1, VariableDeclaration vd2) {
+        return vd1.getKind() == vd2.getKind();
     }
 
-    public boolean equalsKindExceptGlobal(VariableDeclaration vd1, VariableDeclaration vd2) {
-        return vd1.getKind() != VariableDeclarationKind.GLOBAL
-                && vd1.getKind().equals(vd2.getKind());
+    public boolean equalsKind(VariableDeclaration vd1, VariableDeclaration vd2) {
+        return vd1.getKind() != null && vd1.getKind() == vd2.getKind();
     }
 }

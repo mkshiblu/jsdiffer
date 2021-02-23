@@ -1,9 +1,9 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.UMLParameter;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
-import io.rminer.core.entities.DeclarationContainer;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.entities.DeclarationContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Holds the body of the function
      */
     private FunctionBody body;
-
-    private String containerName;
+    
     /**
      * Stores whether the body of the function is empty or not
      */
@@ -49,6 +48,8 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * True if the function is also a constructor
      */
     private boolean isConstructor;
+
+    private boolean isStatic;
 
     public FunctionDeclaration() {
     }
@@ -189,5 +190,13 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
             }
         }
         return operationsInsideAnonymousClass;
+    }
+
+    public void setStatic(boolean isStatic) {
+        this.isStatic = isStatic;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
     }
 }

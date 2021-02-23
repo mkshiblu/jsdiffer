@@ -1,9 +1,11 @@
 package io.jsrminer.sourcetree;
 
+import io.rminerx.core.api.INode;
+
 /**
  * A complete entity such as functionDeclarations, VariableDeclarations etc.
  */
-public class CodeEntity {
+public class CodeEntity implements INode {
     protected SourceLocation sourceLocation;
     protected String text;
     protected CodeElementType type;
@@ -33,10 +35,10 @@ public class CodeEntity {
     }
 
     public boolean equalsSourceLocation(CodeEntity test) {
-        if (this.sourceLocation.getFile() == null) {
-            if (test.sourceLocation.getFile() != null)
+        if (this.sourceLocation.getFilePath() == null) {
+            if (test.sourceLocation.getFilePath() != null)
                 return false;
-        } else if (!this.sourceLocation.getFile().equals(test.sourceLocation.getFile()))
+        } else if (!this.sourceLocation.getFilePath().equals(test.sourceLocation.getFilePath()))
             return false;
 
         return this.sourceLocation.equalsLineAndColumn(test.sourceLocation);

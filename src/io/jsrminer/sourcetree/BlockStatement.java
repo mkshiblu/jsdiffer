@@ -1,8 +1,8 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.ICompositeFragment;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.ICompositeFragment;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
@@ -13,11 +13,12 @@ import java.util.*;
 public class BlockStatement extends Statement implements ICompositeFragment {
     protected List<Statement> statements = new ArrayList<>();
     protected List<Expression> expressions = new ArrayList<>();
-    //private List<VariableDeclaration> variableDeclarations;
+    private List<VariableDeclaration> enhancedForVariableDeclarations = new ArrayList<>();
     // exp
     // vd
 
     public BlockStatement() {
+        this.setCodeElementType(CodeElementType.BLOCK_STATEMENT);
     }
 
     public void addStatement(Statement statement) {
@@ -28,6 +29,9 @@ public class BlockStatement extends Statement implements ICompositeFragment {
         this.expressions.add(expression);
     }
 
+    public void addEnhancedForVariableDeclaration(VariableDeclaration variableDeclaration) {
+        this.enhancedForVariableDeclarations.add(variableDeclaration);
+    }
 
     /**
      * Returns all the single statements including children's of children in a bottom up fashion
@@ -210,6 +214,15 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
+    public List<String> getInfixExpressions() {
+        List<String> infixExpressions = new ArrayList<>();
+        for (Expression expression : this.expressions) {
+            infixExpressions.addAll(expression.getInfixExpressions());
+        }
+        return infixExpressions;
+    }
+
+    @Override
     public List<String> getInfixOperators() {
         List<String> infixOperators = new ArrayList<>();
         for (Expression expression : this.expressions) {
@@ -255,10 +268,10 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     }
 
     @Override
-    public List<String> getIdentifierArguments() {
+    public List<String> getArguments() {
         List<String> arguments = new ArrayList<String>();
         for (Expression expression : expressions) {
-            arguments.addAll(expression.getIdentifierArguments());
+            arguments.addAll(expression.getArguments());
         }
         return arguments;
     }
@@ -267,7 +280,7 @@ public class BlockStatement extends Statement implements ICompositeFragment {
     public List<VariableDeclaration> getVariableDeclarations() {
         List<VariableDeclaration> variableDeclarations = new ArrayList<>();
         //special handling for enhanced-for formal parameter
-        // variableDeclarations.addAll(this.variableDeclarations);
+        variableDeclarations.addAll(this.enhancedForVariableDeclarations);
         for (Expression expression : this.getExpressions()) {
             variableDeclarations.addAll(expression.getVariableDeclarations());
         }
@@ -453,6 +466,10 @@ public class BlockStatement extends Statement implements ICompositeFragment {
             return getExpressions().contains(fragment);
         }
         return false;
+    }
+
+    public List<VariableDeclaration> getOwnVariableDeclarations() {
+        return enhancedForVariableDeclarations;
     }
 
     @Override

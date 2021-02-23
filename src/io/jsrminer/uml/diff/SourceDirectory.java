@@ -29,7 +29,7 @@ public class SourceDirectory {
 
     public Map<String, SourceFile> getSourceFiles() {
         if (sourceFilesMapped == null) {
-            sourceFilesMapped = new HashMap<>();
+            sourceFilesMapped = new LinkedHashMap<>();
             Collection<File> sourceFiles = FileUtils.listFiles(new File(directoryPath), SUPPORTED_EXTENSIONS, true);
 
             for (File file : sourceFiles) {
@@ -43,7 +43,7 @@ public class SourceDirectory {
     public String[] getRelativeSourceFilePaths() {
         List<String> paths = new ArrayList<>(this.sourceFilesMapped.size());
         for (SourceFile file : this.sourceFilesMapped.values()) {
-            paths.add(file.getRelativePathToSourceDirectory());
+            paths.add(file.getPathFromSourceDirectory());
         }
         return paths.toArray(String[]::new);
     }
@@ -67,14 +67,14 @@ public class SourceDirectory {
         for (SourceFile sourceFile : sourceMaps1.values()) {
 
             // Check if common files
-            if (sourceMaps2.containsKey(sourceFile.getRelativePathToSourceDirectory())) {
+            if (sourceMaps2.containsKey(sourceFile.getPathFromSourceDirectory())) {
                 diff.addFileAtSameLocation(sourceFile);
             } else
                 diff.addToDeletedFiles(sourceFile);
         }
 
         for (SourceFile sourceFile : sourceMaps2.values()) {
-            if (!sourceMaps1.containsKey(sourceFile.getRelativePathToSourceDirectory())) {
+            if (!sourceMaps1.containsKey(sourceFile.getPathFromSourceDirectory())) {
                 diff.addAddedFile(sourceFile);
             }
         }

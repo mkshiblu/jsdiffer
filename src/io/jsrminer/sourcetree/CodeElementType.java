@@ -5,8 +5,8 @@ import java.util.Map;
 
 public enum CodeElementType {
     EXPRESSION_STATEMENT("ExpressionStatement"),
-    IF_STATEMENT("IfStatement"),
-    BLOCK_STATEMENT("BlockStatement"),
+    IF_STATEMENT("IfStatement", "if"),
+    BLOCK_STATEMENT("BlockStatement", "{"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     EMPTY_STATEMENT("EmptyStatement"),
     FUNCTION_INVOCATION("CallExpression"),
@@ -14,26 +14,57 @@ public enum CodeElementType {
     SUPER_CONSTRUCTOR_INVOCATION("SuperExpression"),    // TODO ReVisit type (It could not be a constructor sometimes)
     OBJECT_CREATION("NewExpression"),
     RETURN_STATEMENT("ReturnStatement"),
-    TRY_STATEMENT("TryStatement"),
-    CATCH_CLAUSE("CatchClause"),
+    TRY_STATEMENT("TryStatement", "try"),
+    CATCH_CLAUSE("CatchClause", "catch"),
+    FINALLY_BLOCK("Finally", "finally"),
     THROW_STATEMENT("ThrowStatement"),
     ARRAY_EXPRESSION("ArrayExpression"),
-    ENHANCED_FOR_STATEMENT("ForInStatement"), // TODO revisit
-    FOR_STATEMENT("ForStatement"),
+    ENHANCED_FOR_STATEMENT("EnhancedForStatement", "for"), // TODO revisit
+    FOR_STATEMENT("ForStatement", "for"),
     LABELED_STATEMENT("LabeledStatement"),
     VARIABLE_DECLARATION("VariableDeclaration"),
-    DD_WHILE_STATEMENT("DoWhileStatement"),
+    DO_WHILE_STATEMENT("DoWhileStatement", "do"),
     BREAK_STATEMENT("BreakStatement"),
     CONTINUE_STATEMENT("ContinueStatement"),
     SWITCH_CASE("SwitchCase"),
-    SWITCH_STATEMENT("SwitchStatement"),
-    WHILE_STATEMENT("WhileStatement");
+    SWITCH_STATEMENT("SwitchStatement", "switch"),
 
+    WHILE_STATEMENT("WhileStatement", "while"),
+    LITERAL_EXPRESSION("LiteralExpression"),
+    COMMA_EXPRESSION("CommaExpression"),
+    VARIABLE_DECLARATION_STATEMENT("VariableDeclarationStatement"),
+    IF_STATEMENT_CONDITION,
+    VARIABLE_DECLARATION_INITIALIZER,
+    FOR_STATEMENT_INITIALIZER,
+    FOR_STATEMENT_CONDITION,
+    FOR_STATEMENT_UPDATER,
+    ENHANCED_FOR_STATEMENT_INITIALIZER, // SAME as RM EFS parameter
+    ENHANCED_FOR_STATEMENT_EXPRESSION,
+    WHILE_STATEMENT_CONDITION,
+    DO_STATEMENT_CONDITION,
+    CATCH_CLAUSE_EXCEPTION_NAME,
+    SWITCH_STATEMENT_CONDITION,
+    TERNARY_OPERATOR_CONDITION,
+    TERNARY_OPERATOR_THEN_EXPRESSION,
+    TERNARY_OPERATOR_ELSE_EXPRESSION,
+    ;
 
     public final String titleCase;
+    public final String keyword;
 
-    private CodeElementType(String titleCase) {
+    CodeElementType() {
+        this.titleCase = null;
+        this.keyword = null;
+    }
+
+    CodeElementType(String titleCase) {
         this.titleCase = titleCase;
+        this.keyword = null;
+    }
+
+    CodeElementType(String titleCase, String keyword) {
+        this.titleCase = titleCase;
+        this.keyword = keyword;
     }
 
     private static Map<String, CodeElementType> typeTitleCaseMap = new HashMap<>();

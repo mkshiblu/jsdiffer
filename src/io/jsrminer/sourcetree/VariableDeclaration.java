@@ -1,7 +1,10 @@
 package io.jsrminer.sourcetree;
 
+import org.eclipse.jgit.annotations.Nullable;
+
 public class VariableDeclaration extends CodeEntity {
-    private Expression initializer;
+
+    @Nullable Expression initializer;
     private final VariableDeclarationKind kind;
     public final String variableName;
     private SourceLocation scope;
@@ -10,6 +13,7 @@ public class VariableDeclaration extends CodeEntity {
     public VariableDeclaration(String variableName, VariableDeclarationKind kind) {
         this.variableName = variableName;
         this.kind = kind;
+        this.setType(CodeElementType.VARIABLE_DECLARATION);
     }
 
     public VariableDeclaration(String variableName, Expression optionalInitializer, VariableDeclarationKind kind) {
@@ -54,10 +58,6 @@ public class VariableDeclaration extends CodeEntity {
 
     public void setIsParameter(boolean isParameter) {
         this.isParameter = isParameter;
-    }
-
-    public boolean isGlobal() {
-        return this.kind.equals(VariableDeclarationKind.GLOBAL);
     }
 
     public String toString() {

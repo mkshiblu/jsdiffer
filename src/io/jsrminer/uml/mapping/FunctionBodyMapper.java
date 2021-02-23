@@ -10,16 +10,16 @@ import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.*;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
 public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
-    public final FunctionDeclaration function1;
-    public final FunctionDeclaration function2;
-    public final UMLOperationDiff operationDiff;
+    public FunctionDeclaration function1;
+    public FunctionDeclaration function2;
+    public UMLOperationDiff operationDiff;
 
     public static final Argumentizer argumentizer = new Argumentizer();
 
@@ -33,7 +33,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private final SourceFileDiff sourceFileDiff;
+    private SourceFileDiff sourceFileDiff;
     private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
@@ -85,6 +85,90 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     /**
+     * Maps two sets of statements similar to lambda body mapper
+     */
+    public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2) {
+
+        this.function1 = function1;
+        this.function2 = function2;
+
+        List<Statement> statements1 = function1.getBody().blockStatement.getStatements();
+        List<Statement> statements2 = function2.getBody().blockStatement.getStatements();
+        if (statements1.size() > 0 && statements2.size() > 0) {
+            // Add all leaves and composite from statements
+            LinkedHashSet<SingleStatement> leaves1 = new LinkedHashSet<>();
+            LinkedHashSet<SingleStatement> leaves2 = new LinkedHashSet<>();
+            LinkedHashSet<BlockStatement> innerNodes1 = new LinkedHashSet<>();
+            LinkedHashSet<BlockStatement> innerNodes2 = new LinkedHashSet<>();
+
+//            for (Statement statement : statements1) {
+//                if (statement instanceof SingleStatement) {
+//                    leaves1.add((SingleStatement) statement);
+//                } else {
+//                    innerNodes1.add((BlockStatement) statement);
+//                }
+//            }
+//
+//            for (Statement statement : statements2) {
+//                if (statement instanceof SingleStatement) {
+//                    leaves2.add((SingleStatement) statement);
+//                } else {
+//                    innerNodes2.add((BlockStatement) statement);
+//                }
+//            }
+
+            leaves1.addAll(getLeavesRecursiveOrder(statements1));
+            leaves2.addAll(getLeavesRecursiveOrder(statements2));
+
+            // First round match with immediate leaves vs leaves
+            matchLeaves(leaves1, leaves2, new LinkedHashMap<>());
+
+            innerNodes1.addAll(getBlockStatementsRecursiveOrder(statements1));
+            innerNodes2.addAll(getBlockStatementsRecursiveOrder(statements2));
+
+            matchBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
+
+            // 2nd round match with each composites and their leaves
+
+            nonMappedLeavesT1.addAll(leaves1);
+            nonMappedLeavesT2.addAll(leaves2);
+            nonMappedInnerNodesT1.addAll(innerNodes1);
+            nonMappedInnerNodesT2.addAll(innerNodes2);
+
+//            for (StatementObject statement : getNonMappedLeavesT2()) {
+//                temporaryVariableAssignment(statement, nonMappedLeavesT2);
+//            }
+//            for (StatementObject statement : getNonMappedLeavesT1()) {
+//                inlinedVariableAssignment(statement, nonMappedLeavesT2);
+//
+        }
+    }
+
+    private Set<SingleStatement> getLeavesRecursiveOrder(List<Statement> statements) {
+        final Set<SingleStatement> leaves = new LinkedHashSet<>();
+        for (Statement statement : statements) {
+            if (statement instanceof BlockStatement) {
+                leaves.addAll(((BlockStatement) statement).getAllLeafStatementsIncludingNested());
+            } else {
+                leaves.add((SingleStatement) statement);
+            }
+        }
+        return leaves;
+    }
+
+    private Set<BlockStatement> getBlockStatementsRecursiveOrder(List<Statement> statements) {
+        final Set<BlockStatement> innerNodes = new LinkedHashSet<>();
+        for (Statement statement : statements) {
+            if (statement instanceof BlockStatement) {
+                BlockStatement composite = (BlockStatement) statement;
+                innerNodes.addAll(composite.getAllBlockStatementsIncludingNested());
+            }
+        }
+        //innerNodes.add(this);
+        return innerNodes;
+    }
+
+    /**
      * Maps funciton1 with funciton2
      */
     public void map() {
@@ -122,7 +206,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             argumentizer.clearCache(innerNodes1, innerNodes2);
             replaceParametersWithArguments(innerNodes1, innerNodes2);
             if (innerNodes1.size() > 0 && innerNodes2.size() > 0)
-                matchNestedBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
+                matchBlockStatements(innerNodes1, innerNodes2, new LinkedHashMap<>());
 
             this.nonMappedInnerNodesT1.addAll(innerNodes1);
             this.nonMappedInnerNodesT2.addAll(innerNodes2);
@@ -218,7 +302,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             }
 
             //compare inner nodes from T1 with inner nodes from T2
-            matchNestedBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap);
+            matchBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap);
 
             //match expressions in inner nodes from T2 with leaves from T1
             Set<Expression> expressionsT2 = new LinkedHashSet<>();
@@ -326,7 +410,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
             //compare leaves from T1 with leaves from T2
-            matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
+            if (leaves1.size() > 0 && leaves2.size() > 0)
+                matchLeaves(leaves1, leaves2, parameterToArgumentMap2);
 
             //adding innerNodes that were mapped with replacements
             for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
@@ -364,7 +449,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 }
             }
             //compare inner nodes from T1 with inner nodes from T2
-            matchNestedBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap2);
+            matchBlockStatements(innerNodes1, innerNodes2, parameterToArgumentMap2);
 
             //match expressions in inner nodes from T1 with leaves from T2
             Set<Expression> expressionsT1 = new LinkedHashSet<>();
@@ -596,7 +681,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     /**
      * Match the block statements inside of the body of a function
      */
-    void matchNestedBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
+    void matchBlockStatements(Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap) {
         //exact string+depth matching - inner nodes
         matchInnerNodesWithIdenticalText(innerNodes1, innerNodes2, parameterToArgumentMap, false);
@@ -864,14 +949,14 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private LeafCodeFragmentMapping createLeafMapping(CodeFragment leaf1, CodeFragment
             leaf2, Map<String, String> parameterToArgumentMap) {
-//        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.operation1;
-//        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.operation2;
+        FunctionDeclaration operation1 = codeFragmentOperationMap1.containsKey(leaf1) ? codeFragmentOperationMap1.get(leaf1) : this.function1;
+        FunctionDeclaration operation2 = codeFragmentOperationMap2.containsKey(leaf2) ? codeFragmentOperationMap2.get(leaf2) : this.function2;
         LeafCodeFragmentMapping mapping = new LeafCodeFragmentMapping(leaf1, leaf2, function1, function2, argumentizer);
         for (String key : parameterToArgumentMap.keySet()) {
             String value = parameterToArgumentMap.get(key);
-//            if(!key.equals(value) && ReplacementUtil.contains(leaf2.getString(), key) && ReplacementUtil.contains(leaf1.getString(), value)) {
-//                mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
-//            }
+            if (!key.equals(value) && ReplacementUtil.contains(leaf2.getText(), key) && ReplacementUtil.contains(leaf1.getText(), value)) {
+                mapping.addReplacement(new Replacement(value, key, ReplacementType.VARIABLE_NAME));
+            }
         }
         return mapping;
     }
@@ -1491,4 +1576,5 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         }
         return editDistance / maxLength;
     }
+
 }

@@ -28,13 +28,13 @@ public class MoveOperationRefactoring extends Refactoring {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getName()).append("\t");
+        sb.append(getName()).append("    ");
         sb.append(originalOperation);
-        sb.append(" from class ");
+        sb.append(" from ");
         sb.append(originalOperation.getParentContainerQualifiedName());
         sb.append(" to ");
         sb.append(movedOperation);
-        sb.append(" from container ");
+        sb.append(" at ");
         sb.append(movedOperation.getParentContainerQualifiedName());
         return sb.toString();
     }

@@ -1,7 +1,7 @@
 package io.jsrminer.sourcetree;
 
 import io.jsrminer.uml.diff.SourceFileDiff;
-import io.jsrminer.uml.diff.SourceDiffer;
+import io.jsrminer.uml.diff.SourceFileDiffer;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -338,7 +338,7 @@ public abstract class Invocation extends CodeEntity {
     public boolean renamedWithIdenticalExpressionAndDifferentNumberOfArguments(Invocation call, Set<Replacement> replacements, double distance, List<FunctionBodyMapper> lambdaMappers) {
         boolean allExactLambdaMappers = lambdaMappers.size() > 0;
         for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
-            if (!SourceDiffer.allMappingsAreExactMatches(lambdaMapper)) {
+            if (!SourceFileDiffer.allMappingsAreExactMatches(lambdaMapper)) {
                 allExactLambdaMappers = false;
                 break;
             }
@@ -364,13 +364,13 @@ public abstract class Invocation extends CodeEntity {
     private boolean argumentIsReturned(String statement) {
         return statement.startsWith("return ") && getArguments().size() == 1 &&
                 //length()-2 to remove ";\n" from the end of the return statement, 7 to remove the prefix "return "
-                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(7, statement.length() - 2));
+                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(7, statement.length() - 1));
     }
 
     private boolean argumentIsEqual(String statement) {
         return statement.endsWith(JsConfig.STATEMENT_TERMINATOR_CHAR + "") && getArguments().size() == 1 &&
                 //length()-2 to remove ";\n" from the end of the statement
-                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(0, statement.length() - 2));
+                equalsIgnoringExtraParenthesis(getArguments().get(0), statement.substring(0, statement.length() - 1));
     }
 
     private static boolean equalsIgnoringExtraParenthesis(String s1, String s2) {

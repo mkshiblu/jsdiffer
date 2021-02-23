@@ -34,6 +34,9 @@ public abstract class CodeFragmentMapping {
         return fragment1.toString() + fragment2.toString();
     }
 
+    public void addReplacement(Replacement replacement) {
+        this.replacements.add(replacement);
+    }
     public void addReplacements(Set<Replacement> replacements) {
         this.replacements.addAll(replacements);
     }

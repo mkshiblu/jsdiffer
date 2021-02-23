@@ -38,7 +38,6 @@ public class ReplacementInfo {
         this.unMatchedStatements1 = unMatchedStatements1;
         this.unMatchedStatements2 = unMatchedStatements2;
         setArgumentizedString1(argumentizedString1);
-
     }
 
     public void setArgumentizedString1(String string) {

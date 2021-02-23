@@ -10,6 +10,7 @@ import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
+import io.jsrminer.uml.mapping.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.*;
@@ -41,28 +42,27 @@ public class ExtractOperationDetection {
                 !mapper.getReplacementsInvolvingMethodInvocation().isEmpty()) {
 
             List<OperationInvocation> addedOperationInvocations = matchingInvocations(addedOperation, operationInvocations);
-
-            if (addedOperationInvocations.size() > 0)
-                processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
-
-//            if (addedOperationInvocations.size() > 0) {
-//                int otherAddedMethodsCalled = 0;
-//                for (FunctionDeclaration addedOperation2 : this.addedOperations) {
-//                    if (!addedOperation.equals(addedOperation2)) {
-//                        List<OperationInvocation> addedOperationInvocations2 = matchingInvocations(addedOperation2, operationInvocations);
-//                        if (addedOperationInvocations2.size() > 0) {
-//                            otherAddedMethodsCalled++;
-//                        }
-//                    }
-//                }
-//                if (otherAddedMethodsCalled == 0) {
-//                    for (OperationInvocation addedOperationInvocation : addedOperationInvocations) {
-//                        processAddedOperation(mapper, addedOperation, refactorings, addedOperationInvocations, addedOperationInvocation);
-//                    }
-//                } else {
-//                    processAddedOperation(mapper, addedOperation, refactorings, addedOperationInvocations, addedOperationInvocations.get(0));
-//                }
-//            }
+            if (addedOperationInvocations.size() > 0) {
+                int otherAddedMethodsCalled = 0;
+                for (FunctionDeclaration addedOperation2 : this.addedOperations) {
+                    if (!addedOperation.equals(addedOperation2)) {
+                        List<OperationInvocation> addedOperationInvocations2 = matchingInvocations(addedOperation2, operationInvocations/*, mapper.getOperation2().variableTypeMap()*/);
+                        if (addedOperationInvocations2.size() > 0) {
+                            otherAddedMethodsCalled++;
+                        }
+                    }
+                }
+                if (otherAddedMethodsCalled == 0) {
+                    List<OperationInvocation> sortedInvocations = sortInvocationsBasedOnArgumentOccurrences(addedOperationInvocations);
+                    for (OperationInvocation addedOperationInvocation : sortedInvocations) {
+                        processAddedOperation(mapper, addedOperation, refactorings, addedOperationInvocations, addedOperationInvocation);
+                        //processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+                    }
+                } else {
+                    processAddedOperation(mapper, addedOperation, refactorings, addedOperationInvocations, addedOperationInvocations.get(0));
+                    //processInvokedAddedOperation(addedOperationInvocations.get(0), addedOperation, this.mapper, addedOperationInvocations, refactorings);
+                }
+            }
         }
         return refactorings;
     }
@@ -103,7 +103,9 @@ public class ExtractOperationDetection {
         }
         FunctionBodyMapper operationBodyMapper = createMapperForExtractedMethod(mapper
                 , mapper.function1, addedOperation, addedOperationInvocation);
+
         if (operationBodyMapper != null) {
+            operationBodyMapper.mapAddedOperation();
             List<CodeFragmentMapping> additionalExactMatches = new ArrayList<>();
             List<CallTreeNode> nodesInBreadthFirstOrder = callTree.getNodesInBreadthFirstOrder();
 
@@ -112,6 +114,7 @@ public class ExtractOperationDetection {
                 if (matchingInvocations(node.getInvokedOperation(), this.operationInvocations).size() == 0) {
                     FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper, node.getOriginalOperation(), node.getInvokedOperation(), node.getInvocation());
                     if (nestedMapper != null) {
+                        nestedMapper.mapAddedOperation();
                         additionalExactMatches.addAll(nestedMapper.getExactMatches());
                         if (extractMatchCondition(nestedMapper, new ArrayList<>())
                                 && extractMatchCondition(operationBodyMapper, additionalExactMatches)) {
@@ -296,17 +299,18 @@ public class ExtractOperationDetection {
     }
 
     private FunctionDeclaration findDelegateMethod(FunctionDeclaration originalOperation, FunctionDeclaration addedOperation, OperationInvocation addedOperationInvocation) {
-//        OperationInvocation delegateMethodInvocation = addedOperation.isDelegate();
-//        if (originalOperation.isDelegate() == null && delegateMethodInvocation != null
-//                && !originalOperation.getAllOperationInvocations().contains(addedOperationInvocation)) {
-//            for (FunctionDeclaration operation : addedOperations) {
-//                if (delegateMethodInvocation.matchesOperation(operation)) {
-//                    return operation;
-//                }
-//            }
-//        }
+        OperationInvocation delegateMethodInvocation = FunctionUtil.isDelegate(addedOperation);
+        if (FunctionUtil.isDelegate(originalOperation) == null && delegateMethodInvocation != null
+                && !FunctionUtil.containsInvocation(originalOperation, addedOperationInvocation)) {
+            for (FunctionDeclaration operation : addedOperations) {
+                if (delegateMethodInvocation.matchesOperation(operation)) {
+                    return operation;
+                }
+            }
+        }
         return null;
     }
+
 
     private boolean parameterTypesMatch(Map<UMLParameter, UMLParameter> originalMethodParametersPassedAsArgumentsMappedToCalledMethodParameters) {
 //        for (UMLParameter key : originalMethodParametersPassedAsArgumentsMappedToCalledMethodParameters.keySet()) {
@@ -317,5 +321,35 @@ public class ExtractOperationDetection {
 //            }
 //        }
         return true;
+    }
+
+    private List<OperationInvocation> sortInvocationsBasedOnArgumentOccurrences(List<OperationInvocation> invocations) {
+        if (invocations.size() > 1) {
+            List<OperationInvocation> sorted = new ArrayList<OperationInvocation>();
+            List<String> allVariables = new ArrayList<String>();
+            for (BlockStatement composite : mapper.getNonMappedInnerNodesT1()) {
+                allVariables.addAll(composite.getVariables());
+            }
+            for (SingleStatement leaf : mapper.getNonMappedLeavesT1()) {
+                allVariables.addAll(leaf.getVariables());
+            }
+            int max = 0;
+            for (OperationInvocation invocation : invocations) {
+                List<String> arguments = invocation.getArguments();
+                int occurrences = 0;
+                for (String argument : arguments) {
+                    occurrences += Collections.frequency(allVariables, argument);
+                }
+                if (occurrences > max) {
+                    sorted.add(0, invocation);
+                    max = occurrences;
+                } else {
+                    sorted.add(invocation);
+                }
+            }
+            return sorted;
+        } else {
+            return invocations;
+        }
     }
 }

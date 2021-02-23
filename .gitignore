@@ -61,3 +61,7 @@ docs/JS Function Declaration.synctex.gz
 *.aux
 resources/.vscode/
 .vscode/
+bin/
+.settings/
+.classpath
+.project

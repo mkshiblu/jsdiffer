@@ -1,7 +1,8 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.ICodeFragment;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.List;
 import java.util.Map;
@@ -9,12 +10,12 @@ import java.util.Map;
 /**
  * Base class for all the code elements that has apis  to provide all the variables, identifiers appeared in the code
  */
-public abstract class CodeFragment extends CodeEntity {
+public abstract class CodeFragment extends CodeEntity implements ICodeFragment {
     //    protected SourceLocation sourceLocation;
 //    protected String text;
 //    protected CodeElementType type;
-    protected int positionIndexInParent = -1;
-    protected int depth = -1;
+    protected int positionIndexInParent;
+    protected int depth;
 
     public CodeFragment() {
     }
@@ -92,7 +93,7 @@ public abstract class CodeFragment extends CodeEntity {
     public abstract List<String> getNullLiterals();
 
     public abstract List<String> getBooleanLiterals();
-
+    public abstract List<String> getInfixExpressions();
     public abstract List<String> getInfixOperators();
 
     public abstract List<String> getArrayAccesses();
@@ -103,7 +104,7 @@ public abstract class CodeFragment extends CodeEntity {
 
     public abstract List<TernaryOperatorExpression> getTernaryOperatorExpressions();
 
-    public abstract List<String> getIdentifierArguments();
+    public abstract List<String> getArguments();
 
     public abstract List<VariableDeclaration> getVariableDeclarations();
 

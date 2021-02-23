@@ -1,7 +1,7 @@
 package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.diff.SourceDiffer;
+import io.jsrminer.uml.diff.SourceFileDiffer;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 
 import java.util.LinkedHashSet;
@@ -221,7 +221,7 @@ public class ReplacementHeuristic {
                                                                        OperationInvocation invocationCoveringTheEntireStatement2) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
                 invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()
-                        , SourceDiffer.MAX_OPERATION_NAME_DISTANCE)) {
+                        , SourceFileDiffer.MAX_OPERATION_NAME_DISTANCE)) {
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
                     invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
             replacementInfo.addReplacement(replacement);
@@ -232,7 +232,7 @@ public class ReplacementHeuristic {
 
     public boolean invocationRenamedButNoExpressionAndIdenticalArguments(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                invocationCoveringTheEntireStatement1.renamedWithIdenticalArgumentsAndNoExpression(invocationCoveringTheEntireStatement2, SourceDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalArgumentsAndNoExpression(invocationCoveringTheEntireStatement2, SourceFileDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.getName(),
                     invocationCoveringTheEntireStatement2.getName(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, ReplacementType.METHOD_INVOCATION_NAME);
             replacementInfo.addReplacement(replacement);
@@ -255,7 +255,7 @@ public class ReplacementHeuristic {
 
     public boolean invocationRenmadeArgumentsChangedButIdenticalExpressions(OperationInvocation invocationCoveringTheEntireStatement1, OperationInvocation invocationCoveringTheEntireStatement2, List<FunctionBodyMapper> lambdaMappers) {
         if (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), SourceDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
+                invocationCoveringTheEntireStatement1.renamedWithIdenticalExpressionAndDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), SourceFileDiffer.MAX_OPERATION_NAME_DISTANCE, lambdaMappers)) {
             ReplacementType type = invocationCoveringTheEntireStatement1.getName().equals(invocationCoveringTheEntireStatement2.getName()) ? ReplacementType.METHOD_INVOCATION_ARGUMENT : ReplacementType.METHOD_INVOCATION_NAME_AND_ARGUMENT;
             Replacement replacement = new MethodInvocationReplacement(invocationCoveringTheEntireStatement1.actualString(),
                     invocationCoveringTheEntireStatement2.actualString(), invocationCoveringTheEntireStatement1, invocationCoveringTheEntireStatement2, type);
@@ -478,19 +478,22 @@ public class ReplacementHeuristic {
         if (creationCoveringTheEntireStatement1 != null && creationCoveringTheEntireStatement2 != null &&
                 creationCoveringTheEntireStatement1.identicalName(creationCoveringTheEntireStatement2) &&
                 creationCoveringTheEntireStatement1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
-            String subStringS1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
-            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray() &&
-                    subStringS1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
-                    subStringS1.length() > 0) {
-                //return replacementInfo.getReplacements();
-                return true;
+
+            if (creationCoveringTheEntireStatement1.isArray() && creationCoveringTheEntireStatement2.isArray()) {
+                String subStringS1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                if (subStringS1.length() > 0 && subStringS1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
             }
-            String subString2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
-            if (!creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray() &&
-                    subString2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
-                    subString2.length() > 0) {
-                //return replacementInfo.getReplacements();
-                return true;
+
+            if (!creationCoveringTheEntireStatement1.isArray() && !creationCoveringTheEntireStatement2.isArray()) {
+                String subString2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                if (subString2.length() > 0 &&
+                        subString2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))) {
+                    //return replacementInfo.getReplacements();
+                    return true;
+                }
             }
         }
         return false;
@@ -520,19 +523,23 @@ public class ReplacementHeuristic {
                     //check if the argument lists are identical after replacements
                     if (objectCreation1.identicalName(creationCoveringTheEntireStatement2) &&
                             objectCreation1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
-                        String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
-                        if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray() &&
-                                substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]"))) &&
-                                substring1.length() > 0) {
-                            //return replacementInfo.getReplacements();
-                            return true;
+
+                        if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray()) {
+                            String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                            if (substring1.length() > 0 && substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
+                                //return replacementInfo.getReplacements();
+                                return true;
+                            }
                         }
-                        String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
-                        if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray() &&
-                                substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")"))) &&
-                                substring2.length() > 0) {
-                            //return replacementInfo.getReplacements();
-                            return true;
+
+                        if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray()) {
+                            String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                            if (substring2.length() > 0 &&
+                                    substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))
+                            ) {
+                                //return replacementInfo.getReplacements();
+                                return true;
+                            }
                         }
                     }
                 }
@@ -545,7 +552,7 @@ public class ReplacementHeuristic {
         }
         for (String creation1 : creations1) {
             for (Invocation objectCreation1 : creationMap1.get(creation1)) {
-                if (statement1.getText().endsWith(creation1 + ";\n") && (r = objectCreation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
+                if (statement1.getText().endsWith(creation1 + JsConfig.STATEMENT_TERMINATOR_CHAR) && (r = objectCreation1.makeReplacementForReturnedArgument(replacementInfo.getArgumentizedString2())) != null) {
                     replacementInfo.addReplacement(r);
                     //return replacementInfo.getReplacements();
                     return true;
@@ -699,7 +706,8 @@ public class ReplacementHeuristic {
         return false;
     }
 
-    public boolean fieldAssignentReplacedWithSetter(OperationInvocation invocationCoveringTheEntireStatement2, Set<String> variables1) {
+    public boolean fieldAssignentReplacedWithSetter(OperationInvocation
+                                                            invocationCoveringTheEntireStatement2, Set<String> variables1) {
         Replacement r;
         if (invocationCoveringTheEntireStatement2 != null
                 && statement2.getText().equals(invocationCoveringTheEntireStatement2.actualString() + JsConfig.STATEMENT_TERMINATOR_CHAR)

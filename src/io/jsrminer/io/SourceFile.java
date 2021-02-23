@@ -4,7 +4,7 @@ import java.io.File;
 
 public class SourceFile {
     private final File file;
-    private final String relativePathToSourceDirectory;
+    private final String pathFromSourceDirectory;
 
     public SourceFile(String filePath) {
         this(new File(filePath), null);
@@ -14,22 +14,22 @@ public class SourceFile {
         this.file = file;
         String path = file.getPath();
         if (srcDirPath == null) {
-            relativePathToSourceDirectory = file.getName();
+            pathFromSourceDirectory = file.getName();
         } else {
-            int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length();
-            relativePathToSourceDirectory = path.substring(prefixIndex);
+            int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length() + 1;
+            pathFromSourceDirectory = path.substring(prefixIndex);
         }
     }
 
-    public String getRelativePathToSourceDirectory() {
-        return relativePathToSourceDirectory;
+    public String getPathFromSourceDirectory() {
+        return pathFromSourceDirectory;
     }
 
     /**
      * An identifier which is unique inside the uppermost source directory
      */
     public String getIdentifier() {
-        return relativePathToSourceDirectory;
+        return pathFromSourceDirectory;
     }
 
     public File getFile() {

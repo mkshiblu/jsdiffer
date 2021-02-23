@@ -142,19 +142,20 @@ public class ReplacementFinder {
         String s1 = argumentizedStrings[0];
         String s2 = argumentizedStrings[1];
 
+        List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations());
+        List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations());
+
         boolean isEqualWithReplacement = s1.equals(s2)
                 || replacementInfo.getArgumentizedString1().equals(replacementInfo.getArgumentizedString2())
                 || differOnlyInCastExpressionOrPrefixOperator(s1, s2, replacementInfo)
                 || oneIsVariableDeclarationTheOtherIsVariableAssignment(s1, s2, replacementInfo)
+                || identicalVariableDeclarationsWithDifferentNames(s1, s2, variableDeclarations1, variableDeclarations2, replacementInfo)
                 || oneIsVariableDeclarationTheOtherIsReturnStatement(s1, s2)
                 || oneIsVariableDeclarationTheOtherIsReturnStatement(statement1.getText(), statement2.getText())
                 || (commonConditional(s1, s2, replacementInfo) && containsValidOperatorReplacements(replacementInfo))
                 || equalAfterArgumentMerge(s1, s2, replacementInfo)
                 || equalAfterNewArgumentAdditions(s1, s2, replacementInfo)
                 /*|| (validStatementForConcatComparison(statement1, statement2) && commonConcat(s1, s2, replacementInfo))*/;
-
-        List<VariableDeclaration> variableDeclarations1 = new ArrayList<>(statement1.getVariableDeclarations());
-        List<VariableDeclaration> variableDeclarations2 = new ArrayList<>(statement2.getVariableDeclarations());
 
         if (isEqualWithReplacement) {
             if (variableDeclarationsWithEverythingReplaced(variableDeclarations1, variableDeclarations2, replacementInfo)
@@ -1073,11 +1074,7 @@ public class ReplacementFinder {
             Double normalizedDistance = bestReplacements.firstEntry().getKey();
             if (normalizedDistance == 0) {
                 for (Replacement replacement : bestReplacements.firstEntry().getValue()) {
-
                     replacementInfo.addReplacement(replacement);
-                    //replacementInfo.addReplacement(replacement);
-                    //replacementInfo.setArgumentizedString1(ReplacementUtil
-                    //      .performReplacement(this.getArgumentizedString1(), this.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter()));
                     strAfterReplacement = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), replacement.getBefore(), replacement.getAfter());
                     replacementInfo.setArgumentizedString1(strAfterReplacement);
 
@@ -1455,7 +1452,7 @@ public class ReplacementFinder {
 
     private boolean equalAfterNewArgumentAdditions(String s1, String s2, ReplacementInfo replacementInfo) {
         UMLOperationDiff operationDiff = sourceFileDiff == null ? null : this.sourceFileDiff.getOperationDiff(function1, function2);
-        if (operationDiff == null) {
+        if (operationDiff == null && function1 != null) {
             operationDiff = new UMLOperationDiff(function1, function2);
         }
         String commonPrefix = PrefixSuffixUtils.longestCommonPrefix(s1, s2);
@@ -1481,8 +1478,8 @@ public class ReplacementFinder {
                 diff2 = prepend + diff2;
             }
             //if there is a variable replacement diff1 should be empty, otherwise diff1 should include a single variable
-            if (diff1.isEmpty() ||
-                    (function1.getParameterNameList().contains(diff1) && !function2.getParameterNameList().contains(diff1) && !containsMethodSignatureOfAnonymousClass(diff2))
+            if (diff1.isEmpty() || (function1 != null &&
+                    (function1.getParameterNameList().contains(diff1) && !function2.getParameterNameList().contains(diff1) && !containsMethodSignatureOfAnonymousClass(diff2)))
 //                    ||
 //                    (containerDiff.getOriginalClass().containsAttributeWithName(diff1)
 //                            && !classDiff.getNextClass().containsAttributeWithName(diff1)
@@ -2158,6 +2155,11 @@ public class ReplacementFinder {
                                                              ReplacementInfo replacementInfo) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();
+
+        if (!string1.endsWith("\n") && !string2.endsWith("\n")) {
+            return false;
+        }
+
         if (containsMethodSignatureOfAnonymousClass(string1)) {
             string1 = string1.substring(0, string1.indexOf("\n"));
         }
@@ -2254,6 +2256,11 @@ public class ReplacementFinder {
                                                                 ReplacementInfo replacementInfo, Map<String, String> parameterToArgumentMap) {
         String string1 = statement1.getText();
         String string2 = statement2.getText();
+
+        if (!string1.endsWith("\n") || !string2.endsWith("\n")) {
+            return false;
+        }
+
         if (containsMethodSignatureOfAnonymousClass(string1)) {
             string1 = string1.substring(0, string1.indexOf("\n"));
         }
@@ -2365,6 +2372,28 @@ public class ReplacementFinder {
             if (typeReplacement && !compatibleTypes &&
                     replacedArguments == minArguments && classInstanceCreationReplacement) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean identicalVariableDeclarationsWithDifferentNames(String s1, String s2, List<VariableDeclaration> variableDeclarations1, List<VariableDeclaration> variableDeclarations2, ReplacementInfo replacementInfo) {
+        if (variableDeclarations1.size() == variableDeclarations2.size() && variableDeclarations1.size() == 1) {
+            VariableDeclaration declaration1 = variableDeclarations1.get(0);
+            VariableDeclaration declaration2 = variableDeclarations2.get(0);
+            if (!declaration1.getVariableName().equals(declaration2.getVariableName())) {
+                String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
+                String kind1 = declaration1.getKind().keywordName;
+                String kind2 = declaration2.getKind().keywordName;
+
+                // IF not global variable, then append space
+                String composedString1 = kind1 + (kind1.isEmpty() ? "" : " ") + declaration1.getVariableName() + commonSuffix;
+                String composedString2 = kind2 + (kind2.isEmpty() ? "" : " ") + declaration2.getVariableName() + commonSuffix;
+                if (s1.equals(composedString1) && s2.equals(composedString2)) {
+                    Replacement replacement = new Replacement(declaration1.getVariableName(), declaration2.getVariableName(), ReplacementType.VARIABLE_NAME);
+                    replacementInfo.addReplacement(replacement);
+                    return true;
+                }
             }
         }
         return false;

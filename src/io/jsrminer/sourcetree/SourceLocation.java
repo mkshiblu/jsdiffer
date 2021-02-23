@@ -14,7 +14,7 @@ public class SourceLocation {
     public final int end;
 
     public SourceLocation() {
-        this(-1, -1, -1, -1, -1, -1);
+        this(0, 0, 0, 0, 0, 0);
     }
 
     public SourceLocation(String file, int startLine, int startColumn, int endLine, int endColumn, int start, int end) {
@@ -31,7 +31,7 @@ public class SourceLocation {
         this.end = end;
     }
 
-    public String getFile() {
+    public String getFilePath() {
         return file;
     }
 
@@ -48,7 +48,7 @@ public class SourceLocation {
 
     @Override
     public String toString() {
-        return startLine + ":" + startColumn;
+        return this.file + "(" + startLine + "," + startColumn + ") - (" + endLine + "," + endColumn + ")";
     }
 
     public boolean subsumes(SourceLocation other) {
@@ -59,10 +59,10 @@ public class SourceLocation {
     }
 
     public boolean equalSourceLocation(SourceLocation other) {
-        if (this.getFile() == null) {
-            if (other.getFile() != null)
+        if (this.getFilePath() == null) {
+            if (other.getFilePath() != null)
                 return false;
-        } else if (!this.getFile().equals(other.getFile()))
+        } else if (!this.getFilePath().equals(other.getFilePath()))
             return false;
 
         return this.equalsLineAndColumn(other);

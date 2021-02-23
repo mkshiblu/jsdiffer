@@ -4,8 +4,8 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.ArrayList;
 import java.util.List;

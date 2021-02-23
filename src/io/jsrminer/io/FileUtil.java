@@ -2,18 +2,16 @@ package io.jsrminer.io;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class FileUtil {
 
@@ -53,7 +51,14 @@ public class FileUtil {
             return k;
         });
     }
+    public static String getMemberExtension(String filename) {
+        int dotIndex = filename.indexOf(".");
 
+        if (dotIndex >= 0) {
+            return filename.substring(filename.lastIndexOf(".") + 1, filename.length());
+        }
+        return null;
+    }
     public static String getExtension(String filename) {
         return FilenameUtils.getExtension(filename);
     }
@@ -91,5 +96,15 @@ public class FileUtil {
 
     public static String getResourcePath(String resourceName) {
         return FileUtil.class.getClassLoader().getResource(resourceName).getFile();
+    }
+
+    public static String readFileContent(String path) {
+        try {
+            return Files.readString(Path.of(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

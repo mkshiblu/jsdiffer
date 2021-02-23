@@ -1,26 +1,27 @@
 package io.jsrminer.sourcetree;
 
-import io.rminer.core.api.IAnonymousFunctionDeclaration;
-import io.rminer.core.api.ICodeFragment;
-import io.rminer.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SingleStatement extends Statement implements ICodeFragment {
+public class SingleStatement extends Statement implements ILeafFragment {
     // private List<AbstractExpression> expressionList;
     private List<VariableDeclaration> variableDeclarations = new ArrayList<>();
     private List<String> variables = new ArrayList<>();
     private Map<String, List<OperationInvocation>> methodInvocationMap = new LinkedHashMap<>();
     private Map<String, List<ObjectCreation>> creationMap = new LinkedHashMap<>();
-    private List<String> identifierArguments = new ArrayList<>();
+    private List<String> arguments = new ArrayList<>();
 
     public List<String> stringLiterals = new ArrayList<>();
     public List<String> numberLiterals = new ArrayList<>();
     public List<String> nullLiterals = new ArrayList<>();
     public List<String> booleanLiterals = new ArrayList<>();
+    private List<String> infixExpressions = new ArrayList<>();
     private List<String> infixOperators = new ArrayList<>();
     private List<String> arrayAccesses = new ArrayList<>();
     private List<String> prefixExpressions = new ArrayList<>();
@@ -105,8 +106,8 @@ public class SingleStatement extends Statement implements ICodeFragment {
      * Returns arguments which are Invocations
      */
     @Override
-    public List<String> getIdentifierArguments() {
-        return identifierArguments;
+    public List<String> getArguments() {
+        return arguments;
     }
 
     /**
@@ -115,9 +116,12 @@ public class SingleStatement extends Statement implements ICodeFragment {
     @Override
     public List<VariableDeclaration> getVariableDeclarations() {
         return this.variableDeclarations;
-
     }
 
+    @Override
+    public List<String> getInfixExpressions() {
+        return infixExpressions;
+    }
     //    @Override
 //    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
 //        return this.anonymousClassDeclarations;

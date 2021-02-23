@@ -1,6 +1,6 @@
 package io.jsrminer.uml.mapping.replacement;
 
-import io.rminer.core.api.IContainer;
+import io.rminerx.core.api.IContainer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -16,7 +16,7 @@ public class ReplacementUtil {
      * after or before and the there are compatible character before and after respectively
      **/
     public static String performReplacement(String completeString1, String completeString2, String subString1, String subString2) {
-        String temp = completeString1;
+        String temp = new String(completeString1);
         boolean replacementOccurred = false;
 
         for (String character : SPECIAL_CHARACTERS) {
@@ -182,10 +182,10 @@ public class ReplacementUtil {
     }
 
     public static boolean equalsSourceLocation(IContainer container1, IContainer container2) {
-        if (container1.getSourceLocation().getFile() == null) {
-            if (container2.getSourceLocation().getFile() != null)
+        if (container1.getSourceLocation().getFilePath() == null) {
+            if (container2.getSourceLocation().getFilePath() != null)
                 return false;
-        } else if (!container1.getSourceLocation().getFile().equals(container2.getSourceLocation().getFile()))
+        } else if (!container1.getSourceLocation().getFilePath().equals(container2.getSourceLocation().getFilePath()))
             return false;
 
         return container1.getSourceLocation().equalsLineAndColumn(container2.getSourceLocation());
