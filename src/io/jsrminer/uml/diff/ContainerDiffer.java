@@ -1,12 +1,17 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.entities.Container;
 
-public class ContainerDiffer {
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
+public class ContainerDiffer extends BaseDiffer {
     private final Container function1;
     private final Container function2;
     private final ContainerDiff containerDiff;
@@ -26,10 +31,10 @@ public class ContainerDiffer {
 //        processAttributes();
 //        checkForAttributeChanges();
         // processAnonymousFunctions(sourceDiff);
-//        checkForOperationSignatureChanges(this.containerDiff);
-//        checkForInlinedOperations(this.containerDiff);
-//        checkForExtractedOperations(this.containerDiff);
-//        // Match statements declared inside the body directly
+        checkForOperationSignatureChanges(this.containerDiff);
+        //checkForInlinedOperations(this.containerDiff);
+        //checkForExtractedOperations(this.containerDiff);
+//        // Match statements declared inside the body directly NO need for childdiffers
 //        matchStatements(this.containerDiff);
     }
 
@@ -66,80 +71,177 @@ public class ContainerDiffer {
     }
 
     protected void createBodyMapperForCommonNamedFunctions(ContainerDiff containerDiff) {
-//        for(UMLOperation originalOperation : originalClass.getOperations()) {
-//            for(UMLOperation nextOperation : nextClass.getOperations()) {
-//                if(originalOperation.equalsQualified(nextOperation)) {
-//                    if(getModelDiff() != null) {
-//                        List<UMLOperationBodyMapper> mappers = getModelDiff().findMappersWithMatchingSignature2(nextOperation);
-//                        if(mappers.size() > 0) {
-//                            UMLOperation operation1 = mappers.get(0).getOperation1();
-//                            if(!operation1.equalSignature(originalOperation) &&
-//                                    getModelDiff().commonlyImplementedOperations(operation1, nextOperation, this)) {
-//                                if(!removedOperations.contains(originalOperation)) {
-//                                    removedOperations.add(originalOperation);
-//                                }
-//                                break;
+        final List<IFunctionDeclaration> functions1 = containerDiff.container1.getFunctionDeclarations();
+        final List<IFunctionDeclaration> functions2 = containerDiff.container2.getFunctionDeclarations();
+        // First match by equalsQualified
+        // (In RM it's equals signature which checks modifiers, qualified name and parameter types
+        for (IFunctionDeclaration if1 : functions1) {
+            FunctionDeclaration function1 = (FunctionDeclaration) if1;
+
+            IFunctionDeclaration function2 = functions2.stream()
+                    .filter(f2 -> FunctionUtil.equalsNameParentQualifiedNameAndParamerNames(f2, function1))
+                    .findFirst()
+                    .orElse(null);
+
+            if (function2 != null) {
+//                if (getModelDiff() != null) {
+//                    List<FunctionBodyMapper> mappers
+//                            = getModelDiff().findMappersWithMatchingSignature2(function2);
+//                    if (mappers.size() > 0) {
+//                        var operation1 = mappers.get(0).getOperation1();
+//                        if (!FunctionUtil.equalNameAndParameterCount(operation1, function1)//operation1.equalSignature(function1)
+//                                && getModelDiff().commonlyImplementedOperations(operation1, function2, this)) {
+//                            if (!containerDiff.getRemovedOperations().contains(function1)) {
+//                                containerDiff.getRemovedOperations().add(function1);
 //                            }
+//                            break;
 //                        }
 //                    }
-//                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(originalOperation, nextOperation, this);
-//                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(originalOperation, nextOperation, operationBodyMapper.getMappings());
-//                    refactorings.addAll(operationSignatureDiff.getRefactorings());
-//                    this.addOperationBodyMapper(operationBodyMapper);
 //                }
-//            }
-//        }
-//        for(UMLOperation operation : originalClass.getOperations()) {
-//            if(!containsMapperForOperation1(operation) && nextClass.getOperations().contains(operation) && !removedOperations.contains(operation)) {
-//                int index = nextClass.getOperations().indexOf(operation);
-//                int lastIndex = nextClass.getOperations().lastIndexOf(operation);
+
+                // Map and find refactorings between two functions
+                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
+                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, containerDiff);
+                operationDiff.setMappings(mapper.getMappings());
+                this.containerDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
+                // save the mapper TODO
+                this.containerDiff.getBodyMapperList().add(mapper);
+            }
+        }
+
+        // Second Not qualified but the 2nd file contains the operation
+        for (IFunctionDeclaration if1 : functions1) {
+            FunctionDeclaration function1 = (FunctionDeclaration) if1;
+            IFunctionDeclaration function2 = functions2.stream()
+                    .filter(f2 -> FunctionUtil.isEqual(f2, function1))
+                    .findFirst()
+                    .orElse(null);
+
+            if (function2 != null
+                    && !containsMapperForOperation(function1)
+                    // && functions2.getOperations().contains(operation)
+                    && !containerDiff.getRemovedOperations().contains(function1)) {
+
+//                int index = functions2.indexOf(operation);
+//                int lastIndex = functions2.lastIndexOf(operation);
 //                int finalIndex = index;
-//                if(index != lastIndex) {
-//                    if(containsMapperForOperation2(nextClass.getOperations().get(index))) {
+//                if (index != lastIndex) {
+//                    double d1 = operation.getReturnParameter().getType()
+//                            .normalizedNameDistance(nextClass.getOperations().get(index).getReturnParameter().getType());
+//                    double d2 = operation.getReturnParameter().getType()
+//                            .normalizedNameDistance(nextClass.getOperations().get(lastIndex).getReturnParameter().getType());
+//                    if (d2 < d1) {
 //                        finalIndex = lastIndex;
 //                    }
-//                    else if(!operation.isConstructor()) {
-//                        double d1 = operation.getReturnParameter().getType().normalizedNameDistance(nextClass.getOperations().get(index).getReturnParameter().getType());
-//                        double d2 = operation.getReturnParameter().getType().normalizedNameDistance(nextClass.getOperations().get(lastIndex).getReturnParameter().getType());
-//                        if(d2 < d1) {
-//                            finalIndex = lastIndex;
-//                        }
+//                }
+
+                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
+                FunctionBodyMapper bodyMapper
+                        = new FunctionBodyMapper(operationDiff, containerDiff);
+                operationDiff.setMappings(bodyMapper.getMappings());
+                containerDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
+                containerDiff.getBodyMapperList().add(bodyMapper);
+            }
+        }
+    }
+
+    private void checkForOperationSignatureChanges(ContainerDiff sourceDiff) {
+        sourceDiff.setConsistentMethodInvocationRenames(findConsistentMethodInvocationRenames(sourceDiff));
+
+        if (sourceDiff.getRemovedOperations().size() <= sourceDiff.getAddedOperations().size()) {
+
+            for (Iterator<FunctionDeclaration> removedOperationIterator = sourceDiff.getRemovedOperations().iterator(); removedOperationIterator.hasNext(); ) {
+                FunctionDeclaration removedOperation = removedOperationIterator.next();
+                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>();
+
+                for (Iterator<FunctionDeclaration> addedOperationIterator = sourceDiff.getAddedOperations().iterator(); addedOperationIterator.hasNext(); ) {
+                    FunctionDeclaration addedOperation = addedOperationIterator.next();
+                    int maxDifferenceInPosition;
+
+//                    if (removedOperation.hasTestAnnotation() && addedOperation.hasTestAnnotation()) {
+//                        maxDifferenceInPosition = Math.abs(removedOperations.size() - addedOperations.size());
+//                    } else {
+                    maxDifferenceInPosition = Math.max(sourceDiff.getRemovedOperations().size(), sourceDiff.getAddedOperations().size());
 //                    }
-//                }
-//                UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(operation, nextClass.getOperations().get(finalIndex), this);
-//                UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(operation, nextClass.getOperations().get(finalIndex), operationBodyMapper.getMappings());
-//                refactorings.addAll(operationSignatureDiff.getRefactorings());
-//                this.addOperationBodyMapper(operationBodyMapper);
-//            }
-//        }
-//        List<UMLOperation> removedOperationsToBeRemoved = new ArrayList<UMLOperation>();
-//        List<UMLOperation> addedOperationsToBeRemoved = new ArrayList<UMLOperation>();
-//        for(UMLOperation removedOperation : removedOperations) {
-//            for(UMLOperation addedOperation : addedOperations) {
-//                if(removedOperation.equalsIgnoringVisibility(addedOperation)) {
-//                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(removedOperation, addedOperation, this);
-//                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, operationBodyMapper.getMappings());
-//                    refactorings.addAll(operationSignatureDiff.getRefactorings());
-//                    this.addOperationBodyMapper(operationBodyMapper);
-//                    removedOperationsToBeRemoved.add(removedOperation);
-//                    addedOperationsToBeRemoved.add(addedOperation);
-//                }
-//                else if(removedOperation.equalsIgnoringNameCase(addedOperation)) {
-//                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(removedOperation, addedOperation, this);
-//                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, operationBodyMapper.getMappings());
-//                    refactorings.addAll(operationSignatureDiff.getRefactorings());
-//                    if(!removedOperation.getName().equals(addedOperation.getName()) &&
-//                            !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
-//                        RenameOperationRefactoring rename = new RenameOperationRefactoring(operationBodyMapper);
-//                        refactorings.add(rename);
+
+                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, sourceDiff);
+//                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousFunctionDeclarations(container1.added);
+//                    for (FunctionDeclaration operationInsideAnonymousClass : operationsInsideAnonymousClass) {
+//                        updateMapperSet(mapperSet, removedOperation, operationInsideAnonymousClass, addedOperation, maxDifferenceInPosition);
 //                    }
-//                    this.addOperationBodyMapper(operationBodyMapper);
-//                    removedOperationsToBeRemoved.add(removedOperation);
-//                    addedOperationsToBeRemoved.add(addedOperation);
-//                }
+                }
+                if (!mapperSet.isEmpty()) {
+                    FunctionBodyMapper bestMapper = findBestMapper(mapperSet);
+                    if (bestMapper != null) {
+                        removedOperation = bestMapper.getOperation1();
+                        FunctionDeclaration addedOperation = bestMapper.getOperation2();
+                        sourceDiff.getAddedOperations().remove(addedOperation);
+                        removedOperationIterator.remove();
+
+                        UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, bestMapper.getMappings());
+                        sourceDiff.getOperationDiffList().add(operationSignatureDiff);
+                        sourceDiff.getRefactoringsBeforePostProcessing().addAll(operationSignatureDiff.getRefactorings());
+                        if (!removedOperation.getName().equals(addedOperation.getName()) &&
+                                !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
+                            RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
+                            sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
+                        }
+                        sourceDiff.getBodyMapperList().add(bestMapper);
+                    }
+                }
+            }
+        } else {
+            for (Iterator<FunctionDeclaration> addedOperationIterator = sourceDiff.getAddedOperations().iterator(); addedOperationIterator.hasNext(); ) {
+                FunctionDeclaration addedOperation = addedOperationIterator.next();
+                TreeSet<FunctionBodyMapper> mapperSet = new TreeSet<>();
+                for (Iterator<FunctionDeclaration> removedOperationIterator = sourceDiff.getRemovedOperations().iterator(); removedOperationIterator.hasNext(); ) {
+                    FunctionDeclaration removedOperation = removedOperationIterator.next();
+                    int maxDifferenceInPosition;
+//                    if (removedOperation.hasTestAnnotation() && addedOperation.hasTestAnnotation()) {
+//                        maxDifferenceInPosition = Math.abs(removedOperations.size() - addedOperations.size());
+//                    } else {
+                    maxDifferenceInPosition = Math.max(sourceDiff.getRemovedOperations().size(), sourceDiff.getAddedOperations().size());
+//                    }
+                    updateMapperSet(mapperSet, removedOperation, addedOperation, maxDifferenceInPosition, sourceDiff);
+//                    List<FunctionDeclaration> operationsInsideAnonymousClass = addedOperation.getOperationsInsideAnonymousFunctionDeclarations(container1.addedAnonymousClasses);
+//                    for (FunctionDeclaration operationInsideAnonymousClass : operationsInsideAnonymousClass) {
+//                        updateMapperSet(mapperSet, removedOperation, operationInsideAnonymousClass, addedOperation, maxDifferenceInPosition);
+//                    }
+                }
+                if (!mapperSet.isEmpty()) {
+                    FunctionBodyMapper bestMapper = findBestMapper(mapperSet);
+                    if (bestMapper != null) {
+                        FunctionDeclaration removedOperation = bestMapper.getOperation1();
+                        addedOperation = bestMapper.getOperation2();
+                        sourceDiff.getRemovedOperations().remove(removedOperation);
+                        addedOperationIterator.remove();
+
+                        UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, bestMapper.getMappings());
+                        sourceDiff.getOperationDiffList().add(operationSignatureDiff);
+                        sourceDiff.getRefactoringsBeforePostProcessing().addAll(operationSignatureDiff.getRefactorings());
+                        if (!removedOperation.getName().equals(addedOperation.getName()) &&
+                                !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
+                            RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
+                            sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
+                        }
+                        sourceDiff.getBodyMapperList().add(bestMapper);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns true if the mapper's operation one is equal to the test operation
+     */
+    public boolean containsMapperForOperation(FunctionDeclaration operation) {
+        for (FunctionBodyMapper mapper : this.containerDiff.getBodyMapperList()) {
+//            if(mapper.getOperation1().equalsQualified(operation)) {
+//                return true;
 //            }
-//        }
-//        removedOperations.removeAll(removedOperationsToBeRemoved);
-//        addedOperations.removeAll(addedOperationsToBeRemoved);
+            if (mapper.getOperation1().equals(operation))
+                return true;
+        }
+        return false;
     }
 }

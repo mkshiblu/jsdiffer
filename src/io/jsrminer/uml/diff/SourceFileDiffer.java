@@ -1,27 +1,25 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.*;
+import io.jsrminer.refactorings.ExtractOperationRefactoring;
+import io.jsrminer.refactorings.InlineOperationRefactoring;
+import io.jsrminer.refactorings.RenameOperationRefactoring;
+import io.jsrminer.refactorings.RenameVariableRefactoring;
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
-import io.jsrminer.uml.mapping.replacement.*;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Diff between two source File?
  */
-public class SourceFileDiffer {
-    public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
+public class SourceFileDiffer extends BaseDiffer {
 
     public final SourceFileDiff sourceFileDiff;
     public final UMLModelDiff modelDiff;
@@ -95,8 +93,8 @@ public class SourceFileDiffer {
     }
 
     protected void createBodyMapperForCommonNamedFunctions(SourceFileDiff sourceDiff) {
-        final List<IFunctionDeclaration> functions1 = sourceDiff.source1.getFunctionDeclarations();
-        final List<IFunctionDeclaration> functions2 = sourceDiff.source2.getFunctionDeclarations();
+        final List<IFunctionDeclaration> functions1 = sourceDiff.getSource1().getFunctionDeclarations();
+        final List<IFunctionDeclaration> functions2 = sourceDiff.getSource2().getFunctionDeclarations();
         // First match by equalsQualified
         // (In RM it's equals signature which checks modifiers, qualified name and parameter types
         for (IFunctionDeclaration if1 : functions1) {
@@ -301,65 +299,6 @@ public class SourceFileDiffer {
 //        return allConsistentMethodInvocationRenames;
 //    }
 
-    private FunctionBodyMapper findBestMapper(TreeSet<FunctionBodyMapper> mapperSet) {
-        List<FunctionBodyMapper> mapperList = new ArrayList<>(mapperSet);
-        FunctionBodyMapper bestMapper = mapperSet.first();
-        FunctionDeclaration bestMapperOperation1 = bestMapper.function1;
-        FunctionDeclaration bestMapperOperation2 = bestMapper.function2;
-
-        // TDOO return Param
-
-//        if (bestMapperOperation1.equalReturnParameter(bestMapperOperation2) &&
-//                bestMapperOperation1.name.equals(bestMapperOperation2.name) &&
-//                bestMapperOperation1.commonParameterTypes(bestMapperOperation2).size() > 0) {
-//            return bestMapper;
-//        }
-//
-//        boolean identicalBodyWithOperation1OfTheBestMapper = identicalBodyWithAnotherAddedMethod(bestMapper);
-//        boolean identicalBodyWithOperation2OfTheBestMapper = identicalBodyWithAnotherRemovedMethod(bestMapper);
-//        for (int i = 1; i < mapperList.size(); i++) {
-//            FunctionBodyMapper mapper = mapperList.get(i);
-//            FunctionDeclaration operation2 = mapper.function2;
-//            List<OperationInvocation> operationInvocations2 = operation2.getBody().getAllOperationInvocations();
-//            boolean anotherMapperCallsOperation2OfTheBestMapper = false;
-//            for (OperationInvocation invocation : operationInvocations2) {
-//                if (invocation.matchesOperation(bestMapper.getOperation2(), operation2.variableTypeMap(), modelDiff) && !invocation.matchesOperation(bestMapper.getOperation1(), operation2.variableTypeMap(), modelDiff) &&
-//                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, removedOperations)) {
-//                    anotherMapperCallsOperation2OfTheBestMapper = true;
-//                    break;
-//                }
-//            }
-//            FunctionDeclaration operation1 = mapper.function1;
-//            List<OperationInvocation> operationInvocations1 = operation1.getBody().getAllOperationInvocations();
-//            boolean anotherMapperCallsOperation1OfTheBestMapper = false;
-//            for (OperationInvocation invocation : operationInvocations1) {
-//                if (invocation.matchesOperation(bestMapper.function1/*, operation1.variableTypeMap(), modelDiff*/)
-//                        && !invocation.matchesOperation(bestMapper.function2/*, operation1.variableTypeMap(), modelDiff*/) &&
-//                        !operationContainsMethodInvocationWithTheSameNameAndCommonArguments(invocation, addedOperations)) {
-//                    anotherMapperCallsOperation1OfTheBestMapper = true;
-//                    break;
-//                }
-//            }
-//            boolean nextMapperMatchesConsistentRename = matchesConsistentMethodInvocationRename(mapper, consistentMethodInvocationRenames);
-//            boolean bestMapperMismatchesConsistentRename = mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames);
-//            if (bestMapperMismatchesConsistentRename && nextMapperMatchesConsistentRename) {
-//                bestMapper = mapper;
-//                break;
-//            }
-//            if (anotherMapperCallsOperation2OfTheBestMapper || anotherMapperCallsOperation1OfTheBestMapper) {
-//                bestMapper = mapper;
-//                break;
-//            }
-//            if (identicalBodyWithOperation2OfTheBestMapper || identicalBodyWithOperation1OfTheBestMapper) {
-//                bestMapper = mapper;
-//                break;
-//            }
-//        }
-//        if (mismatchesConsistentMethodInvocationRename(bestMapper, consistentMethodInvocationRenames)) {
-//            return null;
-//        }
-        return bestMapper;
-    }
 
     //    public boolean equalReturnParameter(FunctionDeclaration function1, FunctionDeclaration function2) {
 //
@@ -421,58 +360,6 @@ public class SourceFileDiffer {
 //    }
 
 
-    private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int differenceInPosition, SourceFileDiff sourceDiff) {
-        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
-
-        List<CodeFragmentMapping> totalMappings = new ArrayList<>(operationBodyMapper.getMappings());
-        int mappings = operationBodyMapper.mappingsWithoutBlocks();
-        if (mappings > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
-            if (exactMappings(operationBodyMapper, sourceDiff)) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper)
-                    && absoluteDifferenceInPosition <= differenceInPosition
-                    && compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition)
-                //&& removedOperation.testAnnotationCheck(addedOperation)
-            ) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT2(mappings, operationBodyMapper
-                    , new ArrayList<>(sourceDiff.getAddedOperations())
-            ) && absoluteDifferenceInPosition <= differenceInPosition
-                    && isPartOfMethodExtracted(removedOperation, addedOperation, sourceDiff.getAddedOperations())
-                //        && removedOperation.testAnnotationCheck(addedOperation)
-            ) {
-                mapperSet.add(operationBodyMapper);
-            } else if (mappedElementsMoreThanNonMappedT1(mappings, operationBodyMapper
-                    , new ArrayList<>(sourceDiff.getRemovedOperations()))
-                    && absoluteDifferenceInPosition <= differenceInPosition
-                    && isPartOfMethodInlined(removedOperation, addedOperation, sourceDiff.getRemovedOperations())
-                //                && removedOperation.testAnnotationCheck(addedOperation)
-            ) {
-                mapperSet.add(operationBodyMapper);
-            }
-        } else {
-
-            Set<MethodInvocationReplacement> consistentMethodInvocationRenames = findConsistentMethodInvocationRenames(sourceDiff);
-            for (MethodInvocationReplacement replacement : consistentMethodInvocationRenames) {
-                if (replacement.getInvokedOperationBefore().matchesOperation(removedOperation) &&
-                        replacement.getInvokedOperationAfter().matchesOperation(addedOperation)) {
-                    mapperSet.add(operationBodyMapper);
-                    break;
-                }
-            }
-        }
-        if (totalMappings.size() > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation);
-            if (singleUnmatchedStatementCallsAddedOperation(operationBodyMapper, sourceDiff) &&
-                    absoluteDifferenceInPosition <= differenceInPosition &&
-                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition)) {
-                mapperSet.add(operationBodyMapper);
-            }
-        }
-    }
-
 //    private void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
 //            , FunctionDeclaration operationInsideAnonymousClass, FunctionDeclaration addedOperation, int differenceInPosition) throws RefactoringMinerTimedOutException {
 //        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, operationInsideAnonymousClass, this);
@@ -500,256 +387,6 @@ public class SourceFileDiffer {
 //        }
 //    }
 
-    private boolean isPartOfMethodExtracted(FunctionDeclaration removedOperation, FunctionDeclaration
-            addedOperation
-            , List<FunctionDeclaration> addedOperations) {
-        List<OperationInvocation> removedOperationInvocations = removedOperation.getBody().getAllOperationInvocations();
-        List<OperationInvocation> addedOperationInvocations = addedOperation.getBody().getAllOperationInvocations();
-        Set<OperationInvocation> intersection = new LinkedHashSet<>(removedOperationInvocations);
-        intersection.retainAll(addedOperationInvocations);
-        int numberOfInvocationsMissingFromRemovedOperation
-                = new LinkedHashSet<>(removedOperationInvocations).size() - intersection.size();
-
-        Set<OperationInvocation> operationInvocationsInMethodsCalledByAddedOperation
-                = new LinkedHashSet<>();
-
-        for (OperationInvocation addedOperationInvocation : addedOperationInvocations) {
-            if (!intersection.contains(addedOperationInvocation)) {
-                for (FunctionDeclaration operation : addedOperations) {
-                    if (!operation.equals(addedOperation) && operation.getBody() != null) {
-                        if (addedOperationInvocation.matchesOperation(operation/*, addedOperation.variableTypeMap(), modelDiff*/)) {
-                            //addedOperation calls another added method
-                            operationInvocationsInMethodsCalledByAddedOperation.addAll(operation.getBody().getAllOperationInvocations());
-                        }
-                    }
-                }
-            }
-        }
-        Set<OperationInvocation> newIntersection = new LinkedHashSet<>(removedOperationInvocations);
-        newIntersection.retainAll(operationInvocationsInMethodsCalledByAddedOperation);
-
-        Set<OperationInvocation> removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted = new LinkedHashSet<>(removedOperationInvocations);
-        removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeAll(intersection);
-        removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeAll(newIntersection);
-        for (Iterator<OperationInvocation> operationInvocationIterator = removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.iterator(); operationInvocationIterator.hasNext(); ) {
-            OperationInvocation invocation = operationInvocationIterator.next();
-            if (invocation.getName().startsWith("get")) {
-                operationInvocationIterator.remove();
-            }
-        }
-        int numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations = newIntersection.size();
-        int numberOfInvocationsMissingFromRemovedOperationWithoutThoseFoundInOtherAddedOperations = numberOfInvocationsMissingFromRemovedOperation - numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations;
-        return numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations > numberOfInvocationsMissingFromRemovedOperationWithoutThoseFoundInOtherAddedOperations ||
-                numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations > removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.size();
-    }
-
-    private boolean isPartOfMethodInlined(FunctionDeclaration removedOperation, FunctionDeclaration
-            addedOperation, List<FunctionDeclaration> removedOperations) {
-        List<OperationInvocation> removedOperationInvocations = removedOperation.getBody().getAllOperationInvocations();
-        List<OperationInvocation> addedOperationInvocations = addedOperation.getBody().getAllOperationInvocations();
-        Set<OperationInvocation> intersection = new LinkedHashSet<>(removedOperationInvocations);
-        intersection.retainAll(addedOperationInvocations);
-        int numberOfInvocationsMissingFromAddedOperation = new LinkedHashSet<>(addedOperationInvocations).size() - intersection.size();
-
-        Set<OperationInvocation> operationInvocationsInMethodsCalledByRemovedOperation = new LinkedHashSet<>();
-        for (OperationInvocation removedOperationInvocation : removedOperationInvocations) {
-            if (!intersection.contains(removedOperationInvocation)) {
-                for (FunctionDeclaration operation : removedOperations) {
-                    if (!operation.equals(removedOperation) && operation.getBody() != null) {
-                        if (removedOperationInvocation.matchesOperation(operation/*, removedOperation.variableTypeMap(), modelDiff*/)) {
-                            //removedOperation calls another removed method
-                            operationInvocationsInMethodsCalledByRemovedOperation.addAll(operation.getBody().getAllOperationInvocations());
-                        }
-                    }
-                }
-            }
-        }
-        Set<OperationInvocation> newIntersection = new LinkedHashSet<OperationInvocation>(addedOperationInvocations);
-        newIntersection.retainAll(operationInvocationsInMethodsCalledByRemovedOperation);
-
-        int numberOfInvocationsCalledByAddedOperationFoundInOtherRemovedOperations = newIntersection.size();
-        int numberOfInvocationsMissingFromAddedOperationWithoutThoseFoundInOtherRemovedOperations = numberOfInvocationsMissingFromAddedOperation - numberOfInvocationsCalledByAddedOperationFoundInOtherRemovedOperations;
-        return numberOfInvocationsCalledByAddedOperationFoundInOtherRemovedOperations > numberOfInvocationsMissingFromAddedOperationWithoutThoseFoundInOtherRemovedOperations;
-    }
-
-
-    private boolean mappedElementsMoreThanNonMappedT1AndT2(int mappings, FunctionBodyMapper operationBodyMapper) {
-        int nonMappedElementsT1 = operationBodyMapper.nonMappedElementsT1();
-        int nonMappedElementsT2 = operationBodyMapper.nonMappedElementsT2();
-        return (mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) ||
-                (nonMappedElementsT1 == 0 && mappings > Math.floor(nonMappedElementsT2 / 2.0)) ||
-                (mappings == 1 && nonMappedElementsT1 + nonMappedElementsT2 == 1 && operationBodyMapper
-                        .function1.getName().equals(operationBodyMapper.function2.getName()));
-    }
-
-    private boolean mappedElementsMoreThanNonMappedT2(int mappings, FunctionBodyMapper
-            operationBodyMapper, List<FunctionDeclaration> addedOperations) {
-        int nonMappedElementsT2 = operationBodyMapper.nonMappedElementsT2();
-        int nonMappedElementsT2CallingAddedOperation = operationBodyMapper.nonMappedElementsT2CallingAddedOperation(addedOperations);
-        int nonMappedElementsT2WithoutThoseCallingAddedOperation = nonMappedElementsT2 - nonMappedElementsT2CallingAddedOperation;
-        return mappings > nonMappedElementsT2 || (mappings >= nonMappedElementsT2WithoutThoseCallingAddedOperation &&
-                nonMappedElementsT2CallingAddedOperation >= nonMappedElementsT2WithoutThoseCallingAddedOperation);
-    }
-
-    private boolean mappedElementsMoreThanNonMappedT1(int mappings, FunctionBodyMapper
-            operationBodyMapper, List<FunctionDeclaration> removedOperations) {
-        int nonMappedElementsT1 = operationBodyMapper.nonMappedElementsT1();
-        int nonMappedElementsT1CallingRemovedOperation = operationBodyMapper.nonMappedElementsT1CallingRemovedOperation(removedOperations);
-        int nonMappedElementsT1WithoutThoseCallingRemovedOperation = nonMappedElementsT1 - nonMappedElementsT1CallingRemovedOperation;
-        return mappings > nonMappedElementsT1 || (mappings >= nonMappedElementsT1WithoutThoseCallingRemovedOperation &&
-                nonMappedElementsT1CallingRemovedOperation >= nonMappedElementsT1WithoutThoseCallingRemovedOperation);
-    }
-
-//    public boolean testAnnotationCheck(FunctionDeclaration operation) {
-//        if(this.hasTestAnnotation() && !operation.hasTestAnnotation())
-//            return false;
-//        if(!this.hasTestAnnotation() && operation.hasTestAnnotation())
-//            return false;
-//        return true;
-//    }
-
-    private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper
-                                                                        operationBodyMapper, SourceFileDiff sourceDiff) {
-        Set<SingleStatement> nonMappedLeavesT1 = operationBodyMapper.getNonMappedLeavesT1();
-        Set<SingleStatement> nonMappedLeavesT2 = operationBodyMapper.getNonMappedLeavesT2();
-        if (nonMappedLeavesT1.size() == 1 && nonMappedLeavesT2.size() == 1) {
-            SingleStatement statementT2 = nonMappedLeavesT2.iterator().next();
-            OperationInvocation invocationT2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statementT2);
-            if (invocationT2 != null) {
-                for (FunctionDeclaration addedOperation : sourceDiff.getAddedOperations()) {
-                    if (invocationT2.matchesOperation(addedOperation/*, operationBodyMapper.function2, variableTypeMap(), modelDiff*/)) {
-                        SingleStatement statementT1 = nonMappedLeavesT1.iterator().next();
-                        OperationInvocation invocationT1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statementT1);
-                        if (invocationT1 != null && addedOperation.getBody().getAllOperationInvocations().contains(invocationT1)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean compatibleSignatures(FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int absoluteDifferenceInPosition) {
-
-        // TODO addedOperation.compatibleSignature
-
-        boolean isCompatibleParameters = false;
-
-        if (removedOperation.getParameters().size() == addedOperation.getParameters().size()) {
-            Set<String> params1 = addedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
-            Set<String> params2 = removedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
-            isCompatibleParameters = params1.equals(params2);
-        }
-
-        return isCompatibleParameters ||
-                (
-                        (absoluteDifferenceInPosition == 0 || operationsBeforeAndAfterMatch(removedOperation, addedOperation)) &&
-                                /*!gettersWithDifferentReturnType(removedOperation, addedOperation) &&*/
-                                ( /*addedOperation.getParameterTypeList().equals(removedOperation.getParameterTypeList()*/
-                                        addedOperation.getParameters().size() == removedOperation.getParameters().size())
-                                || normalizedNameDistance(removedOperation, addedOperation) <= MAX_OPERATION_NAME_DISTANCE
-                );
-    }
-
-    private boolean operationsBeforeAndAfterMatch(FunctionDeclaration removedOperation, FunctionDeclaration
-            addedOperation) {
-        FunctionDeclaration operationBefore1 = null;
-        FunctionDeclaration operationAfter1 = null;
-        FunctionDeclaration[] originalClassOperations = container1.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
-
-
-        int removedOperationIndex = ArrayUtils.indexOf(container1.getFunctionDeclarations().toArray(), removedOperation);
-
-        if (removedOperationIndex > 0) {
-            operationBefore1 = originalClassOperations[removedOperationIndex - 1];
-        }
-
-        if (removedOperationIndex < originalClassOperations.length - 1) {
-            operationAfter1 = originalClassOperations[removedOperationIndex + 1];
-        }
-
-        FunctionDeclaration[] nextClassOperations = container2.getFunctionDeclarations().toArray(FunctionDeclaration[]::new);
-        int addedOperationIndex = ArrayUtils.indexOf(nextClassOperations, addedOperation);
-
-        FunctionDeclaration operationBefore2 = null;
-        FunctionDeclaration operationAfter2 = null;
-        if (addedOperationIndex > 0) {
-            operationBefore2 = nextClassOperations[addedOperationIndex - 1];
-        }
-        if (addedOperationIndex < nextClassOperations.length - 1) {
-            operationAfter2 = nextClassOperations[addedOperationIndex + 1];
-        }
-//
-//        for (int i = 0; i < originalClassOperations.length; i++) {
-//            FunctionDeclaration current = originalClassOperations[i];
-//
-//            // TODO check equals
-//            if (current.equals(removedOperation)) {
-//                if (i > 0) {
-//
-//                }
-//                if (i < originalClassOperations.length - 1) {
-//                    operationAfter1 = originalClassOperations[i + 1];
-//                }
-//            }
-//        }
-
-//        FunctionDeclaration operationBefore2 = null;
-//        FunctionDeclaration operationAfter2 = null;
-//        FunctionDeclaration[] nextClassOperations = source2.getFunctionDeclarations();
-//
-//        for (int i = 0; i < nextClassOperations.length; i++) {
-//            FunctionDeclaration current = nextClassOperations[i];
-//            if (current.equals(addedOperation)) {
-//                if (i > 0) {
-//                    operationBefore2 = nextClassOperations[i - 1];
-//                }
-//                if (i < nextClassOperations.length - 1) {
-//                    operationAfter2 = nextClassOperations[i + 1];
-//                }
-//            }
-//        }
-
-        boolean operationsBeforeMatch = false;
-        if (operationBefore1 != null && operationBefore2 != null) {
-            operationsBeforeMatch = operationBefore1.getName().equals(operationBefore2.getName()) &&
-                    operationBefore1.getParameters().size() == operationBefore2.getParameters().size();
-//              operationBefore1.equalParameterTypes(operationBefore2)
-//                    && operationBefore1.getName().equals(operationBefore2.getName());
-        }
-
-        boolean operationsAfterMatch = false;
-        if (operationAfter1 != null && operationAfter2 != null) {
-
-            operationsAfterMatch = operationAfter1.getName().equals(operationAfter2.getName()) &&
-                    operationAfter1.getParameters().size() == operationAfter2.getParameters().size();
-            //operationsAfterMatch = operationAfter1.equalParameterTypes(operationAfter2) && operationAfter1.getName().equals(operationAfter2.getName());
-        }
-
-        return operationsBeforeMatch || operationsAfterMatch;
-    }
-
-    private int computeAbsoluteDifferenceInPositionWithinClass(FunctionDeclaration
-                                                                       removedOperation, FunctionDeclaration addedOperation) {
-        int index1 = container1.getFunctionDeclarations().indexOf(removedOperation);
-        int index2 = container2.getFunctionDeclarations().indexOf(addedOperation);
-        return Math.abs(index1 - index2);
-    }
-
-    private Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(SourceFileDiff sourceDiff) {
-        Set<MethodInvocationReplacement> allConsistentMethodInvocationRenames = new LinkedHashSet<>();
-        Set<MethodInvocationReplacement> allInconsistentMethodInvocationRenames = new LinkedHashSet<>();
-        for (FunctionBodyMapper bodyMapper : sourceDiff.getBodyMapperList()) {
-            Set<MethodInvocationReplacement> methodInvocationRenames = bodyMapper.getMethodInvocationRenameReplacements();
-            ConsistentReplacementDetector.updateRenames(allConsistentMethodInvocationRenames, allInconsistentMethodInvocationRenames,
-                    methodInvocationRenames);
-        }
-        allConsistentMethodInvocationRenames.removeAll(allInconsistentMethodInvocationRenames);
-        return allConsistentMethodInvocationRenames;
-    }
-
     private void checkForInlinedOperations(SourceFileDiff sourceDiff) {
         List<FunctionDeclaration> removedOperations = sourceFileDiff.getRemovedOperations();
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
@@ -770,124 +407,6 @@ public class SourceFileDiffer {
         sourceFileDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
     }
 
-
-    private boolean exactMappings(FunctionBodyMapper operationBodyMapper, SourceFileDiff sourceDiff) {
-        if (allMappingsAreExactMatches(operationBodyMapper)) {
-            if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() == 0)
-                return true;
-            else if (operationBodyMapper.nonMappedElementsT1() > 0
-                    && operationBodyMapper.getNonMappedInnerNodesT1().size() == 0
-                    && operationBodyMapper.nonMappedElementsT2() == 0) {
-                int countableStatements = 0;
-                int parameterizedVariableDeclarationStatements = 0;
-                FunctionDeclaration addedOperation = operationBodyMapper.function2;
-                List<String> nonMappedLeavesT1 = new ArrayList<>();
-                for (SingleStatement statement : operationBodyMapper.getNonMappedLeavesT1()) {
-                    if (statement.countableStatement()) {
-                        nonMappedLeavesT1.add(statement.getText());
-                        for (String parameterName : addedOperation.getParameterNameList()) {
-                            if (statement.getVariableDeclaration(parameterName) != null) {
-                                parameterizedVariableDeclarationStatements++;
-                                break;
-                            }
-                        }
-                        countableStatements++;
-                    }
-                }
-                int nonMappedLeavesExactlyMatchedInTheBodyOfAddedOperation = 0;
-                for (FunctionDeclaration operation : sourceDiff.getAddedOperations()) {
-                    if (!operation.equals(addedOperation) && operation.getBody() != null) {
-                        for (SingleStatement statement : operation.getBody().blockStatement.getAllLeafStatementsIncludingNested()) {
-                            if (nonMappedLeavesT1.contains(statement.getText())) {
-                                nonMappedLeavesExactlyMatchedInTheBodyOfAddedOperation++;
-                            }
-                        }
-                    }
-                }
-                return (countableStatements == parameterizedVariableDeclarationStatements || countableStatements == nonMappedLeavesExactlyMatchedInTheBodyOfAddedOperation + parameterizedVariableDeclarationStatements) && countableStatements > 0;
-            } else if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() > 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
-                int countableStatements = 0;
-                int parameterizedVariableDeclarationStatements = 0;
-                FunctionDeclaration removedOperation = operationBodyMapper.function1;
-                for (SingleStatement statement : operationBodyMapper.getNonMappedLeavesT2()) {
-                    if (statement.countableStatement()) {
-                        for (String parameterName : removedOperation.getParameterNameList()) {
-                            if (statement.getVariableDeclaration(parameterName) != null) {
-                                parameterizedVariableDeclarationStatements++;
-                                break;
-                            }
-                        }
-                        countableStatements++;
-                    }
-                }
-                return countableStatements == parameterizedVariableDeclarationStatements && countableStatements > 0;
-            } else if ((operationBodyMapper.nonMappedElementsT1() == 1 || operationBodyMapper.nonMappedElementsT2() == 1) &&
-                    operationBodyMapper.getNonMappedInnerNodesT1().size() == 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
-                SingleStatement statementUsingParameterAsInvoker1 = null;
-                FunctionDeclaration removedOperation = operationBodyMapper.function1;
-                for (SingleStatement statement : operationBodyMapper.getNonMappedLeavesT1()) {
-                    if (statement.countableStatement()) {
-                        for (String parameterName : removedOperation.getParameterNameList()) {
-                            OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
-                            if (invocation != null && invocation.getExpressionText() != null && invocation.getExpressionText().equals(parameterName)) {
-                                statementUsingParameterAsInvoker1 = statement;
-                                break;
-                            }
-                        }
-                    }
-                }
-                SingleStatement statementUsingParameterAsInvoker2 = null;
-                FunctionDeclaration addedOperation = operationBodyMapper.function2;
-                for (SingleStatement statement : operationBodyMapper.getNonMappedLeavesT2()) {
-                    if (statement.countableStatement()) {
-                        for (String parameterName : addedOperation.getParameterNameList()) {
-                            OperationInvocation invocation = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement);
-                            if (invocation != null && invocation.getExpressionText() != null && invocation.getExpressionText().equals(parameterName)) {
-                                statementUsingParameterAsInvoker2 = statement;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (statementUsingParameterAsInvoker1 != null && statementUsingParameterAsInvoker2 != null) {
-                    for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
-                        if (mapping.fragment1 instanceof BlockStatement && mapping.fragment2 instanceof BlockStatement) {
-                            BlockStatement parent1 = (BlockStatement) mapping.fragment1;
-                            BlockStatement parent2 = (BlockStatement) mapping.fragment2;
-                            if (parent1.getAllLeafStatementsIncludingNested().contains(statementUsingParameterAsInvoker1)
-                                    && parent2.getAllLeafStatementsIncludingNested().contains(statementUsingParameterAsInvoker2)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public static boolean allMappingsAreExactMatches(FunctionBodyMapper operationBodyMapper) {
-        int mappings = operationBodyMapper.mappingsWithoutBlocks();
-        int tryMappingsCount = 0;
-        int mappingsWithTypeReplacement = 0;
-        for (CodeFragmentMapping mapping : operationBodyMapper.getMappings()) {
-
-            // TODO recheck
-            if (mapping.fragment1.getText().equals("try") && mapping.fragment2.getText().equals("try")) {
-                tryMappingsCount++;
-            }
-            if (mapping.containsReplacement(ReplacementType.TYPE)) {
-                mappingsWithTypeReplacement++;
-            }
-        }
-        if (mappings == operationBodyMapper.getExactMatches().size() + tryMappingsCount) {
-            return true;
-        }
-        if (mappings == operationBodyMapper.getExactMatches().size() + tryMappingsCount + mappingsWithTypeReplacement && mappings > mappingsWithTypeReplacement) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Extract is detected by Checking if the already mapped operations contains any calls to
@@ -948,23 +467,15 @@ public class SourceFileDiffer {
         }
     }
 
-    public double normalizedNameDistance(FunctionDeclaration operation1, FunctionDeclaration operation2) {
-        String s1 = operation1.getName().toLowerCase();
-        String s2 = operation2.getName().toLowerCase();
-        int distance = StringDistance.editDistance(s1, s2);
-        double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
-        return normalized;
-    }
-
     // Adds the added and removed ops in the model diff
     private void reportAddedAndRemovedOperationsIfNotEquals(SourceFileDiff sourceDiff) {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
         boolean isEqual;
-        for (IFunctionDeclaration function1 : sourceDiff.source1.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function1 : sourceDiff.getSource1().getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function2 : sourceDiff.source2.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function2 : sourceDiff.getSource2().getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function1, function2)) {
                     break;
                 }
@@ -974,9 +485,9 @@ public class SourceFileDiffer {
             if (!isEqual)
                 sourceDiff.reportRemovedOperation((FunctionDeclaration) function1);
         }
-        for (IFunctionDeclaration function2 : sourceDiff.source2.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function2 : sourceDiff.getSource2().getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function1 : sourceDiff.source1.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function1 : sourceDiff.getSource1().getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function2, function1)) {
                     break;
                 }
@@ -1006,8 +517,8 @@ public class SourceFileDiffer {
     private void matchStatements(SourceFileDiff sourceDiff) {
 
         // Create  two functions using to statemtens
-        FunctionDeclaration function1 = createLambda(sourceDiff.source1.getStatements(), sourceDiff.source1);
-        FunctionDeclaration function2 = createLambda(sourceDiff.source2.getStatements(), sourceDiff.source2);
+        FunctionDeclaration function1 = createLambda(sourceDiff.getSource1().getStatements(), sourceDiff.getSource1());
+        FunctionDeclaration function2 = createLambda(sourceDiff.getSource2().getStatements(), sourceDiff.getSource2());
         // ContainerBodyMapper bodyMapper = new ContainerBodyMapper(container1, container2);
         FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
 

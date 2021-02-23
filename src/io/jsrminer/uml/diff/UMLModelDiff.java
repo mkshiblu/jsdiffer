@@ -787,7 +787,7 @@ public class UMLModelDiff extends Diff {
 
     private SourceFileDiff getUMLClassDiff(String fileName) {
         for (SourceFileDiff classDiff : this.commonFilesDiffList) {
-            if (classDiff.source1.getFilepath().equals(fileName))
+            if (classDiff.getSource1().getFilepath().equals(fileName))
                 return classDiff;
         }
 //        for(UMLClassMoveDiff classDiff : classMoveDiffList) {
@@ -821,7 +821,7 @@ public class UMLModelDiff extends Diff {
     }
 
     public boolean containsOperationWithTheSameSignatureInNextClass(SourceFileDiff sourceFileDiff, FunctionDeclaration operation) {
-        for (IFunctionDeclaration originalOperation : sourceFileDiff.source2.getFunctionDeclarations()) {
+        for (IFunctionDeclaration originalOperation : sourceFileDiff.getSource2().getFunctionDeclarations()) {
             if (FunctionUtil.isExactSignature(originalOperation, operation)) ;
             return true;
         }

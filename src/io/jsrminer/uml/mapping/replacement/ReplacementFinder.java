@@ -4,7 +4,10 @@ import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.*;
-import io.jsrminer.uml.mapping.*;
+import io.jsrminer.uml.mapping.Argumentizer;
+import io.jsrminer.uml.mapping.CodeFragmentMapping;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
+import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.replacers.BooleanReplacer;
 import io.jsrminer.uml.mapping.replacement.replacers.TernaryExpressionReplacer;
 
@@ -23,9 +26,9 @@ public class ReplacementFinder {
     final FunctionDeclaration function1;
     final FunctionDeclaration function2;
     final FunctionBodyMapper bodyMapper;
-    final SourceFileDiff sourceFileDiff;
+    final ContainerDiff sourceFileDiff;
 
-    public ReplacementFinder(FunctionBodyMapper bodyMapper, SourceFileDiff sourceFileDiff) {
+    public ReplacementFinder(FunctionBodyMapper bodyMapper, ContainerDiff sourceFileDiff) {
         this.bodyMapper = bodyMapper;
         this.function1 = bodyMapper.function1;
         this.function2 = bodyMapper.function2;

@@ -6,9 +6,7 @@ import io.jsrminer.refactorings.CandidateMergeVariableRefactoring;
 import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.SourceFileDiff;
-import io.jsrminer.uml.diff.StringDistance;
-import io.jsrminer.uml.diff.UMLOperationDiff;
+import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.replacement.*;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
@@ -33,7 +31,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private SourceFileDiff sourceFileDiff;
+    private ContainerDiff sourceFileDiff;
     private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
@@ -45,23 +43,24 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , SourceFileDiff sourceFileDiff) {
+            , ContainerDiff sourceFileDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
         this.sourceFileDiff = sourceFileDiff;
         map();
+        mapChildFunctionDeclarations(function1, function2);
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
-            , SourceFileDiff sourceFileDiff) {
+            , ContainerDiff sourceFileDiff) {
         this(new UMLOperationDiff(function1, function2), sourceFileDiff);
     }
 
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
-    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, SourceFileDiff sourceFileDiff
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff sourceFileDiff
 
             , Map<String, String> parameterToArgumentMap1
             , Map<String, String> parameterToArgumentMap2) {
@@ -173,7 +172,10 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private void mapChildFunctionDeclarations(FunctionDeclaration function1, FunctionDeclaration function2) {
         // Maps the functions that are immediately declared into this mapper
-
+        if (function1.getFunctionDeclarations().size() > 0 && function2.getFunctionDeclarations().size() > 0) {
+            var differ = new ContainerDiffer(function1, function2);
+            differ.diffChildFunctions();
+        }
     }
 
     /**
@@ -904,7 +906,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return refactorings;
     }
 
-    public SourceFileDiff getContainerDiff() {
+    public ContainerDiff getContainerDiff() {
         return sourceFileDiff;
     }
 

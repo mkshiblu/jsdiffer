@@ -9,18 +9,18 @@ public class SourceFileMoveDiff extends SourceFileDiff {
     }
 
     public ISourceFile getMovedFile() {
-        return source2;
+        return super.getSource2();
     }
     public ISourceFile getOriginalFile() {
-        return source1;
+        return super.getSource1();
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("file ");
-        sb.append(source1.getDirectoryPath());
+        sb.append(getSource1().getDirectoryPath());
         sb.append(" was moved to ");
-        sb.append(source2.getDirectoryPath());
+        sb.append(getSource2().getDirectoryPath());
         sb.append(System.lineSeparator());
         return sb.toString();
     }
@@ -31,8 +31,8 @@ public class SourceFileMoveDiff extends SourceFileDiff {
 
         if (o instanceof SourceFileMoveDiff) {
             SourceFileMoveDiff classMoveDiff = (SourceFileMoveDiff) o;
-            return this.source1.equals(classMoveDiff.source1.getFilepath())
-                    && this.source2.getFilepath().equals(classMoveDiff.source2.getFilepath());
+            return this.getSource1().equals(classMoveDiff.getSource1().getFilepath())
+                    && this.getSource2().getFilepath().equals(classMoveDiff.getSource2().getFilepath());
         }
         return false;
     }
