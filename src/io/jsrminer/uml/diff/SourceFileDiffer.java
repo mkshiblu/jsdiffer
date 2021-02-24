@@ -522,7 +522,6 @@ public class SourceFileDiffer extends BaseDiffer {
         // ContainerBodyMapper bodyMapper = new ContainerBodyMapper(container1, container2);
         FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
 
-
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
 //            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
@@ -536,7 +535,7 @@ public class SourceFileDiffer extends BaseDiffer {
 //                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
                 //this.refactorings.addAll(mapper.getRefactorings());
                 sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
-                sourceDiff.bodyStatementMapper = mapper;
+                sourceDiff.setBodyStatementMapper(mapper);
             }
         }
     }

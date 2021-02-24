@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.ContainerDiffer;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
@@ -47,21 +48,30 @@ public class AnonymousFunctionReplacementFinder {
 
                     IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
                     IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
-                    int matchedOperations = 0;
-                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
-                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
-                            if (operation1.equals(operation2)
-                                    || equalSignature(operation1, operation2)
-                                    || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
-                            ) {
-                                boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
-                                if (isMatched)
-                                    matchedOperations++;
-                            }
-                        }
-                    }
+                    // Here do container differ since we will match the inner functions properly
+                    ContainerDiffer differ = new ContainerDiffer(anonymousClass1, anonymousClass2);
+                    var diff = differ.diff();
 
-                    if (matchedOperations > 0) {
+                    int matchedOperations = diff.getBodyMapperList().size();
+                    int matchedStatementWithoutBlockCount = diff.getBodyStatementMapper() != null ? diff.getBodyStatementMapper().mappingsWithoutBlocks() : 0;
+
+//                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
+//                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
+//                            if (operation1.equals(operation2)
+//                                    || equalSignature(operation1, operation2)
+//                                    || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
+//                            ) {
+//                                boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
+//                                if (isMatched)
+//                                    matchedOperations++;
+//                            }
+//                        }
+//                    }
+
+
+                    if (matchedOperations > 0 ||
+                            (matchedStatementWithoutBlockCount > diff.getBodyStatementMapper().getNonMappedLeavesT2().size()
+                                    && matchedStatementWithoutBlockCount > diff.getBodyStatementMapper().getNonMappedInnerNodesT1().size())) {
                         Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
                         replacements.add(replacement);
                         return replacements;

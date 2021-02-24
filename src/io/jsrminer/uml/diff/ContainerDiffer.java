@@ -4,28 +4,31 @@ import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
-import io.rminerx.core.entities.Container;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
 public class ContainerDiffer extends BaseDiffer {
-    private final Container function1;
-    private final Container function2;
+    private final IContainer function1;
+    private final IContainer function2;
     private final ContainerDiff containerDiff;
 
-    public ContainerDiffer(Container function1, Container function2) {
-        this.function1 = function1;
-        this.function2 = function2;
-        this.containerDiff = new ContainerDiff(function1, function2);
+    /**
+     * Diff all the children functions and statements
+     */
+    public ContainerDiff diff() {
+        diffChildFunctions();
+        matchStatements(this.containerDiff);
+        return this.containerDiff;
     }
 
     /**
-     * Diff all the children functions
+     * Diff all the children functions ony
      */
-    public void diffChildFunctions() {
+    public ContainerDiff diffChildFunctions() {
         reportAddedAndRemovedOperations(this.containerDiff);
         createBodyMapperForCommonNamedFunctions(this.containerDiff);
 //        processAttributes();
@@ -35,7 +38,14 @@ public class ContainerDiffer extends BaseDiffer {
         //checkForInlinedOperations(this.containerDiff);
         //checkForExtractedOperations(this.containerDiff);
 //        // Match statements declared inside the body directly NO need for childdiffers
-//        matchStatements(this.containerDiff);
+
+        return this.containerDiff;
+    }
+
+    public ContainerDiffer(IContainer function1, IContainer function2) {
+        this.function1 = function1;
+        this.function2 = function2;
+        this.containerDiff = new ContainerDiff(function1, function2);
     }
 
     // Adds the added and removed ops in the model diff
@@ -243,5 +253,29 @@ public class ContainerDiffer extends BaseDiffer {
                 return true;
         }
         return false;
+    }
+
+    private void matchStatements(ContainerDiff sourceDiff) {
+        // Create  two functions using to statemtens
+        FunctionDeclaration function1 = (FunctionDeclaration) sourceDiff.getContainer1();
+        FunctionDeclaration function2 = (FunctionDeclaration) sourceDiff.getContainer2();
+        FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
+
+        int mappings = mapper.mappingsWithoutBlocks();
+        if (mappings > 0) {
+//            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
+//            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
+//            if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
+            if (mappings > mapper.nonMappedElementsT1() && mappings > mapper.nonMappedElementsT2()) {
+//                this.mappings.addAll(mapper.mappings);
+//                this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
+//                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
+//                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
+//                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
+                //this.refactorings.addAll(mapper.getRefactorings());
+                sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+                sourceDiff.setBodyStatementMapper(mapper);
+            }
+        }
     }
 }

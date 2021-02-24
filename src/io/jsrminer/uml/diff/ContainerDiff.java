@@ -30,10 +30,7 @@ public class ContainerDiff {
     /**
      * Name map
      */
-//    private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
-//    private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
-
-    FunctionBodyMapper bodyStatementMapper;
+    private FunctionBodyMapper bodyStatementMapper;
     MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
 
 
@@ -99,5 +96,13 @@ public class ContainerDiff {
 
     public void setConsistentMethodInvocationRenames(Set<MethodInvocationReplacement> consistentMethodInvocationRenames) {
         this.consistentMethodInvocationRenames = consistentMethodInvocationRenames;
+    }
+
+    public FunctionBodyMapper getBodyStatementMapper() {
+        return bodyStatementMapper;
+    }
+
+    public void setBodyStatementMapper(FunctionBodyMapper bodyStatementMapper) {
+        this.bodyStatementMapper = bodyStatementMapper;
     }
 }

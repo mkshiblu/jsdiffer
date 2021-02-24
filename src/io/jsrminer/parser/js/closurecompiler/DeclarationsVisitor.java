@@ -92,7 +92,7 @@ class DeclarationsVisitor {
                 leaf.getVariables().add(vd.variableName);
 
                 if (vd.getInitializer() != null) {
-                    copyLeafData(leaf, vd.getInitializer());
+                    copyLeafData(vd.getInitializer(),leaf);
                 }
             }
             return null;

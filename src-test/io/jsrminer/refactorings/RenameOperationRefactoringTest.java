@@ -1,6 +1,7 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.BaseTest;
+import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -21,7 +22,8 @@ public class RenameOperationRefactoringTest extends BaseTest {
 
     @BeforeAll
     public static void setup() {
-        refactorings = RefactoringDataProvider.getRefactoringsOfType(RefactoringType.RENAME_METHOD);
+        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src1\\RenameFunction.js",
+                getRootResourceDirectory() + "src2\\RenameFunction.js");
         renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
     }
 

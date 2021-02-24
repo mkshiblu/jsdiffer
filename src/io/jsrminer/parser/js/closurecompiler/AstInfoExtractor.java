@@ -100,26 +100,26 @@ public class AstInfoExtractor {
         return singleStatement;
     }
 
-    static ILeafFragment copyLeafData(ILeafFragment leaf1, ILeafFragment leaf2) {
-        leaf1.getVariables().addAll(leaf2.getVariables());
-        leaf1.getNullLiterals().addAll(leaf2.getNullLiterals());
-        leaf1.getNumberLiterals().addAll(leaf2.getNumberLiterals());
-        leaf1.getStringLiterals().addAll(leaf2.getStringLiterals());
-        leaf1.getBooleanLiterals().addAll(leaf2.getBooleanLiterals());
-        leaf1.getInfixOperators().addAll(leaf2.getInfixOperators());
-        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
+    static ILeafFragment copyLeafData(ILeafFragment source, ILeafFragment target) {
+        target.getVariables().addAll(source.getVariables());
+        target.getNullLiterals().addAll(source.getNullLiterals());
+        target.getNumberLiterals().addAll(source.getNumberLiterals());
+        target.getStringLiterals().addAll(source.getStringLiterals());
+        target.getBooleanLiterals().addAll(source.getBooleanLiterals());
+        target.getInfixOperators().addAll(source.getInfixOperators());
+        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
 
-        leaf1.getPostfixExpressions().addAll(leaf2.getPostfixExpressions());
-        leaf1.getTernaryOperatorExpressions().addAll(leaf2.getTernaryOperatorExpressions());
-        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
-        leaf1.getVariableDeclarations().addAll(leaf2.getVariableDeclarations());
-        leaf1.getArguments().addAll(leaf2.getArguments());
+        target.getPostfixExpressions().addAll(source.getPostfixExpressions());
+        target.getTernaryOperatorExpressions().addAll(source.getTernaryOperatorExpressions());
+        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
+        target.getVariableDeclarations().addAll(source.getVariableDeclarations());
+        target.getArguments().addAll(source.getArguments());
 
 
-        for (var entry : leaf2.getMethodInvocationMap().entrySet()) {
-            var invocations1 = leaf1.getMethodInvocationMap().get(entry.getKey());
+        for (var entry : source.getMethodInvocationMap().entrySet()) {
+            var invocations1 = target.getMethodInvocationMap().get(entry.getKey());
             if (invocations1 == null) {
-                leaf1.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
+                target.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
             } else {
                 invocations1.addAll(entry.getValue());
             }
@@ -128,16 +128,19 @@ public class AstInfoExtractor {
         //leaf1.getMethodInvocationMap().addAll(leaf2.getVariableDeclarations());
         //leaf1.getCreationMap().addAll(leaf2.getVariableDeclarations());
 
-        for (var entry : leaf2.getCreationMap().entrySet()) {
-            var creations1 = leaf1.getCreationMap().get(entry.getKey());
+        for (var entry : source.getCreationMap().entrySet()) {
+            var creations1 = target.getCreationMap().get(entry.getKey());
             if (creations1 == null) {
-                leaf1.getCreationMap().put(entry.getKey(), entry.getValue());
+                target.getCreationMap().put(entry.getKey(), entry.getValue());
             } else {
                 creations1.addAll(entry.getValue());
             }
         }
 
-        return leaf1;
+        // Copy anonymous classes
+        target.getAnonymousFunctionDeclarations().addAll(source.getAnonymousFunctionDeclarations());
+
+        return target;
     }
 
     /**
