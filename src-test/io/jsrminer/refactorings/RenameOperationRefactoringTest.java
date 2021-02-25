@@ -48,7 +48,7 @@ public class RenameOperationRefactoringTest extends BaseTest {
         assertTrue(first.fragment1.getText().startsWith("let d ="));
         assertTrue(first.fragment2.getText().startsWith("let d ="));
 
-        assertEquals("let z = '34';", second.fragment1.getText());
+        assertEquals("let z = 10;", second.fragment1.getText());
         assertEquals("let z = 5;", second.fragment2.getText());
     }
 
@@ -70,7 +70,7 @@ public class RenameOperationRefactoringTest extends BaseTest {
 
         Replacement replacement = second.getReplacements().iterator().next();
 
-        assertEquals("'34'", replacement.getBefore());
+        assertEquals("10", replacement.getBefore());
         assertEquals("5", replacement.getAfter());
         assertEquals(ReplacementType.NUMBER_LITERAL, replacement.getType());
     }

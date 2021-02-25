@@ -1141,6 +1141,16 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
 
+    public int nonMappedLeafElementsT1() {
+        int nonMappedLeafCount = 0;
+        for (var statement : getNonMappedLeavesT1()) {
+            if (statement.countableStatement())
+                nonMappedLeafCount++;
+        }
+        return nonMappedLeafCount;
+    }
+
+
     public int nonMappedLeafElementsT2() {
         int nonMappedLeafCount = 0;
         for (SingleStatement statement : getNonMappedLeavesT2()) {

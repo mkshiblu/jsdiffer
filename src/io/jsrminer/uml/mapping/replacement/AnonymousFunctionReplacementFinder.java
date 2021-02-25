@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.ContainerDiffer;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -52,8 +53,6 @@ public class AnonymousFunctionReplacementFinder {
                     ContainerDiffer differ = new ContainerDiffer(anonymousClass1, anonymousClass2);
                     var diff = differ.diff();
 
-                    int matchedOperations = diff.getBodyMapperList().size();
-                    int matchedStatementWithoutBlockCount = diff.getBodyStatementMapper() != null ? diff.getBodyStatementMapper().mappingsWithoutBlocks() : 0;
 
 //                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
 //                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
@@ -68,10 +67,8 @@ public class AnonymousFunctionReplacementFinder {
 //                        }
 //                    }
 
-
-                    if (matchedOperations > 0 ||
-                            (matchedStatementWithoutBlockCount > diff.getBodyStatementMapper().getNonMappedLeavesT2().size()
-                                    && matchedStatementWithoutBlockCount > diff.getBodyStatementMapper().getNonMappedInnerNodesT1().size())) {
+                    if (isAnonymousBodyMatched(diff)) {
+                        copyMappingsAndRefactoringsToParentMapper(diff);
                         Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
                         replacements.add(replacement);
                         return replacements;
@@ -80,6 +77,62 @@ public class AnonymousFunctionReplacementFinder {
             }
         }
         return null;
+    }
+
+    boolean isAnonymousBodyMatched(ContainerDiff anonymousDiff) {
+        int matchedOperations = anonymousDiff.getBodyMapperList().size();
+        if (matchedOperations > 0) {
+            return true;
+        }
+
+        var statementMapper = anonymousDiff.getBodyStatementMapper();
+        if (statementMapper != null) {
+            int mappings = statementMapper.mappingsWithoutBlocks();
+            if ((mappings > statementMapper.nonMappedElementsT1()
+                    && mappings > statementMapper.nonMappedElementsT2())) {
+                return true;
+            }
+        }
+
+        boolean bothHasZeroStatements = anonymousDiff.getContainer1().getStatements().size() == 0
+                && anonymousDiff.getContainer2().getStatements().size() == 0;
+
+        if (bothHasZeroStatements) {
+            // check params
+            return true;
+        }
+
+        return false;
+    }
+
+    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff anonymousClassDiff) {
+        var matchedOperationMappers = anonymousClassDiff.getBodyMapperList();
+        if (matchedOperationMappers.size() > 0) {
+
+            // Copy operation mapper refactorings and mappings
+            for (var mapper : matchedOperationMappers) {
+                this.parentOperationsMapper.getMappings().addAll(mapper.getMappings());
+                this.parentOperationsMapper.getNonMappedInnerNodesT1().addAll(mapper.getNonMappedInnerNodesT1());
+                this.parentOperationsMapper.getNonMappedInnerNodesT2().addAll(mapper.getNonMappedInnerNodesT2());
+                this.parentOperationsMapper.getNonMappedLeavesT1().addAll(mapper.getNonMappedLeavesT1());
+                this.parentOperationsMapper.getNonMappedLeavesT2().addAll(mapper.getNonMappedLeavesT2());
+
+                // Copy refs
+                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+            }
+
+
+            // Copy refactorings of operation signature diffs
+            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
+                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
+            }
+//            for(UMLAttributeDiff attributeDiff : anonymousClassDiff.getAttributeDiffs()) {
+//                this.refactorings.addAll(attributeDiff.getRefactorings());
+//            }
+
+            // Here attributes are sataements
+            this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
+        }
     }
 
     private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
