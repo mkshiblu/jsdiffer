@@ -76,7 +76,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public FunctionBodyMapper(FunctionDeclaration removedOperation, FunctionBodyMapper operationBodyMapper
-            , Map<String, String> parameterToArgumentMap, SourceFileDiff classDiff) {
+            , Map<String, String> parameterToArgumentMap, ContainerDiff classDiff) {
         this.parentMapper = operationBodyMapper;
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;

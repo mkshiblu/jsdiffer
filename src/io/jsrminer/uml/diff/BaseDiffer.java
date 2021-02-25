@@ -1,5 +1,7 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.RenameVariableRefactoring;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
@@ -507,4 +509,37 @@ public abstract class BaseDiffer {
         return numberOfInvocationsCalledByAddedOperationFoundInOtherRemovedOperations > numberOfInvocationsMissingFromAddedOperationWithoutThoseFoundInOtherRemovedOperations;
     }
 
+    protected void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, ContainerDiff sourceDiff) {
+        if (mapper.getChildMappers().size() > 1) {
+            Set<IRefactoring> refactoringsToBeRemoved = new LinkedHashSet<>();
+            for (IRefactoring r : sourceDiff.getRefactoringsBeforePostProcessing()) {
+                if (r instanceof RenameVariableRefactoring) {
+                    RenameVariableRefactoring rename = (RenameVariableRefactoring) r;
+                    Set<CodeFragmentMapping> references = rename.getVariableReferences();
+                    for (CodeFragmentMapping reference : references) {
+                        if (reference.getFragment1().getVariableDeclarations().size() > 0 && !reference.isExact()) {
+                            Set<CodeFragmentMapping> allMappingsForReference = new LinkedHashSet<>();
+                            for (FunctionBodyMapper childMapper : mapper.getChildMappers()) {
+                                for (CodeFragmentMapping mapping : childMapper.getMappings()) {
+                                    if (mapping.getFragment1().equals(reference.getFragment1())) {
+                                        allMappingsForReference.add(mapping);
+                                        break;
+                                    }
+                                }
+                            }
+                            if (allMappingsForReference.size() > 1) {
+                                for (CodeFragmentMapping mapping : allMappingsForReference) {
+                                    if (!mapping.equals(reference) && mapping.isExact()) {
+                                        refactoringsToBeRemoved.add(rename);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            sourceDiff.getRefactoringsBeforePostProcessing().removeAll(refactoringsToBeRemoved);
+        }
+    }
 }

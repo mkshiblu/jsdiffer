@@ -109,7 +109,7 @@ public class AnonymousFunctionReplacementFinder {
         var matchedOperationMappers = anonymousClassDiff.getBodyMapperList();
         if (matchedOperationMappers.size() > 0) {
 
-            // Copy operation mapper refactorings and mappings
+            // Copy operation mapper mappings ?
             for (var mapper : matchedOperationMappers) {
                 this.parentOperationsMapper.getMappings().addAll(mapper.getMappings());
                 this.parentOperationsMapper.getNonMappedInnerNodesT1().addAll(mapper.getNonMappedInnerNodesT1());
@@ -118,20 +118,21 @@ public class AnonymousFunctionReplacementFinder {
                 this.parentOperationsMapper.getNonMappedLeavesT2().addAll(mapper.getNonMappedLeavesT2());
 
                 // Copy refs
-                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+                // this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
             }
 
+            this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getAllRefactorings());
 
             // Copy refactorings of operation signature diffs
-            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
-                this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
-            }
+//            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
+//                //this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
+//            }
 //            for(UMLAttributeDiff attributeDiff : anonymousClassDiff.getAttributeDiffs()) {
 //                this.refactorings.addAll(attributeDiff.getRefactorings());
 //            }
 
             // Here attributes are sataements
-            this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
+            //  this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
         }
     }
 

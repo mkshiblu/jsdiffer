@@ -1,20 +1,20 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
-import io.jsrminer.refactorings.RenameVariableRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
-import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Diff between two source File?
@@ -393,7 +393,7 @@ public class SourceFileDiffer extends BaseDiffer {
 
         for (FunctionDeclaration removedOperation : removedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
-                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.sourceFileDiff, this.modelDiff);
+                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.sourceFileDiff/*, this.modelDiff*/);
                 List<InlineOperationRefactoring> refs = detection.check(removedOperation);
                 for (InlineOperationRefactoring refactoring : refs) {
                     sourceDiff.getRefactoringsBeforePostProcessing().add(refactoring);
@@ -418,7 +418,7 @@ public class SourceFileDiffer extends BaseDiffer {
 
         for (FunctionDeclaration addedOperation : addedOperations) {
             for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
-                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceFileDiff, modelDiff);
+                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceFileDiff/*, modelDiff*/);
                 List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
                 for (ExtractOperationRefactoring refactoring : refs) {
                     sourceDiff.getRefactoringsBeforePostProcessing().add(refactoring);
@@ -433,39 +433,6 @@ public class SourceFileDiffer extends BaseDiffer {
         sourceFileDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
-    private void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, SourceFileDiff sourceDiff) {
-        if (mapper.getChildMappers().size() > 1) {
-            Set<IRefactoring> refactoringsToBeRemoved = new LinkedHashSet<>();
-            for (IRefactoring r : sourceDiff.getRefactoringsBeforePostProcessing()) {
-                if (r instanceof RenameVariableRefactoring) {
-                    RenameVariableRefactoring rename = (RenameVariableRefactoring) r;
-                    Set<CodeFragmentMapping> references = rename.getVariableReferences();
-                    for (CodeFragmentMapping reference : references) {
-                        if (reference.getFragment1().getVariableDeclarations().size() > 0 && !reference.isExact()) {
-                            Set<CodeFragmentMapping> allMappingsForReference = new LinkedHashSet<>();
-                            for (FunctionBodyMapper childMapper : mapper.getChildMappers()) {
-                                for (CodeFragmentMapping mapping : childMapper.getMappings()) {
-                                    if (mapping.getFragment1().equals(reference.getFragment1())) {
-                                        allMappingsForReference.add(mapping);
-                                        break;
-                                    }
-                                }
-                            }
-                            if (allMappingsForReference.size() > 1) {
-                                for (CodeFragmentMapping mapping : allMappingsForReference) {
-                                    if (!mapping.equals(reference) && mapping.isExact()) {
-                                        refactoringsToBeRemoved.add(rename);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            sourceDiff.getRefactoringsBeforePostProcessing().removeAll(refactoringsToBeRemoved);
-        }
-    }
 
     // Adds the added and removed ops in the model diff
     private void reportAddedAndRemovedOperationsIfNotEquals(SourceFileDiff sourceDiff) {

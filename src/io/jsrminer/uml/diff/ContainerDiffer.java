@@ -1,12 +1,17 @@
 package io.jsrminer.uml.diff;
 
+import io.jsrminer.refactorings.ExtractOperationRefactoring;
+import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
+import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -35,10 +40,9 @@ public class ContainerDiffer extends BaseDiffer {
 //        checkForAttributeChanges();
         // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges(this.containerDiff);
-        //checkForInlinedOperations(this.containerDiff);
-        //checkForExtractedOperations(this.containerDiff);
+        checkForInlinedOperations(this.containerDiff);
+        checkForExtractedOperations(this.containerDiff);
 //        // Match statements declared inside the body directly NO need for childdiffers
-
         return this.containerDiff;
     }
 
@@ -253,6 +257,52 @@ public class ContainerDiffer extends BaseDiffer {
                 return true;
         }
         return false;
+    }
+
+    private void checkForInlinedOperations(ContainerDiff sourceDiff) {
+        List<FunctionDeclaration> removedOperations = sourceDiff.getRemovedOperations();
+        List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
+
+        for (FunctionDeclaration removedOperation : removedOperations) {
+            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+                InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, sourceDiff/*, this.modelDiff*/);
+                List<InlineOperationRefactoring> refs = detection.check(removedOperation);
+                for (InlineOperationRefactoring refactoring : refs) {
+                    sourceDiff.getRefactoringsBeforePostProcessing().add(refactoring);
+                    FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+                    sourceDiff.processMapperRefactorings(operationBodyMapper, sourceDiff.getRefactoringsBeforePostProcessing());
+                    mapper.addChildMapper(operationBodyMapper);
+                    operationsToBeRemoved.add(removedOperation);
+                }
+            }
+        }
+        sourceDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
+    }
+
+
+    /**
+     * Extract is detected by Checking if the already mapped operations contains any calls to
+     * any addedOperations.
+     */
+    private void checkForExtractedOperations(ContainerDiff sourceDiff) {
+        List<FunctionDeclaration> addedOperations = new ArrayList<>(sourceDiff.getAddedOperations());
+        List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
+
+        for (FunctionDeclaration addedOperation : addedOperations) {
+            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+                ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceDiff/*, modelDiff*/);
+                List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
+                for (ExtractOperationRefactoring refactoring : refs) {
+                    sourceDiff.getRefactoringsBeforePostProcessing().add(refactoring);
+                    FunctionBodyMapper operationBodyMapper = refactoring.getBodyMapper();
+                    sourceDiff.processMapperRefactorings(operationBodyMapper, sourceDiff.getRefactoringsBeforePostProcessing());
+                    mapper.addChildMapper(operationBodyMapper);
+                    operationsToBeRemoved.add(addedOperation);
+                }
+                checkForInconsistentVariableRenames(mapper, sourceDiff);
+            }
+        }
+        sourceDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
     private void matchStatements(ContainerDiff sourceDiff) {
