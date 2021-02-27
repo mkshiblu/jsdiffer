@@ -2,6 +2,7 @@ package io.jsrminer.parser.js.closurecompiler.statementsvisitor;
 
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import io.jsrminer.parser.js.closurecompiler.LoopStatementsVisitor;
+import io.jsrminer.parser.js.closurecompiler.StatementsDataProvider;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.VariableDeclaration;

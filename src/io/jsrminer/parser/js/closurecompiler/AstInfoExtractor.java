@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
@@ -49,21 +48,19 @@ public class AstInfoExtractor {
     }
 
     static void loadFunctionInfo(FunctionDeclarationTree tree, FunctionDeclaration function, IContainer container) {
-        function.setSourceLocation(createSourceLocation(tree.location));
-
         // Name
         String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
+        populateContainerNamesAndLocation(function, name, tree.location, container);
+        //function.setIsConstructor(function.);
+    }
+
+    static void populateContainerNamesAndLocation(FunctionDeclaration function, String name, SourceRange location, IContainer container) {
+        function.setSourceLocation(createSourceLocation(location));
         function.setName(name);
         function.setQualifiedName(generateQualifiedName(function.getName(), container));
         function.setFullyQualifiedName(function.getSourceLocation().getFilePath() + "|" + function.getQualifiedName());
         function.setParentContainerQualifiedName(container.getQualifiedName());
-
         function.setIsTopLevel(container instanceof ISourceFile);
-        //function.setIsConstructor(function.);
-
-        // Parameter
-
-        // Function Body
     }
 
     static Expression createBaseExpression(ParseTree tree) {
@@ -243,13 +240,5 @@ public class AstInfoExtractor {
         vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;
-    }
-
-    static BlockStatement createDummyBodyBlock(BlockTree blockTree) {
-        BlockStatement dummyParent = new BlockStatement();
-        dummyParent.setText("{");
-        AstInfoExtractor.populateLocationAndType(blockTree, dummyParent);
-        dummyParent.setDepth(-1);
-        return dummyParent;
     }
 }

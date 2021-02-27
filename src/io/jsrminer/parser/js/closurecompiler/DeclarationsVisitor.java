@@ -36,45 +36,48 @@ class DeclarationsVisitor {
                 container.getAnonymousFunctionDeclarations().add((AnonymousFunctionDeclaration) function);
             }
 
-            // Load parameters
-            tree.formalParameterList.parameters.forEach(parameterTree -> {
-                UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
-                function.getParameters().add(parameter);
-            });
-
-            // Load functionBody by passing the function as the new container
-            if (tree.functionBody != null) {
-                switch (tree.functionBody.type) {
-                    case BLOCK:
-
-                        BlockStatement bodyBlock = new BlockStatement();
-                        bodyBlock.setText("{");
-                        function.setBody(new FunctionBody(bodyBlock));
-                        BlockTree blockTree = tree.functionBody.asBlock();
-                        populateBlockStatementData(blockTree, bodyBlock);
-                        blockTree.statements.forEach(statementTree -> {
-                            Visitor.visitStatement(statementTree, bodyBlock, function);
-                        });
-                        break;
-                    case IDENTIFIER_EXPRESSION:
-                    case UNARY_EXPRESSION:
-                        // TODO handle Arrow expression or Identifier
-                        //var bodyTree = tree.functionBody.asUnaryExpression();
-                        // bodyTree.
-                        if (isAnonymous)
-                            ((ILeafFragment) fragment).getAnonymousFunctionDeclarations().remove(function);
-                        else
-                            container.getFunctionDeclarations().remove(function);
-
-                        break;
-                }
-            } else {
-                throw new RuntimeException("Null function body not handled for "
-                        + function.getQualifiedName() + " at " + tree.location.toString());
-            }
+            processFunctionParamaterAndBody(tree, fragment, container, isAnonymous, function);
             return function;
         }
     };
+
+    static void processFunctionParamaterAndBody(FunctionDeclarationTree tree, CodeFragment fragment, IContainer container, boolean isAnonymous, FunctionDeclaration function) {
+        // Load parameters
+        tree.formalParameterList.parameters.forEach(parameterTree -> {
+            UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
+            function.getParameters().add(parameter);
+        });
+
+        // Load functionBody by passing the function as the new container
+        if (tree.functionBody != null) {
+            switch (tree.functionBody.type) {
+                case BLOCK:
+
+                    BlockStatement bodyBlock = new BlockStatement();
+                    bodyBlock.setText("{");
+                    function.setBody(new FunctionBody(bodyBlock));
+                    BlockTree blockTree = tree.functionBody.asBlock();
+                    populateBlockStatementData(blockTree, bodyBlock);
+                    blockTree.statements.forEach(statementTree -> {
+                        Visitor.visitStatement(statementTree, bodyBlock, function);
+                    });
+                    break;
+                case IDENTIFIER_EXPRESSION:
+                case UNARY_EXPRESSION:
+                    // TODO handle Arrow expression or Identifier
+                    //var bodyTree = tree.functionBody.asUnaryExpression();
+                    // bodyTree.
+                    if (isAnonymous)
+                        fragment.getAnonymousFunctionDeclarations().remove(function);
+                    else
+                        container.getFunctionDeclarations().remove(function);
+                    break;
+            }
+        } else {
+            throw new RuntimeException("Null function body not handled for "
+                    + function.getQualifiedName() + " at " + tree.location.toString());
+        }
+    }
 
     /**
      * One or multiple variable declarations with a single kind such as let x, y = 5
@@ -92,7 +95,7 @@ class DeclarationsVisitor {
                 leaf.getVariables().add(vd.variableName);
 
                 if (vd.getInitializer() != null) {
-                    copyLeafData(vd.getInitializer(),leaf);
+                    copyLeafData(vd.getInitializer(), leaf);
                 }
             }
             return null;
