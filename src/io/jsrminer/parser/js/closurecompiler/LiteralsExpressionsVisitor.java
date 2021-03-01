@@ -18,6 +18,7 @@ public class LiteralsExpressionsVisitor {
         public String visit(LiteralExpressionTree tree, ILeafFragment fragment, IContainer container) {
 
             List<String> literals;
+            String value = tree.literalToken.toString();
             switch (tree.literalToken.type) {
                 case NUMBER:
                     literals = fragment.getNumberLiterals();
@@ -25,6 +26,7 @@ public class LiteralsExpressionsVisitor {
                 case STRING:
                 case REGULAR_EXPRESSION:
                     literals = fragment.getStringLiterals();
+                    value = value.substring(1, value.length() - 1);
                     break;
                 case NULL:
                     literals = fragment.getNullLiterals();
@@ -37,7 +39,7 @@ public class LiteralsExpressionsVisitor {
                     throw new RuntimeException("Literal type: " + tree.literalToken.type + " not handled");
             }
 
-            literals.add(tree.literalToken.toString());
+            literals.add(value);
             return tree.literalToken.toString();
         }
     };
@@ -50,11 +52,11 @@ public class LiteralsExpressionsVisitor {
         @Override
         public Void visit(ArrayLiteralExpressionTree tree, ILeafFragment leaf, IContainer container) {
 
-            if(tree.elements.size()>0) {
+            if (tree.elements.size() > 0) {
                 tree.elements.forEach(element -> {
                     Visitor.visitExpression(element, leaf, container);
                 });
-            }else {
+            } else {
                 // Empty array creation
                 ObjectCreation creation = new ObjectCreation();
                 creation.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));

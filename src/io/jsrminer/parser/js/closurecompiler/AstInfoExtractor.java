@@ -229,6 +229,17 @@ public class AstInfoExtractor {
         );
     }
 
+    static SourceLocation createVariableScope(SourceLocation variableLocation, SourceLocation parentLocation) {
+        return new SourceLocation(parentLocation.getFilePath(),
+                variableLocation.startLine,
+                variableLocation.startColumn,
+                parentLocation.endLine,
+                parentLocation.endColumn,
+                variableLocation.start,
+                parentLocation.end
+        );
+    }
+
     static UMLParameter createUmlParameter(IdentifierExpressionTree parameterTree, FunctionDeclaration functionDeclaration) {
         String name = parameterTree.identifierToken.value;
         UMLParameter parameter = new UMLParameter(name);

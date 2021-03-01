@@ -1,6 +1,7 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.*;
+import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
@@ -91,16 +92,20 @@ class DeclarationsVisitor {
             for (var declarationTree : tree.declarations) {
 
                 VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container, leaf.getParent());
-                leaf.getVariableDeclarations().add(vd);
-                leaf.getVariables().add(vd.variableName);
-
-                if (vd.getInitializer() != null) {
-                    copyLeafData(vd.getInitializer(), leaf);
-                }
+                addVariableDeclarationToParent(leaf, vd);
             }
             return null;
         }
     };
+
+    public static void addVariableDeclarationToParent(ILeafFragment leaf, VariableDeclaration vd) {
+        leaf.getVariableDeclarations().add(vd);
+        leaf.getVariables().add(vd.variableName);
+
+        if (vd.getInitializer() != null) {
+            copyLeafData(vd.getInitializer(), leaf);
+        }
+    }
 
     /**
      * A variable declaration Node
@@ -146,6 +151,21 @@ class DeclarationsVisitor {
 
         // Set Scope (TODO set body source location
         variableDeclaration.setScope(createVariableScope(tree, scopeNode));
+
+        return variableDeclaration;
+    }
+
+    static VariableDeclaration createVariableDeclarationFromVariableName(String variableName
+            , VariableDeclarationKind kind
+            , SourceRange fieldLocation
+            , SourceLocation parentLocation) {
+        var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+        var location = createSourceLocation(fieldLocation);
+        variableDeclaration.setSourceLocation(location);
+
+        // Set Scope (TODO set body source location
+        variableDeclaration.setScope(createVariableScope(location, parentLocation));
 
         return variableDeclaration;
     }
