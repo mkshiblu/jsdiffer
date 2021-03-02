@@ -13,7 +13,7 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
     }
 
     @Override
-    public boolean isExactMatch() {
+    public boolean isExact() {
         // TODO revisit
 //        return *(statement1.getArgumentizedString().equals(fragment2.getArgumentizedString()) ||
 //        statement1.getText().equals(fragment2.getString())

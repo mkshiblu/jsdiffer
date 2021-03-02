@@ -21,6 +21,12 @@ public class ContainerDiffer extends BaseDiffer {
     private final IContainer function2;
     private final ContainerDiff containerDiff;
 
+    public ContainerDiffer(IContainer function1, IContainer function2) {
+        this.function1 = function1;
+        this.function2 = function2;
+        this.containerDiff = new ContainerDiff(function1, function2);
+    }
+
     /**
      * Diff all the children functions and statements
      */
@@ -44,12 +50,6 @@ public class ContainerDiffer extends BaseDiffer {
         checkForExtractedOperations(this.containerDiff);
 //        // Match statements declared inside the body directly NO need for childdiffers
         return this.containerDiff;
-    }
-
-    public ContainerDiffer(IContainer function1, IContainer function2) {
-        this.function1 = function1;
-        this.function2 = function2;
-        this.containerDiff = new ContainerDiff(function1, function2);
     }
 
     // Adds the added and removed ops in the model diff

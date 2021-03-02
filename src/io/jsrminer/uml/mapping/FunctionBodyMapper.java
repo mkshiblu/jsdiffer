@@ -174,7 +174,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         // Maps the functions that are immediately declared into this mapper
         if (function1.getFunctionDeclarations().size() > 0 && function2.getFunctionDeclarations().size() > 0) {
             var differ = new ContainerDiffer(function1, function2);
-            differ.diffChildFunctions();
+            var diff = differ.diffChildFunctions();
+            this.refactorings.addAll(diff.getAllRefactorings());
         }
     }
 

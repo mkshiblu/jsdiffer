@@ -7,7 +7,6 @@ import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.replacers.BooleanReplacer;
 import io.jsrminer.uml.mapping.replacement.replacers.TernaryExpressionReplacer;
 
@@ -1354,7 +1353,7 @@ public class ReplacementFinder {
                         !variableDeclarations1.contains(v1)) {
                     count++;
                 }
-                if (mapping.isExactMatch()) {
+                if (mapping.isExact()) {
                     boolean containsMapping = true;
                     if (statement1 instanceof BlockStatement
                             && statement2 instanceof BlockStatement &&
@@ -1366,8 +1365,8 @@ public class ReplacementFinder {
 
                     // TODO revisit
                     if (containsMapping && (
-                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, (LeafCodeFragmentMapping) mapping)
-                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, (LeafCodeFragmentMapping) mapping))) {
+                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, mapping)
+                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, mapping))) {
                         count++;
                     }
                 }

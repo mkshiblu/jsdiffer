@@ -58,9 +58,4 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
             return (double) distance / (double) Math.max(s1.length(), s2.length());
         }
     }
-
-    @Override
-    public boolean isExactMatch() {
-        return false;
-    }
 }

@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.TokenType;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ObjectLiteralExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
@@ -67,22 +66,25 @@ public class ObjectsVisitor {
     private static void processProperty(ParseTree tree, BlockStatement body, IContainer container, ObjectLiteral objectLiteral) {
         var property = tree.asPropertyNameAssignment();
 
-        if (property.name.type == TokenType.IDENTIFIER) {
-            var fieldName = property.name.asIdentifier().value;
-            var propInitializerTree = property.value;
+        switch (property.name.type) {
+            case IDENTIFIER:
+                var fieldName = property.name.asIdentifier().value;
+                var propInitializerTree = property.value;
 
-            if (propInitializerTree != null) {
-                switch (propInitializerTree.type) {
-                    case FUNCTION_DECLARATION:
-                        processObjectFunctionDeclaration(propInitializerTree.asFunctionDeclaration(), body, container, fieldName);
-                        break;
-                    default:
-                        // Else this is an attribute i.e. field declaration
-                        processObjectFieldDeclaration(propInitializerTree, body, container, fieldName, tree);
+                if (propInitializerTree != null) {
+                    switch (propInitializerTree.type) {
+                        case FUNCTION_DECLARATION:
+                            processObjectFunctionDeclaration(propInitializerTree.asFunctionDeclaration(), body, container, fieldName);
+                            break;
+                        default:
+                            // Else this is an attribute i.e. field declaration
+                            processObjectFieldDeclaration(propInitializerTree, body, container, fieldName, tree);
+                    }
                 }
-            }
-        } else {
-            log.warn(tree.toString() + ": Object literal's property name is not an identifier. Skipping...");
+                break;
+            default:
+                //log.warn(tree.toString() + ": Object literal's property name is not an identifier. Skipping...");
+                break;
         }
     }
 

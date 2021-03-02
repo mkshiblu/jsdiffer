@@ -47,8 +47,10 @@ public class AnonymousFunctionReplacementFinder {
                         (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacements) ||
                                 invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacements, parameterToArgumentMap)))) {
 
-                    IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
-                    IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
+                    IAnonymousFunctionDeclaration anonymousClass1 = anonymousClassDeclaration1;
+                    IAnonymousFunctionDeclaration anonymousClass2 = anonymousClassDeclaration2;
+//                    IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
+//                    IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
                     // Here do container differ since we will match the inner functions properly
                     ContainerDiffer differ = new ContainerDiffer(anonymousClass1, anonymousClass2);
                     var diff = differ.diff();

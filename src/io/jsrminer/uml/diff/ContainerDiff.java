@@ -33,7 +33,6 @@ public class ContainerDiff {
     private FunctionBodyMapper bodyStatementMapper;
     MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
 
-
     final IContainer container1;
     final IContainer container2;
 

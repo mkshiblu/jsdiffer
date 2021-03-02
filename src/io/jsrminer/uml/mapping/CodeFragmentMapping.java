@@ -19,15 +19,22 @@ public abstract class CodeFragmentMapping {
     Argumentizer argumentizer;
     private Set<Replacement> replacements = new LinkedHashSet<>();
 
+    private final boolean equalArgumentizedText;
+    private final boolean equalText;
+    private final boolean isExactMapping;
+
     public CodeFragmentMapping(CodeFragment fragment1, CodeFragment fragment2, FunctionDeclaration function1, FunctionDeclaration function2, Argumentizer argumentizer) {
         this.fragment1 = fragment1;
         this.fragment2 = fragment2;
         this.function1 = function1;
         this.function2 = function2;
         this.argumentizer = argumentizer;
+        equalArgumentizedText = argumentizer.getArgumentizedString(fragment1).equals(argumentizer.getArgumentizedString(fragment2));
+        equalText = fragment1.getText().equals(fragment2.getText());
+        isExactMapping = !isKeyword() && (equalText
+                || equalArgumentizedText
+                || isExactAfterAbstraction() || containsIdenticalOrCompositeReplacement());
     }
-
-    public abstract boolean isExactMatch();
 
     @Override
     public String toString() {
@@ -37,6 +44,7 @@ public abstract class CodeFragmentMapping {
     public void addReplacement(Replacement replacement) {
         this.replacements.add(replacement);
     }
+
     public void addReplacements(Set<Replacement> replacements) {
         this.replacements.addAll(replacements);
     }
@@ -46,9 +54,7 @@ public abstract class CodeFragmentMapping {
     }
 
     public boolean isExact() {
-        return !isKeyword() && (fragment1.getText().equals(fragment2.getText())
-                || argumentizer.getArgumentizedString(fragment1).equals(argumentizer.getArgumentizedString(fragment2))
-                || isExactAfterAbstraction() || containsIdenticalOrCompositeReplacement());
+        return isExactMapping;
     }
 
     private boolean isExactAfterAbstraction() {
@@ -120,6 +126,16 @@ public abstract class CodeFragmentMapping {
             types.add(replacement.getType());
         }
         return types;
+    }
+
+    public boolean bothContainsAnonymous() {
+        return fragment1.getAnonymousFunctionDeclarations().size() > 0
+                && fragment2.getAnonymousFunctionDeclarations().size() > 0;
+    }
+
+    public boolean atLeastOneFragmentContainsAnonymous() {
+        return fragment1.getAnonymousFunctionDeclarations().size() > 0
+                || fragment2.getAnonymousFunctionDeclarations().size() > 0;
     }
 
     public CodeFragment getFragment1() {
