@@ -670,14 +670,15 @@ public class ReplacementFinder {
     private Map<CodeFragment, Set<String>> intersectVariableDeclarationsKind(CodeFragment statement1, CodeFragment statement2) {
         List<String> kindList1 = statement1.getVariableDeclarations()
                 .stream()
+                .filter(vd -> vd.getKind() != null)
                 .map(vd -> vd.getKind().keywordName)
                 .collect(Collectors.toList());
 
         List<String> kindsList2 = statement2.getVariableDeclarations()
                 .stream()
+                .filter(vd -> vd.getKind() != null)
                 .map(vd -> vd.getKind().keywordName)
                 .collect(Collectors.toList());
-
 
         Set<String> kinds1 = new LinkedHashSet<>(kindList1);
         Set<String> kinds2 = new LinkedHashSet<>(kindsList2);
@@ -689,7 +690,7 @@ public class ReplacementFinder {
             for (int i = 0; i < kindList1.size(); i++) {
                 String kind1 = kindList1.get(i);
                 String kind2 = kindsList2.get(i);
-                if (!kind1.equals(kind2)) {
+                if (!(kind1 != null && kind1.equals(kind2))) {
                     unequalKindsInSamePositionIndex.add(kind1);
                     unequalKindsInSamePositionIndex.add(kind2);
                 }
@@ -2398,12 +2399,14 @@ public class ReplacementFinder {
             VariableDeclaration declaration2 = variableDeclarations2.get(0);
             if (!declaration1.getVariableName().equals(declaration2.getVariableName())) {
                 String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
-                String kind1 = declaration1.getKind().keywordName;
-                String kind2 = declaration2.getKind().keywordName;
+
+                String kind1 = declaration1.getKind() == null ? "" : declaration1.getKind().keywordName;
+                String kind2 = declaration2.getKind() == null ? "" : declaration2.getKind().keywordName;
 
                 // IF not global variable, then append space
                 String composedString1 = kind1 + (kind1.isEmpty() ? "" : " ") + declaration1.getVariableName() + commonSuffix;
                 String composedString2 = kind2 + (kind2.isEmpty() ? "" : " ") + declaration2.getVariableName() + commonSuffix;
+
                 if (s1.equals(composedString1) && s2.equals(composedString2)) {
                     Replacement replacement = new Replacement(declaration1.getVariableName(), declaration2.getVariableName(), ReplacementType.VARIABLE_NAME);
                     replacementInfo.addReplacement(replacement);
