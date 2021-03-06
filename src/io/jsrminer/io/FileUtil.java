@@ -11,6 +11,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 public class FileUtil {
@@ -106,5 +107,15 @@ public class FileUtil {
         }
 
         return null;
+    }
+
+    public static void allDirectoriesInPath(String filepath, Set<String> directories) {
+        String name = FilenameUtils.getName(filepath);
+        String dir = filepath.substring(0, filepath.length() - name.length());
+        if (dir.length() > 0) {
+            dir = dir.substring(0, dir.length() - 1);
+            directories.add(dir);
+            allDirectoriesInPath(dir, directories);
+        }
     }
 }

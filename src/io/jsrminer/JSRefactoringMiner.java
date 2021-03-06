@@ -197,7 +197,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
-
                 //Instant startTime = Instant.now();
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -211,8 +210,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
-
-
+                
                 stopWatch.stop();
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 

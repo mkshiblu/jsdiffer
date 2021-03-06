@@ -1,6 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.uml.UMLModel;
+import io.jsrminer.uml.UMLSourceFileMatcher;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public class UMLModelDiffer {
         reportAddedAndRemovedSourceFiles(modelDiff);
 
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
-        //modelDiff.checkForMovedFiles(renamedFileHints, umlModel.repositoryDirectories, new UMLSourceFileMatcher.Move());
+        modelDiff.checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff);

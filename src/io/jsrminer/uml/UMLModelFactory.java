@@ -1,12 +1,11 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.io.FileUtil;
 import io.jsrminer.parser.js.UMDHandler;
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
 import io.jsrminer.sourcetree.JsConfig;
-import org.apache.commons.io.FilenameUtils;
 
 import java.util.Map;
-import java.util.Set;
 
 public class UMLModelFactory {
 //    public static UMLModel createUMLModel(Map<String, String> fileContents, Set<String> repositoryDirectories) {
@@ -26,7 +25,7 @@ public class UMLModelFactory {
 //                directory = directory.substring(0, directory.lastIndexOf("/"));
 //                //umlModel.repositoryDirectories.add(directory);
 //            }
-            allDirectoriesInPath(path, model.repositoryDirectories);
+            FileUtil.allDirectoriesInPath(path, model.getRepositoryDirectories());
         }
 
         // filter UMD if enabled
@@ -41,13 +40,4 @@ public class UMLModelFactory {
         return model;
     }
 
-    public static void allDirectoriesInPath(String filepath, Set<String> directories) {
-        String name = FilenameUtils.getName(filepath);
-        String dir = filepath.substring(0, filepath.length() - name.length());
-        if (dir.length() > 0) {
-            dir = dir.substring(0, dir.length() - 1);
-            directories.add(dir);
-            allDirectoriesInPath(dir, directories);
-        }
-    }
 }

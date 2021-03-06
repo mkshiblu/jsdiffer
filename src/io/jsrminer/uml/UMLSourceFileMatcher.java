@@ -1,20 +1,22 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.mapping.FunctionUtil;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
-public interface UMLSourceFileMatcher {
+public abstract class UMLSourceFileMatcher {
     //public boolean match(IFunctionDeclaration removedClass, IFunctionDeclaration addedClass, String renamedFile);
-    boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
+    abstract boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
 
-    public static class Move implements UMLSourceFileMatcher {
+    public static class Move extends UMLSourceFileMatcher {
         public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile) {
             return removedFile.getName().equals(addedFile.getName()) &&
-                    (removedFile.getFunctionDeclarations().size() <= addedFile.getFunctionDeclarations().size()
-                            && (file2ContainsAllFunctionOfFile1(removedFile, addedFile)
-                            || removedFile.getDirectoryPath().equals(renamedFile)
-                            || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath())));
+                    hasEqualTopLevelFunctionsCount(removedFile, addedFile)
+                    && (file2ContainsAllFunctionOfFile1(removedFile, addedFile)
+                    || removedFile.getDirectoryPath().equals(renamedFile)
+                    || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath())));
         }
 
         public boolean file2ContainsAllFunctionOfFile1(ISourceFile sourceFile1, ISourceFile sourceFile2) {
@@ -62,6 +64,42 @@ public interface UMLSourceFileMatcher {
         }
     }
 
+    public boolean hasEqualTopLevelFunctionsCount(IContainer container1, IContainer container2) {
+        return container1.getFunctionDeclarations().size() == container2.getFunctionDeclarations().size();
+    }
+
+    public boolean hasEqualStatementCount(IContainer container1, IContainer container2) {
+        return container1.getStatements().size() == container2.getStatements().size();
+    }
+
+    public boolean hasSameOperationsAndStatements(IContainer container1, IContainer container2) {
+        if (!hasEqualTopLevelFunctionsCount(container1, container2))
+            return false;
+
+        if (!hasEqualStatementCount(container1, container2))
+            return false;
+
+        for (var operation : container2.getFunctionDeclarations()) {
+            if (!this.containsOperationWithTheSameSignatureIgnoringChangedTypes(container1, operation)) {
+                return false;
+            }
+        }
+        for (UMLAttribute attribute : attributes) {
+            if (!umlClass.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
+                return false;
+            }
+        }
+        for (UMLAttribute attribute : umlClass.attributes) {
+            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    boolean containsOperationWithTheSameSignatureIgnoringChangedTypes(IContainer container, IFunctionDeclaration operation) {
+        
+    }
 
 //    public static class Move implements UMLSourceFileMatcher {
 //        public boolean match(IFunctionDeclaration removedFunction, IFunctionDeclaration addedFunction, String renamedFile) {
