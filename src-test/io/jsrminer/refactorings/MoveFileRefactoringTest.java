@@ -12,32 +12,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoveFileRefactoringTest extends BaseTest {
     static List<IRefactoring> refactorings;
-    static MoveFileToAnotherSourceFolderRefactoring moveOperationRefactoring;
+    static MoveFileRefactoring moveFileRefactoring;
 
     @BeforeAll
     public static void setup() {
         refactorings = new JSRefactoringMiner().detectBetweenDirectories(getRootResourceDirectory() + "move\\v1"
                 , getRootResourceDirectory() + "move\\v2");
-        moveOperationRefactoring = (MoveFileToAnotherSourceFolderRefactoring) refactorings.get(0);
+        moveFileRefactoring = (MoveFileRefactoring) refactorings.get(0);
     }
 
     @Test
     void testMovedFile() {
-        assertEquals("same_content.js", moveOperationRefactoring.getMovedClass().getName());
+        assertEquals("same_content.js", moveFileRefactoring.getMovedFileName());
     }
-//
-//    @Test
-//    void testOriginalOperation() {
-//        assertEquals("mf2", moveOperationRefactoring.originalOperation.getName());
-//    }
-//
-//    @Test
-//    void testOriginalFile() {
-//        assertEquals("dir\\dir1\\MoveFunction.js", moveOperationRefactoring.originalOperation.getSourceLocation().getFilePath());
-//    }
-//
-//    @Test
-//    void testTargetFile() {
-//        assertEquals("dir\\dir1\\MoveTarget.js", moveOperationRefactoring.movedOperation.getSourceLocation().getFilePath());
-//    }
+
+    @Test
+    void testMovedFilePath() {
+        assertEquals("mv2", moveFileRefactoring.getMovedPathDirectory());
+    }
 }
