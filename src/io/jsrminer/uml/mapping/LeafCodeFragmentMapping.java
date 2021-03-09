@@ -24,6 +24,9 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
 
     @Override
     public int compareTo(LeafCodeFragmentMapping o) {
+        if (this.atLeastOneFragmentContainsAnonymous() || o.atLeastOneFragmentContainsAnonymous())
+            return -1;
+
         double distance1 = this.normalizedTextualDistance();
         double distance2 = o.normalizedTextualDistance();
 

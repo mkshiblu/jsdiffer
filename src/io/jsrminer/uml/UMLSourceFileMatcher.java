@@ -1,6 +1,7 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
@@ -8,59 +9,14 @@ import io.rminerx.core.api.ISourceFile;
 
 public abstract class UMLSourceFileMatcher {
     //public boolean match(IFunctionDeclaration removedClass, IFunctionDeclaration addedClass, String renamedFile);
-    abstract boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
+    public abstract boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
 
     public static class Move extends UMLSourceFileMatcher {
         public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile) {
-            return removedFile.getName().equals(addedFile.getName()) &&
-                    hasEqualTopLevelFunctionsCount(removedFile, addedFile)
-                    && (file2ContainsAllFunctionOfFile1(removedFile, addedFile)
+            return removedFile.getName().equals(addedFile.getName())
+                    && (hasSameOperationsAndStatements(removedFile, addedFile)
                     || removedFile.getDirectoryPath().equals(renamedFile)
-                    || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath())));
-        }
-
-        public boolean file2ContainsAllFunctionOfFile1(ISourceFile sourceFile1, ISourceFile sourceFile2) {
-//        if(this.attributes.size() != other.attributes.size())
-//            return false;
-//        if (this.functionDeclarations.size() != other.functionDeclarations.size())
-//            return false;
-
-
-//        Set<IFunctionDeclaration>  otherFunctions = new LinkedHashSet<>(other.functionDeclarations);
-            for (IFunctionDeclaration function1 : sourceFile1.getFunctionDeclarations()) {
-
-//            if(!other.containsOperationWithTheSameSignatureIgnoringChangedTypes(operation)) {
-//                return false;
-//            }
-
-                boolean contains = false;
-                for (IFunctionDeclaration function2 : sourceFile2.getFunctionDeclarations()) {
-                    if (FunctionUtil.nameEqualsIgnoreCaseAndEqualParameterCount(function1, function2)) {
-                        contains = true;
-                        break;
-                    }
-                }
-
-                if (!contains)
-                    return false;
-            }
-
-//        for(UMLOperation operation : other.operations) {
-//            if(!this.containsOperationWithTheSameSignatureIgnoringChangedTypes(operation)) {
-//                return false;
-//            }
-//        }
-//        for(UMLAttribute attribute : attributes) {
-//            if(!other.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
-//                return false;
-//            }
-//        }
-//        for(UMLAttribute attribute : other.attributes) {
-//            if(!this.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
-//                return false;
-//            }
-//        }
-            return true;
+                    || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath()));
         }
     }
 
@@ -84,21 +40,30 @@ public abstract class UMLSourceFileMatcher {
                 return false;
             }
         }
-        for (UMLAttribute attribute : attributes) {
-            if (!umlClass.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
-                return false;
-            }
-        }
-        for (UMLAttribute attribute : umlClass.attributes) {
-            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
-                return false;
-            }
-        }
+
+//        for (var attribute : container1.getStatements()) {
+//            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(container2, attribute)) {
+//                return false;
+//            }
+//        }
+//        for (var attribute : container2.getStatements()) {
+//            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(container1, attribute)) {
+//                return false;
+//            }
+//        }
         return true;
     }
 
-    boolean containsOperationWithTheSameSignatureIgnoringChangedTypes(IContainer container, IFunctionDeclaration operation) {
-        
+    protected boolean containsAttributeWithTheSameNameIgnoringChangedType(IContainer container, Statement attribute) {
+        return false;
+    }
+
+    boolean containsOperationWithTheSameSignatureIgnoringChangedTypes(IContainer container, IFunctionDeclaration testOperation) {
+        for (var function : container.getFunctionDeclarations()) {
+            if (function.getName().equals(testOperation.getName()))
+                return true;
+        }
+        return false;
     }
 
 //    public static class Move implements UMLSourceFileMatcher {

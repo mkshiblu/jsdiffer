@@ -210,7 +210,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
-                
+
                 stopWatch.stop();
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
 
@@ -262,16 +262,20 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     IOUtils.copy(loader.openStream(), writer, Charset.defaultCharset());
                     fileContents.put(pathString, writer.toString());
                 }
-                if (isExtensionAllowed(pathString) && pathString.contains("/")) {
-                    String directory = pathString.substring(0, pathString.lastIndexOf("/"));
-                    repositoryDirectories.add(directory);
-                    //include sub-directories
-                    String subDirectory = new String(directory);
-                    while (subDirectory.contains("/")) {
-                        subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf("/"));
-                        repositoryDirectories.add(subDirectory);
-                    }
-                }
+                populateSubDirectories(repositoryDirectories, pathString, '/');
+            }
+        }
+    }
+
+    private void populateSubDirectories(Set<String> repositoryDirectories, String pathString, char pathSeparator) {
+        if (isExtensionAllowed(pathString) && pathString.indexOf(pathSeparator) != -1) {
+            String directory = pathString.substring(0, pathString.lastIndexOf(pathSeparator));
+            repositoryDirectories.add(directory);
+            //include sub-directories
+            String subDirectory = new String(directory);
+            while (subDirectory.contains("/")) {
+                subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf(pathSeparator));
+                repositoryDirectories.add(subDirectory);
             }
         }
     }

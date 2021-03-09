@@ -271,4 +271,9 @@ public class ContainerDiff {
 //        }
         return refactorings;
     }
+
+//    @Override
+//    public int compareTo(ContainerDiff o) {
+//        return this.container1.getQualifiedName().compareTo(o.container1.getQualifiedName());
+//    }
 }

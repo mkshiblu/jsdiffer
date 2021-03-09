@@ -242,12 +242,17 @@ public class AstInfoExtractor {
 
     static UMLParameter createUmlParameter(IdentifierExpressionTree parameterTree, FunctionDeclaration functionDeclaration) {
         String name = parameterTree.identifierToken.value;
+        return createUmlParameter(name, functionDeclaration, createSourceLocation(parameterTree));
+    }
+
+    static UMLParameter createUmlParameter(String name, FunctionDeclaration functionDeclaration
+            , SourceLocation location) {
         UMLParameter parameter = new UMLParameter(name);
-        parameter.setSourceLocation(createSourceLocation(parameterTree));
+        parameter.setSourceLocation(location);
         parameter.setIndexPositionInParent(functionDeclaration.getParameters().size());
         VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.VAR);
         vd.setIsParameter(true);
-        vd.setScope(createVariableScope(parameterTree, functionDeclaration));
+        vd.setScope(createVariableScope(location, functionDeclaration.getSourceLocation()));
         vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;

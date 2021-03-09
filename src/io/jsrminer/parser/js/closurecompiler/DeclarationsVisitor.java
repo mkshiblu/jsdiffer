@@ -45,8 +45,22 @@ class DeclarationsVisitor {
     static void processFunctionParamaterAndBody(FunctionDeclarationTree tree, CodeFragment fragment, IContainer container, boolean isAnonymous, FunctionDeclaration function) {
         // Load parameters
         tree.formalParameterList.parameters.forEach(parameterTree -> {
-            UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
-            function.getParameters().add(parameter);
+            switch (parameterTree.type) {
+                case IDENTIFIER_EXPRESSION:
+                    UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
+                    function.getParameters().add(parameter);
+                    break;
+                case OBJECT_PATTERN:
+                    var objectParameter = parameterTree.asObjectPattern();
+                    for (var fieldTree : objectParameter.fields) {
+                        var variableName = fieldTree.asPropertyNameAssignment().name.asIdentifier().value;
+                        var umlParameter = createUmlParameter(variableName, function, createSourceLocation(fieldTree));
+                        function.getParameters().add(umlParameter);
+                    }
+                    break;
+                default:
+                    break;
+            }
         });
 
         // Load functionBody by passing the function as the new container

@@ -7,6 +7,7 @@ public class JsConfig {
      * Statement terminator in Js (semicolon)
      */
     public static final char STATEMENT_TERMINATOR_CHAR = ';';
+    public static final char PATH_SEPARATOR = '\\';
     public static final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("[\\w\\<\\>\\[\\]]+\\s+(\\w+) *\\([^\\)]*\\) *(\\{?|[^;])");
     public static final String JS_FILE_EXTENSION = "js";
     public static final String[] IGNORED_FILE_EXTENSIONS = {"min.js"};

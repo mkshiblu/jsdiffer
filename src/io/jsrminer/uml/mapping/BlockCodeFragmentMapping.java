@@ -17,6 +17,9 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
 
     @Override
     public int compareTo(BlockCodeFragmentMapping o) {
+        if (this.atLeastOneFragmentContainsAnonymous() || o.atLeastOneFragmentContainsAnonymous())
+            return -1;
+
         double distance1 = this.getNormalizedTextualDistance();
         double distance2 = o.getNormalizedTextualDistance();
 

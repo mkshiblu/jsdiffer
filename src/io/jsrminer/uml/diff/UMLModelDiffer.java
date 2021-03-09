@@ -4,8 +4,7 @@ import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLSourceFileMatcher;
 import io.rminerx.core.api.ISourceFile;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UMLModelDiffer {
     UMLModel umlModel1;
@@ -22,7 +21,7 @@ public class UMLModelDiffer {
         reportAddedAndRemovedSourceFiles(modelDiff);
 
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
-        modelDiff.checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move());
+        checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move(), modelDiff);
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff);
@@ -43,6 +42,82 @@ public class UMLModelDiffer {
             if (!umlModel1.getSourceFileModels().containsKey(umlClass.getFilepath()))
                 modelDiff.reportAddedFile(umlClass);
         }
+    }
+
+    public void checkForMovedFiles(Map<String, String> renamedFileHints
+            , Set<String> repositoryDirectories
+            , UMLSourceFileMatcher matcher
+            , UMLModelDiff modelDiff) {
+        LinkedHashSet<String> deletedFolderPaths = new LinkedHashSet<>();
+
+        for (Iterator<ISourceFile> removedFilesIterator = modelDiff.getRemovedFiles().iterator(); removedFilesIterator.hasNext(); ) {
+            ISourceFile removedFile = removedFilesIterator.next();
+            TreeSet<SourceFileMoveDiff> diffSet = new TreeSet<>((o1, o2) -> {
+                double sourceFolderDistance1 = o1.getMovedFile().normalizedSourceFolderDistance(o1.getOriginalFile());
+                double sourceFolderDistance2 = o2.getMovedFile().normalizedSourceFolderDistance(o2.getOriginalFile());
+                return Double.compare(sourceFolderDistance1, sourceFolderDistance2);
+            });
+
+            for (Iterator<ISourceFile> addedFilesIterator = modelDiff.getAddedFiles().iterator(); addedFilesIterator.hasNext(); ) {
+                ISourceFile addedFile = addedFilesIterator.next();
+                String removedClassSourceFile = removedFile.getFilepath();
+                String renamedFile = renamedFileHints.get(removedClassSourceFile);
+//                String removedClassSourceFolder = "";
+//                if (removedClassSourceFile.contains("/")) {
+//                    removedClassSourceFolder = removedClassSourceFile.substring(0, removedClassSourceFile.lastIndexOf("/"));
+//                }
+
+//                String removedClassSourceFolder = removedFile.getDirectoryPath();
+//
+//                if (!repositoryDirectories.contains(removedClassSourceFolder)) {
+//                    deletedFolderPaths.add(removedClassSourceFolder);
+//
+//                    //add deleted sub-directories
+//                    String subDirectory = new String(removedClassSourceFolder);
+//                    while (subDirectory.contains("/")) {
+//                        subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf("/"));
+//                        if (!repositoryDirectories.contains(subDirectory)) {
+//                            deletedFolderPaths.add(subDirectory);
+//                        }
+//                    }
+//                }
+
+
+                if (matcher.match(removedFile, addedFile, renamedFile)) {
+                    //if (!conflictingMoveOfTopLevelClass(removedFile, addedFile))
+                    {
+                        SourceFileMoveDiff classMoveDiff = new SourceFileMoveDiff(removedFile, addedFile);
+                        diffSet.add(classMoveDiff);
+                    }
+                }
+            }
+
+            if (!diffSet.isEmpty()) {
+                SourceFileMoveDiff minClassMoveDiff = diffSet.first();
+                //minClassMoveDiff.process();
+                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minClassMoveDiff.getSource1()
+                        , minClassMoveDiff.getSource2(), modelDiff);
+                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
+                modelDiff.reportClassMoveDiff(minClassMoveDiff);
+                modelDiff.getAddedFiles().remove(minClassMoveDiff.getMovedFile());
+                removedFilesIterator.remove();
+            }
+        }
+
+        // For inner class move not applicable for file
+//        List<SourceFileMoveDiff> allClassMoves = new ArrayList<>(modelDiff.getClassMoveDiffList());
+//        Collections.sort(allClassMoves);
+//
+//        for (int i = 0; i < allClassMoves.size(); i++) {
+//            SourceFileMoveDiff classMoveI = allClassMoves.get(i);
+//            for (int j = i + 1; j < allClassMoves.size(); j++) {
+//                SourceFileMoveDiff classMoveJ = allClassMoves.get(j);
+//                if (classMoveI.isInnerClassMove(classMoveJ)) {
+//                    innerClassMoveDiffList.add(classMoveJ);
+//                }
+//            }
+//        }
+//        this.classMoveDiffList.removeAll(innerClassMoveDiffList);
     }
 
     private void diffCommonNamedFiles(UMLModelDiff modelDiff) {

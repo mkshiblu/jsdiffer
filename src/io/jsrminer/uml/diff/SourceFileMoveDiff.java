@@ -2,7 +2,7 @@ package io.jsrminer.uml.diff;
 
 import io.rminerx.core.api.ISourceFile;
 
-public class SourceFileMoveDiff extends SourceFileDiff {
+public class SourceFileMoveDiff extends SourceFileDiff implements Comparable<SourceFileMoveDiff> {
 
     public SourceFileMoveDiff(ISourceFile originalClass, ISourceFile movedClass/*, UMLModelDiff modelDiff*/) {
         super(originalClass, movedClass/*, modelDiff*/);
@@ -11,6 +11,7 @@ public class SourceFileMoveDiff extends SourceFileDiff {
     public ISourceFile getMovedFile() {
         return super.getSource2();
     }
+
     public ISourceFile getOriginalFile() {
         return super.getSource1();
     }
@@ -24,6 +25,7 @@ public class SourceFileMoveDiff extends SourceFileDiff {
         sb.append(System.lineSeparator());
         return sb.toString();
     }
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -35,5 +37,10 @@ public class SourceFileMoveDiff extends SourceFileDiff {
                     && this.getSource2().getFilepath().equals(classMoveDiff.getSource2().getFilepath());
         }
         return false;
+    }
+
+    @Override
+    public int compareTo(SourceFileMoveDiff o) {
+        return this.getOriginalFile().getFilepath().compareTo(o.getOriginalFile().getFilepath());
     }
 }
