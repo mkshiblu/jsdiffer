@@ -2,6 +2,7 @@ package io.jsrminer.uml.mapping;
 
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.LinkedHashSet;
@@ -189,5 +190,9 @@ public class FunctionUtil {
         }
 
         return false;
+    }
+
+    public static boolean equalTopLevelAnonymousFunctionDeclarationCount(IContainer container1, IContainer container2) {
+        return container1.getAnonymousFunctionDeclarations().size() == container2.getAnonymousFunctionDeclarations().size();
     }
 }

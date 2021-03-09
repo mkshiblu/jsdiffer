@@ -1,6 +1,5 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.Statement;
 import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IContainer;
@@ -12,6 +11,8 @@ public abstract class UMLSourceFileMatcher {
     public abstract boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
 
     public static class Move extends UMLSourceFileMatcher {
+        final static int FUNCTION_DECLARATION_CHECK_DEPTH = 2;
+
         public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile) {
             return removedFile.getName().equals(addedFile.getName())
                     && (hasSameOperationsAndStatements(removedFile, addedFile)
@@ -35,11 +36,19 @@ public abstract class UMLSourceFileMatcher {
         if (!hasEqualStatementCount(container1, container2))
             return false;
 
-        for (var operation : container2.getFunctionDeclarations()) {
-            if (!this.containsOperationWithTheSameSignatureIgnoringChangedTypes(container1, operation)) {
-                return false;
-            }
+//        if (!bothContainSameTopLevelOperations(container1, container2)) {
+//            return false;
+//        }
+
+        if (!bothContainsSameNestedFunctionDeclarations(container1, container2)) {
+            return false;
         }
+
+        if (!FunctionUtil.equalTopLevelAnonymousFunctionDeclarationCount(container1, container2)) {
+            return false;
+        }
+
+        // Check child
 
 //        for (var attribute : container1.getStatements()) {
 //            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(container2, attribute)) {
@@ -51,6 +60,45 @@ public abstract class UMLSourceFileMatcher {
 //                return false;
 //            }
 //        }
+        return true;
+    }
+
+    boolean bothContainsSameNestedFunctionDeclarations(IContainer container1, IContainer container2) {
+        var functionMap1 = container1.getFunctionDeclarationsQualifiedNameMapUpToDepth(Move.FUNCTION_DECLARATION_CHECK_DEPTH);
+        var functionMap2 = container2.getFunctionDeclarationsQualifiedNameMapUpToDepth(Move.FUNCTION_DECLARATION_CHECK_DEPTH);
+
+        for (var entry : functionMap1.entrySet()) {
+            var function = functionMap2.get(entry.getKey());
+
+            if (function == null || !FunctionUtil.equalParameterCount(entry.getValue(), function)) {
+                return false;
+            }
+        }
+
+        for (var entry : functionMap2.entrySet()) {
+            var function = functionMap1.get(entry.getKey());
+
+            if (function == null || !FunctionUtil.equalParameterCount(entry.getValue(), function)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    boolean bothContainSameTopLevelOperations(IContainer container1, IContainer container2) {
+        for (var operation : container1.getFunctionDeclarations()) {
+            if (!this.containsOperationWithTheSameSignatureIgnoringChangedTypes(container2, operation)) {
+                return false;
+            }
+        }
+
+        for (var operation : container2.getFunctionDeclarations()) {
+            if (!this.containsOperationWithTheSameSignatureIgnoringChangedTypes(container1, operation)) {
+                return false;
+            }
+        }
+
         return true;
     }
 

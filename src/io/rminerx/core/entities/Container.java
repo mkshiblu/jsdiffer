@@ -6,8 +6,8 @@ import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class Container implements IContainer {
     protected final ContainerType containerType;
@@ -15,6 +15,9 @@ public abstract class Container implements IContainer {
     protected final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
     protected SourceLocation sourceLocation;
     private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+    private Map<Integer, List<IFunctionDeclaration>> nestedFunctionsDepthMap = new HashMap<>();
+    private Map<Integer, Map<String, IFunctionDeclaration>> nestedFunctionsQualifiedNameDepthMap = new HashMap<>();
+
     /**
      * Qualified name excluding the filename but including the parent function name.
      * For example if function y() is declared inside x(), it will return x.y.
@@ -40,7 +43,7 @@ public abstract class Container implements IContainer {
         return functionDeclarations;
     }
 
-    public SourceLocation getSourceLocation(){
+    public SourceLocation getSourceLocation() {
         return this.sourceLocation;
     }
 
@@ -61,4 +64,58 @@ public abstract class Container implements IContainer {
     }
 
     public abstract String getFullyQualifiedName();
+
+    public List<IFunctionDeclaration> getFunctionDeclarationsUpToDepth(int depth) {
+        if (!nestedFunctionsDepthMap.containsKey(depth)) {
+            List<IFunctionDeclaration> functions = null;
+            switch (depth) {
+                case 1:
+                    functions = new ArrayList<>(this.getFunctionDeclarations());
+                    break;
+                case 2:
+                    functions = new ArrayList<>(getFunctionDeclarationsUpToDepth(depth - 1));
+                    var children = new LinkedList<IFunctionDeclaration>();
+                    for (var function : functions) {
+                        children.addAll(function.getFunctionDeclarationsUpToDepth(1));
+                    }
+                    functions.addAll(children);
+
+                    for (var ano : this.getAnonymousFunctionDeclarations()) {
+                        functions.addAll(ano.getFunctionDeclarations());
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Depth of more than 2 is not supported yet");
+            }
+
+            nestedFunctionsDepthMap.put(depth, functions);
+        }
+
+        return nestedFunctionsDepthMap.get(depth);
+    }
+
+    @Override
+    public Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapUpToDepth(int depth) {
+        if (!nestedFunctionsQualifiedNameDepthMap.containsKey(depth)) {
+            var list = getFunctionDeclarationsUpToDepth(depth);
+            LinkedHashMap<String, IFunctionDeclaration> qualifiedNameFunctionMap = list
+                    .stream()
+                    .collect(
+                            LinkedHashMap::new,                           // Supplier
+                            (map, item) -> map.put(item.getQualifiedName(), item),  // Accumulator
+                            Map::putAll);                                 // Combiner
+
+            nestedFunctionsQualifiedNameDepthMap.put(depth, qualifiedNameFunctionMap);
+        }
+
+        return nestedFunctionsQualifiedNameDepthMap.get(depth);
+    }
+
+//    @Override
+//    public Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapAtDepth(int depth) {
+//        var map = nestedFunctionsQualifiedNameDepthMap.get(depth);
+//
+//        return
+//    }
 }
