@@ -157,6 +157,39 @@ public class ContainerDiffer extends BaseDiffer {
                 containerDiff.getBodyMapperList().add(bodyMapper);
             }
         }
+
+        List<FunctionDeclaration> removedOperationsToBeRemoved = new ArrayList<>();
+        List<FunctionDeclaration> addedOperationsToBeRemoved = new ArrayList<>();
+        for (FunctionDeclaration removedOperation : containerDiff.getRemovedOperations()) {
+            for (FunctionDeclaration addedOperation : containerDiff.getAddedOperations()) {
+                /*if (removedOperation.equalsIgnoringVisibility(addedOperation)) {
+                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(removedOperation, addedOperation, this);
+                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, operationBodyMapper.getMappings());
+                    refactorings.addAll(operationSignatureDiff.getRefactorings());
+                    this.addOperationBodyMapper(operationBodyMapper);
+                    removedOperationsToBeRemoved.add(removedOperation);
+                    addedOperationsToBeRemoved.add(addedOperation);
+                } else*/
+                if (FunctionUtil.nameEqualsIgnoreCaseAndEqualParameterCount(removedOperation, addedOperation)) {
+                    UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
+                    FunctionBodyMapper bodyMapper
+                            = new FunctionBodyMapper(operationDiff, containerDiff);
+                    operationDiff.setMappings(bodyMapper.getMappings());
+                    containerDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
+
+                    if (!removedOperation.getName().equals(addedOperation.getName()) &&
+                            !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
+                        RenameOperationRefactoring rename = new RenameOperationRefactoring(bodyMapper);
+                        containerDiff.getRefactoringsBeforePostProcessing().add(rename);
+                    }
+                    containerDiff.getBodyMapperList().add(bodyMapper);
+                    removedOperationsToBeRemoved.add(removedOperation);
+                    addedOperationsToBeRemoved.add(addedOperation);
+                }
+            }
+        }
+        containerDiff.getRemovedOperations().removeAll(removedOperationsToBeRemoved);
+        containerDiff.getAddedOperations().removeAll(addedOperationsToBeRemoved);
     }
 
     private void checkForOperationSignatureChanges(ContainerDiff sourceDiff) {
