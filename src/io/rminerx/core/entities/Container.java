@@ -72,21 +72,18 @@ public abstract class Container implements IContainer {
                 case 1:
                     functions = new ArrayList<>(this.getFunctionDeclarations());
                     break;
-                case 2:
+                default:
                     functions = new ArrayList<>(getFunctionDeclarationsUpToDepth(depth - 1));
                     var children = new LinkedList<IFunctionDeclaration>();
                     for (var function : functions) {
-                        children.addAll(function.getFunctionDeclarationsUpToDepth(1));
+                        children.addAll(function.getFunctionDeclarationsUpToDepth(depth - 1));
                     }
                     functions.addAll(children);
 
                     for (var ano : this.getAnonymousFunctionDeclarations()) {
-                        functions.addAll(ano.getFunctionDeclarations());
+                        functions.addAll(ano.getFunctionDeclarationsUpToDepth(depth - 1));
                     }
                     break;
-
-                default:
-                    throw new IllegalArgumentException("Depth of more than 2 is not supported yet");
             }
 
             nestedFunctionsDepthMap.put(depth, functions);
