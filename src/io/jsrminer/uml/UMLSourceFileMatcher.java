@@ -1,7 +1,7 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.sourcetree.Statement;
-import io.jsrminer.uml.mapping.FunctionUtil;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
@@ -11,11 +11,17 @@ public abstract class UMLSourceFileMatcher {
     public abstract boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile);
 
     public static class Move extends UMLSourceFileMatcher {
-        final static int FUNCTION_DECLARATION_CHECK_DEPTH = 2;
-
         public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile) {
             return removedFile.getName().equals(addedFile.getName())
                     && (hasSameOperationsAndStatements(removedFile, addedFile)
+                    || removedFile.getDirectoryPath().equals(renamedFile)
+                    || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath()));
+        }
+    }
+
+    public static class Rename extends UMLSourceFileMatcher {
+        public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFile) {
+            return (hasSameOperationsAndStatements(removedFile, addedFile)
                     || removedFile.getDirectoryPath().equals(renamedFile)
                     || removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath()));
         }
@@ -64,8 +70,8 @@ public abstract class UMLSourceFileMatcher {
     }
 
     boolean bothContainsSameNestedFunctionDeclarations(IContainer container1, IContainer container2) {
-        var functionMap1 = container1.getFunctionDeclarationsQualifiedNameMapUpToDepth(Move.FUNCTION_DECLARATION_CHECK_DEPTH);
-        var functionMap2 = container2.getFunctionDeclarationsQualifiedNameMapUpToDepth(Move.FUNCTION_DECLARATION_CHECK_DEPTH);
+        var functionMap1 = container1.getFunctionDeclarationsQualifiedNameMapUpToDepth(JsConfig.NESTED_FUNCTION_DEPTH_CHECK);
+        var functionMap2 = container2.getFunctionDeclarationsQualifiedNameMapUpToDepth(JsConfig.NESTED_FUNCTION_DEPTH_CHECK);
 
         for (var entry : functionMap1.entrySet()) {
             var function = functionMap2.get(entry.getKey());

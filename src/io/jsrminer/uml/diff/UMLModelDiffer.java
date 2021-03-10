@@ -22,6 +22,7 @@ public class UMLModelDiffer {
 
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
         checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move(), modelDiff);
+        checkForRenamedFiles(renamedFileHints, new UMLSourceFileMatcher.Rename(), modelDiff);
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff);
@@ -118,6 +119,38 @@ public class UMLModelDiffer {
 //            }
 //        }
 //        this.classMoveDiffList.removeAll(innerClassMoveDiffList);
+    }
+
+    public void checkForRenamedFiles(Map<String, String> renamedFileHints
+            , UMLSourceFileMatcher matcher
+            , UMLModelDiff modelDiff) {
+        for (var removedClassIterator = modelDiff.getRemovedFiles().iterator(); removedClassIterator.hasNext(); ) {
+            var removedClass = removedClassIterator.next();
+            var diffSet = new TreeSet<>(new FileRenameComparator());
+
+            for (var addedClassIterator = modelDiff.getAddedFiles().iterator(); addedClassIterator.hasNext(); ) {
+                var addedClass = addedClassIterator.next();
+                String renamedFile = renamedFileHints.get(removedClass.getFilepath());
+                if (matcher.match(removedClass, addedClass, renamedFile)) {
+//                    if (!conflictingMoveOfTopLevelClass(removedClass, addedClass)
+//                            && !innerClassWithTheSameName(removedClass, addedClass))
+                    {
+                        var classRenameDiff = new SourceFileRenameDiff(removedClass, addedClass);
+                        diffSet.add(classRenameDiff);
+                    }
+                }
+            }
+
+            if (!diffSet.isEmpty()) {
+                var minClassRenameDiff = diffSet.first();
+                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minClassRenameDiff.getSource1()
+                        , minClassRenameDiff.getSource2(), modelDiff);
+                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
+                modelDiff.getFileRenameDiffList().add(minClassRenameDiff);
+                modelDiff.getAddedFiles().remove(minClassRenameDiff.getRenamedFile());
+                removedClassIterator.remove();
+            }
+        }
     }
 
     private void diffCommonNamedFiles(UMLModelDiff modelDiff) {

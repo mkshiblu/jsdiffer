@@ -5,6 +5,7 @@ import io.jsrminer.refactorings.CandidateAttributeRefactoring;
 import io.jsrminer.refactorings.CandidateMergeVariableRefactoring;
 import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.replacement.*;

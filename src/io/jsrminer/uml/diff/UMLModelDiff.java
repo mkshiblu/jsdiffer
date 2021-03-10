@@ -7,7 +7,7 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.FunctionUtil;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -25,8 +25,10 @@ public class UMLModelDiff extends Diff {
 
     private final List<ISourceFile> addedFiles = new ArrayList<>();
     private final List<ISourceFile> removedFiles = new ArrayList<>();
+
     private List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
     private List<SourceFileMoveDiff> classMoveDiffList = new ArrayList<>();
+    private List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
 
     public UMLModelDiff(UMLModel model1, UMLModel model2) {
         this.model1 = model1;
@@ -48,7 +50,7 @@ public class UMLModelDiff extends Diff {
     public List<IRefactoring> getRefactorings() throws RefactoringMinerTimedOutException {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
         refactorings.addAll(getMoveFileRefactorings());
-        //refactorings.addAll(getRenameClassRefactorings());
+        refactorings.addAll(getRenameFileRefactorings());
         //refactorings.addAll(identifyConvertAnonymousClassToTypeRefactorings());
         Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
         Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap
@@ -254,7 +256,7 @@ public class UMLModelDiff extends Diff {
     private List<Refactoring> getMoveFileRefactorings() {
         List<Refactoring> refactorings = new ArrayList<>();
         //List<RenamePackageRefactoring> renamePackageRefactorings = new ArrayList<RenamePackageRefactoring>();
-  //      List<MoveSourceFolderRefactoring> moveSourceFolderRefactorings = new ArrayList<>();
+        //      List<MoveSourceFolderRefactoring> moveSourceFolderRefactorings = new ArrayList<>();
         for (var classMoveDiff : classMoveDiffList) {
             var originalClass = classMoveDiff.getOriginalFile();
             String originalName = originalClass.getName();
@@ -324,6 +326,19 @@ public class UMLModelDiff extends Diff {
 //            //}
 //        }
 //        refactorings.addAll(moveSourceFolderRefactorings);
+        return refactorings;
+    }
+
+    private List<Refactoring> getRenameFileRefactorings() {
+        List<Refactoring> refactorings = new ArrayList<>();
+        for (var classRenameDiff : getFileRenameDiffList()) {
+            Refactoring refactoring = null;
+            if (classRenameDiff.getRenamedFile().getDirectoryPath().equals(classRenameDiff.getOriginalFile().getDirectoryPath()))
+                refactoring = new RenameFileRefactoring(classRenameDiff.getOriginalFile(), classRenameDiff.getRenamedFile());
+            else
+                refactoring = new MoveAndRenameFileRefactoring(classRenameDiff.getOriginalFile(), classRenameDiff.getRenamedFile());
+            refactorings.add(refactoring);
+        }
         return refactorings;
     }
 
@@ -946,7 +961,11 @@ public class UMLModelDiff extends Diff {
         this.classMoveDiffList.add(sourceFileMoveDiff);
     }
 
-    public List<SourceFileMoveDiff> getClassMoveDiffList() {
-        return classMoveDiffList;
+    public List<SourceFileMoveDiff> getFileMoveDiffList() {
+        return this.classMoveDiffList;
+    }
+
+    public List<SourceFileRenameDiff> getFileRenameDiffList() {
+        return fileRenameDiffList;
     }
 }

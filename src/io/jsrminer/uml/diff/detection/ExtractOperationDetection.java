@@ -9,7 +9,7 @@ import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.FunctionUtil;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.*;

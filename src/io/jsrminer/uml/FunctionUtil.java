@@ -1,6 +1,7 @@
-package io.jsrminer.uml.mapping;
+package io.jsrminer.uml;
 
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.diff.StringDistance;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;

@@ -8,7 +8,7 @@ import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.uml.MapperRefactoringProcessor;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.FunctionUtil;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
