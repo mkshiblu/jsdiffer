@@ -56,7 +56,7 @@ public class SourceFile extends Container implements ISourceFile {
 
     @Override
     public String toString() {
-        return qualifiedName;
+        return getFilepath();
     }
 
     @Override

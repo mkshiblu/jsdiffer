@@ -12,22 +12,32 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RenameFileRefactoringTest extends BaseTest {
     static List<IRefactoring> refactorings;
-    static RenameFileRefactoring moveFileRefactoring;
+    static RenameFileRefactoring refactoring;
 
     @BeforeAll
     public static void setup() {
-        refactorings = new JSRefactoringMiner().detectBetweenDirectories(getRootResourceDirectory() + "rename\\v1"
-                , getRootResourceDirectory() + "rename\\v2");
-        moveFileRefactoring = (RenameFileRefactoring) refactorings.get(0);
+        refactorings = new JSRefactoringMiner().detectBetweenDirectories(getRootResourceDirectory() + "rename/v1"
+                , getRootResourceDirectory() + "rename/v2");
+        refactoring = (RenameFileRefactoring) refactorings.get(0);
     }
 
     @Test
     void testRenamedFileName() {
-        assertEquals("same_content.js", moveFileRefactoring.getRenamedFileName());
+        assertEquals("errorCaptured.spec.js", refactoring.getRenamedFileName());
     }
 
     @Test
     void testRenamedFilePath() {
-        assertEquals("v2/rename", moveFileRefactoring.getRenamedFile().getFilepath());
+        assertEquals("rename\\errorCaptured.spec.js", refactoring.getRenamedFile().getFilepath());
+    }
+
+    @Test
+    void testOriginalFileName() {
+        assertEquals("catchError.spec.js", refactoring.getOriginalFileName());
+    }
+
+    @Test
+    void testOriginalFilePath() {
+        assertEquals("rename\\catchError.spec.js", refactoring.getOriginalFile().getFilepath());
     }
 }
