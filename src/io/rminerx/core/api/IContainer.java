@@ -33,6 +33,10 @@ public interface IContainer extends INode {
 
     List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations();
 
+    List<IClassDeclaration> getClassDeclarations();
+
+    List<IAnonymousClassDeclaration> getAnonymousClassDeclarations();
+
     String getQualifiedName();
 
     /**

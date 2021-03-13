@@ -8,6 +8,8 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 
+import java.lang.instrument.ClassDefinition;
+
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 class DeclarationsVisitor {
@@ -28,7 +30,6 @@ class DeclarationsVisitor {
             } else {
                 function = new FunctionDeclaration();
                 container.getFunctionDeclarations().add(function);
-                //fragment.getFunctionDeclarations().add(function);
             }
 
             // Load function info
@@ -197,4 +198,33 @@ class DeclarationsVisitor {
 
         return variableDeclaration;
     }
+
+    public static final NodeVisitor<ClassDeclaration, ClassDeclarationTree, CodeFragment> classDeclarationProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public ClassDeclaration visit(ClassDeclarationTree tree, CodeFragment fragment, IContainer container) {
+
+            final boolean isAnonymous = fragment instanceof ILeafFragment;
+            ClassDeclaration function;
+
+            if (isAnonymous) {
+                var anonymous = new AnonymousClassDeclaration();
+                function = anonymous;
+                ((ILeafFragment) fragment).getAnonymousClassDeclarations().add(anonymous);
+                anonymous.setText(getTextInSource(tree, false));
+            } else {
+                function = new ClassDeclaration();
+                container.getClassDeclarations().add(function);
+            }
+
+            // Load function info
+            AstInfoExtractor.loadClassInfo(tree, function, container);
+            if (isAnonymous) {
+                container.getAnonymousClassDeclarations().add((AnonymousClassDeclaration) function);
+            }
+
+            //processFunctionParamaterAndBody(tree, fragment, container, isAnonymous, function);
+            return function;
+        }
+    };
 }

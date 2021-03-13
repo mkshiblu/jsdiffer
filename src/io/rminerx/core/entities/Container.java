@@ -2,19 +2,21 @@ package io.rminerx.core.entities;
 
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.Statement;
-import io.rminerx.core.api.IAnonymousFunctionDeclaration;
-import io.rminerx.core.api.IContainer;
-import io.rminerx.core.api.IFunctionDeclaration;
+import io.rminerx.core.api.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class Container implements IContainer {
     protected final ContainerType containerType;
+    protected SourceLocation sourceLocation;
+
     protected final List<Statement> statements = new ArrayList<>();
     protected final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
-    protected SourceLocation sourceLocation;
-    private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+    protected final List<IClassDeclaration> classDeclarations = new ArrayList<>();
+    protected List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    protected List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+
     private Map<Integer, List<IFunctionDeclaration>> nestedFunctionsDepthMap = new HashMap<>();
     private Map<Integer, Map<String, IFunctionDeclaration>> nestedFunctionsQualifiedNameDepthMap = new HashMap<>();
 
@@ -109,10 +111,13 @@ public abstract class Container implements IContainer {
         return nestedFunctionsQualifiedNameDepthMap.get(depth);
     }
 
-//    @Override
-//    public Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapAtDepth(int depth) {
-//        var map = nestedFunctionsQualifiedNameDepthMap.get(depth);
-//
-//        return
-//    }
+    @Override
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        return anonymousClassDeclarations;
+    }
+
+    @Override
+    public List<IClassDeclaration> getClassDeclarations() {
+        return classDeclarations;
+    }
 }

@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ClassDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
@@ -10,6 +11,8 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
+import io.rminerx.core.entities.Container;
+import io.rminerx.core.entities.DeclarationContainer;
 
 import static io.jsrminer.parser.js.closurecompiler.Config.appendSemicolonToStatementIfNotPresent;
 import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
@@ -47,6 +50,13 @@ public class AstInfoExtractor {
         return namespace == null ? name : namespace + "." + name;
     }
 
+    static void loadClassInfo(ClassDeclarationTree tree, ClassDeclaration classDeclaration, IContainer container) {
+        // Name
+        String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
+        populateContainerNamesAndLocation(classDeclaration, name, tree.location, container);
+        //function.setIsConstructor(function.);
+    }
+
     static void loadFunctionInfo(FunctionDeclarationTree tree, FunctionDeclaration function, IContainer container) {
         // Name
         String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
@@ -54,7 +64,7 @@ public class AstInfoExtractor {
         //function.setIsConstructor(function.);
     }
 
-    static void populateContainerNamesAndLocation(FunctionDeclaration function, String name, SourceRange location, IContainer container) {
+    static void populateContainerNamesAndLocation(DeclarationContainer function, String name, SourceRange location, IContainer container) {
         function.setSourceLocation(createSourceLocation(location));
         function.setName(name);
         function.setQualifiedName(generateQualifiedName(function.getName(), container));
