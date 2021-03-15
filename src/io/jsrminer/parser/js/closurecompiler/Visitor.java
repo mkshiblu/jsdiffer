@@ -19,6 +19,7 @@ public class Visitor {
 
         //Declarations
         put(FUNCTION_DECLARATION, DeclarationsVisitor.functionDeclarationProcessor);
+        put(CLASS_DECLARATION, DeclarationsVisitor.classDeclarationProcessor);
         put(VARIABLE_DECLARATION_LIST, DeclarationsVisitor.variableDeclarationsList);
         put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
 

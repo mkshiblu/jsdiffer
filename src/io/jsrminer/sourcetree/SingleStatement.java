@@ -1,8 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminerx.core.api.IAnonymousFunctionDeclaration;
-import io.rminerx.core.api.IFunctionDeclaration;
-import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -27,9 +25,10 @@ public class SingleStatement extends Statement implements ILeafFragment {
     private List<String> prefixExpressions = new ArrayList<>();
     private List<String> postfixExpressions = new ArrayList<>();
     protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
-    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
     private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
     private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
+    private List<IClassDeclaration> classDeclarations = new ArrayList<>();
 
     public SingleStatement() {
     }
@@ -122,10 +121,12 @@ public class SingleStatement extends Statement implements ILeafFragment {
     public List<String> getInfixExpressions() {
         return infixExpressions;
     }
-    //    @Override
-//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
-//        return this.anonymousClassDeclarations;
-//    }
+
+    @Override
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        return this.anonymousClassDeclarations;
+    }
+
     @Override
     public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
         return this.anonymousFunctionDeclarations;

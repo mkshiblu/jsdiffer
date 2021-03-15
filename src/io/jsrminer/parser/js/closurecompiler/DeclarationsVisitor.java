@@ -205,26 +205,35 @@ class DeclarationsVisitor {
         public ClassDeclaration visit(ClassDeclarationTree tree, CodeFragment fragment, IContainer container) {
 
             final boolean isAnonymous = fragment instanceof ILeafFragment;
-            ClassDeclaration function;
+            ClassDeclaration classDeclaration;
 
             if (isAnonymous) {
                 var anonymous = new AnonymousClassDeclaration();
-                function = anonymous;
+                classDeclaration = anonymous;
                 ((ILeafFragment) fragment).getAnonymousClassDeclarations().add(anonymous);
                 anonymous.setText(getTextInSource(tree, false));
             } else {
-                function = new ClassDeclaration();
-                container.getClassDeclarations().add(function);
+                classDeclaration = new ClassDeclaration();
+                container.getClassDeclarations().add(classDeclaration);
             }
 
             // Load function info
-            AstInfoExtractor.loadClassInfo(tree, function, container);
+            AstInfoExtractor.loadClassInfo(tree, classDeclaration, container);
             if (isAnonymous) {
-                container.getAnonymousClassDeclarations().add((AnonymousClassDeclaration) function);
+                container.getAnonymousClassDeclarations().add((AnonymousClassDeclaration) classDeclaration);
             }
 
-            //processFunctionParamaterAndBody(tree, fragment, container, isAnonymous, function);
-            return function;
+            processClassBody(tree, fragment, container, isAnonymous, classDeclaration);
+            return classDeclaration;
         }
     };
+
+    private static void processClassBody(ClassDeclarationTree tree, CodeFragment fragment, IContainer container, boolean isAnonymous, ClassDeclaration classDeclaration) {
+
+        for (var element : tree.elements) {
+
+
+        }
+    }
 }
+
