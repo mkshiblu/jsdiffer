@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class Container implements IContainer {
+    protected String name;
     protected final ContainerType containerType;
     protected SourceLocation sourceLocation;
 
@@ -119,5 +120,16 @@ public abstract class Container implements IContainer {
     @Override
     public List<IClassDeclaration> getClassDeclarations() {
         return classDeclarations;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+    /**
+     * The name of the container.
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 }

@@ -6,10 +6,6 @@ import io.rminerx.core.api.IDeclarationContainer;
  * A container type declaration such as a function declaration or a class declaration
  */
 public abstract class DeclarationContainer extends Container implements IDeclarationContainer {
-    /**
-     * The name of the function.
-     */
-    private String name;
 
     /**
      * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
@@ -58,20 +54,6 @@ public abstract class DeclarationContainer extends Container implements IDeclara
 
     public void setParentContainerQualifiedName(String parentContainerQualifiedName) {
         this.parentContainerQualifiedName = parentContainerQualifiedName;
-    }
-
-    /**
-     * The name of the function.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * The name of the function.
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setIsTopLevel(boolean isTopLevel) {

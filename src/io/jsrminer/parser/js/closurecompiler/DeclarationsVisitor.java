@@ -232,7 +232,13 @@ class DeclarationsVisitor {
 
         for (var element : tree.elements) {
 
+            switch (element.type){
+                case FUNCTION_DECLARATION:
 
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

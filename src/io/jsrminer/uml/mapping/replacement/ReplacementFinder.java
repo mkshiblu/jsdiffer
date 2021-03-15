@@ -611,8 +611,7 @@ public class ReplacementFinder {
                         VariableDeclaration v1 = statement1.findVariableDeclarationIncludingParent(s1);
                         VariableDeclaration v2 = statement2.findVariableDeclarationIncludingParent(s2);
                         if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1
-                        /** TODO && operation2.loopWithVariables
-                         (v1.variableName, v2.variableName) == null**/) {
+                                && function2.loopWithVariables(v1.variableName, v2.variableName) == null) {
                             replacement = null;
                         }
 
@@ -623,10 +622,10 @@ public class ReplacementFinder {
                         OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
                         OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
 
-//                            if (invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
-//                                replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
-//                            }
-//
+//                        if (invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
+//                            replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
+//                        }
+
                     } else if (functionInvocations1.contains(s1) && unmatchedVariables2.contains(s2)) {
                         OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
                         replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationBefore, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);

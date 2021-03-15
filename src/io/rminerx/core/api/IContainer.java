@@ -9,8 +9,6 @@ import java.util.Map;
  * Represents a code container such as FunctionDeclrations, Class Declarations or a File
  */
 public interface IContainer extends INode {
-    //SourceLocation getSourceLocation();
-
     /**
      * Represents a container type such s File or Declaration
      **/
@@ -37,6 +35,8 @@ public interface IContainer extends INode {
 
     List<IAnonymousClassDeclaration> getAnonymousClassDeclarations();
 
+    String getName();
+
     String getQualifiedName();
 
     /**
@@ -47,5 +47,5 @@ public interface IContainer extends INode {
     /**
      * For depth 2 it will return all the functions including in anonymous etc.
      */
-    Map<String, IFunctionDeclaration>  getFunctionDeclarationsQualifiedNameMapUpToDepth(int depth);
+    Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapUpToDepth(int depth);
 }
