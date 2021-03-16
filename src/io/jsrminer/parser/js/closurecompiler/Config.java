@@ -13,6 +13,7 @@ public class Config {
         add(ParseTreeType.EXPORT_DECLARATION);
         add(ParseTreeType.MISSING_PRIMARY_EXPRESSION);
         add(ParseTreeType.EMPTY_STATEMENT);
+        add(ParseTreeType.CLASS_DECLARATION);
         add(ParseTreeType.TEMPLATE_LITERAL_EXPRESSION);
         add(ParseTreeType.ITER_SPREAD);
     }};

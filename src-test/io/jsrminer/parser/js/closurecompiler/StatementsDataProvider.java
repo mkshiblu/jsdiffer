@@ -11,7 +11,8 @@ import io.rminerx.core.entities.SourceFile;
 public enum StatementsDataProvider {
     LOOPS("loops.js"),
     VARIABLE_DECLARATIONS("variable_declarations.js"),
-    OBJECT_EXPRESSIONS("objects.js");
+    OBJECT_EXPRESSIONS("objects.js"),
+    CLASS_DECLARATIONS("class_declarations.js");
     ProgramTree programTree;
     SourceFile container;
     BlockStatement dummyBodyBlock;
