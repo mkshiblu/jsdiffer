@@ -10,6 +10,7 @@ public enum RefactoringType {
 
     EXTRACT_OPERATION("Extract Method", "Extract Method (.+) extracted from (.+) in class (.+)", 2),
     RENAME_FILE("Rename File", "Rename File (.+) renamed to (.+)"),
+    MOVE_AND_RENAME_FILE("Move And Rename File", "Move And Rename File (.+) from (.+) to (.+)"),
     RENAME_CLASS("Rename Class", "Rename Class (.+) renamed to (.+)"),
     MOVE_ATTRIBUTE("Move Attribute", "Move Attribute (.+) from class (.+) to (.+) from class (.+)"),
     MOVE_RENAME_ATTRIBUTE("Move And Rename Attribute", "Move And Rename Attribute (.+) renamed to (.+) and moved from class (.+) to class (.+)"),
