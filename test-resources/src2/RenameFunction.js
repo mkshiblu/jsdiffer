@@ -1,13 +1,14 @@
 function m2(){
     let z = 5;
     let d = function a1(){
-function isKeyNotMatch (expect, actual) {
-  if (Array.isArray(expect)) {
-    return expect.indexOf(actual) === -1
-  } else {
-    return expect !== actual
-  }
-}
+
+    function isKeyNotMatch (expect, actual) {
+      if (Array.isArray(expect)) {
+        return expect.indexOf(actual) === -1
+      } else {
+        return expect !== actual
+      }
+    }
 
 /**
  * Runtime helper for checking keyCodes from config.

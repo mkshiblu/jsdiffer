@@ -19,10 +19,9 @@ public class UMLModelDiffer {
         final UMLModelDiff modelDiff = new UMLModelDiff(umlModel1, umlModel2);
 
         reportAddedAndRemovedSourceFiles(modelDiff);
-
-        //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
         checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move(), modelDiff);
         checkForRenamedFiles(renamedFileHints, new UMLSourceFileMatcher.Rename(), modelDiff);
+        //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff);
