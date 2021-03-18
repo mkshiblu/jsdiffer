@@ -209,7 +209,8 @@ public class AstInfoExtractor {
     }
 
     static String getTextInSource(ParseTree tree, boolean isStatement) {
-//        StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
+        ///StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
+        //String text =sb.toString();
         String text = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
         if (isStatement
                 && appendSemicolonToStatementIfNotPresent

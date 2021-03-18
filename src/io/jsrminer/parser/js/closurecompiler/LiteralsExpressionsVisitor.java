@@ -10,6 +10,8 @@ import io.rminerx.core.api.ILeafFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.getTextInSource;
+
 public class LiteralsExpressionsVisitor {
 
     public static final NodeVisitor<String, LiteralExpressionTree, ILeafFragment> literalExpressionProcessor
@@ -53,6 +55,8 @@ public class LiteralsExpressionsVisitor {
         public Void visit(ArrayLiteralExpressionTree tree, ILeafFragment leaf, IContainer container) {
 
             if (tree.elements.size() > 0) {
+                String text = getTextInSource(tree, false);
+                leaf.getArrayAccesses().add(text);
                 tree.elements.forEach(element -> {
                     Visitor.visitExpression(element, leaf, container);
                 });
@@ -60,7 +64,7 @@ public class LiteralsExpressionsVisitor {
                 // Empty array creation
                 ObjectCreation creation = new ObjectCreation();
                 creation.setSourceLocation(AstInfoExtractor.createSourceLocation(tree));
-                creation.setText(AstInfoExtractor.getTextInSource(tree, false));
+                creation.setText(getTextInSource(tree, false));
                 creation.setType(CodeElementType.ARRAY_EXPRESSION);
                 creation.setFunctionName("");
                 leaf.getCreationMap().computeIfAbsent(creation.getText(), key -> new ArrayList<>()).add(creation);

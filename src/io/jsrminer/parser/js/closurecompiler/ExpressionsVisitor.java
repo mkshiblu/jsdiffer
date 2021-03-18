@@ -162,6 +162,21 @@ public class ExpressionsVisitor {
         }
     };
 
+    /**
+     * Has elements
+     */
+    public static final NodeVisitor<Void, ArrayPatternTree, ILeafFragment> arrayPattern
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(ArrayPatternTree tree, ILeafFragment leaf, IContainer container) {
+            var text =  getTextInSource(tree, false);
+            leaf.getArrayAccesses().add(text);
+            for (var element : tree.elements) {
+                Visitor.visitExpression(element, leaf, container);
+            }
+            return null;
+        }
+    };
     public static final NodeVisitor<Void, IdentifierExpressionTree, ILeafFragment> identifierProcessor
             = new NodeVisitor<>() {
         @Override

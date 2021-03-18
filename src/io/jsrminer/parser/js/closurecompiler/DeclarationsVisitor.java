@@ -80,7 +80,7 @@ class DeclarationsVisitor {
                     break;
                 case IDENTIFIER_EXPRESSION:
                 case UNARY_EXPRESSION:
-                    // TODO handle Arrow expression or Identifier
+                default: // TODO handle Arrow expression or Identifier
                     //var bodyTree = tree.functionBody.asUnaryExpression();
                     // bodyTree.
                     if (isAnonymous)
