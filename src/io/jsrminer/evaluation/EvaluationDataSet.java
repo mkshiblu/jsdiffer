@@ -2,12 +2,12 @@ package io.jsrminer.evaluation;
 
 import java.util.*;
 
-public class EvaluationDataSet {
-    Map<String, Map<String, List<RdRow>>> projectCommitsMap = new HashMap<>();
-    List<RdRow> rdRows = new LinkedList<>();
-    Map<String, List<RdRow>> commitRefMap = new HashMap<>();
+public class EvaluationDataSet<T extends Ref> {
+    Map<String, Map<String, List<T>>> projectCommitsMap = new HashMap<>();
+    List<T> rdRows = new LinkedList<>();
+    Map<String, List<T>> commitRefMap = new HashMap<>();
 
-    void reportRow(RdRow rdRow) {
+    void reportRow(T rdRow) {
         this.rdRows.add(rdRow);
 
         var commitRMap = projectCommitsMap.computeIfAbsent(rdRow.repository
@@ -20,7 +20,7 @@ public class EvaluationDataSet {
                 .add(rdRow);
     }
 
-    public List<RdRow> getRefsInCommit(String commitId) {
+    public List<T> getRefsInCommit(String commitId) {
         return commitRefMap.get(commitId);
     }
 

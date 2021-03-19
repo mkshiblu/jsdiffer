@@ -1,21 +1,23 @@
 package io.jsrminer.evaluation;
 
-public class RdRow {
-    String repository;
-    String commit;
-    String refactoringName;
+public class RdRow extends Ref{
+    private String refactoring;
     String nodeType;
     String locationBefore;
     String localNameBefore;
     String locationAfter;
     String localNameAfter;
 
-    public String getFileAfter(){
+    public String getFileAfter() {
         return locationAfter.split(":")[0];
     }
 
-    public String getRmRefactoringName(){
-        return this.refactoringName + " " + nodeType == "Function" ? "method" : nodeType;
+    public String getRefactoring() {
+        return refactoring;
+    }
+
+    public void setRefactoring(String refactoring) {
+        this.refactoring = refactoring;
     }
 
     @Override
