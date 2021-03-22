@@ -17,6 +17,7 @@ public class JsConfig {
 
     // Mapper
     public static final String SPLIT_CONCAT_STRING_PATTERN = "(\\s)*(\\+)(\\s)*";
+    public static final boolean ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT = false;
 
     // Class Matcher
     public static final int NESTED_FUNCTION_DEPTH_CHECK = 3;

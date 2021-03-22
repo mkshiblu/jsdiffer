@@ -15,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.jsrminer.sourcetree.JsConfig.ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 
 public class ReplacementFinder {
@@ -1026,12 +1027,15 @@ public class ReplacementFinder {
                 if (Thread.interrupted()) {
                     throw new RefactoringMinerTimedOutException();
                 }
-                boolean containsMethodSignatureOfAnonymousClass1 = containsMethodSignatureOfAnonymousClass(stringA);
-                boolean containsMethodSignatureOfAnonymousClass2 = containsMethodSignatureOfAnonymousClass(stringB);
-                if (containsMethodSignatureOfAnonymousClass1 != containsMethodSignatureOfAnonymousClass2 &&
-                        this.function1.getVariableDeclaration(stringA) == null
-                        && this.function2.getVariableDeclaration(stringB) == null) {
-                    continue;
+
+                if (ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT) {
+                    boolean containsMethodSignatureOfAnonymousClass1 = containsMethodSignatureOfAnonymousClass(stringA);
+                    boolean containsMethodSignatureOfAnonymousClass2 = containsMethodSignatureOfAnonymousClass(stringB);
+                    if (containsMethodSignatureOfAnonymousClass1 != containsMethodSignatureOfAnonymousClass2 &&
+                            this.function1.getVariableDeclaration(stringA) == null
+                            && this.function2.getVariableDeclaration(stringB) == null) {
+                        continue;
+                    }
                 }
 
                 String temp = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), stringA, stringB);

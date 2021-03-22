@@ -500,7 +500,7 @@ public class SourceFileDiffer extends BaseDiffer {
 //                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
 //                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
 //                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
-                //this.refactorings.addAll(mapper.getRefactorings());
+                //sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsAfterPostProcessing());
                 sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
                 sourceDiff.setBodyStatementMapper(mapper);
             }
