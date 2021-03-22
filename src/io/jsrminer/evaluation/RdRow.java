@@ -3,10 +3,6 @@ package io.jsrminer.evaluation;
 public class RdRow extends Ref{
     private String refactoring;
     String nodeType;
-    String locationBefore;
-    String localNameBefore;
-    String locationAfter;
-    String localNameAfter;
 
     public String getFileAfter() {
         return locationAfter.split(":")[0];

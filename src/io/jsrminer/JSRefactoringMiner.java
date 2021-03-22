@@ -62,15 +62,30 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
-        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
+//        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
+//        refactorings.forEach(r -> {
+//            System.out.print(project);
+//            System.out.print("\t");
+//            System.out.print(commitId);
+//            System.out.print("\t");
+//            System.out.print(r.getName());
+//            System.out.print("\t");
+//            System.out.println(r.toString());
+//        });
+
+        log.info("project\tcommitId\tRefactoringType\tLocationBefore\tNameBefore\tLocationAfter\tNameAfter");
+        final StringBuilder builder = new StringBuilder();
         refactorings.forEach(r -> {
-            System.out.print(project);
-            System.out.print("\t");
-            System.out.print(commitId);
-            System.out.print("\t");
-            System.out.print(r.getName());
-            System.out.print("\t");
-            System.out.println(r.toString());
+            builder.setLength(0);
+            builder.append(project);
+            builder.append("\t");
+            builder.append(commitId);
+            builder.append("\t");
+            builder.append(r.getName());
+            builder.append("\t");
+            var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(r);
+            builder.append(afterBeforeInfo);
+            log.info(builder.toString());
         });
     }
 

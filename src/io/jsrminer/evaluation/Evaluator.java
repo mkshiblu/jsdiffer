@@ -29,7 +29,7 @@ public class Evaluator {
 
     public static void main(String[] args) {
         String repoPath = "E:\\PROJECTS_REPO\\vue";
-        String commitId = "a08feed8c410b89fa049fdbd6b9459e2d858e912";
+        String commitId = "144a4dd860b20ca48263bac150286f627e08d953";
 
         new Evaluator("vue", commitId).evaluate();
     }
@@ -147,10 +147,13 @@ public class Evaluator {
     private RmRow parseRmRefactoring(String line) {
         var row = new RmRow();
         var tokens = line.split("\t");
-        row.repository = tokens[0];
-        row.commit = tokens[1];
-        row.refactoring = tokens[4];
-        row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
+        row.repository = tokens[1];
+        row.commit = tokens[2];
+        row.refType = toRefType(tokens[3].replaceAll("(?i)method", "function"));
+        row.locationBefore = tokens[4];
+        row.localNameBefore = tokens[5];
+        row.locationAfter = tokens[6];
+        row.localNameAfter = tokens[7];
         return row;
     }
 
@@ -179,15 +182,21 @@ public class Evaluator {
     }
 
     boolean isMatch(RdRow rd, RmRow rm) {
-        switch (rd.refType){
-            case MOVE_FILE:
-                //if(rd.localNameBefore.contains(rm.) )
-                break;
-        }
+        boolean equalBeforeLocation = equalLocation(rd.locationBefore, rm.locationBefore);
+        boolean equalBeforeName = rd.localNameBefore.equals(rm.localNameBefore);
+        boolean equalAfterLocation = equalLocation(rd.locationAfter, rm.locationAfter);
+        boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
 
         return rd.commit.equals(this.commit)
                 && rm.refType.equals(rd.refType)
-                ;
+                && equalBeforeLocation
+                && equalBeforeName
+                && equalAfterLocation
+                && equalAfterName;
+    }
+
+    private boolean equalLocation(String rdLocation, String rmLocation) {
+        return rdLocation.equals(rmLocation);
     }
 
     class ComparisonResult {

@@ -10,6 +10,15 @@ public class Ref {
     String repository;
     String commit;
     RefType refType;
+    String locationBefore;
+    String localNameBefore;
+    String locationAfter;
+    String localNameAfter;
+
+    @Override
+    public String toString() {
+        return refType.toString() + ' ' + locationBefore + " " + localNameBefore + " " + locationAfter + " " + localNameAfter;
+    }
 
     enum RefType {
 
@@ -35,6 +44,7 @@ public class Ref {
         RENAME_VARIABLE;
 
         public static Map<String, RefType> fromStringMap = new HashMap<>();
+
         static {
             fromStringMap.put("MOVE_FUNCTION", MOVE_FUNCTION);
             fromStringMap.put("RENAME_FUNCTION", RENAME_FUNCTION);
