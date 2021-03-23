@@ -1,7 +1,7 @@
-12:46:49.293 [main] INFO  io.jsrminer.JSRefactoringMiner 	 project	commitId	RefactoringType	LocationBefore	NameBefore	LocationAfter	NameAfter
-12:47:13.265 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/alias.js:0-441	alias.js	scripts/alias.js:0-441	alias.js
-12:47:13.266 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/build.js:0-2193	build.js	scripts/build.js:0-2193	build.js
-12:47:13.266 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/config.js:0-6426	config.js	scripts/config.js:0-6426	config.js
-12:47:13.267 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/gen-release-note.js:0-434	gen-release-note.js	scripts/gen-release-note.js:0-434	gen-release-note.js
-12:47:13.267 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/get-weex-version.js:0-664	get-weex-version.js	scripts/get-weex-version.js:0-664	get-weex-version.js
-12:47:13.268 [main] INFO  io.jsrminer.JSRefactoringMiner 	 vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/setup.js:0-363	setup.js	scripts/setup.js:0-363	setup.js
+12:46:49.293 [main] INFO  io.jsrminer.JSRefactoringMiner 	project	commitId	RefactoringType	LocationBefore	NameBefore	LocationAfter	NameAfter
+12:47:13.265 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/alias.js:0-441	alias.js	scripts/alias.js:0-441	alias.js
+12:47:13.266 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/build.js:0-2193	build.js	scripts/build.js:0-2193	build.js
+12:47:13.266 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/config.js:0-6426	config.js	scripts/config.js:0-6426	config.js
+12:47:13.267 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/gen-release-note.js:0-434	gen-release-note.js	scripts/gen-release-note.js:0-434	gen-release-note.js
+12:47:13.267 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/get-weex-version.js:0-664	get-weex-version.js	scripts/get-weex-version.js:0-664	get-weex-version.js
+12:47:13.268 [main] INFO  io.jsrminer.JSRefactoringMiner 	vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/setup.js:0-363	setup.js	scripts/setup.js:0-363	setup.js

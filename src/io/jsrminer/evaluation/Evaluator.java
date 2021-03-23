@@ -1,7 +1,5 @@
 package io.jsrminer.evaluation;
 
-import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.RefactoringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,26 +15,49 @@ public class Evaluator {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     final String rdEvaluationFile = "resources\\evaluation\\rd_eval.txt";
     final String rmEvaluationFile = "resources\\evaluation\\rm_eval_data.txt";
-    private final String project;
-    private final String commit;
     EvaluationDataSet<RdRow> rdDataSet = new EvaluationDataSet<>();
     EvaluationDataSet<RmRow> rmDataSet = new EvaluationDataSet<>();
 
-    public Evaluator(String project, String commit) {
-        this.project = project;
-        this.commit = commit;
+    public Evaluator() {
     }
 
     public static void main(String[] args) {
-        String repoPath = "E:\\PROJECTS_REPO\\vue";
-        String commitId = "144a4dd860b20ca48263bac150286f627e08d953";
-
-        new Evaluator("vue", commitId).evaluate();
+        new Evaluator().evaluateAll();
     }
 
-    public void evaluate() {
+    public void evaluateAll() {
+        DataSetDiff diff = new DataSetDiff();
         loadDatasets();
-        diff();
+        for (var projectEntry :
+                rdDataSet.projectCommitsMap.entrySet()) {
+            var project = projectEntry.getKey();
+            var commitMap = projectEntry.getValue();
+            var rmProjectMap = rmDataSet.projectCommitsMap.get(project);
+
+            if (rmProjectMap == null) {
+                //not found
+                diff.registerProjectNotReportedByRm(project);
+            } else {
+                for (var commitEntry : commitMap.entrySet()) {
+                    var rdCommit = commitEntry.getKey();
+                    var rmCommitRefList = rmProjectMap.get(rdCommit);
+                    if (rmCommitRefList == null) {
+                        // not found
+                        diff.registerCommitNotReportedByRm(project, rdCommit);
+                    } else {
+                        var commitDiff = diff(project, rdCommit);
+                        diff.registerCommitDiff(commitDiff);
+                    }
+                }
+            }
+        }
+
+        System.out.println(diff.toString());
+    }
+
+    public void evaluate(String project, String commit) {
+        loadDatasets();
+        diff(project, commit);
     }
 
     public void loadDatasets() {
@@ -44,13 +65,16 @@ public class Evaluator {
         loadRmData(this.rmEvaluationFile);
     }
 
-    public void diff() {
-        var rdRefs = rdDataSet.getRefsInCommit(commit);
+    public CommitRefactoringsDiff diff(String project, String commit) {
+        var rdRefs = rdDataSet.projectCommitsMap
+                .get(project)
+                .get(commit);
         var rmRefs = rmDataSet.getRefsInCommit(commit);
-        diffCommitRefs(rdRefs, rmRefs);
+        var result = diffCommitRefs(rdRefs, rmRefs);
+        return result;
     }
 
-    private ComparisonResult diffCommitRefs(List<RdRow> rdRefs, List<RmRow> rmRefs) {
+    private CommitRefactoringsDiff diffCommitRefs(List<RdRow> rdRefs, List<RmRow> rmRefs) {
 
         boolean matchFound;
 
@@ -69,13 +93,14 @@ public class Evaluator {
                     .add(ref);
         }
 
-        ComparisonResult result = diffRefTypeMaps(rdRefTypeMap, rmRefTypeMap);
+        CommitRefactoringsDiff result = diffRefTypeMaps(rdRefTypeMap, rmRefTypeMap);
 
         return result;
     }
 
-    private ComparisonResult diffRefTypeMaps(Map<Ref.RefType, List<RdRow>> rdRefTypeMap, Map<Ref.RefType, List<RmRow>> rmRefTypeMap) {
-        ComparisonResult result = new ComparisonResult();
+    private CommitRefactoringsDiff diffRefTypeMaps(Map<Ref.RefType, List<RdRow>> rdRefTypeMap, Map<Ref.RefType, List<RmRow>> rmRefTypeMap) {
+        var commitID = rdRefTypeMap.values().stream().findAny().get().get(0).commit;
+        CommitRefactoringsDiff result = new CommitRefactoringsDiff(commitID);
 
         for (var rdEntry : rdRefTypeMap.entrySet()) {
             var refType = rdEntry.getKey();
@@ -85,14 +110,14 @@ public class Evaluator {
             if (rmRefactorings != null) {
                 matchSameTypeRefactorings(rdRefactorings, rmRefactorings, result);
             } else {
-                result.totalMissedInRdTypes.put(refType, rdRefactorings);
+                result.registerCompletelyUnmatchedTypeRefsInRd(refType, rdRefactorings);
             }
         }
 
         return result;
     }
 
-    private void matchSameTypeRefactorings(List<RdRow> rdRefactorings, List<RmRow> rmRefactorings, ComparisonResult result) {
+    private void matchSameTypeRefactorings(List<RdRow> rdRefactorings, List<RmRow> rmRefactorings, CommitRefactoringsDiff result) {
         boolean matchFound;
         RdRow rdRef;
         RmRow rmRef;
@@ -112,20 +137,20 @@ public class Evaluator {
             }
 
             if (matchFound) {
-                result.matchedCount++;
+                result.registerMatched(rdRef);
             } else {
-                result.unmatchedCount++;
-                result.unmatchedRds.computeIfAbsent(rdRef.refType, key -> new ArrayList<>()).add(rdRef);
+                result.registerUnmatchedInRd(rdRef);
             }
         }
     }
 
     private void loadRdData(String filePath) {
-        try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
-            stream.skip(1).forEach(line -> {
-                var row = processRdRow(line);
+        try {
+            var lines = Files.readAllLines(Paths.get(filePath));
+            for (int i = 1; i < lines.size(); i++) {
+                var row = processRdRow(lines.get(i), i);
                 rdDataSet.reportRow(row);
-            });
+            }
 
         } catch (IOException ex) {
             log.error(ex.getMessage());
@@ -133,19 +158,20 @@ public class Evaluator {
     }
 
     private void loadRmData(String filePath) {
-        try (Stream<String> stream = Files.lines(Paths.get(filePath))) {
-            stream.skip(1).forEach(line -> {
-                var row = parseRmRefactoring(line);
+        try {
+            var lines = Files.readAllLines(Paths.get(filePath));
+            for (int i = 1; i < lines.size(); i++) {
+                var row = parseRmRefactoring(lines.get(i), i);
                 rmDataSet.reportRow(row);
-            });
-
+            }
         } catch (IOException ex) {
             log.error(ex.getMessage());
         }
     }
 
-    private RmRow parseRmRefactoring(String line) {
+    private RmRow parseRmRefactoring(String line, int lineNo) {
         var row = new RmRow();
+        row.lineNo = lineNo;
         var tokens = line.split("\t");
         row.repository = tokens[1];
         row.commit = tokens[2];
@@ -157,9 +183,9 @@ public class Evaluator {
         return row;
     }
 
-    private RdRow processRdRow(String line) {
+    private RdRow processRdRow(String line, int lineNo) {
         var row = new RdRow();
-
+        row.lineNo = lineNo;
         var tokens = line.split("\t");
 
         row.repository = tokens[0];
@@ -187,7 +213,7 @@ public class Evaluator {
         boolean equalAfterLocation = equalLocation(rd.locationAfter, rm.locationAfter);
         boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
 
-        return rd.commit.equals(this.commit)
+        return rd.commit.equals(rm.commit)
                 && rm.refType.equals(rd.refType)
                 && equalBeforeLocation
                 && equalBeforeName
@@ -197,30 +223,5 @@ public class Evaluator {
 
     private boolean equalLocation(String rdLocation, String rmLocation) {
         return rdLocation.equals(rmLocation);
-    }
-
-    class ComparisonResult {
-        Map<Ref.RefType, List<RdRow>> totalMissedInRdTypes = new HashMap<>();
-        Map<Ref.RefType, List<RdRow>> totalMissedInRmTypes = new HashMap<>();
-
-        Map<Ref.RefType, List<RdRow>> unmatchedRds = new HashMap<>();
-        Map<Ref.RefType, List<RmRow>> unmatchedRms = new HashMap<>();
-        int unmatchedCount = 0;
-        int matchedCount = 0;
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-
-            if (totalMissedInRdTypes.size() > 0) {
-                builder.append("Missed Refactorings Type in RD: ");
-                builder.append(totalMissedInRdTypes.keySet().toString());
-                builder.append(System.lineSeparator());
-            }
-            builder.append("Unmatched Count: " + unmatchedCount + "\n");
-            builder.append("Matched Count: " + matchedCount + "\n");
-
-            return builder.toString();
-        }
     }
 }

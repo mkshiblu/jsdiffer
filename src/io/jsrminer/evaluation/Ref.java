@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Ref {
+    int lineNo;
     String repository;
     String commit;
     RefType refType;
