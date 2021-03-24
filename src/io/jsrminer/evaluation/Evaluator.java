@@ -1,5 +1,6 @@
 package io.jsrminer.evaluation;
 
+import io.jsrminer.sourcetree.SourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,13 +174,13 @@ public class Evaluator {
         var row = new RmRow();
         row.lineNo = lineNo;
         var tokens = line.split("\t");
-        row.repository = tokens[1];
-        row.commit = tokens[2];
-        row.refType = toRefType(tokens[3].replaceAll("(?i)method", "function"));
-        row.locationBefore = tokens[4];
-        row.localNameBefore = tokens[5];
-        row.locationAfter = tokens[6];
-        row.localNameAfter = tokens[7];
+        row.repository = tokens[0];
+        row.commit = tokens[1];
+        row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
+        row.setLocationBefore(tokens[3]);
+        row.localNameBefore = tokens[4];
+        row.setLocationAfter(tokens[5]);
+        row.localNameAfter = tokens[6];
         return row;
     }
 
@@ -191,9 +192,9 @@ public class Evaluator {
         row.repository = tokens[0];
         row.commit = tokens[1];
         row.nodeType = tokens[3];
-        row.locationBefore = tokens[4];
+        row.setLocationBefore(tokens[4]);
         row.localNameBefore = tokens[5];
-        row.locationAfter = tokens[6];
+        row.setLocationAfter(tokens[6]);
         row.localNameAfter = tokens[7];
         row.setRefactoring(tokens[2]);
         row.refType = toRefType(tokens[2] + "_" + row.nodeType);
@@ -208,11 +209,10 @@ public class Evaluator {
     }
 
     boolean isMatch(RdRow rd, RmRow rm) {
-        boolean equalBeforeLocation = equalLocation(rd.locationBefore, rm.locationBefore);
+        boolean equalBeforeLocation = equalLocation(rd.getLocationBefore(), rm.getLocationBefore());
         boolean equalBeforeName = rd.localNameBefore.equals(rm.localNameBefore);
-        boolean equalAfterLocation = equalLocation(rd.locationAfter, rm.locationAfter);
+        boolean equalAfterLocation = equalLocation(rd.getLocationAfter(), rm.getLocationAfter());
         boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
-
         return rd.commit.equals(rm.commit)
                 && rm.refType.equals(rd.refType)
                 && equalBeforeLocation
@@ -221,7 +221,8 @@ public class Evaluator {
                 && equalAfterName;
     }
 
-    private boolean equalLocation(String rdLocation, String rmLocation) {
-        return rdLocation.equals(rmLocation);
+    private boolean equalLocation(SourceLocation rdLocation, SourceLocation rmLocation) {
+        return rdLocation.start == rmLocation.start && rdLocation.end == rmLocation.end
+                && rdLocation.getFilePath().equals(rmLocation.getFilePath());
     }
 }

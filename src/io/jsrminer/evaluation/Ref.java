@@ -1,6 +1,7 @@
 package io.jsrminer.evaluation;
 
 import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.SourceLocation;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -11,14 +12,28 @@ public class Ref {
     String repository;
     String commit;
     RefType refType;
-    String locationBefore;
+
     String localNameBefore;
-    String locationAfter;
     String localNameAfter;
+
+    private SourceLocation locationBefore;
+    private SourceLocation locationAfter;
+    private String locationBeforeStr;
+    private String locationAfterStr;
 
     @Override
     public String toString() {
-        return refType.toString() + ' ' + locationBefore + " " + localNameBefore + " " + locationAfter + " " + localNameAfter;
+        StringBuilder builder = new StringBuilder(200);
+        builder.append(refType.toString());
+        builder.append(" (");
+        builder.append(locationBeforeStr);
+        builder.append(") ");
+        builder.append(localNameBefore);
+        builder.append(" (");
+        builder.append(locationAfterStr);
+        builder.append(") ");
+        builder.append(localNameAfter);
+        return builder.toString();
     }
 
     enum RefType {
@@ -67,5 +82,33 @@ public class Ref {
             fromStringMap.put("RENAME_PARAMETER", RENAME_PARAMETER);
             fromStringMap.put("RENAME_VARIABLE", RENAME_VARIABLE);
         }
+    }
+
+
+    private SourceLocation toSourceLocation(String location) {
+        var splitted = location.split(":");
+        String filePath = splitted[0];
+        var startEndSplitted = splitted[1].split("-");
+        var start = Integer.parseInt(startEndSplitted[0]);
+        var end = Integer.parseInt(startEndSplitted[1]);
+        return new SourceLocation(filePath, 0, 0, 0, 0, start, end);
+    }
+
+    public void setLocationBefore(String location) {
+        this.locationBeforeStr = location;
+        locationBefore = toSourceLocation(location);
+    }
+
+    public void setLocationAfter(String location) {
+        this.locationAfterStr = location;
+        locationAfter = toSourceLocation(location);
+    }
+
+    public SourceLocation getLocationBefore() {
+        return locationBefore;
+    }
+
+    public SourceLocation getLocationAfter() {
+        return locationAfter;
     }
 }

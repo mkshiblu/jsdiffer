@@ -1,12 +1,8 @@
 package io.jsrminer.evaluation;
 
-public class RdRow extends Ref{
+public class RdRow extends Ref {
     private String refactoring;
     String nodeType;
-
-    public String getFileAfter() {
-        return locationAfter.split(":")[0];
-    }
 
     public String getRefactoring() {
         return refactoring;
@@ -16,8 +12,8 @@ public class RdRow extends Ref{
         this.refactoring = refactoring;
     }
 
-    @Override
-    public String toString() {
-        return locationAfter + " " + commit;
-    }
+//    @Override
+//    public String toString() {
+//        return "(" + getLocationAfter().start + "-" + getLocationAfter().end + ") " + commit;
+//    }
 }

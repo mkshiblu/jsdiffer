@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
@@ -73,10 +74,13 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 //            System.out.println(r.toString());
 //        });
 
-        log.info("project\tcommitId\tRefactoringType\tLocationBefore\tNameBefore\tLocationAfter\tNameAfter");
+
         final StringBuilder builder = new StringBuilder();
+        builder.append(refactorings.size() + " Refactorings\n");
+        builder.append("project\tcommitId\tRefactoringType\tLocationBefore\tNameBefore\tLocationAfter\tNameAfter");
+        builder.append("\n");
         refactorings.forEach(r -> {
-            builder.setLength(0);
+            //builder.setLength(0);
             builder.append(project);
             builder.append("\t");
             builder.append(commitId);
@@ -85,8 +89,10 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             builder.append("\t");
             var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(r);
             builder.append(afterBeforeInfo);
-            log.info(builder.toString());
+            builder.append("\n");
         });
+
+        log.info(builder.toString());
     }
 
     @Override
@@ -274,7 +280,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
                     StringWriter writer = new StringWriter();
-                    IOUtils.copy(loader.openStream(), writer, Charset.defaultCharset());
+                    IOUtils.copy(loader.openStream(), writer, StandardCharsets.UTF_8);
                     fileContents.put(pathString, writer.toString());
                 }
                 populateSubDirectories(repositoryDirectories, pathString, '/');

@@ -24,9 +24,8 @@ public class DataSetDiff {
 
     public String toString() {
         StringBuilder builder = new StringBuilder(128000);
-        var projectsMissed = String.join(",", projectNotReportedByRm);
         builder.append(projectNotReportedByRm.size() + " Missed Projects:\n");
-        builder.append(projectsMissed);
+        builder.append(projectNotReportedByRm.toString());
         builder.append("\n");
 
         builder.append("Missed Commits: \n");
