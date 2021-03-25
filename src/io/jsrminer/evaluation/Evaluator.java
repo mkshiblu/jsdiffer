@@ -1,5 +1,6 @@
 package io.jsrminer.evaluation;
 
+import com.google.javascript.jscomp.jarjar.com.google.common.base.Strings;
 import io.jsrminer.sourcetree.SourceLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,9 +77,6 @@ public class Evaluator {
     }
 
     private CommitRefactoringsDiff diffCommitRefs(List<RdRow> rdRefs, List<RmRow> rmRefs) {
-
-        boolean matchFound;
-
         var rdRefTypeMap = new HashMap<Ref.RefType, List<RdRow>>();
         var rmRefTypeMap = new HashMap<Ref.RefType, List<RmRow>>();
 
@@ -149,7 +147,7 @@ public class Evaluator {
         try {
             var lines = Files.readAllLines(Paths.get(filePath));
             for (int i = 1; i < lines.size(); i++) {
-                var row = processRdRow(lines.get(i), i);
+                var row = processRdRow(lines.get(i), i + 1);
                 rdDataSet.reportRow(row);
             }
 
@@ -162,7 +160,7 @@ public class Evaluator {
         try {
             var lines = Files.readAllLines(Paths.get(filePath));
             for (int i = 1; i < lines.size(); i++) {
-                var row = parseRmRefactoring(lines.get(i), i);
+                var row = parseRmRefactoring(lines.get(i), i + 1);
                 rmDataSet.reportRow(row);
             }
         } catch (IOException ex) {
@@ -177,10 +175,20 @@ public class Evaluator {
         row.repository = tokens[0];
         row.commit = tokens[1];
         row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
-        row.setLocationBefore(tokens[3]);
-        row.localNameBefore = tokens[4];
-        row.setLocationAfter(tokens[5]);
-        row.localNameAfter = tokens[6];
+
+
+        if (tokens.length > 3) {
+
+            if (!Strings.isNullOrEmpty(tokens[3]))
+                row.setLocationBefore(tokens[3]);
+
+            row.localNameBefore = tokens[4];
+
+            if (!Strings.isNullOrEmpty(tokens[3]))
+                row.setLocationAfter(tokens[5]);
+
+            row.localNameAfter = tokens[6];
+        }
         return row;
     }
 

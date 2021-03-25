@@ -39,7 +39,7 @@ public class DataSetDiff {
             builder.append("\n");
         }
 
-        builder.append("Refactorings at Commits: ");
+        builder.append("Refactorings at " + commitDiffs.size() + " Commits: ");
         builder.append("\n");
 
         //builder.append("commit\tMatchedCount\tUnmatchedCount");

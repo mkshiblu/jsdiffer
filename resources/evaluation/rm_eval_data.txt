@@ -7,3 +7,11 @@ vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server
 vue	015a31890250e93564959de97372be7bd6195f62	Rename Method	packages/vue-server-renderer/build.js:99170-100768	model$1	packages/vue-server-renderer/build.js:101469-103067	model$2
 vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server-renderer/build.js:98907-98912	model	packages/vue-server-renderer/build.js:101202-101209	model$1
 vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server-renderer/build.js:175461-175470	renderFns	packages/vue-server-renderer/build.js:178798-178805	options
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-665	transformVBind	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-694	preTransformVBind
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-915	transformVIf	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-918	preTransformVIf

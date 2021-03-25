@@ -1,23 +1,39 @@
 package io.jsrminer;
 
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.MoveFileRefactoring;
-import io.jsrminer.refactorings.RenameFileRefactoring;
-import io.jsrminer.refactorings.RenameOperationRefactoring;
-import io.jsrminer.refactorings.RenameVariableRefactoring;
+import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 
 public class RefactoringDisplayFormatter {
+    private static class AfterBeforeInfo {
+        private final String nameBefore;
+        private final String nameAfter;
+        private final String locationBefore;
+        private final String locationAfter;
 
-    private interface AfterBeforeInfo {
-        String getLocalNameBefore();
+        AfterBeforeInfo(String nameBefore, String nameAfter, String locationBefore, String locationAfter) {
+            this.nameBefore = nameBefore;
+            this.nameAfter = nameAfter;
+            this.locationBefore = locationBefore;
+            this.locationAfter = locationAfter;
+        }
 
-        String getLocalNameAfter();
+        public String getLocalNameBefore() {
+            return nameBefore;
+        }
 
-        String getLocationBefore();
+        public String getLocalNameAfter() {
+            return nameAfter;
+        }
 
-        String getLocationAfter();
+        public String getLocationBefore() {
+            return locationBefore;
+        }
+
+        public String getLocationAfter() {
+            return locationAfter;
+        }
     }
 
     public static String formatAsAfterBefore(IRefactoring refactoring) {
@@ -42,70 +58,36 @@ public class RefactoringDisplayFormatter {
         switch (refactoring.getRefactoringType()) {
             case MOVE_FILE:
                 var moveRefactoring = (MoveFileRefactoring) refactoring;
-                afterBeforeInfo = new AfterBeforeInfo() {
-                    @Override
-                    public String getLocalNameBefore() {
-                        return moveRefactoring.getOriginalFileName();
-                    }
-
-                    public String getLocalNameAfter() {
-                        return moveRefactoring.getMovedFileName();
-                    }
-
-                    public String getLocationBefore() {
-                        return moveRefactoring.getOriginalPath() + ":0-" + (moveRefactoring.getOriginalFile().getSourceLocation().end + 1);
-                    }
-
-                    public String getLocationAfter() {
-                        return moveRefactoring.getMovedToPath() + ":0-" + (moveRefactoring.getMovedFile().getSourceLocation().end + 1);
-                    }
-                };
+                afterBeforeInfo = new AfterBeforeInfo(
+                        moveRefactoring.getOriginalFileName()
+                        , moveRefactoring.getMovedFileName()
+                        , (moveRefactoring.getOriginalPath() + ":0-" + (moveRefactoring.getOriginalFile().getSourceLocation().end + 1))
+                        , moveRefactoring.getMovedToPath() + ":0-" + (moveRefactoring.getMovedFile().getSourceLocation().end + 1)
+                );
                 break;
             case RENAME_METHOD:
                 var renameFunctionRefactoring = (RenameOperationRefactoring) refactoring;
-                afterBeforeInfo = new AfterBeforeInfo() {
-                    @Override
-                    public String getLocalNameBefore() {
-                        return renameFunctionRefactoring.getOriginalOperation().getName();
-                    }
-
-                    public String getLocalNameAfter() {
-                        return renameFunctionRefactoring.getRenamedOperation().getName();
-                    }
-
-                    public String getLocationBefore() {
-                        return renameFunctionRefactoring.getOriginalOperation().getSourceLocation().getFilePath()
-                                + getContainerStartAndEndString(renameFunctionRefactoring.getOriginalOperation());
-                    }
-
-                    public String getLocationAfter() {
-                        return renameFunctionRefactoring.getRenamedOperation().getSourceLocation().getFilePath()
-                                + getContainerStartAndEndString(renameFunctionRefactoring.getRenamedOperation());
-                    }
-                };
+                afterBeforeInfo = new AfterBeforeInfo(
+                        renameFunctionRefactoring.getOriginalOperation().getName()
+                        , renameFunctionRefactoring.getRenamedOperation().getName()
+                        , renameFunctionRefactoring.getOriginalOperation().getSourceLocation().getFilePath()
+                        + getContainerStartAndEndString(renameFunctionRefactoring.getOriginalOperation())
+                        , renameFunctionRefactoring.getRenamedOperation().getSourceLocation().getFilePath()
+                        + getContainerStartAndEndString(renameFunctionRefactoring.getRenamedOperation())
+                );
                 break;
             case RENAME_VARIABLE:
                 var renameVariableRefactoring = (RenameVariableRefactoring) refactoring;
-                afterBeforeInfo = new AfterBeforeInfo() {
-                    @Override
-                    public String getLocalNameBefore() {
-                        return renameVariableRefactoring.getOriginalVariable().variableName;
-                    }
-
-                    public String getLocalNameAfter() {
-                        return renameVariableRefactoring.getRenamedVariable().variableName;
-                    }
-
-                    public String getLocationBefore() {
-                        return renameVariableRefactoring.getOriginalVariable().getSourceLocation().getFilePath()
-                                + getLocationStartAndEndString(renameVariableRefactoring.getOriginalVariable().getSourceLocation());
-                    }
-
-                    public String getLocationAfter() {
-                        return renameVariableRefactoring.getRenamedVariable().getSourceLocation().getFilePath()
-                                + getLocationStartAndEndString(renameVariableRefactoring.getRenamedVariable().getSourceLocation());
-                    }
-                };
+                afterBeforeInfo = new AfterBeforeInfo(
+                        renameVariableRefactoring.getOriginalVariable().variableName
+                        , renameVariableRefactoring.getRenamedVariable().variableName
+                        , renameVariableRefactoring.getOriginalVariable().getSourceLocation().getFilePath()
+                        + getLocationStartAndEndString(renameVariableRefactoring.getOriginalVariable().getSourceLocation())
+                        , renameVariableRefactoring.getRenamedVariable().getSourceLocation().getFilePath()
+                        + getLocationStartAndEndString(renameVariableRefactoring.getRenamedVariable().getSourceLocation())
+                );
+                break;
+            case ADD_PARAMETER:
                 break;
             default:
                 throw new UnsupportedOperationException();
