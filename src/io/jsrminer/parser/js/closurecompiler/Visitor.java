@@ -24,6 +24,7 @@ public class Visitor {
         put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
 
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
+        put(EXPORT_DECLARATION, StatementsVisitor.exportDeclarationStatementProcessor);
         put(BLOCK, StatementsVisitor.blockStatementProcessor);
 
         // Choices
@@ -95,6 +96,6 @@ public class Visitor {
     }
 
     public static boolean isIgnored(ParseTree parseTree) {
-        return Config.ignoredNodes.contains(parseTree.type);
+        return ParserConfig.ignoredNodes.contains(parseTree.type);
     }
 }

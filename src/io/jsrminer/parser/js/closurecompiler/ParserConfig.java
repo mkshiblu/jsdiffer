@@ -1,25 +1,29 @@
 package io.jsrminer.parser.js.closurecompiler;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import io.jsrminer.sourcetree.CodeElementType;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Config {
-    public static final Set<ParseTreeType> ignoredNodes = new HashSet<>() {{
-        add(ParseTreeType.IMPORT_DECLARATION);
-        add(ParseTreeType.EXPORT_DECLARATION);
-        add(ParseTreeType.MISSING_PRIMARY_EXPRESSION);
-        add(ParseTreeType.EMPTY_STATEMENT);
-        add(ParseTreeType.CLASS_DECLARATION);
-        add(ParseTreeType.TEMPLATE_LITERAL_EXPRESSION);
-        add(ParseTreeType.ITER_SPREAD);
-    }};
+import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
+
+public class ParserConfig {
+    public static final EnumSet<ParseTreeType> ignoredNodes = EnumSet.of(
+            IMPORT_DECLARATION
+            , MISSING_PRIMARY_EXPRESSION
+            , EMPTY_STATEMENT
+            , CLASS_DECLARATION
+            , TEMPLATE_LITERAL_EXPRESSION
+            , ITER_SPREAD
+    );
 
     public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
         put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
+        put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
 
         put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
         put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
@@ -60,7 +64,6 @@ public class Config {
     }};
 
     /**
-     *
      * require('./core/core.js')(p1, p2)
      */
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;

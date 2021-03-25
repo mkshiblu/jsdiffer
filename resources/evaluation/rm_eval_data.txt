@@ -13,5 +13,11 @@ vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/text.js:294-553	transformText	src/platforms/weex/compiler/modules/recycle-list/text.js:294-583	postTransformText
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-665	transformVBind	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-694	preTransformVBind
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-for.js:139-911	transformVFor	src/platforms/weex/compiler/modules/recycle-list/v-for.js:139-914	preTransformVFor
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-915	transformVIf	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-918	preTransformVIf
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter

@@ -11,11 +11,10 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
-import io.rminerx.core.entities.Container;
 import io.rminerx.core.entities.DeclarationContainer;
 
-import static io.jsrminer.parser.js.closurecompiler.Config.appendSemicolonToStatementIfNotPresent;
-import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
+import static io.jsrminer.parser.js.closurecompiler.ParserConfig.appendSemicolonToStatementIfNotPresent;
+import static io.jsrminer.parser.js.closurecompiler.ParserConfig.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
 

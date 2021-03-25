@@ -1,10 +1,9 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ExpressionStatementTree;
-import com.google.javascript.jscomp.parsing.parser.trees.VariableStatementTree;
+import com.google.javascript.jscomp.parsing.parser.trees.*;
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.INode;
 
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
@@ -38,6 +37,25 @@ public class StatementsVisitor {
             var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
             Visitor.visitExpression(tree.expression, leaf, container);
             return leaf;
+        }
+    };
+
+    /**
+     * An expression statement such as x = "4";
+     */
+    public static final NodeVisitor<Object, ExportDeclarationTree, BlockStatement> exportDeclarationStatementProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public Object visit(ExportDeclarationTree tree, BlockStatement parent, IContainer container) {
+            if (tree.declaration.type == ParseTreeType.FUNCTION_DECLARATION) {
+                var functionDeclarationTree = tree.declaration.asFunctionDeclaration();
+                return Visitor.visitStatement(functionDeclarationTree, parent, container);
+
+            } else {
+                var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
+                Visitor.visitExpression(tree.declaration, leaf, container);
+                return leaf;
+            }
         }
     };
 
