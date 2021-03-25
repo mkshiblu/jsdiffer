@@ -1,17 +1,18 @@
-package io.jsrminer.parser.js.closurecompiler.statementsvisitor;
+package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.BaseTest;
 import io.jsrminer.io.FileUtil;
-import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.entities.SourceFile;
 
 public enum StatementsDataProvider {
     LOOPS("loops.js"),
-    VARIABLE_DECLARATIONS("variable_declarations.js");
+    VARIABLE_DECLARATIONS("variable_declarations.js"),
+    OBJECT_EXPRESSIONS("objects.js"),
+    CLASS_DECLARATIONS("class_declarations.js");
     ProgramTree programTree;
     SourceFile container;
     BlockStatement dummyBodyBlock;

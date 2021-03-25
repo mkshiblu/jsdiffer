@@ -1,6 +1,7 @@
 package io.jsrminer.refactorings;
 
 import io.jsrminer.BaseTest;
+import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -21,18 +22,19 @@ public class RenameOperationRefactoringTest extends BaseTest {
 
     @BeforeAll
     public static void setup() {
-        refactorings = RefactoringDataProvider.getRefactoringsOfType(RefactoringType.RENAME_METHOD);
+        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src1\\RenameFunction.js",
+                getRootResourceDirectory() + "src2\\RenameFunction.js");
         renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
     }
 
     @Test
     void testRefactoringCount() {
-        assertEquals(1, refactorings.size());
+        assertEquals(5, refactorings.size());
     }
 
     @Test
     void testMapperMappingsCount() {
-        assertEquals(2, renameOperationRefactoring.getBodyMapper().getMappings().size());
+        assertEquals(7, renameOperationRefactoring.getBodyMapper().getMappings().size());
     }
 
     @Test
@@ -42,12 +44,11 @@ public class RenameOperationRefactoringTest extends BaseTest {
         CodeFragmentMapping first = iterator.next();
         CodeFragmentMapping second = iterator.next();
 
+        assertTrue(second.fragment1.getText().startsWith("return hyphenate"));
+        assertTrue(second.fragment2.getText().startsWith("return hyphenate"));
 
-        assertTrue(first.fragment1.getText().startsWith("let d ="));
-        assertTrue(first.fragment2.getText().startsWith("let d ="));
-
-        assertEquals("let z = '34';", second.fragment1.getText());
-        assertEquals("let z = 5;", second.fragment2.getText());
+        assertEquals("let z = 10;", first.fragment1.getText());
+        assertEquals("let z = 5;", first.fragment2.getText());
     }
 
     @Test
@@ -56,8 +57,8 @@ public class RenameOperationRefactoringTest extends BaseTest {
         CodeFragmentMapping first = iterator.next();
         CodeFragmentMapping second = iterator.next();
 
-        assertEquals(0, first.getReplacements().size());
-        assertEquals(1, second.getReplacements().size());
+        assertEquals(1, first.getReplacements().size());
+        assertEquals(0, second.getReplacements().size());
     }
 
     @Test
@@ -66,9 +67,9 @@ public class RenameOperationRefactoringTest extends BaseTest {
         CodeFragmentMapping first = iterator.next();
         CodeFragmentMapping second = iterator.next();
 
-        Replacement replacement = second.getReplacements().iterator().next();
+        Replacement replacement = first.getReplacements().iterator().next();
 
-        assertEquals("'34'", replacement.getBefore());
+        assertEquals("10", replacement.getBefore());
         assertEquals("5", replacement.getAfter());
         assertEquals(ReplacementType.NUMBER_LITERAL, replacement.getType());
     }

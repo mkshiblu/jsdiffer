@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
@@ -62,16 +63,36 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
-        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
+//        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
+//        refactorings.forEach(r -> {
+//            System.out.print(project);
+//            System.out.print("\t");
+//            System.out.print(commitId);
+//            System.out.print("\t");
+//            System.out.print(r.getName());
+//            System.out.print("\t");
+//            System.out.println(r.toString());
+//        });
+
+
+        final StringBuilder builder = new StringBuilder();
+        builder.append(refactorings.size() + " Refactorings\n");
+        builder.append("project\tcommitId\tRefactoringType\tLocationBefore\tNameBefore\tLocationAfter\tNameAfter");
+        builder.append("\n");
         refactorings.forEach(r -> {
-            System.out.print(project);
-            System.out.print("\t");
-            System.out.print(commitId);
-            System.out.print("\t");
-            System.out.print(r.getName());
-            System.out.print("\t");
-            System.out.println(r.toString());
+            //builder.setLength(0);
+            builder.append(project);
+            builder.append("\t");
+            builder.append(commitId);
+            builder.append("\t");
+            builder.append(r.getName());
+            builder.append("\t");
+            var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(r);
+            builder.append(afterBeforeInfo);
+            builder.append("\n");
         });
+
+        log.info(builder.toString());
     }
 
     @Override
@@ -197,7 +218,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
 
-
                 //Instant startTime = Instant.now();
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
@@ -211,7 +231,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
                 UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
-
 
                 stopWatch.stop();
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
@@ -261,19 +280,23 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
                     StringWriter writer = new StringWriter();
-                    IOUtils.copy(loader.openStream(), writer, Charset.defaultCharset());
+                    IOUtils.copy(loader.openStream(), writer, StandardCharsets.UTF_8);
                     fileContents.put(pathString, writer.toString());
                 }
-                if (isExtensionAllowed(pathString) && pathString.contains("/")) {
-                    String directory = pathString.substring(0, pathString.lastIndexOf("/"));
-                    repositoryDirectories.add(directory);
-                    //include sub-directories
-                    String subDirectory = new String(directory);
-                    while (subDirectory.contains("/")) {
-                        subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf("/"));
-                        repositoryDirectories.add(subDirectory);
-                    }
-                }
+                populateSubDirectories(repositoryDirectories, pathString, '/');
+            }
+        }
+    }
+
+    private void populateSubDirectories(Set<String> repositoryDirectories, String pathString, char pathSeparator) {
+        if (isExtensionAllowed(pathString) && pathString.indexOf(pathSeparator) != -1) {
+            String directory = pathString.substring(0, pathString.lastIndexOf(pathSeparator));
+            repositoryDirectories.add(directory);
+            //include sub-directories
+            String subDirectory = new String(directory);
+            while (subDirectory.contains("/")) {
+                subDirectory = subDirectory.substring(0, subDirectory.lastIndexOf(pathSeparator));
+                repositoryDirectories.add(subDirectory);
             }
         }
     }

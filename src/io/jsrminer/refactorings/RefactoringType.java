@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 public enum RefactoringType {
 
     EXTRACT_OPERATION("Extract Method", "Extract Method (.+) extracted from (.+) in class (.+)", 2),
+    RENAME_FILE("Rename File", "Rename File (.+) renamed to (.+)"),
+    MOVE_AND_RENAME_FILE("Move And Rename File", "Move And Rename File (.+) from (.+) to (.+)"),
     RENAME_CLASS("Rename Class", "Rename Class (.+) renamed to (.+)"),
     MOVE_ATTRIBUTE("Move Attribute", "Move Attribute (.+) from class (.+) to (.+) from class (.+)"),
     MOVE_RENAME_ATTRIBUTE("Move And Rename Attribute", "Move And Rename Attribute (.+) renamed to (.+) and moved from class (.+) to class (.+)"),
@@ -16,10 +18,11 @@ public enum RefactoringType {
     RENAME_METHOD("Rename Method", "Rename Method (.+) renamed to (.+) in class (.+)"),
     INLINE_OPERATION("Inline Method", "Inline Method (.+) inlined to (.+) in class (.+)", 2),
     MOVE_OPERATION("Move Method", "Move Method (.+) from class (.+) to (.+) from class (.+)"),
-    MOVE_AND_RENAME_OPERATION("Move And Rename Method", "Move And Rename Method (.+) from class (.+) to (.+) from class (.+)"),
+    MOVE_AND_RENAME_OPERATION("Move And Rename Method", "Move And Rename Method (.+) from  (.+) to (.+) from (.+)"),
     PULL_UP_OPERATION("Pull Up Method", "Pull Up Method (.+) from class (.+) to (.+) from class (.+)", 1, 2),
     MOVE_CLASS("Move Class", "Move Class (.+) moved to (.+)"),
     MOVE_RENAME_CLASS("Move And Rename Class", ".+"),
+    MOVE_FILE("Move File", "Move file (.+)  to (.+)"),
     MOVE_SOURCE_FOLDER("Move Source Folder", "Move Source Folder (.+) to (.+)"),
     PULL_UP_ATTRIBUTE("Pull Up Attribute", "Pull Up Attribute (.+) from class (.+) to (.+) from class (.+)", 2),
     PUSH_DOWN_ATTRIBUTE("Push Down Attribute", "Push Down Attribute (.+) from class (.+) to (.+) from class (.+)", 3),
@@ -77,7 +80,9 @@ public enum RefactoringType {
     private int[] aggregateGroups;
     public static RefactoringType[] ALL = {
             RENAME_CLASS,
+            RENAME_FILE,
             MOVE_CLASS,
+            MOVE_FILE,
             MOVE_SOURCE_FOLDER,
             RENAME_METHOD,
             EXTRACT_OPERATION,

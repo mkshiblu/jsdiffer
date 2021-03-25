@@ -33,11 +33,11 @@ public class MoveFunctionRefactoringTest extends BaseTest {
 
     @Test
     void testOriginalFile() {
-        assertEquals("dir\\dir1\\MoveFunction.js", moveOperationRefactoring.originalOperation.getParentContainerQualifiedName());
+        assertEquals("dir\\dir1\\MoveFunction.js", moveOperationRefactoring.originalOperation.getSourceLocation().getFilePath());
     }
 
     @Test
     void testTargetFile() {
-        assertEquals("dir\\dir1\\MoveTarget.js", moveOperationRefactoring.movedOperation.getParentContainerQualifiedName());
+        assertEquals("dir\\dir1\\MoveTarget.js", moveOperationRefactoring.movedOperation.getSourceLocation().getFilePath());
     }
 }

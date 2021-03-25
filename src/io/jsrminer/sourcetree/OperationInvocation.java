@@ -4,6 +4,7 @@ import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
+import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
@@ -84,7 +85,7 @@ public class OperationInvocation extends Invocation {
 //
 
 
-    public boolean matchesOperation(FunctionDeclaration operation/*
+    public boolean matchesOperation(IFunctionDeclaration operation/*
             , Map<String, UMLType> variableTypeMap, UMLModelDiff modelDiff*/) {
 //        List<UMLType> inferredArgumentTypes = new ArrayList<>();
 //

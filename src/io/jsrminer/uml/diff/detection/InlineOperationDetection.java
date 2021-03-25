@@ -6,10 +6,7 @@ import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.CallTree;
-import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.SourceFileDiff;
-import io.jsrminer.uml.diff.UMLModelDiff;
+import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.InvocationCoverage;
@@ -22,18 +19,18 @@ import java.util.Map;
 public class InlineOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> removedOperations;
-    private SourceFileDiff classDiff;
-    private UMLModelDiff modelDiff;
+    private ContainerDiff classDiff;
+    //private UMLModelDiff modelDiff;   // only needed for matching invocation using types
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     public InlineOperationDetection(FunctionBodyMapper mapper
             , List<FunctionDeclaration> removedOperations
-            , SourceFileDiff classDiff, UMLModelDiff modelDiff) {
+            , ContainerDiff classDiff/*, UMLModelDiff modelDiff*/) {
         this.mapper = mapper;
         this.removedOperations = removedOperations;
         this.classDiff = classDiff;
-        this.modelDiff = modelDiff;
+        //this.modelDiff = modelDiff;
         this.operationInvocations = getInvocationsInTargetOperationBeforeInline(mapper);
     }
 
@@ -117,8 +114,7 @@ public class InlineOperationDetection {
             parameterToArgumentMap.put(parameters.get(i).name, arguments.get(i));
         }
 
-        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, mapper, classDiff);
-        operationBodyMapper.mapRemovedOperation(parameterToArgumentMap);
+        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, mapper, parameterToArgumentMap, classDiff);
         return operationBodyMapper;
     }
 

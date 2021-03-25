@@ -7,7 +7,6 @@ import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.replacers.BooleanReplacer;
 import io.jsrminer.uml.mapping.replacement.replacers.TernaryExpressionReplacer;
 
@@ -16,6 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.jsrminer.sourcetree.JsConfig.ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT;
 import static io.jsrminer.uml.mapping.replacement.VariableReplacementWithMethodInvocation.Direction;
 
 public class ReplacementFinder {
@@ -26,21 +26,43 @@ public class ReplacementFinder {
     final FunctionDeclaration function1;
     final FunctionDeclaration function2;
     final FunctionBodyMapper bodyMapper;
-    final SourceFileDiff sourceFileDiff;
+    final ContainerDiff sourceFileDiff;
 
-    public ReplacementFinder(FunctionBodyMapper bodyMapper, SourceFileDiff sourceFileDiff) {
+    public ReplacementFinder(FunctionBodyMapper bodyMapper, ContainerDiff sourceFileDiff) {
         this.bodyMapper = bodyMapper;
         this.function1 = bodyMapper.function1;
         this.function2 = bodyMapper.function2;
         this.sourceFileDiff = sourceFileDiff;
     }
 
+    private ReplacementInfo createReplacementInfo(CodeFragment statement1
+            , CodeFragment statement2
+            , Set<? extends CodeFragment> statements1
+            , Set<? extends CodeFragment> statements2) {
+        List<? extends CodeFragment> unmatchedStatments1 = new ArrayList<>(statements1);
+        unmatchedStatments1.remove(statement1);
+        List<? extends CodeFragment> unmatchedStatements2 = new ArrayList<>(statements2);
+        unmatchedStatements2.remove(statement2);
+        return new ReplacementInfo(
+                this.bodyMapper.createArgumentizedString(statement1, statement2),
+                this.bodyMapper.createArgumentizedString(statement2, statement1),
+                unmatchedStatments1, unmatchedStatements2);
+    }
+
     public Set<Replacement> findReplacementsWithExactMatching(CodeFragment statement1
             , CodeFragment statement2
             , Map<String, String> parameterToArgumentMap
-            , ReplacementInfo replacementInfo
+            , Set<? extends CodeFragment> statements1
+            , Set<? extends CodeFragment> statements2
             , Argumentizer argumentizer) {
 
+        // Since anonymous functions or class can be potentially huge, we need to separately match them
+        if (statement1.getAnonymousFunctionDeclarations().size() > 0 || statement2.getAnonymousFunctionDeclarations().size() > 0) {
+            AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, this.bodyMapper);
+            return anonymousReplacer.replaceInAnonymousFunctions(statement1, statement2, function1, function2);
+        }
+
+        ReplacementInfo replacementInfo = createReplacementInfo(statement1, statement2, statements1, statements2);
         final CodeFragmentDiff diff = new CodeFragmentDiff(statement1, statement2);
 
         // Intersect variables
@@ -175,13 +197,7 @@ public class ReplacementFinder {
             return replacementInfo.getReplacements();
         }
 
-        // region annonymous
-        AnonymousFunctionReplacementFinder anonymousReplacer = new AnonymousFunctionReplacementFinder(parameterToArgumentMap, bodyMapper);
-        Set<Replacement> replacements = anonymousReplacer.replaceInAnonymousFunctions(statement1, statement2, function1, function2,
-                replacementInfo);
-        if (replacements != null) {
-            return replacements;
-        }
+
         // endregion
 
         // region lambda
@@ -596,8 +612,7 @@ public class ReplacementFinder {
                         VariableDeclaration v1 = statement1.findVariableDeclarationIncludingParent(s1);
                         VariableDeclaration v2 = statement2.findVariableDeclarationIncludingParent(s2);
                         if (inconsistentVariableMappingCount(statement1, statement2, v1, v2) > 1
-                        /** TODO && operation2.loopWithVariables
-                         (v1.variableName, v2.variableName) == null**/) {
+                                && function2.loopWithVariables(v1.variableName, v2.variableName) == null) {
                             replacement = null;
                         }
 
@@ -608,10 +623,10 @@ public class ReplacementFinder {
                         OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
                         OperationInvocation invokedOperationAfter = (OperationInvocation) methodInvocationMap2.get(s2).get(0);
 
-//                            if (invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
-//                                replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
-//                            }
-//
+//                        if (invokedOperationBefore.compatibleExpression(invokedOperationAfter)) {
+//                            replacement = new MethodInvocationReplacement(s1, s2, invokedOperationBefore, invokedOperationAfter, ReplacementType.METHOD_INVOCATION);
+//                        }
+
                     } else if (functionInvocations1.contains(s1) && unmatchedVariables2.contains(s2)) {
                         OperationInvocation invokedOperationBefore = (OperationInvocation) methodInvocationMap1.get(s1).get(0);
                         replacement = new VariableReplacementWithMethodInvocation(s1, s2, invokedOperationBefore, VariableReplacementWithMethodInvocation.Direction.INVOCATION_TO_VARIABLE);
@@ -655,14 +670,15 @@ public class ReplacementFinder {
     private Map<CodeFragment, Set<String>> intersectVariableDeclarationsKind(CodeFragment statement1, CodeFragment statement2) {
         List<String> kindList1 = statement1.getVariableDeclarations()
                 .stream()
+                .filter(vd -> vd.getKind() != null)
                 .map(vd -> vd.getKind().keywordName)
                 .collect(Collectors.toList());
 
         List<String> kindsList2 = statement2.getVariableDeclarations()
                 .stream()
+                .filter(vd -> vd.getKind() != null)
                 .map(vd -> vd.getKind().keywordName)
                 .collect(Collectors.toList());
-
 
         Set<String> kinds1 = new LinkedHashSet<>(kindList1);
         Set<String> kinds2 = new LinkedHashSet<>(kindsList2);
@@ -674,7 +690,7 @@ public class ReplacementFinder {
             for (int i = 0; i < kindList1.size(); i++) {
                 String kind1 = kindList1.get(i);
                 String kind2 = kindsList2.get(i);
-                if (!kind1.equals(kind2)) {
+                if (!(kind1 != null && kind1.equals(kind2))) {
                     unequalKindsInSamePositionIndex.add(kind1);
                     unequalKindsInSamePositionIndex.add(kind2);
                 }
@@ -1011,12 +1027,15 @@ public class ReplacementFinder {
                 if (Thread.interrupted()) {
                     throw new RefactoringMinerTimedOutException();
                 }
-                boolean containsMethodSignatureOfAnonymousClass1 = containsMethodSignatureOfAnonymousClass(stringA);
-                boolean containsMethodSignatureOfAnonymousClass2 = containsMethodSignatureOfAnonymousClass(stringB);
-                if (containsMethodSignatureOfAnonymousClass1 != containsMethodSignatureOfAnonymousClass2 &&
-                        this.function1.getVariableDeclaration(stringA) == null
-                        && this.function2.getVariableDeclaration(stringB) == null) {
-                    continue;
+
+                if (ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT) {
+                    boolean containsMethodSignatureOfAnonymousClass1 = containsMethodSignatureOfAnonymousClass(stringA);
+                    boolean containsMethodSignatureOfAnonymousClass2 = containsMethodSignatureOfAnonymousClass(stringB);
+                    if (containsMethodSignatureOfAnonymousClass1 != containsMethodSignatureOfAnonymousClass2 &&
+                            this.function1.getVariableDeclaration(stringA) == null
+                            && this.function2.getVariableDeclaration(stringB) == null) {
+                        continue;
+                    }
                 }
 
                 String temp = ReplacementUtil.performReplacement(replacementInfo.getArgumentizedString1(), replacementInfo.getArgumentizedString2(), stringA, stringB);
@@ -1338,7 +1357,7 @@ public class ReplacementFinder {
                         !variableDeclarations1.contains(v1)) {
                     count++;
                 }
-                if (mapping.isExactMatch()) {
+                if (mapping.isExact()) {
                     boolean containsMapping = true;
                     if (statement1 instanceof BlockStatement
                             && statement2 instanceof BlockStatement &&
@@ -1350,8 +1369,8 @@ public class ReplacementFinder {
 
                     // TODO revisit
                     if (containsMapping && (
-                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, (LeafCodeFragmentMapping) mapping)
-                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, (LeafCodeFragmentMapping) mapping))) {
+                            VariableReplacementAnalysis.bothFragmentsUseVariable(v1, mapping)
+                                    || VariableReplacementAnalysis.bothFragmentsUseVariable(v2, mapping))) {
                         count++;
                     }
                 }
@@ -2383,12 +2402,14 @@ public class ReplacementFinder {
             VariableDeclaration declaration2 = variableDeclarations2.get(0);
             if (!declaration1.getVariableName().equals(declaration2.getVariableName())) {
                 String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(s1, s2);
-                String kind1 = declaration1.getKind().keywordName;
-                String kind2 = declaration2.getKind().keywordName;
+
+                String kind1 = declaration1.getKind() == null ? "" : declaration1.getKind().keywordName;
+                String kind2 = declaration2.getKind() == null ? "" : declaration2.getKind().keywordName;
 
                 // IF not global variable, then append space
                 String composedString1 = kind1 + (kind1.isEmpty() ? "" : " ") + declaration1.getVariableName() + commonSuffix;
                 String composedString2 = kind2 + (kind2.isEmpty() ? "" : " ") + declaration2.getVariableName() + commonSuffix;
+
                 if (s1.equals(composedString1) && s2.equals(composedString2)) {
                     Replacement replacement = new Replacement(declaration1.getVariableName(), declaration2.getVariableName(), ReplacementType.VARIABLE_NAME);
                     replacementInfo.addReplacement(replacement);

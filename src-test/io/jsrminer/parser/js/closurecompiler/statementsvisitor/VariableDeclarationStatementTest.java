@@ -1,5 +1,7 @@
 package io.jsrminer.parser.js.closurecompiler.statementsvisitor;
 
+import io.jsrminer.parser.js.closurecompiler.AstInfo;
+import io.jsrminer.parser.js.closurecompiler.StatementsDataProvider;
 import io.jsrminer.parser.js.closurecompiler.StatementsVisitor;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.jsrminer.sourcetree.VariableDeclarationKind;

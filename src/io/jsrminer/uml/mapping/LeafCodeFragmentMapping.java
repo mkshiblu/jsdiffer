@@ -13,7 +13,7 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
     }
 
     @Override
-    public boolean isExactMatch() {
+    public boolean isExact() {
         // TODO revisit
 //        return *(statement1.getArgumentizedString().equals(fragment2.getArgumentizedString()) ||
 //        statement1.getText().equals(fragment2.getString())
@@ -24,6 +24,9 @@ public class LeafCodeFragmentMapping extends CodeFragmentMapping implements Comp
 
     @Override
     public int compareTo(LeafCodeFragmentMapping o) {
+        if (this.atLeastOneFragmentContainsAnonymous() || o.atLeastOneFragmentContainsAnonymous())
+            return -1;
+
         double distance1 = this.normalizedTextualDistance();
         double distance2 = o.normalizedTextualDistance();
 

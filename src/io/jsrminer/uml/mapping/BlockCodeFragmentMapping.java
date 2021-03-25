@@ -17,6 +17,9 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
 
     @Override
     public int compareTo(BlockCodeFragmentMapping o) {
+        if (this.atLeastOneFragmentContainsAnonymous() || o.atLeastOneFragmentContainsAnonymous())
+            return -1;
+
         double distance1 = this.getNormalizedTextualDistance();
         double distance2 = o.getNormalizedTextualDistance();
 
@@ -57,10 +60,5 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
             int distance = StringDistance.editDistance(s1, s2);
             return (double) distance / (double) Math.max(s1.length(), s2.length());
         }
-    }
-
-    @Override
-    public boolean isExactMatch() {
-        return false;
     }
 }

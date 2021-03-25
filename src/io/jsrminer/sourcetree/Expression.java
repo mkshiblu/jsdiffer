@@ -1,8 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.rminerx.core.api.IAnonymousFunctionDeclaration;
-import io.rminerx.core.api.IFunctionDeclaration;
-import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,9 +24,10 @@ public class Expression extends CodeFragment implements ILeafFragment {
     private List<String> postfixExpressions = new ArrayList<>();
 
     protected List<TernaryOperatorExpression> ternaryOperatorExpressions = new ArrayList<>();
-    //private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
     private List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
     private List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
+    private List<IClassDeclaration> classDeclarations = new ArrayList<>();
     private BlockStatement ownerBlock;
 
     @Override
@@ -129,10 +128,11 @@ public class Expression extends CodeFragment implements ILeafFragment {
         }
         return null;
     }
-//    @Override
-//    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
-//        return anonymousClassDeclarations;
-//    }
+
+    @Override
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        return anonymousClassDeclarations;
+    }
 
     @Override
     public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {

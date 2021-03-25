@@ -4,6 +4,7 @@ import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.diff.UMLParameterDiff;
@@ -11,6 +12,7 @@ import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.entities.Container;
 
 import java.util.*;
 
@@ -29,7 +31,7 @@ public class VariableReplacementAnalysis {
     private Set<IRefactoring> refactorings;
     private FunctionDeclaration callSiteOperation;
     private UMLOperationDiff operationDiff;
-    private SourceFileDiff sourceFileDiff;
+    private ContainerDiff sourceFileDiff;
     private Set<RenameVariableRefactoring> variableRenames = new LinkedHashSet<>();
     private Set<MergeVariableRefactoring> variableMerges = new LinkedHashSet<MergeVariableRefactoring>();
     private Set<SplitVariableRefactoring> variableSplits = new LinkedHashSet<SplitVariableRefactoring>();
@@ -38,7 +40,7 @@ public class VariableReplacementAnalysis {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<CandidateSplitVariableRefactoring>();
 
     public VariableReplacementAnalysis(FunctionBodyMapper mapper, Set<IRefactoring> refactorings
-            , SourceFileDiff sourceFileDiff) {
+            , ContainerDiff sourceFileDiff) {
         this.sourceFileDiff = sourceFileDiff;
         this.mappings = mapper.getMappings();
         this.nonMappedLeavesT1 = new ArrayList<>(mapper.getNonMappedLeavesT1());

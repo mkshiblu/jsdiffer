@@ -1,16 +1,16 @@
 package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.ContainerMatcher;
 import io.jsrminer.uml.UMLParameter;
+import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.ContainerDiffer;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AnonymousFunctionReplacementFinder {
 
@@ -25,61 +25,144 @@ public class AnonymousFunctionReplacementFinder {
     public Set<Replacement> replaceInAnonymousFunctions(CodeFragment statement1
             , CodeFragment statement2
             , FunctionDeclaration function1
-            , FunctionDeclaration function2
-            , ReplacementInfo replacementInfo) {
+            , FunctionDeclaration function2) {
 
+        var replacements = new LinkedHashSet<Replacement>();
+        List<IAnonymousFunctionDeclaration> anonymousContainers1 = new ArrayList<>(statement1.getAnonymousFunctionDeclarations());
+        List<IAnonymousFunctionDeclaration> anonymousContainers2 = new ArrayList<>(statement2.getAnonymousFunctionDeclarations());
+
+        // First exact matches
+        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.SAME,
+                statement1, statement2, function1, function2, replacements);
+
+        // Relaxed
+        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.COMMON,
+                statement1, statement2, function1, function2, replacements);
+
+        return replacements.size() > 0 ? replacements : null;
+    }
+
+    void matchAnonymousContainers(List<IAnonymousFunctionDeclaration> anonymousContainers1
+            , List<IAnonymousFunctionDeclaration> anonymousContainers2
+            , ContainerMatcher matcher
+            , CodeFragment statement1
+            , CodeFragment statement2
+            , FunctionDeclaration function1
+            , FunctionDeclaration function2
+            , LinkedHashSet<Replacement> replacements) {
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
-        List<IAnonymousFunctionDeclaration> anonymousClassDeclarations1 = statement1.getAnonymousFunctionDeclarations();
-        List<IAnonymousFunctionDeclaration> anonymousClassDeclarations2 = statement2.getAnonymousFunctionDeclarations();
+        for (ListIterator<? extends IAnonymousFunctionDeclaration> listIterator1 = anonymousContainers1.listIterator(); listIterator1.hasNext(); ) {
+            var anonymousClassDeclaration1 = listIterator1.next();
 
-        if (!anonymousClassDeclarations2.isEmpty() && !anonymousClassDeclarations2.isEmpty()) {
-            for (int i = 0; i < anonymousClassDeclarations1.size(); i++) {
-                for (int j = 0; j < anonymousClassDeclarations2.size(); j++) {
-                    IAnonymousFunctionDeclaration anonymousClassDeclaration1 = anonymousClassDeclarations1.get(i);
-                    IAnonymousFunctionDeclaration anonymousClassDeclaration2 = anonymousClassDeclarations2.get(j);
+            for (ListIterator<? extends IAnonymousFunctionDeclaration> listIterator2 = anonymousContainers2.listIterator(); listIterator2.hasNext(); ) {
+                var anonymousClassDeclaration2 = listIterator2.next();
+                String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, function1);
+                String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
 
-                    String statementWithoutAnonymous1 = statementWithoutAnonymous(statement1, anonymousClassDeclaration1, function1);
-                    String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
+                if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
+                        identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacements)
+                        || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null
+                        && (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacements)
+                        || invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacements, parameterToArgumentMap)))
+                ) {
 
-                    if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
-                            identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacementInfo.getReplacements())
-                            || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null &&
-                            (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements()) ||
-                                    invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacementInfo.getReplacements(), parameterToArgumentMap)))) {
-
-                        IAnonymousFunctionDeclaration anonymousClass1 = findAnonymousClass(anonymousClassDeclaration1, function1);
-                        IAnonymousFunctionDeclaration anonymousClass2 = findAnonymousClass(anonymousClassDeclaration2, function2);
-                        int matchedOperations = 0;
-                        for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
-                            for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
-                                if (operation1.equals(operation2)
-                                        || equalSignature(operation1, operation2)
-                                        || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
-                                ) {
-                                    boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
-                                    if (isMatched)
-                                        matchedOperations++;
-                                }
-                            }
-                        }
-
-                        if (matchedOperations > 0) {
-                            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
-                            replacementInfo.addReplacement(replacement);
-                            return replacementInfo.getReplacements();
+                    if (matcher.match(anonymousClassDeclaration1, anonymousClassDeclaration2)) {
+                        Replacement replacement = diffAnonymousPair(anonymousClassDeclaration1, anonymousClassDeclaration2);
+                        if (replacement != null) {
+                            listIterator1.remove();
+                            listIterator2.remove();
                         }
                     }
                 }
             }
         }
+    }
+
+    Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousClassDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
+        ContainerDiffer differ = new ContainerDiffer(anonymousClassDeclaration1, anonymousClassDeclaration2);
+        var diff = differ.diff();
+//                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
+//                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
+//                            if (operation1.equals(operation2)
+//                                    || equalSignature(operation1, operation2)
+//                                    || equalSignatureWithIdenticalNameIgnoringChangedTypes(operation1, operation2)
+//                            ) {
+//                                boolean isMatched = createMapperOfFunctionsInsideAnonymous((FunctionDeclaration) operation1, (FunctionDeclaration) operation2);
+//                                if (isMatched)
+//                                    matchedOperations++;
+//                            }
+//                        }
+//                    }
+
+        if (isAnonymousBodyMatched(diff)) {
+            copyMappingsAndRefactoringsToParentMapper(diff);
+            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
+            return replacement;
+        }
         return null;
+    }
+
+    boolean isAnonymousBodyMatched(ContainerDiff anonymousDiff) {
+        int matchedOperations = anonymousDiff.getBodyMapperList().size();
+        if (matchedOperations > 0) {
+            return true;
+        }
+
+        var statementMapper = anonymousDiff.getBodyStatementMapper();
+        if (statementMapper != null) {
+            int mappings = statementMapper.mappingsWithoutBlocks();
+            if ((mappings > statementMapper.nonMappedElementsT1()
+                    && mappings > statementMapper.nonMappedElementsT2())) {
+                return true;
+            }
+        }
+
+        boolean bothHasZeroStatements = anonymousDiff.getContainer1().getStatements().size() == 0
+                && anonymousDiff.getContainer2().getStatements().size() == 0;
+
+        if (bothHasZeroStatements) {
+            // check params
+            return true;
+        }
+
+        return false;
+    }
+
+    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff anonymousClassDiff) {
+        var matchedOperationMappers = anonymousClassDiff.getBodyMapperList();
+        if (matchedOperationMappers.size() > 0) {
+
+            // Copy operation mapper mappings ?
+            for (var mapper : matchedOperationMappers) {
+                this.parentOperationsMapper.getMappings().addAll(mapper.getMappings());
+                this.parentOperationsMapper.getNonMappedInnerNodesT1().addAll(mapper.getNonMappedInnerNodesT1());
+                this.parentOperationsMapper.getNonMappedInnerNodesT2().addAll(mapper.getNonMappedInnerNodesT2());
+                this.parentOperationsMapper.getNonMappedLeavesT1().addAll(mapper.getNonMappedLeavesT1());
+                this.parentOperationsMapper.getNonMappedLeavesT2().addAll(mapper.getNonMappedLeavesT2());
+
+                // Copy refs
+                // this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+            }
+
+            this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getAllRefactorings());
+
+            // Copy refactorings of operation signature diffs
+//            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
+//                //this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
+//            }
+//            for(UMLAttributeDiff attributeDiff : anonymousClassDiff.getAttributeDiffs()) {
+//                this.refactorings.addAll(attributeDiff.getRefactorings());
+//            }
+
+            // Here attributes are sataements
+            //  this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
+        }
     }
 
     private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         boolean isMatched = false;
         FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getContainerDiff());
-        mapper.map();
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
             int nonMappedElementsT1 = mapper.nonMappedElementsT1();

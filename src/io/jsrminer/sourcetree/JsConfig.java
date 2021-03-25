@@ -7,6 +7,7 @@ public class JsConfig {
      * Statement terminator in Js (semicolon)
      */
     public static final char STATEMENT_TERMINATOR_CHAR = ';';
+    public static final char PATH_SEPARATOR = '\\';
     public static final Pattern METHOD_SIGNATURE_PATTERN = Pattern.compile("[\\w\\<\\>\\[\\]]+\\s+(\\w+) *\\([^\\)]*\\) *(\\{?|[^;])");
     public static final String JS_FILE_EXTENSION = "js";
     public static final String[] IGNORED_FILE_EXTENSIONS = {"min.js"};
@@ -16,10 +17,14 @@ public class JsConfig {
 
     // Mapper
     public static final String SPLIT_CONCAT_STRING_PATTERN = "(\\s)*(\\+)(\\s)*";
+    public static final boolean ENABLE_SEARCH_FOR_ANONYMOUS_SIGNATURE_DURING_REPLACEMENT = false;
+
+    // Class Matcher
+    public static final int NESTED_FUNCTION_DEPTH_CHECK = 3;
 
     // Parser specifics
 
     // If true, Functions of a leaf will be added to its parent containers list of anonymous function declarations too
     public static final boolean addLeafAnonymousFunctionsToParentContainerAlso = true;
-    public static boolean treatUMDAsSourceFile = true;
+    public static boolean treatUMDAsSourceFile = false;
 }

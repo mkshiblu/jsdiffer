@@ -12,21 +12,11 @@ import java.util.stream.Collectors;
 public class FunctionDeclaration extends DeclarationContainer implements IFunctionDeclaration {
 
     /**
-     * The name of the function.
-     */
-    private String name;
-    /**
      * Name parameter map
      */
     private List<UMLParameter> parameters = new ArrayList<>();
 
     //public final String namespace;
-
-    /**
-     * Fully Qualified name including the filename, parent function name if any.
-     * For example if function y() is declared inside x() in file f.js, it will return f.x.y.
-     */
-    private String fullyQualifiedName;
 
     /**
      * Holds the body of the function
@@ -37,12 +27,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Stores whether the body of the function is empty or not
      */
     private boolean isEmptyBody;
-
-    /**
-     * Stores whether this function is a 'Top-Level' i.e. declared directly inside a
-     * file and not nested
-     */
-    private boolean isTopLevel;
 
     /**
      * True if the function is also a constructor
@@ -60,10 +44,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public boolean hasIdenticalBody(FunctionDeclaration fd) {
         return this.body.equals(fd.body);
-    }
-
-    public String getFullyQualifiedName() {
-        return fullyQualifiedName;
     }
 
     public List<String> getParameterNameList() {
@@ -100,7 +80,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
     }
 
     public boolean nameEquals(FunctionDeclaration function) {
-        return this.name != null && this.name.equals(function.name);
+        return getName() != null && getName().equals(function.getName());
     }
 
     public int parameterCount() {
@@ -113,32 +93,6 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public void setIsConstructor(boolean constructor) {
         isConstructor = constructor;
-    }
-
-    public void setIsTopLevel(boolean isTopLevel) {
-        this.isTopLevel = isTopLevel;
-    }
-
-    public boolean isTopLevel() {
-        return isTopLevel;
-    }
-
-    public void setFullyQualifiedName(String fullyQualifiedName) {
-        this.fullyQualifiedName = fullyQualifiedName;
-    }
-
-    /**
-     * The name of the function.
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * The name of the function.
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<String> getAllVariables() {

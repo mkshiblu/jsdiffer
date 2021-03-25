@@ -1,6 +1,6 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
+import com.google.javascript.jscomp.parsing.parser.trees.ClassDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
@@ -11,12 +11,15 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
+import io.rminerx.core.entities.Container;
+import io.rminerx.core.entities.DeclarationContainer;
 
+import static io.jsrminer.parser.js.closurecompiler.Config.appendSemicolonToStatementIfNotPresent;
 import static io.jsrminer.parser.js.closurecompiler.Config.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
 
-    private static final PrettyPrinter prettyPrinter = new PrettyPrinter();
+    static PrettyPrinter prettyPrinter;
 
     public static SourceLocation createSourceLocation(SourceRange sourceRange) {
         return new SourceLocation(
@@ -47,22 +50,27 @@ public class AstInfoExtractor {
         return namespace == null ? name : namespace + "." + name;
     }
 
-    static void loadFunctionInfo(FunctionDeclarationTree tree, FunctionDeclaration function, IContainer container) {
-        function.setSourceLocation(createSourceLocation(tree.location));
-
+    static void loadClassInfo(ClassDeclarationTree tree, ClassDeclaration classDeclaration, IContainer container) {
         // Name
         String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
+        populateContainerNamesAndLocation(classDeclaration, name, tree.location, container);
+        //function.setIsConstructor(function.);
+    }
+
+    static void loadFunctionInfo(FunctionDeclarationTree tree, FunctionDeclaration function, IContainer container) {
+        // Name
+        String name = tree.name == null ? generateNameForAnonymousContainer(container) : tree.name.value;
+        populateContainerNamesAndLocation(function, name, tree.location, container);
+        //function.setIsConstructor(function.);
+    }
+
+    static void populateContainerNamesAndLocation(DeclarationContainer function, String name, SourceRange location, IContainer container) {
+        function.setSourceLocation(createSourceLocation(location));
         function.setName(name);
         function.setQualifiedName(generateQualifiedName(function.getName(), container));
         function.setFullyQualifiedName(function.getSourceLocation().getFilePath() + "|" + function.getQualifiedName());
         function.setParentContainerQualifiedName(container.getQualifiedName());
-
         function.setIsTopLevel(container instanceof ISourceFile);
-        //function.setIsConstructor(function.);
-
-        // Parameter
-
-        // Function Body
     }
 
     static Expression createBaseExpression(ParseTree tree) {
@@ -99,26 +107,26 @@ public class AstInfoExtractor {
         return singleStatement;
     }
 
-    static ILeafFragment copyLeafData(ILeafFragment leaf1, ILeafFragment leaf2) {
-        leaf1.getVariables().addAll(leaf2.getVariables());
-        leaf1.getNullLiterals().addAll(leaf2.getNullLiterals());
-        leaf1.getNumberLiterals().addAll(leaf2.getNumberLiterals());
-        leaf1.getStringLiterals().addAll(leaf2.getStringLiterals());
-        leaf1.getBooleanLiterals().addAll(leaf2.getBooleanLiterals());
-        leaf1.getInfixOperators().addAll(leaf2.getInfixOperators());
-        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
+    static ILeafFragment copyLeafData(ILeafFragment source, ILeafFragment target) {
+        target.getVariables().addAll(source.getVariables());
+        target.getNullLiterals().addAll(source.getNullLiterals());
+        target.getNumberLiterals().addAll(source.getNumberLiterals());
+        target.getStringLiterals().addAll(source.getStringLiterals());
+        target.getBooleanLiterals().addAll(source.getBooleanLiterals());
+        target.getInfixOperators().addAll(source.getInfixOperators());
+        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
 
-        leaf1.getPostfixExpressions().addAll(leaf2.getPostfixExpressions());
-        leaf1.getTernaryOperatorExpressions().addAll(leaf2.getTernaryOperatorExpressions());
-        leaf1.getPrefixExpressions().addAll(leaf2.getPrefixExpressions());
-        leaf1.getVariableDeclarations().addAll(leaf2.getVariableDeclarations());
-        leaf1.getArguments().addAll(leaf2.getArguments());
+        target.getPostfixExpressions().addAll(source.getPostfixExpressions());
+        target.getTernaryOperatorExpressions().addAll(source.getTernaryOperatorExpressions());
+        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
+        target.getVariableDeclarations().addAll(source.getVariableDeclarations());
+        target.getArguments().addAll(source.getArguments());
 
 
-        for (var entry : leaf2.getMethodInvocationMap().entrySet()) {
-            var invocations1 = leaf1.getMethodInvocationMap().get(entry.getKey());
+        for (var entry : source.getMethodInvocationMap().entrySet()) {
+            var invocations1 = target.getMethodInvocationMap().get(entry.getKey());
             if (invocations1 == null) {
-                leaf1.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
+                target.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
             } else {
                 invocations1.addAll(entry.getValue());
             }
@@ -127,16 +135,19 @@ public class AstInfoExtractor {
         //leaf1.getMethodInvocationMap().addAll(leaf2.getVariableDeclarations());
         //leaf1.getCreationMap().addAll(leaf2.getVariableDeclarations());
 
-        for (var entry : leaf2.getCreationMap().entrySet()) {
-            var creations1 = leaf1.getCreationMap().get(entry.getKey());
+        for (var entry : source.getCreationMap().entrySet()) {
+            var creations1 = target.getCreationMap().get(entry.getKey());
             if (creations1 == null) {
-                leaf1.getCreationMap().put(entry.getKey(), entry.getValue());
+                target.getCreationMap().put(entry.getKey(), entry.getValue());
             } else {
                 creations1.addAll(entry.getValue());
             }
         }
 
-        return leaf1;
+        // Copy anonymous classes
+        target.getAnonymousFunctionDeclarations().addAll(source.getAnonymousFunctionDeclarations());
+
+        return target;
     }
 
     /**
@@ -198,10 +209,16 @@ public class AstInfoExtractor {
     }
 
     static String getTextInSource(ParseTree tree, boolean isStatement) {
-        String astString = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+        ///StringBuilder sb = prettyPrinter.getTextWithoutCommentsAndWhitespaces(tree.location);
+        //String text =sb.toString();
+        String text = tree.location.start.source.contents.substring(tree.location.start.offset, tree.location.end.offset);
+        if (isStatement
+                && appendSemicolonToStatementIfNotPresent
+                && text.charAt(text.length() - 1) != ';') {
+            text = text + ';';
+        }
 
-        String pretty = prettyPrinter.prettify(astString, false);
-        return astString;
+        return text;
     }
 
     static CodeElementType getCodeElementType(ParseTree tree) {
@@ -223,24 +240,32 @@ public class AstInfoExtractor {
         );
     }
 
+    static SourceLocation createVariableScope(SourceLocation variableLocation, SourceLocation parentLocation) {
+        return new SourceLocation(parentLocation.getFilePath(),
+                variableLocation.startLine,
+                variableLocation.startColumn,
+                parentLocation.endLine,
+                parentLocation.endColumn,
+                variableLocation.start,
+                parentLocation.end
+        );
+    }
+
     static UMLParameter createUmlParameter(IdentifierExpressionTree parameterTree, FunctionDeclaration functionDeclaration) {
         String name = parameterTree.identifierToken.value;
+        return createUmlParameter(name, functionDeclaration, createSourceLocation(parameterTree));
+    }
+
+    static UMLParameter createUmlParameter(String name, FunctionDeclaration functionDeclaration
+            , SourceLocation location) {
         UMLParameter parameter = new UMLParameter(name);
-        parameter.setSourceLocation(createSourceLocation(parameterTree));
+        parameter.setSourceLocation(location);
         parameter.setIndexPositionInParent(functionDeclaration.getParameters().size());
         VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.VAR);
         vd.setIsParameter(true);
-        vd.setScope(createVariableScope(parameterTree, functionDeclaration));
+        vd.setScope(createVariableScope(location, functionDeclaration.getSourceLocation()));
         vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;
-    }
-
-    static BlockStatement createDummyBodyBlock(BlockTree blockTree) {
-        BlockStatement dummyParent = new BlockStatement();
-        dummyParent.setText("{");
-        AstInfoExtractor.populateLocationAndType(blockTree, dummyParent);
-        dummyParent.setDepth(-1);
-        return dummyParent;
     }
 }

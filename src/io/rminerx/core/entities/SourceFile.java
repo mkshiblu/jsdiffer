@@ -10,7 +10,6 @@ import org.apache.commons.io.FilenameUtils;
 public class SourceFile extends Container implements ISourceFile {
 
     private String filepath;
-    private String name;
 
     private String directoryName;
     private String directoryPath;
@@ -27,11 +26,6 @@ public class SourceFile extends Container implements ISourceFile {
 
     public String getFilepath() {
         return filepath;
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     public void setFilepath(String filepath) {
@@ -56,7 +50,7 @@ public class SourceFile extends Container implements ISourceFile {
 
     @Override
     public String toString() {
-        return qualifiedName;
+        return getFilepath();
     }
 
     @Override

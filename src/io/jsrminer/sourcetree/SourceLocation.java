@@ -52,7 +52,7 @@ public class SourceLocation {
     }
 
     public boolean subsumes(SourceLocation other) {
-        boolean isEqualFile = this.file != null && this.file == other.file;
+        boolean isEqualFile = (this.file != null && this.file.equals(other.file)) || (this.file == null && other.file == null);
         return isEqualFile &&
                 this.start <= other.start &&
                 this.end >= other.end;

@@ -16,7 +16,7 @@ public class SourceFile {
         if (srcDirPath == null) {
             pathFromSourceDirectory = file.getName();
         } else {
-            int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length() + 1;
+            int prefixIndex = path.indexOf(srcDirPath) + srcDirPath.length() + 2;
             pathFromSourceDirectory = path.substring(prefixIndex);
         }
     }

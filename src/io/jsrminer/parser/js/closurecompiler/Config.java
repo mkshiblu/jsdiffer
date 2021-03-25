@@ -13,8 +13,9 @@ public class Config {
         add(ParseTreeType.EXPORT_DECLARATION);
         add(ParseTreeType.MISSING_PRIMARY_EXPRESSION);
         add(ParseTreeType.EMPTY_STATEMENT);
-        add(ParseTreeType.TEMPLATE_LITERAL_EXPRESSION);
         add(ParseTreeType.CLASS_DECLARATION);
+        add(ParseTreeType.TEMPLATE_LITERAL_EXPRESSION);
+        add(ParseTreeType.ITER_SPREAD);
     }};
 
     public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
@@ -63,4 +64,6 @@ public class Config {
      * require('./core/core.js')(p1, p2)
      */
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;
+
+    public static boolean appendSemicolonToStatementIfNotPresent = true;
 }

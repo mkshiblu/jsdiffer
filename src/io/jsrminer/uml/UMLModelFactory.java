@@ -1,12 +1,11 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.io.FileUtil;
 import io.jsrminer.parser.js.UMDHandler;
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
 import io.jsrminer.sourcetree.JsConfig;
-import org.apache.commons.io.FilenameUtils;
 
 import java.util.Map;
-import java.util.Set;
 
 public class UMLModelFactory {
 //    public static UMLModel createUMLModel(Map<String, String> fileContents, Set<String> repositoryDirectories) {
@@ -16,7 +15,7 @@ public class UMLModelFactory {
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
         ClosureCompilerParser parser = new ClosureCompilerParser();
-        parser.setEnableStrictMode(true);
+        //parser.setEnableStrictMode(true);
         UMLModel model = parser.parse(fileContents);
 
         // Populate repository directories
@@ -26,12 +25,12 @@ public class UMLModelFactory {
 //                directory = directory.substring(0, directory.lastIndexOf("/"));
 //                //umlModel.repositoryDirectories.add(directory);
 //            }
-            allDirectoriesInPath(path, model.repositoryDirectories);
+            FileUtil.allDirectoriesInPath(path, model.getRepositoryDirectories());
         }
 
-        UMDHandler umdHandler = new UMDHandler();
         // filter UMD if enabled
         if (JsConfig.treatUMDAsSourceFile) {
+            UMDHandler umdHandler = new UMDHandler();
             for (var sourceFile : model.getSourceFileModels().values()) {
                 if (umdHandler.isUMD(sourceFile))
                     umdHandler.hoistUMDCodeToSourceFileLevel(sourceFile);
@@ -41,13 +40,4 @@ public class UMLModelFactory {
         return model;
     }
 
-    public static void allDirectoriesInPath(String filepath, Set<String> directories) {
-        String name = FilenameUtils.getName(filepath);
-        String dir = filepath.substring(0, filepath.length() - name.length());
-        if (dir.length() > 0) {
-            dir = dir.substring(0, dir.length() - 1);
-            directories.add(dir);
-            allDirectoriesInPath(dir, directories);
-        }
-    }
 }

@@ -5,12 +5,11 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.CallTree;
 import io.jsrminer.uml.diff.CallTreeNode;
-import io.jsrminer.uml.diff.SourceFileDiff;
-import io.jsrminer.uml.diff.UMLModelDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.mapping.Argumentizer;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.FunctionUtil;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
 
 import java.util.*;
@@ -18,18 +17,18 @@ import java.util.*;
 public class ExtractOperationDetection {
     private FunctionBodyMapper mapper;
     private List<FunctionDeclaration> addedOperations;
-    private SourceFileDiff classDiff;
-    private UMLModelDiff modelDiff;
+    private ContainerDiff classDiff;
+    //private UMLModelDiff modelDiff;
     private List<OperationInvocation> operationInvocations;
     private Map<CallTreeNode, CallTree> callTreeMap = new LinkedHashMap<>();
 
     Argumentizer argumentizer;
 
-    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, SourceFileDiff classDiff, UMLModelDiff modelDiff) {
+    public ExtractOperationDetection(FunctionBodyMapper mapper, List<FunctionDeclaration> addedOperations, ContainerDiff classDiff/*, UMLModelDiff modelDiff*/) {
         this.mapper = mapper;
         this.addedOperations = addedOperations;
         this.classDiff = classDiff;
-        this.modelDiff = modelDiff;
+        //  this.modelDiff = modelDiff;
         this.operationInvocations = getInvocationsInSourceOperationAfterExtraction(mapper);
         this.argumentizer = mapper.argumentizer;
     }
@@ -75,7 +74,6 @@ public class ExtractOperationDetection {
         FunctionBodyMapper operationBodyMapper = createMapperForExtractedMethod(mapper
                 , mapper.function1, invokedAddedOperation, operationInvocation);
 
-        operationBodyMapper.mapAddedOperation();
         List<CodeFragmentMapping> additionalExactMatches = new ArrayList<>();
         FunctionDeclaration delegateMethod = findDelegateMethod(mapper.function1, invokedAddedOperation, operationInvocation);
         if (extractMatchCondition(operationBodyMapper, additionalExactMatches)) {
@@ -105,7 +103,6 @@ public class ExtractOperationDetection {
                 , mapper.function1, addedOperation, addedOperationInvocation);
 
         if (operationBodyMapper != null) {
-            operationBodyMapper.mapAddedOperation();
             List<CodeFragmentMapping> additionalExactMatches = new ArrayList<>();
             List<CallTreeNode> nodesInBreadthFirstOrder = callTree.getNodesInBreadthFirstOrder();
 
@@ -114,7 +111,6 @@ public class ExtractOperationDetection {
                 if (matchingInvocations(node.getInvokedOperation(), this.operationInvocations).size() == 0) {
                     FunctionBodyMapper nestedMapper = createMapperForExtractedMethod(mapper, node.getOriginalOperation(), node.getInvokedOperation(), node.getInvocation());
                     if (nestedMapper != null) {
-                        nestedMapper.mapAddedOperation();
                         additionalExactMatches.addAll(nestedMapper.getExactMatches());
                         if (extractMatchCondition(nestedMapper, new ArrayList<>())
                                 && extractMatchCondition(operationBodyMapper, additionalExactMatches)) {

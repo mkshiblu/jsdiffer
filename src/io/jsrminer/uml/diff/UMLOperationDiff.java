@@ -67,7 +67,7 @@ public class UMLOperationDiff extends Diff {
         final Set<String> removedParameterNames = removedParameters.keySet();
         for (String removedParameterName : removedParameterNames) {
             if (addedParameters.containsKey(removedParameterName)) {
-                // Same name found
+                 // Same name found
                 UMLParameterDiff parameterDiff = new UMLParameterDiff(removedParameters.get(removedParameterName)
                         , addedParameters.get(removedParameterName));
                 parameterDiffs.add(parameterDiff);

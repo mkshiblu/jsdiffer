@@ -21,6 +21,9 @@ public class ModelLoader {
      * @param container SourceFile to be populated
      */
     public void loadFromAst(@NonNull ProgramTree programTree, @NonNull Container container) {
+
+        // TODO fix static nature
+        AstInfoExtractor.prettyPrinter = new PrettyPrinter(programTree.location.start.source.contents, programTree.sourceComments);
         // Create a dummy Block parent for the file
         BlockStatement dummyBodyBlock = new BlockStatement();
         // Set the source location of the block parent to the end of the file
