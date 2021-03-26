@@ -177,7 +177,7 @@ public class Evaluator {
         row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
 
 
-        if (tokens.length > 3) {
+        if (tokens.length  ==  7) {
 
             if (!Strings.isNullOrEmpty(tokens[3]))
                 row.setLocationBefore(tokens[3]);

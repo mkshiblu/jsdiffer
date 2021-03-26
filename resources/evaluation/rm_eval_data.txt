@@ -21,3 +21,26 @@ vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/co
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-915	transformVIf	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-918	preTransformVIf
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
 vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/alias.js:0-441	alias.js	scripts/alias.js:0-441	alias.js
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/build.js:0-2193	build.js	scripts/build.js:0-2193	build.js
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/config.js:0-6426	config.js	scripts/config.js:0-6426	config.js
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/gen-release-note.js:0-434	gen-release-note.js	scripts/gen-release-note.js:0-434	gen-release-note.js
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/get-weex-version.js:0-664	get-weex-version.js	scripts/get-weex-version.js:0-664	get-weex-version.js
+vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/setup.js:0-363	setup.js	scripts/setup.js:0-363	setup.js
+vue	1dd6b6f046c3093950e599ccc6bbe7a393b8a494	Move Method	src/platforms/weex/util/index.js::1231-1558	query	src/platforms/weex/util/element.js::1287-1614	query
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Method	packages/weex-vue-framework/factory.js:21669-23012	defineReactive$$1	packages/weex-vue-framework/factory.js:24257-25603	defineReactive
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::11486-11896	handleError	packages/weex-vue-framework/factory.js::12383-12677	logError
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::11486-11896	handleError	packages/weex-vue-framework/factory.js::12134-12381	globalHandleError
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::102280-104760	renderMixin	packages/weex-vue-framework/factory.js::93493-93962	installRenderHelpers
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::114016-114377	pruneCache	packages/weex-vue-framework/factory.js::119802-120032	pruneCacheEntry
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Method	packages/weex-vue-framework/factory.js:122462-122570	remove$$1	packages/weex-vue-framework/factory.js:129711-129813	remove
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Variable	packages/weex-vue-framework/factory.js:131420-131429	elmToMove	packages/weex-vue-framework/factory.js:138985-138996	vnodeToMove
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
+vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Variable	packages/weex-vue-framework/index.js:1898-1910	moduleGetter	packages/weex-vue-framework/index.js:989-993	weex

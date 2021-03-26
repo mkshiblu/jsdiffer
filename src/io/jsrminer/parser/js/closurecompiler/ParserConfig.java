@@ -19,6 +19,7 @@ public class ParserConfig {
             , CLASS_DECLARATION
             , TEMPLATE_LITERAL_EXPRESSION
             , ITER_SPREAD
+            , WITH_STATEMENT
     );
 
     public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{

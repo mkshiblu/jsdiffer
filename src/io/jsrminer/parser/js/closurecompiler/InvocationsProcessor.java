@@ -31,7 +31,7 @@ public class InvocationsProcessor {
             boolean success = processInvocation(tree, leaf, container, creation);
             if (!success) {
                 leaf.getCreationMap().get(text).remove(creation);
-                if(leaf.getCreationMap().get(text).size() == 0){
+                if (leaf.getCreationMap().get(text).size() == 0) {
                     leaf.getCreationMap().remove(text);
                 }
             }
@@ -54,7 +54,7 @@ public class InvocationsProcessor {
             boolean success = processInvocation(tree, leaf, container, invocation);
             if (!success) {
                 leaf.getMethodInvocationMap().get(text).remove(invocation);
-                if(leaf.getMethodInvocationMap().get(text).size() == 0){
+                if (leaf.getMethodInvocationMap().get(text).size() == 0) {
                     leaf.getMethodInvocationMap().remove(text);
                 }
             }
@@ -131,7 +131,7 @@ public class InvocationsProcessor {
                 if (calleeAsParenExpression.expression.type == ParseTreeType.FUNCTION_DECLARATION) {
                     name = leaf.getAnonymousFunctionDeclarations().size() + 1 + "";
                 } else {
-                    parsedProperly =false;
+                    parsedProperly = false;
                     //throw new RuntimeException("Paren expression except function is not handled: " + tree.location.toString());
                 }
                 Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
@@ -149,7 +149,9 @@ public class InvocationsProcessor {
                 parsedProperly = false;
                 break;
             case MISSING_PRIMARY_EXPRESSION:
-                parsedProperly =false;
+            case TEMPLATE_LITERAL_EXPRESSION:
+                Visitor.visitExpression(callee, leaf, container);
+                parsedProperly = false;
                 break;
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.type + " at " + callee.location.toString());

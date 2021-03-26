@@ -1,9 +1,11 @@
-package io.jsrminer;
+package io.jsrminer.util;
 
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
+
+import java.util.List;
 
 public class RefactoringDisplayFormatter {
     private static class AfterBeforeInfo {
@@ -36,20 +38,56 @@ public class RefactoringDisplayFormatter {
         }
     }
 
-    public static String formatAsAfterBefore(IRefactoring refactoring) {
-        StringBuilder builder = new StringBuilder();
-        var afterBeforeInfo = getAfterBeforeInfo(refactoring);
+    public static String getHeader() {
+        return "project\tcommitId\tRefactoringType\tNameBefore\tNameAfter\tLocationBefore\tLocationAfter\tRefactoring";
+    }
 
-        if (afterBeforeInfo != null) {
-            builder.append(afterBeforeInfo.getLocationBefore());
+    public static String generateDisplayStringForRefactorings(String project, String commitId, List<IRefactoring> refactorings, boolean printHeader) {
+        final StringBuilder builder = new StringBuilder();
+
+        if (printHeader) {
+            builder.append(getHeader());
+            builder.append(System.lineSeparator());
+        }
+
+        refactorings.forEach(r -> {
+            builder.append(project);
             builder.append("\t");
+            builder.append(commitId);
+            builder.append("\t");
+            RefactoringDisplayFormatter.format(r, builder);
+            builder.append(System.lineSeparator());
+        });
+
+        return builder.toString();
+    }
+
+    public static StringBuilder format(IRefactoring refactoring, StringBuilder builder) {
+        builder.append(refactoring.getRefactoringType().toString());
+        builder.append("\t");
+        var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(refactoring);
+        builder.append(afterBeforeInfo);
+        builder.append("\t");
+        builder.append(refactoring.toString().replace("\t", " "));
+        return builder;
+    }
+
+    public static String formatAsAfterBefore(IRefactoring refactoring) {
+        var afterBeforeInfo = getAfterBeforeInfo(refactoring);
+        if (afterBeforeInfo != null) {
+            StringBuilder builder = new StringBuilder();
             builder.append(afterBeforeInfo.getLocalNameBefore());
             builder.append("\t");
-            builder.append(afterBeforeInfo.getLocationAfter());
-            builder.append("\t");
             builder.append(afterBeforeInfo.getLocalNameAfter());
+            builder.append("\t");
+            builder.append(afterBeforeInfo.getLocationBefore());
+            builder.append("\t");
+            builder.append(afterBeforeInfo.getLocationAfter());
+
+            return builder.toString();
+        } else {
+            return "\t\t\t\t";
         }
-        return builder.toString();
     }
 
 
@@ -87,12 +125,36 @@ public class RefactoringDisplayFormatter {
                         + getLocationStartAndEndString(renameVariableRefactoring.getRenamedVariable().getSourceLocation())
                 );
                 break;
+            case EXTRACT_OPERATION:
+                var extractOperationRefactoring = (ExtractOperationRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        extractOperationRefactoring.getSourceOperationBeforeExtraction().getName()
+                        , extractOperationRefactoring.getExtractedOperation().getName()
+                        , getLocationString(extractOperationRefactoring.getSourceOperationBeforeExtraction().getSourceLocation())
+                        , getLocationString(extractOperationRefactoring.getExtractedOperation().getSourceLocation())
+                );
+
+                break;
+            case MOVE_OPERATION:
+                var moveOperation = (MoveOperationRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        moveOperation.getOriginalOperation().getName()
+                        , moveOperation.getMovedOperation().getName()
+                        , getLocationString(moveOperation.getOriginalOperation().getSourceLocation())
+                        , getLocationString(moveOperation.getMovedOperation().getSourceLocation())
+                );
+                break;
             case ADD_PARAMETER:
+            case RENAME_PARAMETER:
                 break;
             default:
                 throw new UnsupportedOperationException();
         }
         return afterBeforeInfo;
+    }
+
+    static String getLocationString(SourceLocation location) {
+        return location.getFilePath() + ":" + getLocationStartAndEndString(location);
     }
 
     static String getContainerStartAndEndString(IContainer container) {

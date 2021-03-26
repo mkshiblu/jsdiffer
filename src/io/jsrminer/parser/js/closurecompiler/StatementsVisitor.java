@@ -47,15 +47,18 @@ public class StatementsVisitor {
             = new NodeVisitor<>() {
         @Override
         public Object visit(ExportDeclarationTree tree, BlockStatement parent, IContainer container) {
-            if (tree.declaration.type == ParseTreeType.FUNCTION_DECLARATION) {
-                var functionDeclarationTree = tree.declaration.asFunctionDeclaration();
-                return Visitor.visitStatement(functionDeclarationTree, parent, container);
+            if (tree.declaration != null) {
+                if (tree.declaration.type == ParseTreeType.FUNCTION_DECLARATION) {
+                    var functionDeclarationTree = tree.declaration.asFunctionDeclaration();
+                    return Visitor.visitStatement(functionDeclarationTree, parent, container);
 
-            } else {
-                var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
-                Visitor.visitExpression(tree.declaration, leaf, container);
-                return leaf;
+                } else {
+                    var leaf = createSingleStatementPopulateAndAddToParent(tree, parent);
+                    Visitor.visitExpression(tree.declaration, leaf, container);
+                    return leaf;
+                }
             }
+            return null;
         }
     };
 

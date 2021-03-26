@@ -1,33 +1,46 @@
 /* @flow */
 
-import { forAliasRE, forIteratorRE } from 'compiler/parser/index'
-import { getAndRemoveAttr } from 'compiler/helpers'
+import config from 'core/config'
+import { hyphenate } from 'shared/util'
 
-export function transformVFor (el: ASTElement, options: CompilerOptions) {
-  const exp = getAndRemoveAttr(el, 'v-for')
-  if (!exp) {
-    return
+const keyNames: { [key: string]: string | Array<string> } = {
+  esc: 'Escape',
+  tab: 'Tab',
+  enter: 'Enter',
+  space: ' ',
+  up: 'ArrowUp',
+  left: 'ArrowLeft',
+  right: 'ArrowRight',
+  down: 'ArrowDown',
+  'delete': ['Backspace', 'Delete']
+}
+
+function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
+  if (Array.isArray(expect)) {
+    return expect.indexOf(actual) === -1
+  } else {
+    return expect !== actual
   }
-  const inMatch = exp.match(forAliasRE)
-  if (inMatch) {
-    const alias = inMatch[1].trim()
-    const desc: Object = {
-      '@expression': inMatch[2].trim(),
-      '@alias': alias
-    }
-    const iteratorMatch = alias.match(forIteratorRE)
-    if (iteratorMatch) {
-      desc['@alias'] = iteratorMatch[1].trim()
-      desc['@index'] = iteratorMatch[2].trim()
-      if (iteratorMatch[3]) {
-        desc['@key'] = iteratorMatch[2].trim()
-        desc['@index'] = iteratorMatch[3].trim()
-      }
-    }
-    delete el.attrsMap['v-for']
-    el.attrsMap['[[repeat]]'] = desc
-    el.attrsList.push({ name: '[[repeat]]', value: desc })
-  } else if (process.env.NODE_ENV !== 'production' && options.warn) {
-    options.warn(`Invalid v-for expression: ${exp}`)
+}
+
+/**
+ * Runtime helper for checking keyCodes from config.
+ * exposed as Vue.prototype._k
+ * passing in eventKeyName as last argument separately for backwards compat
+ */
+export function checkKeyCodes (
+  eventKeyCode: number,
+  key: string,
+  builtInAlias?: number | Array<number>,
+  eventKeyName?: string
+): ?boolean {
+  const keyCodes = config.keyCodes[key] || builtInAlias
+  const builtInName: string | Array<string> = keyNames[key]
+  if (builtInName && keyCodes === builtInAlias && eventKeyName) {
+    return isKeyNotMatch(builtInName, eventKeyName)
+  } else if (keyCodes) {
+    return isKeyNotMatch(keyCodes, eventKeyCode)
+  } else if (eventKeyName) {
+    return hyphenate(eventKeyName) !== key
   }
 }
