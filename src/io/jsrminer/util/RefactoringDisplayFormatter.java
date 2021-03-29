@@ -108,10 +108,8 @@ public class RefactoringDisplayFormatter {
                 afterBeforeInfo = new AfterBeforeInfo(
                         renameFunctionRefactoring.getOriginalOperation().getName()
                         , renameFunctionRefactoring.getRenamedOperation().getName()
-                        , renameFunctionRefactoring.getOriginalOperation().getSourceLocation().getFilePath()
-                        + getContainerStartAndEndString(renameFunctionRefactoring.getOriginalOperation())
-                        , renameFunctionRefactoring.getRenamedOperation().getSourceLocation().getFilePath()
-                        + getContainerStartAndEndString(renameFunctionRefactoring.getRenamedOperation())
+                        , getLocationString(renameFunctionRefactoring.getOriginalOperation().getSourceLocation())
+                        , getLocationString(renameFunctionRefactoring.getRenamedOperation().getSourceLocation())
                 );
                 break;
             case RENAME_VARIABLE:
@@ -119,10 +117,8 @@ public class RefactoringDisplayFormatter {
                 afterBeforeInfo = new AfterBeforeInfo(
                         renameVariableRefactoring.getOriginalVariable().variableName
                         , renameVariableRefactoring.getRenamedVariable().variableName
-                        , renameVariableRefactoring.getOriginalVariable().getSourceLocation().getFilePath()
-                        + getLocationStartAndEndString(renameVariableRefactoring.getOriginalVariable().getSourceLocation())
-                        , renameVariableRefactoring.getRenamedVariable().getSourceLocation().getFilePath()
-                        + getLocationStartAndEndString(renameVariableRefactoring.getRenamedVariable().getSourceLocation())
+                        , getLocationString(renameVariableRefactoring.getOriginalVariable().getSourceLocation())
+                        , getLocationString(renameVariableRefactoring.getRenamedVariable().getSourceLocation())
                 );
                 break;
             case EXTRACT_OPERATION:
@@ -144,6 +140,14 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(moveOperation.getMovedOperation().getSourceLocation())
                 );
                 break;
+            case RENAME_FILE:
+                var renameFile = (RenameFileRefactoring)refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        renameFile.getOriginalFileName()
+                        , renameFile.getRenamedFileName()
+                        , getLocationString(renameFile.getOriginalFile().getSourceLocation())
+                        , getLocationString(renameFile.getRenamedFile().getSourceLocation())
+                );
             case ADD_PARAMETER:
             case RENAME_PARAMETER:
                 break;
@@ -162,7 +166,12 @@ public class RefactoringDisplayFormatter {
     }
 
     static String getLocationStartAndEndString(SourceLocation location) {
-        return ":" + (location.start)
-                + "-" + (location.end);
+        return String.format("%d-%d|(%d-%d)-(%d-%d)"
+                , location.start
+                , location.end
+                , location.startLine
+                , location.startColumn
+                , location.endLine
+                , location.endColumn);
     }
 }
