@@ -99,8 +99,8 @@ public class RefactoringDisplayFormatter {
                 afterBeforeInfo = new AfterBeforeInfo(
                         moveRefactoring.getOriginalFileName()
                         , moveRefactoring.getMovedFileName()
-                        , (moveRefactoring.getOriginalPath() + ":0-" + (moveRefactoring.getOriginalFile().getSourceLocation().end + 1))
-                        , moveRefactoring.getMovedToPath() + ":0-" + (moveRefactoring.getMovedFile().getSourceLocation().end + 1)
+                        , getLocationString(moveRefactoring.getOriginalFile().getSourceLocation())
+                        , getLocationString(moveRefactoring.getMovedFile().getSourceLocation())
                 );
                 break;
             case RENAME_METHOD:
@@ -166,7 +166,7 @@ public class RefactoringDisplayFormatter {
     }
 
     static String getLocationStartAndEndString(SourceLocation location) {
-        return String.format("%d-%d|(%d-%d)-(%d-%d)"
+        return String.format("%d-%d|(%d,%d)-(%d,%d)"
                 , location.start
                 , location.end
                 , location.startLine

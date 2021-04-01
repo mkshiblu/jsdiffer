@@ -1,46 +1,12 @@
-project	commitId	RefactoringType	LocationBefore	NameBefore	LocationAfter	NameAfter
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	dist/vue.common.js:93062-93071	renderFns	dist/vue.common.js:93603-93610	options
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	dist/vue.esm.js:93047-93056	renderFns	dist/vue.esm.js:93588-93595	options
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	dist/vue.runtime.esm.js:92908-92917	renderFns	dist/vue.runtime.esm.js:93449-93456	options
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Method	packages/vue-server-renderer/basic.js:181282-182794	model$1	packages/vue-server-renderer/basic.js:183581-185093	model$2
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server-renderer/basic.js:181019-181024	model	packages/vue-server-renderer/basic.js:183314-183321	model$1
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Method	packages/vue-server-renderer/build.js:99170-100768	model$1	packages/vue-server-renderer/build.js:101469-103067	model$2
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server-renderer/build.js:98907-98912	model	packages/vue-server-renderer/build.js:101202-101209	model$1
-vue	015a31890250e93564959de97372be7bd6195f62	Rename Variable	packages/vue-server-renderer/build.js:175461-175470	renderFns	packages/vue-server-renderer/build.js:178798-178805	options
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/text.js:294-553	transformText	src/platforms/weex/compiler/modules/recycle-list/text.js:294-583	postTransformText
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-665	transformVBind	src/platforms/weex/compiler/modules/recycle-list/v-bind.js:254-694	preTransformVBind
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-for.js:139-911	transformVFor	src/platforms/weex/compiler/modules/recycle-list/v-for.js:139-914	preTransformVFor
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Rename Method	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-915	transformVIf	src/platforms/weex/compiler/modules/recycle-list/v-if.js:473-918	preTransformVIf
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	0c11aa8addf5ad852e37da358ce2887af72e4193	Add Parameter
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/alias.js:0-441	alias.js	scripts/alias.js:0-441	alias.js
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/build.js:0-2193	build.js	scripts/build.js:0-2193	build.js
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/config.js:0-6426	config.js	scripts/config.js:0-6426	config.js
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/gen-release-note.js:0-434	gen-release-note.js	scripts/gen-release-note.js:0-434	gen-release-note.js
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/get-weex-version.js:0-664	get-weex-version.js	scripts/get-weex-version.js:0-664	get-weex-version.js
-vue	144a4dd860b20ca48263bac150286f627e08d953	Move File	build/setup.js:0-363	setup.js	scripts/setup.js:0-363	setup.js
-vue	1dd6b6f046c3093950e599ccc6bbe7a393b8a494	Move Method	src/platforms/weex/util/index.js::1231-1558	query	src/platforms/weex/util/element.js::1287-1614	query
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Method	packages/weex-vue-framework/factory.js:21669-23012	defineReactive$$1	packages/weex-vue-framework/factory.js:24257-25603	defineReactive
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Add Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::11486-11896	handleError	packages/weex-vue-framework/factory.js::12383-12677	logError
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::11486-11896	handleError	packages/weex-vue-framework/factory.js::12134-12381	globalHandleError
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::102280-104760	renderMixin	packages/weex-vue-framework/factory.js::93493-93962	installRenderHelpers
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Extract Method	packages/weex-vue-framework/factory.js::114016-114377	pruneCache	packages/weex-vue-framework/factory.js::119802-120032	pruneCacheEntry
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Method	packages/weex-vue-framework/factory.js:122462-122570	remove$$1	packages/weex-vue-framework/factory.js:129711-129813	remove
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Variable	packages/weex-vue-framework/factory.js:131420-131429	elmToMove	packages/weex-vue-framework/factory.js:138985-138996	vnodeToMove
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Parameter
-vue	2b3e1a0a964c21d405f67479a9960c2d00f235b4	Rename Variable	packages/weex-vue-framework/index.js:1898-1910	moduleGetter	packages/weex-vue-framework/index.js:989-993	weex
+project	commitId	RefactoringType	NameBefore	NameAfter	LocationBefore	LocationAfter	Refactoring
+angular	03043839d5a540b02208001fe12e812dfde00a8e	MOVE_FILE	script.js	script.js	test/e2e/fixtures/angular-already-loaded/script.js:0-137	test/e2e/fixtures/angularjs-already-loaded/script.js:0-137	Move File test/e2e/fixtures/angular-already-loaded/script.js to test/e2e/fixtures/angularjs-already-loaded/script.js
+angular	03043839d5a540b02208001fe12e812dfde00a8e	RENAME_FILE	angular-already-loaded.spec.js	angularjs-already-loaded.spec.js	test/e2e/tests/angular-already-loaded.spec.js:0-296|(0,0)-(10,3)	test/e2e/tests/angularjs-already-loaded.spec.js:0-300|(0,0)-(10,3)	Rename File test/e2e/tests/angular-already-loaded.spec.js renamed to test/e2e/tests/angularjs-already-loaded.spec.js
+angular	0cbc50512126fa22546dbe9b79a14939d9dc4459	ADD_PARAMETER						Add Parameter html5Mode in method parseAppUrl(url ,locationObj ,html5Mode) atsrc/ng/location.js|parseAppUrl
+angular	223de59e988dc0cc8b4ec3a045b7c0735eba1c77	EXTRACT_OPERATION	$setSubmitted	$$setSubmitted	src/ng/directive/form.js:9165-9310|(278,17)-(282,3)	src/ng/directive/form.js:9491-9732|(288,18)-(296,3)	Extract Method 1.$$setSubmitted() extracted from 1.$setSubmitted() in  1 in file src/ng/directive/form.js
+angular	42e622b751d1ad1520b824473f9ad31e7efb75b3	RENAME_VARIABLE	directive	controllerDirective	src/ng/compile.js:126762-126771|(2810,16)-(2810,25)	src/ng/compile.js:126920-126939|(2813,14)-(2813,33)	Rename Variable directive to controllerDirective in $CompileProvider.10.applyDirectivesToNode.nodeLinkFn(childLinkFn ,scope ,linkNode ,$rootElement ,boundTranscludeFn) at src/ng/compile.js|$CompileProvider.10.applyDirectivesToNode.nodeLinkFn
+angular	4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9	MOVE_OPERATION	errorHandlingConfig	errorHandlingConfig	src/Angular.js:3161-3429|(156,0)-(164,1)	src/minErr.js:955-1223|(33,0)-(41,1)	Move Method    errorHandlingConfig(config) from Angular.js to errorHandlingConfig(config) at minErr.js
+angular	4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9	MOVE_OPERATION	isValidObjectMaxDepth	isValidObjectMaxDepth	src/Angular.js:3500-3589|(171,0)-(173,1)	src/minErr.js:1294-1383|(48,0)-(50,1)	Move Method    isValidObjectMaxDepth(maxDepth) from Angular.js to isValidObjectMaxDepth(maxDepth) at minErr.js
+angular	7e2e235cf25389a59ea957631ff07c6cc8a3ad32	ADD_PARAMETER						Add Parameter reason in method createHttpBackend.1.timeoutRequest(reason) atsrc/ng/httpBackend.js|createHttpBackend.1.timeoutRequest
+angular	8e104ee508418bc2ebb65e5b4ac73d22285cc224	RENAME_VARIABLE	controllerDirective	directive	src/ng/compile.js:126920-126939|(2813,14)-(2813,33)	src/ng/compile.js:126762-126771|(2810,16)-(2810,25)	Rename Variable controllerDirective to directive in $CompileProvider.10.applyDirectivesToNode.nodeLinkFn(childLinkFn ,scope ,linkNode ,$rootElement ,boundTranscludeFn) at src/ng/compile.js|$CompileProvider.10.applyDirectivesToNode.nodeLinkFn
+angular	b7d396b8b6e8f27a1f4556d58fc903321e8d532a	EXTRACT_OPERATION	jqLiteRemoveData	removeIfEmptyData	src/jqLite.js:13285-13796|(351,0)-(370,1)	src/jqLite.js:12332-12762|(322,0)-(333,1)	Extract Method removeIfEmptyData(element) extracted from jqLiteRemoveData(element ,name) in  jqLite.js in file src/jqLite.js
+angular	de74034ddf6f92505ccdb61be413a6df2c723f87	EXTRACT_OPERATION	$parse	addWatchDelegate	src/ng/parse.js:57500-58783|(1782,4)-(1818,5)	src/ng/parse.js:62724-63138|(1927,4)-(1937,5)	Extract Method $ParseProvider.3.addWatchDelegate(parsedExpression) extracted from $ParseProvider.3.$parse(exp ,interceptorFn) in  $ParseProvider.3 in file src/ng/parse.js

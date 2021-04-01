@@ -83,27 +83,39 @@ public class Ref {
             fromStringMap.put("RENAME_VARIABLE", RENAME_VARIABLE);
         }
     }
-     
+
     private SourceLocation toSourceLocation(String location) {
-        var splitted = location.split(":");
-        String filePath = splitted[0];
 
-        var segments = splitted[1].split("|");
-        var startEndSplitted = segments[0].split("-");
-        var start = Integer.parseInt(startEndSplitted[0]);
-        var end = Integer.parseInt(startEndSplitted[1]);
+        if (location.contains(":")) {
+            var splitted = location.split(":");
+            String filePath = splitted[0];
 
-        var lineColSplitted = segments[1].split("-");
-        var startLineColSplitted = lineColSplitted[0].substring(1, lineColSplitted[0].length() - 1).split(",");
-        var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
+            if (splitted[1].contains("|")) {
+                var segments = splitted[1].split("\\|");
+                var startEndSplitted = segments[0].split("-");
+                var start = Integer.parseInt(startEndSplitted[0]);
+                var end = Integer.parseInt(startEndSplitted[1]);
 
-        var startLine = Integer.parseInt(startLineColSplitted[0]);
-        var startColumn = Integer.parseInt(startLineColSplitted[1]);
+                var lineColSplitted = segments[1].split("-");
+                var startLineColSplitted = lineColSplitted[0].substring(1, lineColSplitted[0].length() - 1).split(",");
+                var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
 
-        var endLine = Integer.parseInt(endLineColSplitted[0]);
-        var endColumn = Integer.parseInt(endLineColSplitted[1]);
+                var startLine = Integer.parseInt(startLineColSplitted[0]);
+                var startColumn = Integer.parseInt(startLineColSplitted[1]);
 
-        return new SourceLocation(filePath, startLine, startColumn, endLine, endColumn, start, end);
+                var endLine = Integer.parseInt(endLineColSplitted[0]);
+                var endColumn = Integer.parseInt(endLineColSplitted[1]);
+                return new SourceLocation(filePath, startLine, startColumn, endLine, endColumn, start, end);
+            } else {
+
+                var startEndSplitted = splitted[1].split("-");
+                var start = Integer.parseInt(startEndSplitted[0]);
+                var end = Integer.parseInt(startEndSplitted[1]);
+
+                return new SourceLocation(filePath, 0, 0, 0, 0, start, end);
+            }
+        }
+        return null;
     }
 
     public void setLocationBefore(String location) {
