@@ -22,6 +22,7 @@ public class Visitor {
         put(CLASS_DECLARATION, DeclarationsVisitor.classDeclarationProcessor);
         put(VARIABLE_DECLARATION_LIST, DeclarationsVisitor.variableDeclarationsList);
         put(OBJECT_LITERAL_EXPRESSION, ObjectsVisitor.objectLiteralExpression);
+        put(OBJECT_PATTERN, ObjectsVisitor.objectPatternExpressionProcessor);
 
         put(EXPRESSION_STATEMENT, StatementsVisitor.expressionStatementProcessor);
         put(EXPORT_DECLARATION, StatementsVisitor.exportDeclarationStatementProcessor);
@@ -38,6 +39,7 @@ public class Visitor {
 
         put(COMMA_EXPRESSION, ExpressionsVisitor.commaExpressionProcessor);
         put(IDENTIFIER_EXPRESSION, ExpressionsVisitor.identifierProcessor);
+        put(AWAIT_EXPRESSION, ExpressionsVisitor.awaitExpressionProcessor);
 
         put(LITERAL_EXPRESSION, LiteralsExpressionsVisitor.literalExpressionProcessor);
         put(ARRAY_LITERAL_EXPRESSION, LiteralsExpressionsVisitor.arrayLiteralExpression);

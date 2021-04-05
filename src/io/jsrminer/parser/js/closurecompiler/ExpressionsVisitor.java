@@ -169,7 +169,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public Void visit(ArrayPatternTree tree, ILeafFragment leaf, IContainer container) {
-            var text =  getTextInSource(tree, false);
+            var text = getTextInSource(tree, false);
             leaf.getArrayAccesses().add(text);
             for (var element : tree.elements) {
                 Visitor.visitExpression(element, leaf, container);
@@ -205,6 +205,18 @@ public class ExpressionsVisitor {
                 Visitor.visitExpression(expressionTree, leaf, container);
             });
             return getTextInSource(tree, false);
+        }
+    };
+
+    /**
+     * An await expression such as await fetch()
+     */
+    public static final NodeVisitor<Void, AwaitExpressionTree, ILeafFragment> awaitExpressionProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(AwaitExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            Visitor.visitExpression(tree.expression, leaf, container);
+            return null;
         }
     };
 }

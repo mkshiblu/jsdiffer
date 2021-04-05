@@ -1,9 +1,7 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ObjectLiteralExpressionTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
+import com.google.javascript.jscomp.parsing.parser.TokenType;
+import com.google.javascript.jscomp.parsing.parser.trees.*;
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
@@ -21,6 +19,47 @@ import static io.jsrminer.parser.js.closurecompiler.DeclarationsVisitor.createVa
 
 public class ObjectsVisitor {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
+
+    /**
+     * Has elements
+     */
+    public static final NodeVisitor<Void, ObjectPatternTree, ILeafFragment> objectPatternExpressionProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(ObjectPatternTree tree, ILeafFragment leaf, IContainer container) {
+
+            tree.fields.forEach(fieldTree -> {
+
+                switch (fieldTree.type) {
+                    case PROPERTY_NAME_ASSIGNMENT:
+                        var propertyNameAssignment = fieldTree.asPropertyNameAssignment();
+
+                        if (propertyNameAssignment.name.type.equals(TokenType.IDENTIFIER)) {
+                            var name = propertyNameAssignment.name.asIdentifier().value;
+                            var variableDeclaration = DeclarationsVisitor.createVariableDeclarationFromVariableName(name,
+                                    null,
+                                    propertyNameAssignment.name.location
+                                    , container.getSourceLocation());
+
+                            if (propertyNameAssignment.value != null) {
+                                Expression expression = createBaseExpressionWithRMType(propertyNameAssignment.value, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
+                                Visitor.visitExpression(propertyNameAssignment.value, expression, container);
+                                variableDeclaration.setInitializer(expression);
+                            }
+                            DeclarationsVisitor.addVariableDeclarationToParent(leaf, variableDeclaration);
+                        } else {
+                            log.warn("Object Patterns. propertyNameAssignment type " + propertyNameAssignment.name.type
+                                    + " not handled at " + propertyNameAssignment.location.toString());
+                        }
+
+                        break;
+                }
+            });
+            return null;
+        }
+    };
+
     /**
      * An object literal expression e.g.
      * {
