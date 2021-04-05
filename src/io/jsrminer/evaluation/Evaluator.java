@@ -176,17 +176,16 @@ public class Evaluator {
         row.commit = tokens[1];
         row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
 
-        if (tokens.length  ==  8) {
+        if (tokens.length == 8) {
+            row.localNameBefore = tokens[3];
+            row.localNameAfter = tokens[4];
 
-            if (!Strings.isNullOrEmpty(tokens[3]))
-                row.setLocationBefore(tokens[3]);
+            if (!Strings.isNullOrEmpty(tokens[5]))
+                row.setLocationBefore(tokens[5]);
 
-            row.localNameBefore = tokens[4];
+            if (!Strings.isNullOrEmpty(tokens[6]))
+                row.setLocationAfter(tokens[6]);
 
-            if (!Strings.isNullOrEmpty(tokens[3]))
-                row.setLocationAfter(tokens[5]);
-
-            row.localNameAfter = tokens[6];
         }
         return row;
     }
@@ -216,10 +215,19 @@ public class Evaluator {
     }
 
     boolean isMatch(RdRow rd, RmRow rm) {
-        boolean equalBeforeLocation = equalLocation(rd.getLocationBefore(), rm.getLocationBefore());
         boolean equalBeforeName = rd.localNameBefore.equals(rm.localNameBefore);
-        boolean equalAfterLocation = equalLocation(rd.getLocationAfter(), rm.getLocationAfter());
         boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
+
+        if (rd.nodeType.equalsIgnoreCase("File")) {
+            return rd.commit.equals(rm.commit)
+                    && rm.refType.equals(rd.refType)
+                    && equalBeforeName
+                    && equalAfterName;
+        }
+
+        boolean equalBeforeLocation = equalLocation(rd.getLocationBefore(), rm.getLocationBefore());
+        boolean equalAfterLocation = equalLocation(rd.getLocationAfter(), rm.getLocationAfter());
+
         return rd.commit.equals(rm.commit)
                 && rm.refType.equals(rd.refType)
                 && equalBeforeLocation

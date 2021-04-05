@@ -114,8 +114,9 @@ public class Ref {
 
                 return new SourceLocation(filePath, 0, 0, 0, 0, start, end);
             }
+        } else {
+            return new SourceLocation(location, 0, 0, 0, 0, 0, 0);
         }
-        return null;
     }
 
     public void setLocationBefore(String location) {

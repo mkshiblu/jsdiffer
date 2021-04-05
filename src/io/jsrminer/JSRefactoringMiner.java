@@ -51,7 +51,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     gitRepositoryPath.length());
 
             refactorings = detect(repository, commits, new RefactoringHandler() {
-               final StringBuilder builder = new StringBuilder();
+                final StringBuilder builder = new StringBuilder();
 
                 @Override
                 public void handle(String commitId, List<IRefactoring> refactorings) {
@@ -297,6 +297,9 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     StringWriter writer = new StringWriter();
                     IOUtils.copy(loader.openStream(), writer, StandardCharsets.UTF_8);
                     fileContents.put(pathString, writer.toString());
+//                    var content = new String(repository.newObjectReader().open(objectId).getBytes()
+//                            , StandardCharsets.UTF_8.name());
+                    //fileContents.put(pathString, content);
                 }
                 populateSubDirectories(repositoryDirectories, pathString, '/');
             }
