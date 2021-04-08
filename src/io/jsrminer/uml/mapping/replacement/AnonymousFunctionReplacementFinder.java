@@ -61,12 +61,12 @@ public class AnonymousFunctionReplacementFinder {
                 String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
 
                 if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
+                        // This pair wont be matched since replacemnt is empty here
                         identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacements)
                         || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null
                         && (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacements)
                         || invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacements, parameterToArgumentMap)))
                 ) {
-
                     if (matcher.match(anonymousClassDeclaration1, anonymousClassDeclaration2)) {
                         Replacement replacement = diffAnonymousPair(anonymousClassDeclaration1, anonymousClassDeclaration2);
                         if (replacement != null) {
