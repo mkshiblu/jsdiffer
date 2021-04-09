@@ -27,7 +27,7 @@ public class AnonymousFunctionReplacementFinder {
             , FunctionDeclaration function1
             , FunctionDeclaration function2) {
 
-        var replacements = new LinkedHashSet<Replacement>();
+        var replacements = new LinkedHashSet<Replacement>(); // Previous replacements are empty it should be passed
         List<IAnonymousFunctionDeclaration> anonymousContainers1 = new ArrayList<>(statement1.getAnonymousFunctionDeclarations());
         List<IAnonymousFunctionDeclaration> anonymousContainers2 = new ArrayList<>(statement2.getAnonymousFunctionDeclarations());
 
@@ -70,6 +70,7 @@ public class AnonymousFunctionReplacementFinder {
                     if (matcher.match(anonymousClassDeclaration1, anonymousClassDeclaration2)) {
                         Replacement replacement = diffAnonymousPair(anonymousClassDeclaration1, anonymousClassDeclaration2);
                         if (replacement != null) {
+                            replacements.add(replacement);
                             listIterator1.remove();
                             listIterator2.remove();
                         }

@@ -433,7 +433,6 @@ public class SourceFileDiffer extends BaseDiffer {
         sourceFileDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
-
     // Adds the added and removed ops in the model diff
     private void reportAddedAndRemovedOperationsIfNotEquals(SourceFileDiff sourceDiff) {
         // region Find uncommon functions between the two files
