@@ -1,5 +1,5 @@
 var m = function () {
-  var t = 5;
+  var t, z = 5;
 };
 let x = function() {
 

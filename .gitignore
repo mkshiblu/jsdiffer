@@ -65,3 +65,4 @@ bin/
 .settings/
 .classpath
 .project
+src-js/node_modules/

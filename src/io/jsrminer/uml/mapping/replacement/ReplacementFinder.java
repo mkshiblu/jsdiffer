@@ -80,7 +80,7 @@ public class ReplacementFinder {
         // Find replacements in various rounds
 
         // 1. Argument replacement with variables
-        // Perform replacements of  all the arguments in s1 with variables in s2
+        // Perform replacements of  all the arguments in s1 with variables in s2 (no need call for anonymous)
         final Map<String, String> variableToArgumentMap = replaceArgumentsWithVariables(
                 statement1, diff, replacementInfo);
 
