@@ -97,7 +97,6 @@ public class VariablesAndFunctionInvocationsReplacer {
         }
     }
 
-
     private boolean variablesStartWithSameCase(String s1, String s2, Map<String, String> parameterToArgumentMap) {
         if (parameterToArgumentMap.values().contains(s2)) {
             return true;

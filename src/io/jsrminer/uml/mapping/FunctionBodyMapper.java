@@ -876,6 +876,9 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 , leaves1
                 , leaves2
                 , argumentizer);
+
+        // TODO: Take account the anonymous pair mappings
+
         if (replacements != null) {
             LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);
