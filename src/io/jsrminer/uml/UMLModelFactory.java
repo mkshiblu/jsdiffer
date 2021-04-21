@@ -1,7 +1,9 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.io.FileUtil;
+import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.parser.js.UMDHandler;
+import io.jsrminer.parser.js.babel.BabelParser;
 import io.jsrminer.parser.js.closurecompiler.ClosureCompilerParser;
 import io.jsrminer.sourcetree.JsConfig;
 
@@ -14,7 +16,7 @@ public class UMLModelFactory {
 //    }
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
-        ClosureCompilerParser parser = new ClosureCompilerParser();
+        var parser = new BabelParser();
         //parser.setEnableStrictMode(true);
         UMLModel model = parser.parse(fileContents);
 

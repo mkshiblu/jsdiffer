@@ -9,7 +9,7 @@ import java.io.File;
  * Represents the JS engine or environment where JS scripts could be executed
  */
 class JavaScriptEngine implements AutoCloseable {
-    public static final String SCRIPTS_DIRECTORY_NAME = "src-js/scripts";
+    public static final String PARSE_SCRIPT_FILE = "src-js/src-compiled.js";
     private NodeJS nodeJs;
     private V8Object parser;
 
@@ -20,8 +20,7 @@ class JavaScriptEngine implements AutoCloseable {
     }
 
     public void createParseFunction() {
-        parser = this.nodeJs.require(new File(SCRIPTS_DIRECTORY_NAME,
-                "Parser.js"));
+        parser = this.nodeJs.require(new File(PARSE_SCRIPT_FILE));
         this.nodeJs.getRuntime().add("parser", parser);
         this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script, asJson); }");
     }

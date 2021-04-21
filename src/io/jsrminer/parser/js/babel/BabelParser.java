@@ -15,7 +15,6 @@ import java.util.Map;
 
 public class BabelParser extends JavaScriptParser {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    public static final String SCRIPTS_DIRECTORY_NAME = "src-js/scripts";
 
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
