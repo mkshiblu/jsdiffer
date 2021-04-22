@@ -1,8 +1,18 @@
 import * as babelParser from '@babel/parser';
+import * as babelTravese from '@babel/traverse';
+import { File as BabelFile, Program } from '@babel/types';
+import { CompositeStatement, Container } from './RmTypes';
+import * as visitor from './Visitor';
 
-export function parse(script: string) {
+export function parse(content: string) {
   console.time('parse');
-  const ast = babelParser.parse(script, {
+  const ast: BabelFile = parseAndMakeAst(content);
+  traverse(ast);
+  console.timeEnd('parse');
+}
+
+function parseAndMakeAst(content: string): BabelFile {
+  return babelParser.parse(content, {
     sourceType: 'unambiguous',
     allowImportExportEverywhere: true,
     allowReturnOutsideFunction: true,
@@ -18,5 +28,20 @@ export function parse(script: string) {
       'optionalCatchBinding',
     ],
   });
-  console.timeEnd('parse');
+}
+
+function traverse(ast: BabelFile) {
+  //const blockCodeFragment = new CompositeStatement();
+  const container = new Container();
+  babelTravese.default(
+    ast,
+    visitor.containerVisitor,
+    undefined,
+    container,
+    undefined,
+  );
+
+  console.time('JSON.stringify');
+  //const result = asJson ? JSON.stringify(blockCodeFragment) : blockCodeFragment;
+  console.timeEnd('JSON.stringify');
 }
