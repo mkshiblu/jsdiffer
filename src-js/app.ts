@@ -1,9 +1,10 @@
-import { parse } from './src/Parser';
+//import { parse } from './src/Parser';
 
 let content = `
 return keyCodes.indexOf(eventKeyCode) === -1
 `;
 
+//parse('sad');
 console.log('hi');
 // //content = require('fs').readFileSync('E:\\PROJECTS_REPO\\vue.js', 'UTF-8');
 // //content = require('fs').readFileSync('../resources/real-projects/vue/src1/vue_common.js', 'utf-8');
