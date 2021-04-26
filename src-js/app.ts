@@ -1,7 +1,15 @@
 import * as parser from './src/Parser';
 
 let content = `
-return keyCodes.indexOf(eventKeyCode) === -1
+function x(){
+    
+}
+
+//dsa
+function f1(){
+
+return /*dsad*/ keyCodes.indexOf(eventKeyCode) === -1
+}
 `;
 
 parser.parse(content);

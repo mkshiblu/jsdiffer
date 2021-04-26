@@ -35,7 +35,8 @@ function traverse(ast: BabelFile) {
   const container = new Container();
   babelTravese.default(
     ast,
-    visitor.containerVisitor,
+    //visitor.containerVisitor,
+    visitor.createProgramVisitor(),
     undefined,
     container,
     undefined,
