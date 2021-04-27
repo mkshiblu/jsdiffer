@@ -4,6 +4,6 @@
     "module": "commonjs",
     "outDir": "out",
     "sourceMap": true,
-    "lib": ["ES2016"]
+    "lib": ["ES2016", "DOM"]
   }
 }

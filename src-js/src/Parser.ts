@@ -1,7 +1,7 @@
 import * as babelParser from '@babel/parser';
 import * as babelTravese from '@babel/traverse';
 import { File as BabelFile, Program } from '@babel/types';
-import { CompositeStatement, Container } from './RmTypes';
+import { CompositeFragment, Container } from './RmTypes';
 import * as visitor from './Visitor';
 
 export function parse(content: string) {

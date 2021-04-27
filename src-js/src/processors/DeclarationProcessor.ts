@@ -1,6 +1,37 @@
 import { NodePath } from '@babel/traverse';
+import { functionDeclaration } from '@babel/types';
+import { Container, Fragment } from '../RmTypes';
+import { createSourceLocation } from './AstInfoExtractor';
 
-export function processFunctionDeclaration(path: NodePath, parent) {}
+export function processFunctionDeclaration(
+  path: NodePath,
+  container: Container,
+  parentFragment: Fragment,
+) {
+  const name = path.node.id.name;
+  const location = createSourceLocation(path);
+
+  const functonDeclaration = {
+    name,
+    loc: location,
+    params: [],
+    body: [],
+  };
+
+  container.registerFunctionDeclaration(functionDeclaration);
+}
+
+export function processClassDeclaration(
+  path: NodePath,
+  container: Container,
+  parentFragment: Fragment,
+) {}
+
+export function processFunctionExpression(
+  path: NodePath,
+  container: Container,
+  parentFragment: Fragment,
+) {}
 
 // const astProcessor = require("../processors/AstNodeProcessor");
 // const astUtil = require("../parser/AstUtil");

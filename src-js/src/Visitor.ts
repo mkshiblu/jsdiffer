@@ -1,9 +1,12 @@
 import * as types from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import * as declarationProcessor from './processors/DeclarationProcessor';
+import { Container, Fragment } from './RmTypes';
 
 var nodePathProcesses = new Map([
   ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
+  ['FunctionExpression', declarationProcessor.processFunctionExpression],
+  ['ClassDeclaration', declarationProcessor.processClassDeclaration],
   //['VariableDeclaration', declarationProcessor.processVariableDeclaration],
 
   // ['IfStatement', choice.processIfStatement],
@@ -29,23 +32,26 @@ var nodePathProcesses = new Map([
   // ['ThrowStatement', exceptions.processThrowStatement],
 ]);
 
+/**
+ * Entry point of the program
+ */
 export function createProgramVisitor() {
   return {
-    Program(path: NodePath, parent) {
-      for (let childPath in path.get('body')) {
-        process(childPath, parent);
-      }
+    Program(path: NodePath, container: Container) {
+      path.get('body').forEach((childPath) => {
+        visit(childPath, container, null);
+        // TODO pass to java?
+      });
+
       path.skip();
     },
   };
 }
 
-function process(path: NodePath, parent) {
+function visit(path: NodePath, container: Container, parentFragment: Fragment) {
   const process = nodePathProcesses.get(path.node.type);
-  process(path, parent);
+  process(path, container, parentFragment);
 }
-
-function processFunctionDeclaration(path: NodePath, parent) {}
 
 const containerVisitor = {
   Program(path, parent) {
