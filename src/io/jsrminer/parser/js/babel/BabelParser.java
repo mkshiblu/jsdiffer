@@ -20,7 +20,7 @@ public class BabelParser extends JavaScriptParser {
     public UMLModel parse(Map<String, String> fileContents) {
         final UMLModel umlModel = new UMLModel();
 
-        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+        try (final JBabel jsEngine = new JBabel()) {
             jsEngine.createParseFunction();
 
             for (String filepath : fileContents.keySet()) {
@@ -47,7 +47,7 @@ public class BabelParser extends JavaScriptParser {
         if (filepath == null)
             throw new NullPointerException("filepath cannot be null");
 
-        try (final JavaScriptEngine jsEngine = new JavaScriptEngine()) {
+        try (final JBabel jsEngine = new JBabel()) {
             jsEngine.createParseFunction();
 
             SourceFile source = parse(content, jsEngine, filepath);
@@ -63,7 +63,7 @@ public class BabelParser extends JavaScriptParser {
      *
      * @return
      */
-    private SourceFile parse(String fileContent, JavaScriptEngine jsEngine, String filePath) {
+    private SourceFile parse(String fileContent, JBabel jsEngine, String filePath) {
         final String blockJson = processScript(fileContent, jsEngine);
         StopWatch watch = new StopWatch();
         watch.start();
@@ -73,7 +73,7 @@ public class BabelParser extends JavaScriptParser {
         return file;
     }
 
-    private String processScript(String script, JavaScriptEngine jsEngine) {
+    private String processScript(String script, JBabel jsEngine) {
         try {
             return (String) jsEngine.executeFunction("parse", script, true);
         } catch (Exception ex) {

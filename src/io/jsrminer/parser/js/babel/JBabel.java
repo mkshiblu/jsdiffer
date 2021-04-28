@@ -8,12 +8,12 @@ import java.io.File;
 /**
  * Represents the JS engine or environment where JS scripts could be executed
  */
-class JavaScriptEngine implements AutoCloseable {
+class JBabel implements AutoCloseable {
     public static final String PARSE_SCRIPT_FILE = "src-js/src-compiled.js";
     private NodeJS nodeJs;
     private V8Object parser;
 
-    public JavaScriptEngine() {
+    public JBabel() {
         this.nodeJs = NodeJS.createNodeJS();
         // Add a utility toJson function
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) { return JSON.stringify(object);}");
@@ -22,7 +22,7 @@ class JavaScriptEngine implements AutoCloseable {
     public void createParseFunction() {
         parser = this.nodeJs.require(new File(PARSE_SCRIPT_FILE));
         this.nodeJs.getRuntime().add("parser", parser);
-        this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script, asJson); }");
+        this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script); }");
     }
 
     public Object executeFunction(final String name, final Object... args) {
@@ -36,8 +36,13 @@ class JavaScriptEngine implements AutoCloseable {
         return this.nodeJs.getRuntime().executeJSFunction("toJson", object).toString();
     }
 
+    public JV8 parse(String filename, String content) {
+        V8Object ast = (V8Object) executeFunction("parse", content);
+        return new JV8(ast);
+    }
+
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (parser != null) {
             parser.release();
         }

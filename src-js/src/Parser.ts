@@ -3,15 +3,17 @@ import * as babelTravese from '@babel/traverse';
 import { File as BabelFile, Program } from '@babel/types';
 import { CompositeFragment, Container } from './RmTypes';
 import * as visitor from './Visitor';
+import generate from '@babel/generator';
 
 export function parse(content: string) {
   console.time('parse');
   const ast: BabelFile = parseAndMakeAst(content);
+
   traverse(ast);
   console.timeEnd('parse');
 }
 
-function parseAndMakeAst(content: string): BabelFile {
+export function parseAndMakeAst(content: string): BabelFile {
   return babelParser.parse(content, {
     sourceType: 'unambiguous',
     allowImportExportEverywhere: true,

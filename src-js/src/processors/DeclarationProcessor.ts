@@ -18,7 +18,7 @@ export function processFunctionDeclaration(
     body: [],
   };
 
-  container.registerFunctionDeclaration(functionDeclaration);
+  //container.registerFunctionDeclaration(functionDeclaration);
 }
 
 export function processClassDeclaration(

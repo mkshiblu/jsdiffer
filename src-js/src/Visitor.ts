@@ -2,6 +2,7 @@ import * as types from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import * as declarationProcessor from './processors/DeclarationProcessor';
 import { Container, Fragment } from './RmTypes';
+import generate from '@babel/generator';
 
 var nodePathProcesses = new Map([
   ['FunctionDeclaration', declarationProcessor.processFunctionDeclaration],
@@ -38,6 +39,8 @@ var nodePathProcesses = new Map([
 export function createProgramVisitor() {
   return {
     Program(path: NodePath, container: Container) {
+      const node = path.node;
+
       path.get('body').forEach((childPath) => {
         visit(childPath, container, null);
         // TODO pass to java?

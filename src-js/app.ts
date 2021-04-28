@@ -4,7 +4,7 @@ let content = `
 //dsa
 function f1(){
 
-return /*dsad*/ keyCodes.indexOf(eventKeyCode) === -1
+return /*dsad*/ keyCodes.indexOf(  eventKeyCode) ===   -1
 }
 ()=> 'hy';
 
