@@ -9,7 +9,7 @@ import java.io.File;
  * Represents the JS engine or environment where JS scripts could be executed
  */
 class JBabel implements AutoCloseable {
-    public static final String PARSE_SCRIPT_FILE = "src-js/src-compiled.js";
+    public static final String PARSE_SCRIPT_FILE = "src-js/babel_parser.js";
     private NodeJS nodeJs;
     private V8Object parser;
 
@@ -17,9 +17,10 @@ class JBabel implements AutoCloseable {
         this.nodeJs = NodeJS.createNodeJS();
         // Add a utility toJson function
         this.nodeJs.getRuntime().executeVoidScript("function toJson(object) { return JSON.stringify(object);}");
+        init();
     }
 
-    public void createParseFunction() {
+    private void init() {
         parser = this.nodeJs.require(new File(PARSE_SCRIPT_FILE));
         this.nodeJs.getRuntime().add("parser", parser);
         this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script); }");

@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import io.jsrminer.parser.JsonFileLoader;
 import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.uml.UMLModel;
@@ -11,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Map;
+import java.util.*;
 
 public class BabelParser extends JavaScriptParser {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -19,21 +20,20 @@ public class BabelParser extends JavaScriptParser {
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
         final UMLModel umlModel = new UMLModel();
+        try {
 
-        try (final JBabel jsEngine = new JBabel()) {
-            jsEngine.createParseFunction();
-
+            JBabel jBabel = new JBabel();
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
 
                 try {
                     log.info("Processing " + filepath + "...");
-                    SourceFile sourceFile = parse(content, jsEngine, filepath);
+                    SourceFile sourceFile = parseAndLoadSourceFile(content, filepath, jBabel);
                     sourceFile.setFilepath(filepath);
                     umlModel.getSourceFileModels().put(filepath, sourceFile);
                 } catch (Exception ex) {
-                    System.out.println("Ignoring and removing file " + filepath + " due to exception" + ex.toString());
-                    fileContents.remove(filepath);
+                    ex.printStackTrace();
+                    //System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
                 }
             }
         } catch (Exception e) {
@@ -46,11 +46,9 @@ public class BabelParser extends JavaScriptParser {
     public ISourceFile parseSource(String content, @NonNull String filepath) {
         if (filepath == null)
             throw new NullPointerException("filepath cannot be null");
-
-        try (final JBabel jsEngine = new JBabel()) {
-            jsEngine.createParseFunction();
-
-            SourceFile source = parse(content, jsEngine, filepath);
+        try {
+            JBabel jBabel = new JBabel();
+            SourceFile source = parseAndLoadSourceFile(content, filepath, jBabel);
             source.setFilepath(filepath);
             return source;
         } catch (Exception e) {
@@ -58,26 +56,139 @@ public class BabelParser extends JavaScriptParser {
         }
     }
 
+//    /**
+//     * Parses the code using the jsEngine
+//     *
+//     * @return
+//     */
+//    private SourceFile parse(String fileContent, JBabel jsEngine, String filePath) {
+//        final String blockJson = processScript(fileContent, jsEngine);
+//        StopWatch watch = new StopWatch();
+//        watch.start();
+//        SourceFile file = new JsonFileLoader(filePath).parseSourceFile(blockJson);
+//        watch.stop();
+//        log.debug("Model loading time from json: " + watch.toString());
+//        return file;
+//    }
+
     /**
      * Parses the code using the jsEngine
      *
      * @return
      */
-    private SourceFile parse(String fileContent, JBabel jsEngine, String filePath) {
-        final String blockJson = processScript(fileContent, jsEngine);
+    private SourceFile parseAndLoadSourceFile(String fileContent, String filePath, JBabel jBabel) {
+        SourceFile file = new SourceFile(filePath);
+
         StopWatch watch = new StopWatch();
         watch.start();
-        SourceFile file = new JsonFileLoader(filePath).parseSourceFile(blockJson);
+
+        // Get AST
+        ParseResult result = parseAndMakeAst(filePath, fileContent, jBabel);
+        // Traverse AST and load model
+        if (result.getProgramAST() == null) {
+            throw new RuntimeException("Error parsing " + filePath);
+        } else {
+            //modelLoader.loadFromAst(result.getProgramAST(), file);
+        }
+
         watch.stop();
-        log.debug("Model loading time from json: " + watch.toString());
+        log.debug("Parse and Load time: " + watch.toString());
         return file;
     }
 
-    private String processScript(String script, JBabel jsEngine) {
+    public ParseResult parseAndMakeAst(String fileName, String fileContent, JBabel babel) {
+        final List<SyntaxMessage> warnings = new LinkedList<>();
+        final List<SyntaxMessage> errors = new LinkedList<>();
+
+        JV8 programAST = null;
+
         try {
-            return (String) jsEngine.executeFunction("parse", script, true);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            programAST = babel.parse(fileName, fileContent);
+
+        } catch (Exception e) {
+            errors.add(new SyntaxMessage(String.format("%s: %s", e.getClass(), e.getMessage()), -1, -1));
+        }
+
+        return new ParseResult(programAST, errors, warnings);
+    }
+
+    /**
+     * Syntax error message.
+     */
+    static class SyntaxMessage {
+        private final String message;
+        private final int line;
+        private final int column;
+
+        /**
+         * Constructs a new syntax error message object.
+         */
+        SyntaxMessage(String message, int line, int column) {
+            this.message = message;
+            this.line = line;
+            this.column = column;
+        }
+
+        /**
+         * Returns the message.
+         */
+        public String getMessage() {
+            return message;
+        }
+
+        /**
+         * Returns the source location.
+         */
+        public int getLine() {
+            return line;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        @Override
+        public String toString() {
+            return line + "," + column + ": " + getMessage();
+        }
+    }
+
+    /**
+     * Result from parser.
+     */
+    public static class ParseResult {
+
+        private final List<SyntaxMessage> errors;
+
+        private final List<SyntaxMessage> warnings;
+
+        private JV8 programAST;
+
+        private ParseResult(JV8 programAST, List<SyntaxMessage> errors, List<SyntaxMessage> warnings) {
+            this.programAST = programAST;
+            this.errors = errors;
+            this.warnings = warnings;
+        }
+
+        /**
+         * Returns the AST, or null if parse error.
+         */
+        public JV8 getProgramAST() {
+            return programAST;
+        }
+
+        /**
+         * Returns the list of parse errors.
+         */
+        List<SyntaxMessage> getErrors() {
+            return errors;
+        }
+
+        /**
+         * Returns the list of parse warnings.
+         */
+        List<SyntaxMessage> getWarnings() {
+            return warnings;
         }
     }
 }
