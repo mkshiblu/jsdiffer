@@ -5,7 +5,7 @@ exports.parse = function parse(content) {
   return parseAndMakeAst(content);
 };
 
-exports.parseAndMakeAst = function parseAndMakeAst(content) {
+function parseAndMakeAst(content) {
   return babelParser.parse(content, {
     sourceType: 'unambiguous',
     allowImportExportEverywhere: true,
@@ -22,7 +22,7 @@ exports.parseAndMakeAst = function parseAndMakeAst(content) {
       'optionalCatchBinding',
     ],
   });
-};
+}
 
 exports.formatNode = function format(node) {
   return generator.default(node, {

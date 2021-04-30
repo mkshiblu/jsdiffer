@@ -1,5 +1,5 @@
 const { parse } = require('@babel/parser');
-const parser = require('./src/Parser');
+const parser = require('./babel_parser');
 
 let content = `
 //dsa

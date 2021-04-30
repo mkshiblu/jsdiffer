@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.eclipsesource.v8.V8Object;
 import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
 import io.jsrminer.parser.JsonFileLoader;
 import io.jsrminer.parser.js.JavaScriptParser;
@@ -56,21 +57,6 @@ public class BabelParser extends JavaScriptParser {
         }
     }
 
-//    /**
-//     * Parses the code using the jsEngine
-//     *
-//     * @return
-//     */
-//    private SourceFile parse(String fileContent, JBabel jsEngine, String filePath) {
-//        final String blockJson = processScript(fileContent, jsEngine);
-//        StopWatch watch = new StopWatch();
-//        watch.start();
-//        SourceFile file = new JsonFileLoader(filePath).parseSourceFile(blockJson);
-//        watch.stop();
-//        log.debug("Model loading time from json: " + watch.toString());
-//        return file;
-//    }
-
     /**
      * Parses the code using the jsEngine
      *
@@ -88,7 +74,9 @@ public class BabelParser extends JavaScriptParser {
         if (result.getProgramAST() == null) {
             throw new RuntimeException("Error parsing " + filePath);
         } else {
-            //modelLoader.loadFromAst(result.getProgramAST(), file);
+            ModelBuilder builder = new ModelBuilder(file);
+             builder.loadFromAst(result.getProgramAST());
+          //  builder.visit((V8Object) result.getProgramAST().getValue());
         }
 
         watch.stop();
@@ -100,16 +88,16 @@ public class BabelParser extends JavaScriptParser {
         final List<SyntaxMessage> warnings = new LinkedList<>();
         final List<SyntaxMessage> errors = new LinkedList<>();
 
-        JV8 programAST = null;
-
+        JV8 programAst = null;
         try {
-            programAST = babel.parse(fileName, fileContent);
+            var ast = babel.parse(fileName, fileContent);
+            programAst = ast.get("program");
 
         } catch (Exception e) {
             errors.add(new SyntaxMessage(String.format("%s: %s", e.getClass(), e.getMessage()), -1, -1));
         }
 
-        return new ParseResult(programAST, errors, warnings);
+        return new ParseResult(programAst, errors, warnings);
     }
 
     /**
