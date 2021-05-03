@@ -1,26 +1,25 @@
 const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
-let content = `
-//dsa
-function f1(){
+let content = `let x = /*fdf**/1;`;
+// let content = `
+// //dsa
+// function f1(){
 
-return /*dsad*/ keyCodes.indexOf(  eventKeyCode) ===   -1
-}
-()=> 'hy';
+// return /*dsad*/ keyCodes.indexOf(  eventKeyCode) ===   -1
+// }
+// ()=> 'hy';
 
+// (function(){
 
+// })()
+// var d = function x(){
 
-(function(){
+// }
 
-})()
-var d = function x(){
-    
-}
+// `;
 
-
-`;
-
-const ast = parser.parseAndMakeAst(content);
-const code = parser.formatNode(ast);
-console.log(code);
+const ast = parser.parse(content);
+//const formattedCode = parser.formatNode(ast, true);
+//const formattedAst = parser.parse(formattedCode);
+console.log(formattedAst.code);

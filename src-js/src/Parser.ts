@@ -9,8 +9,17 @@ export function parse(content: string) {
   console.time('parse');
   const ast: BabelFile = parseAndMakeAst(content);
 
+  const result = formatCode(ast);
+
   traverse(ast);
   console.timeEnd('parse');
+}
+
+function formatCode(ast: BabelFile) {
+  return generate(ast, {
+    comments: false,
+    //concise: true,
+  });
 }
 
 export function parseAndMakeAst(content: string): BabelFile {

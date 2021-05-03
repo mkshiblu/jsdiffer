@@ -2,7 +2,8 @@ const babelParser = require('@babel/parser');
 const generator = require('@babel/generator');
 
 exports.parse = function parse(content) {
-  return parseAndMakeAst(content);
+  const ast = parseAndMakeAst(content);
+  return ast;
 };
 
 function parseAndMakeAst(content) {
@@ -28,5 +29,8 @@ exports.formatNode = function format(node) {
   return generator.default(node, {
     comments: false,
     //concise: true,
+    //sourceFileName: 'dsa',
+
+    //sourceMaps: true,
   }).code;
 };
