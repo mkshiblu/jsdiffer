@@ -11,8 +11,8 @@ import java.util.Set;
 
 import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
 
-public class ParserConfig {
-    public static final EnumSet<ParseTreeType> ignoredNodes = EnumSet.of(
+public class ClosureParserConfig {
+    static final EnumSet<ParseTreeType> ignoredNodes = EnumSet.of(
             IMPORT_DECLARATION
             , MISSING_PRIMARY_EXPRESSION
             , EMPTY_STATEMENT
@@ -22,7 +22,7 @@ public class ParserConfig {
             , WITH_STATEMENT
     );
 
-    public final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
+    final static EnumMap<ParseTreeType, CodeElementType> parseTreeTypeCodeElementTypeMap = new EnumMap(ParseTreeType.class) {{
         put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
         put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
 
@@ -67,7 +67,7 @@ public class ParserConfig {
     /**
      * require('./core/core.js')(p1, p2)
      */
-    public static boolean treatCallExpressionOperandAsTheFunctionName = true;
+    static boolean treatCallExpressionOperandAsTheFunctionName = true;
 
-    public static boolean appendSemicolonToStatementIfNotPresent = true;
+    static boolean appendSemicolonToStatementIfNotPresent = true;
 }

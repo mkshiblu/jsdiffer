@@ -25,7 +25,7 @@ function parseAndMakeAst(content) {
   });
 }
 
-exports.formatNode = function format(node) {
+exports.formatNode = function format(node, appendSemicolon = false) {
   return generator.default(node, {
     comments: false,
     //concise: true,

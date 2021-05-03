@@ -98,6 +98,6 @@ public class Visitor {
     }
 
     public static boolean isIgnored(ParseTree parseTree) {
-        return ParserConfig.ignoredNodes.contains(parseTree.type);
+        return ClosureParserConfig.ignoredNodes.contains(parseTree.type);
     }
 }

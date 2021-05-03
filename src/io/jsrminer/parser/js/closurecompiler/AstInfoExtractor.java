@@ -13,8 +13,8 @@ import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 import io.rminerx.core.entities.DeclarationContainer;
 
-import static io.jsrminer.parser.js.closurecompiler.ParserConfig.appendSemicolonToStatementIfNotPresent;
-import static io.jsrminer.parser.js.closurecompiler.ParserConfig.parseTreeTypeCodeElementTypeMap;
+import static io.jsrminer.parser.js.closurecompiler.ClosureParserConfig.appendSemicolonToStatementIfNotPresent;
+import static io.jsrminer.parser.js.closurecompiler.ClosureParserConfig.parseTreeTypeCodeElementTypeMap;
 
 public class AstInfoExtractor {
 
