@@ -125,7 +125,7 @@ class JV8 implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         for (JV8 child : children) {
             child.close();
         }

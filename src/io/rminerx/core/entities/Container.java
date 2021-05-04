@@ -126,10 +126,15 @@ public abstract class Container implements IContainer {
     public String getName() {
         return name;
     }
+
     /**
      * The name of the container.
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void registerStatements(List<Statement> statements) {
+        this.statements.addAll(statements);
     }
 }

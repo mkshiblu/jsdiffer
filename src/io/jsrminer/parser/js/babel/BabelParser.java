@@ -1,8 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-import com.eclipsesource.v8.V8Object;
-import com.google.javascript.jscomp.parsing.parser.trees.ProgramTree;
-import io.jsrminer.parser.JsonFileLoader;
 import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.uml.UMLModel;
 import io.rminerx.core.api.ISourceFile;
@@ -63,8 +60,6 @@ public class BabelParser extends JavaScriptParser {
      * @return
      */
     private SourceFile parseAndLoadSourceFile(String fileContent, String filePath, JBabel jBabel) {
-        SourceFile file = new SourceFile(filePath);
-
         StopWatch watch = new StopWatch();
         watch.start();
 
@@ -72,16 +67,15 @@ public class BabelParser extends JavaScriptParser {
         ParseResult result = parseAndMakeAst(filePath, fileContent, jBabel);
         // Traverse AST and load model
         if (result.getProgramAST() == null) {
+            watch.stop();
             throw new RuntimeException("Error parsing " + filePath);
         } else {
-            ModelBuilder builder = new ModelBuilder(file);
-             builder.loadFromAst(result.getProgramAST());
-          //  builder.visit((V8Object) result.getProgramAST().getValue());
+            Visitor builder = new Visitor(filePath, fileContent);
+            SourceFile file = builder.loadFromAst(result.getProgramAST());
+            watch.stop();
+            log.debug("Parse and Load time: " + watch.toString());
+            return file;
         }
-
-        watch.stop();
-        log.debug("Parse and Load time: " + watch.toString());
-        return file;
     }
 
     public ParseResult parseAndMakeAst(String fileName, String fileContent, JBabel babel) {
