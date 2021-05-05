@@ -10,7 +10,7 @@ public class BabelParserParserTest extends BaseTest {
     @Test
     public void testParseCode() {
         var parser = new BabelParser();
-        var result = parser.parseSource("let x = 1;", "file.js");
+        var result = parser.parseSource("let x,y = 1;", "file.js");
         assertNotNull(result);
     }
 
