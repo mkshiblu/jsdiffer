@@ -1,106 +1,77 @@
 package io.jsrminer.parser.js.babel;
 
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.CodeEntity;
+import io.jsrminer.sourcetree.SingleStatement;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
-import io.rminerx.core.api.INode;
 import io.rminerx.core.entities.SourceFile;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.HashMap;
+import java.util.AbstractMap;
+import java.util.EnumMap;
 import java.util.Map;
+
+import static io.jsrminer.parser.js.babel.BabelNodeType.VARIABLE_DECLARATION;
 
 public class Visitor {
     private final String filename;
     private final String fileContent;
+    private final DeclarationVisitor declarationVisitor = new DeclarationVisitor();
 
-    private Map<String, BabelNodeVisitor<Object, JV8, ICodeFragment>> nodeProcessors = new HashMap<>();
+    private final EnumMap<BabelNodeType, BabelNodeVisitor<CodeEntity, ICodeFragment>> nodeProcessors
+            = new EnumMap(BabelNodeType.class) {{
+        put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
+    }};
+
+    /**
+     * An expression statement such as x = "4";
+     */
+    public final BabelNodeVisitor<SingleStatement, BlockStatement> expressionStatementProcessor
+            = (node, parent, container) -> null;
+
+
+    private final Map<String, BabelNodeVisitor<? extends CodeEntity, ? extends ICodeFragment>> nodeProcessors2 = Map.ofEntries(
+            new AbstractMap.SimpleImmutableEntry<String, BabelNodeVisitor<SingleStatement, BlockStatement>>(
+                    "dsad", expressionStatementProcessor
+            )
+    );
 
     public Visitor(String filename, String fileContent) {
         this.filename = filename;
         this.fileContent = fileContent;
-        initProcessors();
     }
 
-    void initProcessors() {
-        nodeProcessors.put("VariableDeclaration", Declarations.returnStatementProcessor);
-    }
+    public SourceFile loadFromAst(BabelNode programAST) {
+        var container = new SourceFile(filename);
+        container.setSourceLocation(programAST.getSourceLocation());
 
-    /**
-     * interface VariableDeclaration <: Declaration {
-     * type: "VariableDeclaration";
-     * declarations: [ VariableDeclarator ];
-     * kind: "var" | "let" | "const";
-     * }
-     */
-    final BabelNodeVisitor<VariableDeclaration, JV8, ILeafFragment> processVariableDeclaration
-            = (JV8 node, ILeafFragment parent, IContainer container) -> {
-        String kindStr = node.get("kind").asString();
-        var kind = VariableDeclarationKind.fromName(kindStr);
-        var declarations = node.get("declarations");
-
-        for (int i = 0; i < declarations.size(); i++) {
-            processVariableDeclarator(declarations.get(i), kind, parent);
-        }
-        return null;
-    };
-
-    /**
-     * interface VariableDeclarator <: Node {
-     * type: "VariableDeclarator";
-     * id: Pattern;
-     * init: Expression | null;
-     * }
-     *
-     * @param {declaratorPath} path
-     */
-    VariableDeclaration processVariableDeclarator(JV8 node, VariableDeclarationKind kind, ILeafFragment leaf) {
-        String variableName = node.get("id").get("name").asString();
-        VariableDeclaration variableDeclaration = createVariableDeclaration(node, variableName, kind, leaf.getParent());
-
-        if (node.get("init") != null) {
-            //        Expression initializer = astProcessor.processExpression(path.get("init"), statement);
-            //      variableDeclaration.initializer = initializer;
+        BlockStatement dummyBodyBlock = new BlockStatement();
+        dummyBodyBlock.setText("");
+        dummyBodyBlock.setSourceLocation(container.getSourceLocation());
+        //var path = new NodePath(dummyBodyBlock, container);
+        BabelNode body = programAST.get("body");
+        for (int i = 0; i < body.size(); i++) {
+            var member = body.get(i);
+            visitStatement(member, dummyBodyBlock, container);
         }
 
-        return variableDeclaration;
+        container.getStatements().addAll(dummyBodyBlock.getStatements());
+
+        return container;
     }
 
-    VariableDeclaration createVariableDeclaration(JV8 node, String variableName
-            , VariableDeclarationKind kind
-            , INode scopeNode) {
-        var variableDeclaration = new VariableDeclaration(variableName, kind);
-        variableDeclaration.setSourceLocation(createSourceLocation(node));
-
-        // Set Scope (TODO set body source location
-        variableDeclaration.setScope(createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
-
-        return variableDeclaration;
-    }
-
-    static SourceLocation createVariableScope(SourceLocation variableLocation, INode scopeNode) {
-        final SourceLocation parentLocation = scopeNode.getSourceLocation();
-        return new SourceLocation(parentLocation.getFilePath(),
-                variableLocation.startLine,
-                variableLocation.startColumn,
-                parentLocation.endLine,
-                parentLocation.endColumn,
-                variableLocation.start,
-                parentLocation.end
-        );
-    }
-
-    void visitExpression(JV8 node, ILeafFragment leaf, IContainer container) {
+    void visitExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         visit(node, leaf, container);
     }
 
-    Object visitStatement(JV8 node, BlockStatement parent, IContainer container) {
+    Object visitStatement(BabelNode node, BlockStatement parent, IContainer container) {
         return visit(node, parent, container);
     }
 
-    Object visit(JV8 node, ICodeFragment parent, IContainer container) {
-        final JV8 elementType = node.get("type");
+    private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
+        final BabelNode elementType = node.get("type");
         String type = elementType.asString();
         var processor = nodeProcessors.get(type);
         if (processor == null) {
@@ -112,56 +83,8 @@ public class Visitor {
         }
         return null;
     }
-//
-//    public void visit(JV8 node, NodePath path) {
-//        final JV8 elementType = node.get("type");
-//        String type = elementType.asString();
-//        nodeProcessors.get(type).visit(node, path.getParent(), path.getContainer());
-//    }
 
-    public SourceLocation createSourceLocation(JV8 node) {
-        int start = node.get("start").asInt();
-        int end = node.get("end").asInt();
-
-        JV8 loc = node.get("loc");
-        JV8 startLoc = loc.get("start");
-        JV8 endLoc = loc.get("end");
-        int startLine = startLoc.get("line").asInt();
-        int startColumn = startLoc.get("column").asInt();
-        int endLine = endLoc.get("line").asInt();
-        int endColumn = endLoc.get("column").asInt();
-
-//        loc.close();
-//        startLoc.close();
-//        endLoc.close();
-
-        return new SourceLocation(
-                this.filename
-                , startLine
-                , startColumn
-                , endLine
-                , endColumn
-                , start
-                , end
-        );
-    }
-
-    public SourceFile loadFromAst(JV8 programAST) {
-        var container = new SourceFile(filename);
-        container.setSourceLocation(createSourceLocation(programAST));
-
-        BlockStatement dummyBodyBlock = new BlockStatement();
-        dummyBodyBlock.setText("");
-        dummyBodyBlock.setSourceLocation(container.getSourceLocation());
-        var path = new NodePath(container, dummyBodyBlock);
-        JV8 body = programAST.get("body");
-        for (int i = 0; i < body.size(); i++) {
-            var member = body.get(i);
-            visit(member, path.getParent(), path.getContainer());
-        }
-
-        container.getStatements().addAll(dummyBodyBlock.getStatements());
-
-        return container;
+    public boolean isIgnored(String type) {
+        return BabelParserConfig.ignoredNodeTypes.contains(type);
     }
 }

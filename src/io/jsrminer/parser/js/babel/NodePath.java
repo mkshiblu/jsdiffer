@@ -1,19 +1,33 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.sourcetree.BlockStatement;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
 
 class NodePath {
     private final IContainer container;
-    private final ICodeFragment parent;
+    private final BlockStatement parent;
+    private final ILeafFragment leaf;
 
-    NodePath(IContainer container, ICodeFragment parent) {
-        this.container = container;
+    NodePath(BlockStatement parent, IContainer container) {
         this.parent = parent;
+        this.container = container;
+        leaf = null;
     }
 
-    public ICodeFragment getParent() {
+    NodePath(BlockStatement parent, IContainer container, ILeafFragment leaf) {
+        this.parent = parent;
+        this.container = container;
+        this.leaf = leaf;
+    }
+
+    public BlockStatement getBlockParent() {
         return parent;
+    }
+
+    public ILeafFragment getLeaf() {
+        return leaf;
     }
 
     public IContainer getContainer() {

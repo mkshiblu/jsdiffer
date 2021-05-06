@@ -1,23 +1,34 @@
 package io.jsrminer.parser.js.babel;
 
-import com.eclipsesource.v8.V8Array;
-import com.eclipsesource.v8.V8Object;
-
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-class JV8 implements AutoCloseable {
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Object;
+import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.util.Lazy;
+
+class BabelNode implements AutoCloseable {
+
+    //region JV8
     private final Object value;
     private final V8Object v8Object;
     private final V8Array objectAsArray;
 
     private final boolean defined;
     private final Function<Object, String> toJsonFunction;
-    private final List<JV8> children = new ArrayList<>();
+    private final List<BabelNode> children = new ArrayList<>();
+    String fileName;
+    String fileContent;
 
-    public JV8(Object value, Function<Object, String> toJsonFunction) {
+    BabelNode(Object value, Function<Object, String> toJsonFunction, String fileName, String fileContent) {
+        this(value, toJsonFunction);
+        this.fileContent = fileContent;
+        this.fileName = fileName;
+    }
+
+    private BabelNode(Object value, Function<Object, String> toJsonFunction) {
         this.value = value;
         if (value instanceof V8Object) {
             if (value instanceof V8Array) {
@@ -46,10 +57,10 @@ class JV8 implements AutoCloseable {
         return v8Object != null && v8Object.contains(member) && get(member).isDefined();
     }
 
-    public JV8 get(String member) {
+    public BabelNode get(String member) {
         if (v8Object != null) {
             if (v8Object.contains(member)) {
-                return addChild(new JV8(v8Object.get(member), toJsonFunction));
+                return addChild(new BabelNode(v8Object.get(member), toJsonFunction));
             } else {
                 throw error("Object has no member '" + member + "'");
             }
@@ -58,9 +69,9 @@ class JV8 implements AutoCloseable {
         }
     }
 
-    public JV8 get(int pos) {
+    public BabelNode get(int pos) {
         if (objectAsArray != null) {
-            return addChild(new JV8(objectAsArray.get(pos), toJsonFunction));
+            return addChild(new BabelNode(objectAsArray.get(pos), toJsonFunction));
         } else {
             throw error("Not an array");
         }
@@ -115,7 +126,7 @@ class JV8 implements AutoCloseable {
         return new RuntimeException(string + ":\n" + toString());
     }
 
-    private JV8 addChild(JV8 value) {
+    private BabelNode addChild(BabelNode value) {
         if (value.v8Object != null) {
             this.children.add(value);
         }
@@ -124,7 +135,7 @@ class JV8 implements AutoCloseable {
 
     @Override
     public void close() {
-        for (JV8 child : children) {
+        for (BabelNode child : children) {
             child.close();
         }
         if (v8Object != null) {
@@ -134,5 +145,39 @@ class JV8 implements AutoCloseable {
 
     public boolean isDefined() {
         return defined;
+    }
+
+    //endregion
+
+    private Lazy<SourceLocation> sourceLocationLazy = new Lazy<>(() -> createSourceLocation());
+
+    SourceLocation getSourceLocation() {
+        return sourceLocationLazy.getValue();
+    }
+
+    private SourceLocation createSourceLocation() {
+        var node = this;
+        int start = node.get("start").asInt();
+        int end = node.get("end").asInt();
+
+        var loc = node.get("loc");
+        var startLoc = loc.get("start");
+        var endLoc = loc.get("end");
+        int startLine = startLoc.get("line").asInt();
+        int startColumn = startLoc.get("column").asInt();
+        int endLine = endLoc.get("line").asInt();
+        int endColumn = endLoc.get("column").asInt();
+
+//        loc.close();
+
+        return new SourceLocation(
+                this.fileName
+                , startLine
+                , startColumn
+                , endLine
+                , endColumn
+                , start
+                , end
+        );
     }
 }

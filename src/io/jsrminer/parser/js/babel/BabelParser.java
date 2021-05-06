@@ -82,7 +82,7 @@ public class BabelParser extends JavaScriptParser {
         final List<SyntaxMessage> warnings = new LinkedList<>();
         final List<SyntaxMessage> errors = new LinkedList<>();
 
-        JV8 programAst = null;
+        BabelNode programAst = null;
         try {
             var ast = babel.parse(fileName, fileContent);
             programAst = ast.get("program");
@@ -144,9 +144,9 @@ public class BabelParser extends JavaScriptParser {
 
         private final List<SyntaxMessage> warnings;
 
-        private JV8 programAST;
+        private BabelNode programAST;
 
-        private ParseResult(JV8 programAST, List<SyntaxMessage> errors, List<SyntaxMessage> warnings) {
+        private ParseResult(BabelNode programAST, List<SyntaxMessage> errors, List<SyntaxMessage> warnings) {
             this.programAST = programAST;
             this.errors = errors;
             this.warnings = warnings;
@@ -155,7 +155,7 @@ public class BabelParser extends JavaScriptParser {
         /**
          * Returns the AST, or null if parse error.
          */
-        public JV8 getProgramAST() {
+        public BabelNode getProgramAST() {
             return programAST;
         }
 
