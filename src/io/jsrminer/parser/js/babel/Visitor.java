@@ -18,11 +18,12 @@ import static io.jsrminer.parser.js.babel.BabelNodeType.VARIABLE_DECLARATION;
 public class Visitor {
     private final String filename;
     private final String fileContent;
-    private final DeclarationVisitor declarationVisitor = new DeclarationVisitor();
+    private final DeclarationVisitor declarationVisitor = new DeclarationVisitor(this);
 
     private final EnumMap<BabelNodeType, BabelNodeVisitor<CodeEntity, ICodeFragment>> nodeProcessors
             = new EnumMap(BabelNodeType.class) {{
         put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
+      //  put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
     }};
 
     /**
@@ -73,7 +74,14 @@ public class Visitor {
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
         final BabelNode elementType = node.get("type");
         String type = elementType.asString();
-        var processor = nodeProcessors.get(type);
+        var nodeType = BabelNodeType.fromTitleCase(type);
+        var processor = nodeProcessors.get(nodeType);
+        switch (type){
+            case "VariableDeclaration":
+                declarationVisitor.variableDeclarationProcessor.visit(node, parent, container)
+                break;
+        }
+
         if (processor == null) {
             if (!isIgnored(type))
                 throw new NotImplementedException("Processor not implemented for " + type);
@@ -83,6 +91,7 @@ public class Visitor {
         }
         return null;
     }
+
 
     public boolean isIgnored(String type) {
         return BabelParserConfig.ignoredNodeTypes.contains(type);

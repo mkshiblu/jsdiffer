@@ -8,22 +8,22 @@ import java.util.Map;
 public enum BabelNodeType {
     VARIABLE_DECLARATION("VariableDeclaration");
 
-    private Object titleCase;
+    private String titleCase;
 
     BabelNodeType(String titleCase) {
         this.titleCase = titleCase;
-    };
+    }
 
-    private static Map<String, io.jsrminer.sourcetree.CodeElementType> typeTitleCaseMap = new HashMap<>();
+    private static Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 
     static {
-        for (CodeElementType type : CodeElementType.values()) {
+        for (BabelNodeType type : BabelNodeType.values()) {
             typeTitleCaseMap.put(type.titleCase, type);
         }
     }
 
-    public static CodeElementType fromTitleCase(String typeInTitleCase) {
-        CodeElementType t = typeTitleCaseMap.get(typeInTitleCase);
+    public static BabelNodeType fromTitleCase(String typeInTitleCase) {
+        BabelNodeType t = typeTitleCaseMap.get(typeInTitleCase);
         if (t == null) {
             System.out.println("No Code Element Tpe for " + typeInTitleCase);
         }
