@@ -37,6 +37,13 @@ class JBabel implements AutoCloseable {
         return this.nodeJs.getRuntime().executeJSFunction("toJson", object).toString();
     }
 
+    /**
+     * Convert the following object to json in node js side. It's a helper function
+     */
+    public String formatCode(Object object) {
+        return this.nodeJs.getRuntime().executeJSFunction("format", object).toString();
+    }
+
     public BabelNode parse(String filename, String content) {
         V8Object ast = (V8Object) executeFunction("parse", content);
         return new BabelNode(ast, this::toJson, filename, content);

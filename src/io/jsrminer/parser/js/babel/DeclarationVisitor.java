@@ -6,6 +6,8 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 
+import static io.jsrminer.parser.js.babel.BabelNodeUtil.createSingleStatementPopulateAndAddToParent;
+
 public class DeclarationVisitor {
     private final Visitor visitor;
 
@@ -33,14 +35,13 @@ public class DeclarationVisitor {
      */
     final BabelNodeVisitor<VariableDeclaration, ICodeFragment> variableDeclarationProcessor =
             (BabelNode node, ICodeFragment fragment, IContainer container) -> {
-
                 String kindStr = node.get("kind").asString();
                 var kind = VariableDeclarationKind.fromName(kindStr);
                 var declarations = node.get("declarations");
-
-                ILeafFragment leaf = fragment instanceof BlockStatement
-                        ? new SingleStatement() // TODO Populate
-                        : (ILeafFragment) fragment;
+                var isStatement = fragment instanceof BlockStatement;
+                ILeafFragment leaf = isStatement
+                        ? createSingleStatementPopulateAndAddToParent(node, (BlockStatement) fragment) // TODO Populate
+                        : (Expression) fragment;
 
                 for (int i = 0; i < declarations.size(); i++) {
                     processVariableDeclarator(declarations.get(i), kind, leaf, container);

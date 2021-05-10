@@ -18,14 +18,21 @@ class BabelNode implements AutoCloseable {
 
     private final boolean defined;
     private final Function<Object, String> toJsonFunction;
+    private final Function<Object, String> formatCodeFunction;
+
     private final List<BabelNode> children = new ArrayList<>();
     String fileName;
     String fileContent;
 
-    BabelNode(Object value, Function<Object, String> toJsonFunction, String fileName, String fileContent) {
-        this(value, toJsonFunction);
+    BabelNode(Object value, Function<Object, String> toJsonFunction, Function<Object, String> formatCodeFunction, String fileName, String fileContent) {
+        this(value, toJsonFunction, formatCodeFunction);
         this.fileContent = fileContent;
         this.fileName = fileName;
+    }
+
+    private BabelNode(Object value, Function<Object, String> toJsonFunction, Function<Object, String> formatCodeFunction) {
+        this(value, toJsonFunction);
+        this.formatCodeFunction = formatCodeFunction;
     }
 
     private BabelNode(Object value, Function<Object, String> toJsonFunction) {

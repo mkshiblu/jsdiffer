@@ -20,24 +20,17 @@ public class Visitor {
     private final String fileContent;
     private final DeclarationVisitor declarationVisitor = new DeclarationVisitor(this);
 
-    private final EnumMap<BabelNodeType, BabelNodeVisitor<CodeEntity, ICodeFragment>> nodeProcessors
-            = new EnumMap(BabelNodeType.class) {{
-        put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
-      //  put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
-    }};
+//    private final EnumMap<BabelNodeType, BabelNodeVisitor<CodeEntity, ICodeFragment>> nodeProcessors
+//            = new EnumMap(BabelNodeType.class) {{
+//        put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
+//      //  put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
+//    }};
 
     /**
      * An expression statement such as x = "4";
      */
     public final BabelNodeVisitor<SingleStatement, BlockStatement> expressionStatementProcessor
             = (node, parent, container) -> null;
-
-
-    private final Map<String, BabelNodeVisitor<? extends CodeEntity, ? extends ICodeFragment>> nodeProcessors2 = Map.ofEntries(
-            new AbstractMap.SimpleImmutableEntry<String, BabelNodeVisitor<SingleStatement, BlockStatement>>(
-                    "dsad", expressionStatementProcessor
-            )
-    );
 
     public Visitor(String filename, String fileContent) {
         this.filename = filename;
@@ -75,20 +68,20 @@ public class Visitor {
         final BabelNode elementType = node.get("type");
         String type = elementType.asString();
         var nodeType = BabelNodeType.fromTitleCase(type);
-        var processor = nodeProcessors.get(nodeType);
+//        var processor = nodeProcessors.get(nodeType);
         switch (type){
             case "VariableDeclaration":
-                declarationVisitor.variableDeclarationProcessor.visit(node, parent, container)
+                declarationVisitor.variableDeclarationProcessor.visit(node, parent, container);
                 break;
         }
 
-        if (processor == null) {
-            if (!isIgnored(type))
-                throw new NotImplementedException("Processor not implemented for " + type);
-        } else {
-            Object result = processor.visit(node, parent, container);
-            return result;
-        }
+//        if (processor == null) {
+//            if (!isIgnored(type))
+//                throw new NotImplementedException("Processor not implemented for " + type);
+//        } else {
+//            Object result = processor.visit(node, parent, container);
+//            return result;
+//        }
         return null;
     }
 
