@@ -25,12 +25,13 @@ function parseAndMakeAst(content) {
   });
 }
 
-exports.formatNode = function format(node, appendSemicolon = false) {
+exports.format = function format(node, appendSemicolon = false) {
   return generator.default(node, {
     comments: false,
-    //concise: true,
+    concise: true,
     //sourceFileName: 'dsa',
 
     //sourceMaps: true,
+    //retainLines: true,
   }).code;
 };

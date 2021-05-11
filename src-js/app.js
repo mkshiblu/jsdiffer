@@ -1,7 +1,7 @@
 const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
-let content = `let x = /*fdf**/1`;
+let content = `let x,y,    z=1`;
 // let content = `
 // //dsa
 // function f1(){
@@ -20,6 +20,6 @@ let content = `let x = /*fdf**/1`;
 // `;
 
 const ast = parser.parse(content);
-const formattedCode = parser.formatNode(ast, true);
+const formattedCode = parser.format(ast, true);
 //const formattedAst = parser.parse(formattedCode);
 console.log(formattedCode);

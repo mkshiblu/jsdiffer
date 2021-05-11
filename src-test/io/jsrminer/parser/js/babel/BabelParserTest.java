@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class BabelParserParserTest extends BaseTest {
+public class BabelParserTest extends BaseTest {
 
     @Test
     public void testParseCode() {

@@ -17,26 +17,13 @@ class BabelNode implements AutoCloseable {
     private final V8Array objectAsArray;
 
     private final boolean defined;
-    private final Function<Object, String> toJsonFunction;
-    private final Function<Object, String> formatCodeFunction;
-
+    private final Function<V8Object, String> toStringFunction;
     private final List<BabelNode> children = new ArrayList<>();
-    String fileName;
-    String fileContent;
+    private final String fileName;
 
-    BabelNode(Object value, Function<Object, String> toJsonFunction, Function<Object, String> formatCodeFunction, String fileName, String fileContent) {
-        this(value, toJsonFunction, formatCodeFunction);
-        this.fileContent = fileContent;
-        this.fileName = fileName;
-    }
-
-    private BabelNode(Object value, Function<Object, String> toJsonFunction, Function<Object, String> formatCodeFunction) {
-        this(value, toJsonFunction);
-        this.formatCodeFunction = formatCodeFunction;
-    }
-
-    private BabelNode(Object value, Function<Object, String> toJsonFunction) {
+    BabelNode(Object value, Function<V8Object, String> toStringFunction, String fileName) {
         this.value = value;
+        this.fileName = fileName;
         if (value instanceof V8Object) {
             if (value instanceof V8Array) {
                 objectAsArray = (V8Array) value;
@@ -57,7 +44,7 @@ class BabelNode implements AutoCloseable {
             this.v8Object = null;
             this.objectAsArray = null;
         }
-        this.toJsonFunction = toJsonFunction;
+        this.toStringFunction = toStringFunction;
     }
 
     public boolean has(String member) {
@@ -67,9 +54,10 @@ class BabelNode implements AutoCloseable {
     public BabelNode get(String member) {
         if (v8Object != null) {
             if (v8Object.contains(member)) {
-                return addChild(new BabelNode(v8Object.get(member), toJsonFunction));
+                return addChild(new BabelNode(v8Object.get(member), toStringFunction, this.fileName));
             } else {
-                throw error("Object has no member '" + member + "'");
+                //throw error("Object has no member '" + member + "'");
+                return null;
             }
         } else {
             throw error("Not an object");
@@ -78,7 +66,7 @@ class BabelNode implements AutoCloseable {
 
     public BabelNode get(int pos) {
         if (objectAsArray != null) {
-            return addChild(new BabelNode(objectAsArray.get(pos), toJsonFunction));
+            return addChild(new BabelNode(objectAsArray.get(pos), toStringFunction, this.fileName));
         } else {
             throw error("Not an array");
         }
@@ -126,7 +114,7 @@ class BabelNode implements AutoCloseable {
 
     @Override
     public String toString() {
-        return value == null ? "null" : toJsonFunction.apply(value);
+        return value == null ? "null" : toStringFunction.apply(v8Object);
     }
 
     private RuntimeException error(String string) {
@@ -157,9 +145,14 @@ class BabelNode implements AutoCloseable {
     //endregion
 
     private Lazy<SourceLocation> sourceLocationLazy = new Lazy<>(() -> createSourceLocation());
+    private Lazy<String> textLazy = new Lazy<>(() -> createText());
 
     SourceLocation getSourceLocation() {
         return sourceLocationLazy.getValue();
+    }
+
+    private String createText() {
+        return toStringFunction.apply(v8Object);
     }
 
     private SourceLocation createSourceLocation() {
@@ -175,8 +168,6 @@ class BabelNode implements AutoCloseable {
         int endLine = endLoc.get("line").asInt();
         int endColumn = endLoc.get("column").asInt();
 
-//        loc.close();
-
         return new SourceLocation(
                 this.fileName
                 , startLine
@@ -186,5 +177,9 @@ class BabelNode implements AutoCloseable {
                 , start
                 , end
         );
+    }
+
+    public String getText() {
+        return textLazy.getValue();
     }
 }

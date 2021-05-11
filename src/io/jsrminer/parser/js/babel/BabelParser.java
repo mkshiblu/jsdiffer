@@ -67,7 +67,7 @@ public class BabelParser extends JavaScriptParser {
             watch.stop();
             throw new RuntimeException("Error parsing " + filePath);
         } else {
-            Visitor builder = new Visitor(filePath, fileContent);
+            var builder = new Visitor(filePath, fileContent);
             SourceFile file = builder.loadFromAst(result.getProgramAST());
             watch.stop();
             log.debug("Parse and Load time: " + watch.toString());

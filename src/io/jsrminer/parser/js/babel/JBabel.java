@@ -24,6 +24,7 @@ class JBabel implements AutoCloseable {
         parser = this.nodeJs.require(new File(PARSE_SCRIPT_FILE));
         this.nodeJs.getRuntime().add("parser", parser);
         this.nodeJs.getRuntime().executeVoidScript("function parse(script, asJson) { return parser.parse(script); }");
+        this.nodeJs.getRuntime().executeVoidScript("function format(node, appendSemicolon = false) { return parser.format(node, appendSemicolon); }");
     }
 
     public Object executeFunction(final String name, final Object... args) {
@@ -38,15 +39,15 @@ class JBabel implements AutoCloseable {
     }
 
     /**
-     * Convert the following object to json in node js side. It's a helper function
+     * Format code in JS side
      */
-    public String formatCode(Object object) {
-        return this.nodeJs.getRuntime().executeJSFunction("format", object).toString();
+    private String formatCode(V8Object v8Object) {
+        return this.nodeJs.getRuntime().executeJSFunction("format", v8Object).toString();
     }
 
     public BabelNode parse(String filename, String content) {
         V8Object ast = (V8Object) executeFunction("parse", content);
-        return new BabelNode(ast, this::toJson, filename, content);
+        return new BabelNode(ast, this::formatCode, filename);
     }
 
     @Override

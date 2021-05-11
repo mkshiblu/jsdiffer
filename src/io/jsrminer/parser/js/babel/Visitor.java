@@ -1,40 +1,23 @@
 package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.BlockStatement;
-import io.jsrminer.sourcetree.CodeEntity;
-import io.jsrminer.sourcetree.SingleStatement;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.entities.SourceFile;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.AbstractMap;
-import java.util.EnumMap;
-import java.util.Map;
-
-import static io.jsrminer.parser.js.babel.BabelNodeType.VARIABLE_DECLARATION;
+import java.util.function.Function;
 
 public class Visitor {
     private final String filename;
-    private final String fileContent;
+    private final BabelNodeUtil nodeUtil;
     private final DeclarationVisitor declarationVisitor = new DeclarationVisitor(this);
-
-//    private final EnumMap<BabelNodeType, BabelNodeVisitor<CodeEntity, ICodeFragment>> nodeProcessors
-//            = new EnumMap(BabelNodeType.class) {{
-//        put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
-//      //  put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationProcessor);
-//    }};
-
-    /**
-     * An expression statement such as x = "4";
-     */
-    public final BabelNodeVisitor<SingleStatement, BlockStatement> expressionStatementProcessor
-            = (node, parent, container) -> null;
+    private final LiteralVisitor literalVisitor = new LiteralVisitor(this);
 
     public Visitor(String filename, String fileContent) {
+        this.nodeUtil = new BabelNodeUtil(filename, fileContent);
         this.filename = filename;
-        this.fileContent = fileContent;
     }
 
     public SourceFile loadFromAst(BabelNode programAST) {
@@ -67,26 +50,25 @@ public class Visitor {
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
         final BabelNode elementType = node.get("type");
         String type = elementType.asString();
-        var nodeType = BabelNodeType.fromTitleCase(type);
-//        var processor = nodeProcessors.get(nodeType);
-        switch (type){
+        switch (type) {
             case "VariableDeclaration":
-                declarationVisitor.variableDeclarationProcessor.visit(node, parent, container);
+                declarationVisitor.visitVariableDeclaration(node, parent, container);
                 break;
+            case "NumericLiteral":
+                literalVisitor.visitNumericLiteral(node, (ILeafFragment) parent, container);
+                break;
+            default:
+                throw new NotImplementedException(type);
         }
 
-//        if (processor == null) {
-//            if (!isIgnored(type))
-//                throw new NotImplementedException("Processor not implemented for " + type);
-//        } else {
-//            Object result = processor.visit(node, parent, container);
-//            return result;
-//        }
         return null;
     }
 
-
     public boolean isIgnored(String type) {
         return BabelParserConfig.ignoredNodeTypes.contains(type);
+    }
+
+    public BabelNodeUtil getNodeUtil() {
+        return nodeUtil;
     }
 }
