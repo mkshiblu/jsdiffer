@@ -33,8 +33,9 @@ public class DeclarationVisitor {
         BabelNode initNode = node.get("init");
 
         if (initNode != null && initNode.isDefined()) {
-            Expression expression = new Expression();
+            Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(initNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             visitor.visitExpression(initNode, expression, container);
+
             variableDeclaration.setInitializer(expression);
         }
 
@@ -82,49 +83,6 @@ public class DeclarationVisitor {
         if (vd.getInitializer() != null) {
             visitor.getNodeUtil().copyLeafData(vd.getInitializer(), leaf);
         }
-    }
-
-    ILeafFragment copyLeafData(ILeafFragment source, ILeafFragment target) {
-        target.getVariables().addAll(source.getVariables());
-        target.getNullLiterals().addAll(source.getNullLiterals());
-        target.getNumberLiterals().addAll(source.getNumberLiterals());
-        target.getStringLiterals().addAll(source.getStringLiterals());
-        target.getBooleanLiterals().addAll(source.getBooleanLiterals());
-        target.getInfixOperators().addAll(source.getInfixOperators());
-        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
-
-        target.getPostfixExpressions().addAll(source.getPostfixExpressions());
-        target.getTernaryOperatorExpressions().addAll(source.getTernaryOperatorExpressions());
-        target.getPrefixExpressions().addAll(source.getPrefixExpressions());
-        target.getVariableDeclarations().addAll(source.getVariableDeclarations());
-        target.getArguments().addAll(source.getArguments());
-
-
-        for (var entry : source.getMethodInvocationMap().entrySet()) {
-            var invocations1 = target.getMethodInvocationMap().get(entry.getKey());
-            if (invocations1 == null) {
-                target.getMethodInvocationMap().put(entry.getKey(), entry.getValue());
-            } else {
-                invocations1.addAll(entry.getValue());
-            }
-        }
-
-        //leaf1.getMethodInvocationMap().addAll(leaf2.getVariableDeclarations());
-        //leaf1.getCreationMap().addAll(leaf2.getVariableDeclarations());
-
-        for (var entry : source.getCreationMap().entrySet()) {
-            var creations1 = target.getCreationMap().get(entry.getKey());
-            if (creations1 == null) {
-                target.getCreationMap().put(entry.getKey(), entry.getValue());
-            } else {
-                creations1.addAll(entry.getValue());
-            }
-        }
-
-        // Copy anonymous classes
-        target.getAnonymousFunctionDeclarations().addAll(source.getAnonymousFunctionDeclarations());
-
-        return target;
     }
 
     SourceLocation createVariableScope(SourceLocation variableLocation, INode scopeNode) {

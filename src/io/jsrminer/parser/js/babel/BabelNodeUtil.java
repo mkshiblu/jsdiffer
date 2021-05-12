@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.util.Lazy;
 import io.rminerx.core.api.ILeafFragment;
@@ -29,6 +30,15 @@ public class BabelNodeUtil {
     void populateSingleStatementData(BabelNode node, SingleStatement fragment) {
         populateTextLocationAndType(node, fragment);
     }
+
+    Expression createBaseExpressionWithRMType(BabelNode tree, CodeElementType type) {
+        var expression = new Expression();
+        ///populateTextLocationAndType(tree, expression);
+        populateTextAndLocation(tree, expression);
+        expression.setType(type);
+        return expression;
+    }
+
 
     ILeafFragment copyLeafData(ILeafFragment source, ILeafFragment target) {
         target.getVariables().addAll(source.getVariables());
@@ -127,7 +137,7 @@ public class BabelNodeUtil {
         }
 
         // An expression ends with semicolon, remove the semicolon
-        if (endsWithSemicolon) {
+        else if (!isStatement && endsWithSemicolon) {
             return text.substring(0, text.length() - 1);
         }
         return text;

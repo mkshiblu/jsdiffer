@@ -20,7 +20,8 @@ public class LiteralVisitor {
      * @param {*} path
      */
     String visitNumericLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
-        final String value = node.get("value").asString();
+        final String value = node.getText();// node.get("value").asString();
+
         leaf.getNumberLiterals().add(value);
         return value;
     }
