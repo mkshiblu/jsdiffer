@@ -1,7 +1,7 @@
 const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
-let content = `let x,y,    z=1`;
+let content = `function f1() { let x,y,    z=1; }`;
 // let content = `
 // //dsa
 // function f1(){

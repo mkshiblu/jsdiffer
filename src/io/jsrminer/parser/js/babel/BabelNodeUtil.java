@@ -1,9 +1,14 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
+import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.util.Lazy;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.ISourceFile;
+import io.rminerx.core.entities.DeclarationContainer;
 
 import java.util.function.Function;
 
@@ -141,5 +146,39 @@ public class BabelNodeUtil {
             return text.substring(0, text.length() - 1);
         }
         return text;
+    }
+
+    void loadFunctionInfo(BabelNode node, FunctionDeclaration function, IContainer container) {
+        var nameNode = node.get("id").get("name");
+        String name = null;
+        if (nameNode != null) {
+            name = nameNode.asString();
+        } else {
+            name = generateNameForAnonymousContainer(container);
+        }
+        populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
+        //function.setIsConstructor(function.);
+    }
+
+    void populateContainerNamesAndLocation(DeclarationContainer function, String name, SourceLocation location, IContainer container) {
+        function.setSourceLocation(location);
+        function.setName(name);
+        function.setQualifiedName(generateQualifiedName(function.getName(), container));
+        function.setFullyQualifiedName(function.getSourceLocation().getFilePath() + "|" + function.getQualifiedName());
+        function.setParentContainerQualifiedName(container.getQualifiedName());
+        function.setIsTopLevel(container instanceof ISourceFile);
+    }
+
+    String generateNameForAnonymousContainer(IContainer parentContainer) {
+        return parentContainer.getAnonymousFunctionDeclarations().size() + 1 + "";
+    }
+
+    String generateQualifiedName(String name, IContainer parentContainer) {
+        String namespace = null;
+        if (!(parentContainer instanceof ISourceFile)) {
+            namespace = parentContainer.getQualifiedName();
+        }
+
+        return namespace == null ? name : namespace + "." + name;
     }
 }

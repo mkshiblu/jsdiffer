@@ -57,6 +57,10 @@ public class Visitor {
             case "NumericLiteral":
                 literalVisitor.visitNumericLiteral(node, (ILeafFragment) parent, container);
                 break;
+
+            case "FunctionDeclaration":
+                declarationVisitor.visitFunctionDeclaration(node, (BlockStatement) parent, container);
+                break;
             default:
                 throw new NotImplementedException(type);
         }
