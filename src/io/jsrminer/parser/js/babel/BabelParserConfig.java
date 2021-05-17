@@ -14,7 +14,7 @@ public class BabelParserConfig {
     );
 
     public final static Map<String, CodeElementType> babelNodeToCodeElementTypeMap = Map.ofEntries(
-        entry("VariableDeclaration", CodeElementType.VARIABLE_DECLARATION_STATEMENT)
+            entry("VariableDeclaration", CodeElementType.VARIABLE_DECLARATION_STATEMENT),
 //        put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
 //        put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
 //
@@ -23,7 +23,7 @@ public class BabelParserConfig {
 //        put(ParseTreeType.CASE_CLAUSE, CodeElementType.SWITCH_CASE);
 //        put(ParseTreeType.DEFAULT_CLAUSE, CodeElementType.SWITCH_CASE);
 //
-//        put(ParseTreeType.BLOCK, CodeElementType.BLOCK_STATEMENT);
+            entry("BlockStatement", CodeElementType.BLOCK_STATEMENT)
 //        put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
 //        put(ParseTreeType.EMPTY_STATEMENT, CodeElementType.EMPTY_STATEMENT);
 //        put(ParseTreeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION);

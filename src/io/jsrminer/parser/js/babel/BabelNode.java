@@ -64,6 +64,10 @@ class BabelNode implements AutoCloseable {
         }
     }
 
+    public String getAsString(String member) {
+        return get(member).asString();
+    }
+
     public BabelNode get(int pos) {
         if (objectAsArray != null) {
             return addChild(new BabelNode(objectAsArray.get(pos), toStringFunction, this.fileName));
@@ -144,6 +148,7 @@ class BabelNode implements AutoCloseable {
 
     //endregion
 
+    private Lazy<String> nodeTypeLazy = new Lazy<>(() -> createNodeType());
     private Lazy<SourceLocation> sourceLocationLazy = new Lazy<>(() -> createSourceLocation());
     private Lazy<String> textLazy = new Lazy<>(() -> createText());
 
@@ -153,6 +158,10 @@ class BabelNode implements AutoCloseable {
 
     private String createText() {
         return toStringFunction.apply(v8Object);
+    }
+
+    private String createNodeType() {
+        return get("type").asString();
     }
 
     private SourceLocation createSourceLocation() {
@@ -181,5 +190,9 @@ class BabelNode implements AutoCloseable {
 
     public String getText() {
         return textLazy.getValue();
+    }
+
+    public String getNodeType() {
+        return nodeTypeLazy.getValue();
     }
 }

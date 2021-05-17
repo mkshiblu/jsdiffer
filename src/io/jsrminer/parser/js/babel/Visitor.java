@@ -61,6 +61,8 @@ public class Visitor {
             case "FunctionDeclaration":
                 declarationVisitor.visitFunctionDeclaration(node, (BlockStatement) parent, container);
                 break;
+            case "EmptyStatement":
+                break;
             default:
                 throw new NotImplementedException(type);
         }

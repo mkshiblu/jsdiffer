@@ -137,4 +137,8 @@ public abstract class Container implements IContainer {
     public void registerStatements(List<Statement> statements) {
         this.statements.addAll(statements);
     }
+
+    public void registerFunctionDeclaration(IFunctionDeclaration functionDeclaration) {
+        this.functionDeclarations.add(functionDeclaration);
+    }
 }

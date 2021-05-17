@@ -22,7 +22,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Holds the body of the function
      */
     private FunctionBody body;
-    
+
     /**
      * Stores whether the body of the function is empty or not
      */
@@ -152,5 +152,19 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public boolean isStatic() {
         return isStatic;
+    }
+
+    /**
+     * Add paramter
+     *
+     * @return
+     */
+    public void registerParameter(UMLParameter parameter) {
+        this.getParameters().add(parameter);
+    }
+
+    @Override
+    public List<Statement> getStatements() {
+        return body.blockStatement.getStatements();
     }
 }

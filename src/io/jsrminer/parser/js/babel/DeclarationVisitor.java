@@ -2,12 +2,14 @@ package io.jsrminer.parser.js.babel;
 
 import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
 import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
+import io.jsrminer.parser.js.closurecompiler.AstInfoExtractor;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +56,7 @@ public class DeclarationVisitor {
         variableDeclaration.setSourceLocation(node.getSourceLocation());
 
         // Set Scope (TODO set body source location
-        variableDeclaration.setScope(createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
-
+        variableDeclaration.setScope(visitor.getNodeUtil().createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
         return variableDeclaration;
     }
 
@@ -71,6 +72,8 @@ public class DeclarationVisitor {
         var kind = VariableDeclarationKind.fromName(kindStr);
         var declarations = node.get("declarations");
         var isStatement = fragment instanceof BlockStatement;
+
+
         ILeafFragment leaf = isStatement
                 ? visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, (BlockStatement) fragment)
                 : (Expression) fragment;
@@ -90,18 +93,6 @@ public class DeclarationVisitor {
         }
     }
 
-    SourceLocation createVariableScope(SourceLocation variableLocation, INode scopeNode) {
-        final SourceLocation parentLocation = scopeNode.getSourceLocation();
-        return new SourceLocation(parentLocation.getFilePath(),
-                variableLocation.startLine,
-                variableLocation.startColumn,
-                parentLocation.endLine,
-                parentLocation.endColumn,
-                variableLocation.start,
-                parentLocation.end
-        );
-    }
-
     /**
      * interface FunctionDeclaration <: Function, Declaration {
      * type: "FunctionDeclaration";
@@ -114,36 +105,34 @@ public class DeclarationVisitor {
      * @param parent
      * @param container
      */
-
     public void visitFunctionDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
-        // TODO can parent be a leaf?
         FunctionDeclaration function = new FunctionDeclaration();
+        container.registerFunctionDeclaration(function);
         visitor.getNodeUtil().loadFunctionInfo(node, function, container);
         processFunctionParamaterAndBody(node, parent, container, false, function);
-
     }
 
     void processFunctionParamaterAndBody(BabelNode node, CodeFragment fragment, IContainer container, boolean isAnonymous, FunctionDeclaration function) {
-        // Load parameters
-        var paramterNodes = node.get("params");
-//        tree.formalParameterList.parameters.forEach(parameterTree -> {
-//            switch (parameterTree.type) {
-//                case IDENTIFIER_EXPRESSION:
-//                    UMLParameter parameter = createUmlParameter(parameterTree.asIdentifierExpression(), function);
-//                    function.getParameters().add(parameter);
-//                    break;
-//                case OBJECT_PATTERN:
-//                    var objectParameter = parameterTree.asObjectPattern();
-//                    for (var fieldTree : objectParameter.fields) {
-//                        var variableName = fieldTree.asPropertyNameAssignment().name.asIdentifier().value;
-//                        var umlParameter = createUmlParameter(variableName, function, createSourceLocation(fieldTree));
-//                        function.getParameters().add(umlParameter);
-//                    }
-//                    break;
-//                default:
-//                    break;
-//            }
-//        });
+        extractFunctionParamters(node, function);
+
+        var functionBodyNode = node.get("body");
+        switch (functionBodyNode.getNodeType()) {
+            case "BlockStatement":
+                BlockStatement bodyBlock = new BlockStatement();
+                bodyBlock.setText("{");
+                function.setBody(new FunctionBody(bodyBlock));
+                visitor.getNodeUtil().populateBlockStatementData(functionBodyNode, bodyBlock);
+
+                // Traverse the body statements
+                var blockBodyNodes = functionBodyNode.get("body");
+                for (int i = 0; i < blockBodyNodes.size(); i++) {
+                    visitor.visitStatement(blockBodyNodes.get(i), bodyBlock, function);
+                }
+                break;
+
+            default:
+                throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
+        }
 
 //        // Load functionBody by passing the function as the new container
 //        if (tree.functionBody != null) {
@@ -174,5 +163,24 @@ public class DeclarationVisitor {
 //            throw new RuntimeException("Null function body not handled for "
 //                    + function.getQualifiedName() + " at " + tree.location.toString());
 //        }
+    }
+
+    private void extractFunctionParamters(BabelNode node, FunctionDeclaration function) {
+        // Load parameters
+        var paramterNodes = node.get("params");
+        BabelNode parameterNode;
+        for (int i = 0; i < paramterNodes.size(); i++) {
+            parameterNode = paramterNodes.get(i);
+
+            switch (parameterNode.getNodeType()) {
+                case "Identifier":
+                    var umlParamter = visitor.getNodeUtil().createUmlParameter(parameterNode.getAsString("name"), function, parameterNode.getSourceLocation());
+                    function.registerParameter(umlParamter);
+                    break;
+
+                default:
+                    throw new NotImplementedException("paramter type not handled: " + function.getSourceLocation());
+            }
+        }
     }
 }

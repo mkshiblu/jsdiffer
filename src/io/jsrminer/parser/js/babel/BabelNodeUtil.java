@@ -1,12 +1,12 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
-import com.google.javascript.jscomp.parsing.parser.util.SourceRange;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.util.Lazy;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 import io.rminerx.core.entities.DeclarationContainer;
 
@@ -129,7 +129,11 @@ public class BabelNodeUtil {
     }
 
     CodeElementType getCodeElementTypeFromBabelNodeType(String babelNodeType) {
-        return BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
+        var type = BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
+        if (type == null) {
+            throw new RuntimeException("Code Element Cannot be Found for babel type " + babelNodeType);
+        }
+        return type;
     }
 
     String getTextInSource(BabelNode node, boolean isStatement) {
@@ -180,5 +184,38 @@ public class BabelNodeUtil {
         }
 
         return namespace == null ? name : namespace + "." + name;
+    }
+
+    UMLParameter createUmlParameter(String name, FunctionDeclaration functionDeclaration
+            , SourceLocation location) {
+        UMLParameter parameter = new UMLParameter(name);
+        parameter.setSourceLocation(location);
+        parameter.setIndexPositionInParent(functionDeclaration.getParameters().size());
+        VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.VAR);
+        vd.setIsParameter(true);
+        vd.setScope(createVariableScope(location, functionDeclaration));
+        vd.setSourceLocation(parameter.getSourceLocation());
+        parameter.setVariableDeclaration(vd);
+        return parameter;
+    }
+
+    SourceLocation createVariableScope(SourceLocation variableLocation, INode scopeNode) {
+        final SourceLocation parentLocation = scopeNode.getSourceLocation();
+        return new SourceLocation(parentLocation.getFilePath(),
+                variableLocation.startLine,
+                variableLocation.startColumn,
+                parentLocation.endLine,
+                parentLocation.endColumn,
+                variableLocation.start,
+                parentLocation.end
+        );
+    }
+
+    void populateBlockStatementData(BabelNode node, BlockStatement blockStatement) {
+        populateLocationAndType(node, blockStatement);
+        blockStatement.setText(blockStatement.getCodeElementType().keyword);
+        if (blockStatement.getText() == null) {
+            throw new RuntimeException("Block text was not populated for type " + blockStatement.getCodeElementType().toString());
+        }
     }
 }

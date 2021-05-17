@@ -48,4 +48,6 @@ public interface IContainer extends INode {
      * For depth 2 it will return all the functions including in anonymous etc.
      */
     Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapUpToDepth(int depth);
+
+    void registerFunctionDeclaration(IFunctionDeclaration functionDeclaration);
 }
