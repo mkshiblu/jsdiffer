@@ -165,4 +165,9 @@ public class Expression extends CodeFragment implements ILeafFragment {
     public List<TernaryOperatorExpression> getTernaryOperatorExpressions() {
         return this.ternaryOperatorExpressions;
     }
+
+    @Override
+    public void registerAnonymousFunctionDeclaration(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {
+        this.anonymousFunctionDeclarations.add(anonymousFunctionDeclaration);
+    }
 }

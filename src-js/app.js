@@ -1,23 +1,10 @@
 const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
-let content = `function f1(p1, p2) { let x,y,    z=1; }`;
-// let content = `
-// //dsa
-// function f1(){
-
-// return /*dsad*/ keyCodes.indexOf(  eventKeyCode) ===   -1
-// }
-// ()=> 'hy';
-
-// (function(){
-
-// })()
-// var d = function x(){
-
-// }
-
-// `;
+let content = `var m = function () {
+  var t, z = 5;
+};
+`;
 
 const ast = parser.parse(content);
 const formattedCode = parser.format(ast, true);

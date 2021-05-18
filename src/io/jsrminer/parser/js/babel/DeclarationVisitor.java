@@ -1,21 +1,11 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.BlockTree;
-import com.google.javascript.jscomp.parsing.parser.trees.FunctionDeclarationTree;
-import io.jsrminer.parser.js.closurecompiler.AstInfoExtractor;
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import org.apache.commons.lang3.NotImplementedException;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
-
 
 public class DeclarationVisitor {
     private final Visitor visitor;
@@ -73,7 +63,6 @@ public class DeclarationVisitor {
         var declarations = node.get("declarations");
         var isStatement = fragment instanceof BlockStatement;
 
-
         ILeafFragment leaf = isStatement
                 ? visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, (BlockStatement) fragment)
                 : (Expression) fragment;
@@ -108,11 +97,40 @@ public class DeclarationVisitor {
     public void visitFunctionDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
         FunctionDeclaration function = new FunctionDeclaration();
         container.registerFunctionDeclaration(function);
-        visitor.getNodeUtil().loadFunctionInfo(node, function, container);
-        processFunctionParamaterAndBody(node, parent, container, false, function);
+        visitor.getNodeUtil().loadFunctionDeclarationInfo(node, function, container);
+        boolean successFullyParsed = processFunctionParamaterAndBody(node, container, function);
+        if (!successFullyParsed) {
+            container.getFunctionDeclarations().remove(function);
+        }
     }
 
-    void processFunctionParamaterAndBody(BabelNode node, CodeFragment fragment, IContainer container, boolean isAnonymous, FunctionDeclaration function) {
+    /**
+     * // interface FunctionExpression <: Function, Expression {
+     * //     type: "FunctionExpression";
+     * //   }
+     * //   A function expression.
+     * <p>
+     * // function [name]([param1[, param2[, ..., paramN]]]) {
+     * //     statements
+     * //  }
+     */
+    public void visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+        var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
+        leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
+        anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));
+        visitor.getNodeUtil().loadAnonymousFunctionDeclarationInfo(node, anonymousFunctionDeclaration, container);
+        container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+
+        boolean isSuccessFullyParsed = processFunctionParamaterAndBody(node, container, anonymousFunctionDeclaration);
+        if (!isSuccessFullyParsed) {
+            leafFragment.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+            container.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+        }
+
+        // TODO add unmatched things to leaf?
+    }
+
+    boolean processFunctionParamaterAndBody(BabelNode node, IContainer container, FunctionDeclaration function) {
         extractFunctionParamters(node, function);
 
         var functionBodyNode = node.get("body");
@@ -134,35 +152,7 @@ public class DeclarationVisitor {
                 throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
         }
 
-//        // Load functionBody by passing the function as the new container
-//        if (tree.functionBody != null) {
-//            switch (tree.functionBody.type) {
-//                case BLOCK:
-//
-//                    BlockStatement bodyBlock = new BlockStatement();
-//                    bodyBlock.setText("{");
-//                    function.setBody(new FunctionBody(bodyBlock));
-//                    BlockTree blockTree = tree.functionBody.asBlock();
-//                    populateBlockStatementData(blockTree, bodyBlock);
-//                    blockTree.statements.forEach(statementTree -> {
-//                        io.jsrminer.parser.js.closurecompiler.Visitor.visitStatement(statementTree, bodyBlock, function);
-//                    });
-//                    break;
-//                case IDENTIFIER_EXPRESSION:
-//                case UNARY_EXPRESSION:
-//                default: // TODO handle Arrow expression or Identifier
-//                    //var bodyTree = tree.functionBody.asUnaryExpression();
-//                    // bodyTree.
-//                    if (isAnonymous)
-//                        fragment.getAnonymousFunctionDeclarations().remove(function);
-//                    else
-//                        container.getFunctionDeclarations().remove(function);
-//                    break;
-//            }
-//        } else {
-//            throw new RuntimeException("Null function body not handled for "
-//                    + function.getQualifiedName() + " at " + tree.location.toString());
-//        }
+        return true;
     }
 
     private void extractFunctionParamters(BabelNode node, FunctionDeclaration function) {

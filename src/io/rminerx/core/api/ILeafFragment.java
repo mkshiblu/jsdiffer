@@ -26,5 +26,5 @@ public interface ILeafFragment extends ICodeFragment {
     VariableDeclaration findVariableDeclarationIncludingParent(String variableName);
     List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations();
     List<IAnonymousClassDeclaration> getAnonymousClassDeclarations();
-//    List<IFunctionDeclaration> getFunctionDeclarations();
+    void registerAnonymousFunctionDeclaration(IAnonymousFunctionDeclaration anonymousFunctionDeclaration);
 }

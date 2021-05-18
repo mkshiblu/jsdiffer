@@ -8,14 +8,9 @@ import io.jsrminer.sourcetree.JsConfig;
 import java.util.Map;
 
 public class UMLModelFactory {
-//    public static UMLModel createUMLModel(Map<String, String> fileContents, Set<String> repositoryDirectories) {
-//        JavaScriptParser parser = new JavaScriptParser();
-//        return parser.parse(fileContents/*, repositoryDirectories*/);
-//    }
 
     public static UMLModel createUMLModel(Map<String, String> fileContents) {
         var parser = new BabelParser();
-        //parser.setEnableStrictMode(true);
         UMLModel model = parser.parse(fileContents);
 
         // Populate repository directories
@@ -39,5 +34,4 @@ public class UMLModelFactory {
 
         return model;
     }
-
 }

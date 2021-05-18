@@ -61,6 +61,10 @@ public class Visitor {
             case "FunctionDeclaration":
                 declarationVisitor.visitFunctionDeclaration(node, (BlockStatement) parent, container);
                 break;
+
+            case "FunctionExpression":
+                declarationVisitor.visitFunctionExpression(node, (ILeafFragment) parent, container);
+                break;
             case "EmptyStatement":
                 break;
             default:

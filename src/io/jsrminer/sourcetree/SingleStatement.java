@@ -156,4 +156,9 @@ public class SingleStatement extends Statement implements ILeafFragment {
 //        }
 //        return null;
 //    }
+
+    @Override
+    public void registerAnonymousFunctionDeclaration(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {
+        this.anonymousFunctionDeclarations.add(anonymousFunctionDeclaration);
+    }
 }
