@@ -42,13 +42,13 @@ public class BabelParser extends JavaScriptParser {
 
     @Override
     public ISourceFile parseSource(String content, @NonNull String filepath) {
-        if (filepath == null){
+        if (filepath == null) {
             throw new NullPointerException("filepath cannot be null");
         }
-            JBabel jBabel = new JBabel();
-            SourceFile source = parseAndLoadSourceFile(content, filepath, jBabel);
-            source.setFilepath(filepath);
-            return source;
+        JBabel jBabel = new JBabel();
+        SourceFile source = parseAndLoadSourceFile(content, filepath, jBabel);
+        source.setFilepath(filepath);
+        return source;
     }
 
     /**

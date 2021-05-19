@@ -161,4 +161,29 @@ public class SingleStatement extends Statement implements ILeafFragment {
     public void registerAnonymousFunctionDeclaration(IAnonymousFunctionDeclaration anonymousFunctionDeclaration) {
         this.anonymousFunctionDeclarations.add(anonymousFunctionDeclaration);
     }
+
+    @Override
+    public void registerInfixOperator(String operator) {
+        this.infixOperators.add(operator);
+    }
+
+    @Override
+    public void registerInfixExpression(String expression) {
+        this.infixExpressions.add(expression);
+    }
+
+    @Override
+    public void registerVariable(String name) {
+        this.getVariables().add(name);
+    }
+
+    @Override
+    public void registerPostfixExpression(String expression) {
+        this.getPostfixExpressions().add(expression);
+    }
+
+    @Override
+    public void registerPrefixExpression(String expression) {
+        this.getPrefixExpressions().add(expression);
+    }
 }

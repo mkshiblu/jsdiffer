@@ -1,9 +1,7 @@
 const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
-let content = `var m = function () {
-  var t, z = 5;
-};
+let content = `vnode.isRootInsert = !nested;
 `;
 
 const ast = parser.parse(content);

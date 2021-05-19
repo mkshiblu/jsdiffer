@@ -84,6 +84,14 @@ class BabelNode implements AutoCloseable {
         }
     }
 
+    public Boolean asBoolean() {
+        if (value instanceof Boolean) {
+            return (Boolean) value;
+        } else {
+            throw error("Not a string");
+        }
+    }
+
     public int asInt() {
         if (value instanceof Number) {
             return ((Number) value).intValue();

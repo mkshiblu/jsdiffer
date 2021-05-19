@@ -15,8 +15,9 @@ public class BabelParserConfig {
 
     public final static Map<String, CodeElementType> babelNodeToCodeElementTypeMap = Map.ofEntries(
             entry("VariableDeclaration", CodeElementType.VARIABLE_DECLARATION_STATEMENT),
-//        put(ParseTreeType.EXPRESSION_STATEMENT, CodeElementType.EXPRESSION_STATEMENT);
-//        put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
+            entry("ExpressionStatement", CodeElementType.EXPRESSION_STATEMENT),
+
+            //        put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
 //
 //        put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
 //        put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
