@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.rminerx.core.api.ISourceFile;
 import org.junit.jupiter.api.BeforeAll;
@@ -7,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionStatementTest {
+public class MemberExpressionStatementTest {
     static SingleStatement statement;
     static ISourceFile sourceFile;
 
@@ -23,6 +24,12 @@ public class ExpressionStatementTest {
     public void testStatementText() {
         assertEquals("x.y = !z;", statement.getText());
     }
+
+    @Test
+    public void testStatementType() {
+        assertEquals(CodeElementType.EXPRESSION_STATEMENT, statement.getCodeElementType());
+    }
+
 
     @Test
     public void testPrefixExpressionCount() {
@@ -41,11 +48,16 @@ public class ExpressionStatementTest {
 
     @Test
     public void testInfixOperatorCount() {
-        assertEquals(1, statement.getInfixOperators().size());
+        assertEquals(0, statement.getInfixOperators().size());
     }
 
+//    @Test
+//    public void testInfixExpressionText() {
+//        assertEquals("x.y = !z", statement.getInfixExpressions().get(0));
+//    }
+
     @Test
-    public void testInfixExpressionText() {
-        assertEquals("x.y = !z", statement.getInfixExpressions().get(0));
+    public void testVariableCount() {
+        assertEquals(3, statement.getVariables().size());
     }
 }

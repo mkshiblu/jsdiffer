@@ -113,7 +113,7 @@ public class ExpressionsVisitor {
             var operator = tree.operator.toString();
 
             // TODO should treated as infix if =?
-            if (operator != "=") {
+            if (!"=".equals(operator)) {
                 leaf.getInfixOperators().add(operator);
                 leaf.getInfixExpressions().add(text);
             }

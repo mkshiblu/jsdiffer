@@ -7,7 +7,6 @@ import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.entities.SourceFile;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.function.Function;
 
 public class Visitor {
     private final String filename;

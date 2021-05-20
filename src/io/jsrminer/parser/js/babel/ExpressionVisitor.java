@@ -36,7 +36,7 @@ public class ExpressionVisitor {
         var operator = node.get("operator").asString();
 
         // TODO should treated as infix if =?
-        if (operator != "=") {
+        if (!"=".equals(operator)) {
             leaf.registerInfixOperator(operator);
             leaf.registerInfixExpression(text);
         }
