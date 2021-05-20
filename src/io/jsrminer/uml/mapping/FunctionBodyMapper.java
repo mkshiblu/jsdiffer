@@ -711,20 +711,22 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
                 for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
                     BlockStatement statement2 = innerNodeIterator2.next();
-                    double score = ChildCountMatcher.computeScore(statement1, statement2
-                            , removedOperations, addedOperations
-                            , this.mappings, this.parentMapper != null);
 
                     String argumentizedString1 = createArgumentizedString(statement1, statement2);
                     String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                     // Check if strings are identical and they are in same depth (or not)
                     if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
-                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
                             && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
-                                , parameterToArgumentMap, score);
-                        sortedMappingSet.add(mapping);
+                        double score = ChildCountMatcher.computeScore(statement1, statement2
+                                , removedOperations, addedOperations
+                                , this.mappings, this.parentMapper != null);
+
+                        if ((score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
+                            BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                    , parameterToArgumentMap, score);
+                            sortedMappingSet.add(mapping);
+                        }
                     }
                 }
                 if (!sortedMappingSet.isEmpty()) {
@@ -743,20 +745,22 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
                 for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                     BlockStatement statement1 = iterator1.next();
-                    double score = ChildCountMatcher.computeScore(statement1, statement2
-                            , removedOperations, addedOperations
-                            , this.mappings, this.parentMapper != null);
 
                     String argumentizedString1 = createArgumentizedString(statement1, statement2);
                     String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                     // Check if strings are identical and they are in same depth (or not)
                     if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
-                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
                             && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
-                                , parameterToArgumentMap, score);
-                        sortedMappingSet.add(mapping);
+                        double score = ChildCountMatcher.computeScore(statement1, statement2
+                                , removedOperations, addedOperations
+                                , this.mappings, this.parentMapper != null);
+
+                        if (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0) {
+                            BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                    , parameterToArgumentMap, score);
+                            sortedMappingSet.add(mapping);
+                        }
                     }
                 }
                 if (!sortedMappingSet.isEmpty()) {
