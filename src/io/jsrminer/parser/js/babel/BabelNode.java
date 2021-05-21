@@ -20,6 +20,7 @@ class BabelNode implements AutoCloseable {
     private final Function<V8Object, String> toStringFunction;
     private final List<BabelNode> children = new ArrayList<>();
     private final String fileName;
+    private final String[] keys;
 
     BabelNode(Object value, Function<V8Object, String> toStringFunction, String fileName) {
         this.value = value;
@@ -32,6 +33,7 @@ class BabelNode implements AutoCloseable {
             }
 
             V8Object v8Object = (V8Object) value;
+            this.keys = v8Object.getKeys();
             if (!v8Object.isUndefined()) {
                 this.v8Object = v8Object;
                 this.defined = true;
@@ -43,6 +45,7 @@ class BabelNode implements AutoCloseable {
             this.defined = value != null;
             this.v8Object = null;
             this.objectAsArray = null;
+            this.keys = null;
         }
         this.toStringFunction = toStringFunction;
     }
@@ -100,7 +103,7 @@ class BabelNode implements AutoCloseable {
         }
     }
 
-    public String[] getOwnKeys() {
+    public String[] getKeys() {
         if (v8Object != null) {
             return v8Object.getKeys();
         } else {

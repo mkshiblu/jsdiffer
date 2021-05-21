@@ -15,6 +15,7 @@ public class Visitor {
     private final LiteralVisitor literalVisitor = new LiteralVisitor(this);
     private final StatementVisitor statementVisitor = new StatementVisitor(this);
     private final ExpressionVisitor expressionVisitor = new ExpressionVisitor(this);
+    private final InvocationVisitor invocationVisitor = new InvocationVisitor(this);
 
     public Visitor(String filename, String fileContent) {
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
@@ -82,8 +83,13 @@ public class Visitor {
                 expressionVisitor.visitUnaryExpression(node, (ILeafFragment) parent, container);
                 break;
 
+            case "NewExpression":
+                invocationVisitor.visitNewExpression(node, (ILeafFragment) parent, container);
+                break;
+
             case "Identifier":
                 expressionVisitor.visitIdentifier(node, (ILeafFragment) parent, container);
+                break;
             case "EmptyStatement":
                 break;
             default:

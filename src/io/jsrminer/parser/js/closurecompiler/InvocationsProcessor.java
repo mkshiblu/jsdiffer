@@ -21,9 +21,6 @@ public class InvocationsProcessor {
             = new NodeVisitor<>() {
         @Override
         public ObjectCreation visit(NewExpressionTree tree, ILeafFragment leaf, IContainer container) {
-            if (tree.hasTrailingComma) {
-                throw new RuntimeException("New Expression Tree with trailing comma found" + tree.location.toString());
-            }
             String text = getTextInSource(tree, false);
             final ObjectCreation creation = new ObjectCreation();
             // Add to the list
