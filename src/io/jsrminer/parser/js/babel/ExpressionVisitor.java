@@ -1,10 +1,7 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
-
-import java.util.function.UnaryOperator;
 
 public class ExpressionVisitor {
 
@@ -95,7 +92,7 @@ public class ExpressionVisitor {
      * An identifier. Note that an identifier may be an expression or a destructuring pattern
      */
     void visitIdentifier(BabelNode node, ILeafFragment leaf, IContainer container) {
-        String name = node.getAsString("name");
+        String name = node.getString("name");
         leaf.registerVariable(name);
     }
 
@@ -121,5 +118,10 @@ public class ExpressionVisitor {
         }
 
         visitor.visitExpression(node.get("argument"), leaf, container);
+    }
+
+    public String visitThisExpression(BabelNode node, ILeafFragment parent, IContainer container) {
+        parent.registerVariable("this");
+        return this.visitor.getNodeUtil().getTextInSource(node, false);
     }
 }

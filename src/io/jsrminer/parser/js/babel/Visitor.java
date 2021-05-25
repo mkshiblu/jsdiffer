@@ -50,50 +50,53 @@ public class Visitor {
     }
 
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
-        final BabelNode elementType = node.get("type");
-        String type = elementType.asString();
+        var type = node.getType();
         switch (type) {
-            case "VariableDeclaration":
+            case VARIABLE_DECLARATION:
                 declarationVisitor.visitVariableDeclaration(node, parent, container);
                 break;
-            case "NumericLiteral":
+            case NUMERIC_LITERAL:
                 literalVisitor.visitNumericLiteral(node, (ILeafFragment) parent, container);
                 break;
 
-            case "FunctionDeclaration":
+            case FUNCTION_DECLARATION:
                 declarationVisitor.visitFunctionDeclaration(node, (BlockStatement) parent, container);
                 break;
 
-            case "FunctionExpression":
+            case FUNCTION_EXPRESSION:
                 declarationVisitor.visitFunctionExpression(node, (ILeafFragment) parent, container);
                 break;
-            case "ExpressionStatement":
+            case EXPRESSION_STATEMENT:
                 statementVisitor.visitExpressionStatement(node, (BlockStatement) parent, container);
                 break;
 
-            case "AssignmentExpression":
+            case ASSIGNMENT_EXPRESSION:
                 expressionVisitor.visitAssignmentExpression(node, (ILeafFragment) parent, container);
                 break;
 
-            case "MemberExpression":
+            case MEMBER_EXPRESSION:
                 expressionVisitor.visitMemberExpression(node, (ILeafFragment) parent, container);
                 break;
 
-            case "UnaryExpression":
+            case UNARY_EXPRESSION:
                 expressionVisitor.visitUnaryExpression(node, (ILeafFragment) parent, container);
                 break;
 
-            case "NewExpression":
+            case NEW_EXPRESSION:
                 invocationVisitor.visitNewExpression(node, (ILeafFragment) parent, container);
                 break;
 
-            case "Identifier":
+            case THIS_EXPRESSION:
+                expressionVisitor.visitThisExpression(node, (ILeafFragment) parent, container);
+                break;
+
+            case IDENTIFIER:
                 expressionVisitor.visitIdentifier(node, (ILeafFragment) parent, container);
                 break;
-            case "EmptyStatement":
+            case EMPTY_STATEMENT:
                 break;
             default:
-                throw new NotImplementedException(type);
+                throw new NotImplementedException(type.toString());
         }
 
         return null;

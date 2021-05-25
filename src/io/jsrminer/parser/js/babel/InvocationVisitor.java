@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-import io.jsrminer.parser.js.closurecompiler.AstInfoExtractor;
 import io.jsrminer.sourcetree.Invocation;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.rminerx.core.api.IContainer;
@@ -17,8 +16,8 @@ public class InvocationVisitor {
 
     /**
      * interface NewExpression <: CallExpression {
-     *   type: "NewExpression";
-     *   optional: boolean | null;
+     * type: "NewExpression";
+     * optional: boolean | null;
      * }
      */
     ObjectCreation visitNewExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
@@ -43,16 +42,14 @@ public class InvocationVisitor {
 
         String name = null;
         String expressionText = null;
-
         boolean parsedProperly = true;
 
-        //boolean isNewExpression = node.getNodeType().equals("NewExpression");
-        var callee = node.get("callee");//isNewExpression ? ((NewExpressionTree) tree).operand : ((CallExpressionTree) tree).operand;
+        var callee = node.get("callee");
         String calleeText = visitor.getNodeUtil().getTextInSource(callee, false);
 
-        switch (callee.getNodeType()) {
-            case "Identifier":
-                name = callee.getAsString("name");
+        switch (callee.getType()) {
+            case IDENTIFIER:
+                name = callee.getString("name");
                 break;
 
 //            case MEMBER_EXPRESSION:
@@ -85,12 +82,12 @@ public class InvocationVisitor {
 //            case THIS_EXPRESSION:
 //                name = "this";
 //                break;
-            case "FunctionExpression":
-                var functionDeclarationTree = callee;//callee.asFunctionDeclaration();
-                if (functionDeclarationTree.name != null) {
-                    name = functionDeclarationTree.name.value;
+            case FUNCTION_EXPRESSION:
+                var idNode = callee.get("id");
+                if ( idNode!= null && idNode.isDefined()) {
+                    name = idNode.getString("name");
                 } else {
-                    name = AstInfoExtractor.generateNameForAnonymousContainer(container);
+                    name = visitor.getNodeUtil().generateNameForAnonymousContainer(container);
                 }
                 visitor.visitExpression(callee, leaf, container);
                 break;
@@ -124,7 +121,7 @@ public class InvocationVisitor {
 //                parsedProperly = false;
 //                break;
             default:
-                throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getNodeType() + " at " + callee.getSourceLocation().toString());
+                throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getType() + " at " + callee.getSourceLocation().toString());
         }
 //
 //        invocation.setText(getTextInSource(tree, false));
@@ -154,13 +151,14 @@ public class InvocationVisitor {
 
     void processArgument(BabelNode argumentNode, ILeafFragment leaf) {
 
-        switch (argumentNode.getNodeType()) {
-            case "Identifier":
-            case "StringLiteral":
-            case "BooleanLiteral":
-            case "MemberExpression":
-            case "FunctionDeclaration":
-            case "ObjectExpression":
+        switch (argumentNode.getType()) {
+            case IDENTIFIER:
+            case STRING_LITERAL:
+            case BOOLEAN_LITERAL:
+            case MEMBER_EXPRESSION:
+            case FUNCTION_DECLARATION:
+            case FUNCTION_EXPRESSION:
+            case OBJECT_EXPRESSION:
                 return;
         }
 //        if (TypeChecker.isIdentifier(argument)

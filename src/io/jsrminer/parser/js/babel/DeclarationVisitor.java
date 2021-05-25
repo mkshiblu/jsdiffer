@@ -134,8 +134,8 @@ public class DeclarationVisitor {
         extractFunctionParamters(node, function);
 
         var functionBodyNode = node.get("body");
-        switch (functionBodyNode.getNodeType()) {
-            case "BlockStatement":
+        switch (functionBodyNode.getType()) {
+            case BLOCK_STATEMENT:
                 BlockStatement bodyBlock = new BlockStatement();
                 bodyBlock.setText("{");
                 function.setBody(new FunctionBody(bodyBlock));
@@ -162,9 +162,9 @@ public class DeclarationVisitor {
         for (int i = 0; i < paramterNodes.size(); i++) {
             parameterNode = paramterNodes.get(i);
 
-            switch (parameterNode.getNodeType()) {
-                case "Identifier":
-                    var umlParamter = visitor.getNodeUtil().createUmlParameter(parameterNode.getAsString("name"), function, parameterNode.getSourceLocation());
+            switch (parameterNode.getType()) {
+                case IDENTIFIER:
+                    var umlParamter = visitor.getNodeUtil().createUmlParameter(parameterNode.getString("name"), function, parameterNode.getSourceLocation());
                     function.registerParameter(umlParamter);
                     break;
 
