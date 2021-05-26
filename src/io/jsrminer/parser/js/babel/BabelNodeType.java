@@ -17,6 +17,7 @@ public enum BabelNodeType {
     ASSIGNMENT_EXPRESSION("AssignmentExpression"),
     MEMBER_EXPRESSION("MemberExpression"),
     UNARY_EXPRESSION("UnaryExpression"),
+    UPDATE_EXPRESSION("UpdateExpression"),
     NEW_EXPRESSION("NewExpression"),
     THIS_EXPRESSION("ThisExpression"),
     IDENTIFIER("Identifier"),
@@ -25,6 +26,7 @@ public enum BabelNodeType {
     OBJECT_EXPRESSION("ObjectExpression"),
     FILE("File"),
     PROGRAM("Program"),
+    RETURN_STATEMENT("ReturnStatement"),
 
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();

@@ -16,6 +16,7 @@ public class Visitor {
     private final StatementVisitor statementVisitor = new StatementVisitor(this);
     private final ExpressionVisitor expressionVisitor = new ExpressionVisitor(this);
     private final InvocationVisitor invocationVisitor = new InvocationVisitor(this);
+    private final ControlFlowStatementVisitor controlFlowStatementVisitor = new ControlFlowStatementVisitor(this);
 
     public Visitor(String filename, String fileContent) {
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
@@ -82,6 +83,10 @@ public class Visitor {
                 expressionVisitor.visitUnaryExpression(node, (ILeafFragment) parent, container);
                 break;
 
+            case UPDATE_EXPRESSION:
+                expressionVisitor.visitUpdateExpression(node, (ILeafFragment) parent, container);
+                break;
+
             case NEW_EXPRESSION:
                 invocationVisitor.visitNewExpression(node, (ILeafFragment) parent, container);
                 break;
@@ -94,6 +99,9 @@ public class Visitor {
                 expressionVisitor.visitIdentifier(node, (ILeafFragment) parent, container);
                 break;
             case EMPTY_STATEMENT:
+                break;
+            case RETURN_STATEMENT:
+                controlFlowStatementVisitor.visitReturnStatement(node, (BlockStatement) parent, container);
                 break;
             default:
                 throw new NotImplementedException(type.toString());

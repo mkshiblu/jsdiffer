@@ -123,12 +123,12 @@ public class InvocationVisitor {
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getType() + " at " + callee.getSourceLocation().toString());
         }
-//
-//        invocation.setText(getTextInSource(tree, false));
-//        invocation.setExpressionText(expressionText);
-//        invocation.setSourceLocation(createSourceLocation(tree));
-//        invocation.setType(getCodeElementType(tree));
-//        invocation.setFunctionName(name);
+
+        invocation.setText(this.visitor.getNodeUtil().getTextInSource(node, false));
+        invocation.setExpressionText(expressionText);
+        invocation.setSourceLocation(node.getSourceLocation());
+        invocation.setType(this.visitor.getNodeUtil().getCodeElementTypeFromBabelNodeType(node.getType()));
+        invocation.setFunctionName(name);
 //
 //        var arguments = isNewExpression
 //                ? ((NewExpressionTree) tree).arguments

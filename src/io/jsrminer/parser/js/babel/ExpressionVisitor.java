@@ -120,6 +120,28 @@ public class ExpressionVisitor {
         visitor.visitExpression(node.get("argument"), leaf, container);
     }
 
+     /** An ++ or -- after or before and expression
+      * interface UpdateExpression <: Expression {
+     type: "UpdateExpression";
+     operator: UpdateOperator;
+     argument: Expression;
+     prefix: boolean;
+   }*/
+
+    void visitUpdateExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        boolean isPrefix = node.get("prefix").asBoolean();
+        String operator = node.get("operator").asString();
+        String text = this.visitor.getNodeUtil().getTextInSource(node, false);
+
+        if (isPrefix) {
+            leaf.registerPrefixExpression(text);
+        } else {
+            leaf.registerPostfixExpression(text);
+        }
+
+        visitor.visitExpression(node.get("argument"), leaf, container);
+    }
+
     public String visitThisExpression(BabelNode node, ILeafFragment parent, IContainer container) {
         parent.registerVariable("this");
         return this.visitor.getNodeUtil().getTextInSource(node, false);

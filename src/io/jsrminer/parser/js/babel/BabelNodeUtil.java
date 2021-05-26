@@ -105,7 +105,7 @@ public class BabelNodeUtil {
 
     <T extends CodeFragment> void populateLocationAndType(BabelNode node, T fragment) {
         fragment.setSourceLocation(node.getSourceLocation());
-        fragment.setType(getCodeElementTypeFromBabelNodeType(node.get("type").asString()));
+        fragment.setType(getCodeElementTypeFromBabelNodeType(node.getType()));
     }
 
     <T extends CodeFragment> void populateTextAndLocation(BabelNode node, T fragment) {
@@ -128,8 +128,8 @@ public class BabelNodeUtil {
         expression.setOwnerBlock(parent);
     }
 
-    CodeElementType getCodeElementTypeFromBabelNodeType(String babelNodeType) {
-        var type = BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
+    CodeElementType getCodeElementTypeFromBabelNodeType(BabelNodeType babelNodeType) {
+            var type = BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
         if (type == null) {
             throw new RuntimeException("Code Element Cannot be Found for babel type " + babelNodeType);
         }
