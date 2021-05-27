@@ -8,6 +8,15 @@ public class StatementVisitor {
 
     private final Visitor visitor;
 
+    final BabelNodeVisitor<BlockStatement, SingleStatement> expressionStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitExpressionStatement(node, parent, container);
+    };
+
+    final BabelNodeVisitor<BlockStatement, BlockStatement> blockStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitBlockStatement(node, parent, container);
+    };
+
+
     StatementVisitor(Visitor visitor) {
         this.visitor = visitor;
     }

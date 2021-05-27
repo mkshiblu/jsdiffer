@@ -10,9 +10,14 @@ import java.util.ArrayList;
 public class InvocationVisitor {
     private final Visitor visitor;
 
+    BabelNodeVisitor<ILeafFragment, Object> newExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitNewExpression(node, parent, container);
+    };
+
     InvocationVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
+
 
     /**
      * interface NewExpression <: CallExpression {
@@ -84,7 +89,7 @@ public class InvocationVisitor {
 //                break;
             case FUNCTION_EXPRESSION:
                 var idNode = callee.get("id");
-                if ( idNode!= null && idNode.isDefined()) {
+                if (idNode != null && idNode.isDefined()) {
                     name = idNode.getString("name");
                 } else {
                     name = visitor.getNodeUtil().generateNameForAnonymousContainer(container);
@@ -131,8 +136,8 @@ public class InvocationVisitor {
         invocation.setFunctionName(name);
 
         // Parse the arguments
-        var argumentsNode  = node.get("arguments");
-        for (int i = 0; i < argumentsNode.size(); i++){
+        var argumentsNode = node.get("arguments");
+        for (int i = 0; i < argumentsNode.size(); i++) {
             var argumentNode = argumentsNode.get(i);
             registerArgument(argumentNode, leaf);
             invocation.getArguments().add(visitor.getNodeUtil().getTextInSource(argumentNode, false));

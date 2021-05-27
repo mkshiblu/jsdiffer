@@ -7,6 +7,10 @@ public class LiteralVisitor {
 
     private Visitor visitor;
 
+    BabelNodeVisitor<ILeafFragment, String> numericLiteralVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitNumericLiteral(node, parent, container);
+    };
+
     LiteralVisitor(Visitor visitor) {
         this.visitor = visitor;
     }

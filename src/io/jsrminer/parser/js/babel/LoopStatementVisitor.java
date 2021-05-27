@@ -6,11 +6,14 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.CodeElementType;
 import io.rminerx.core.api.IContainer;
 
-public class LoopVisitor {
+public class LoopStatementVisitor {
 
     private Visitor visitor;
+    BabelNodeVisitor<BlockStatement, BlockStatement> forStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitForStatement(node, parent, container);
+    };
 
-    LoopVisitor(Visitor visitor) {
+    LoopStatementVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
 

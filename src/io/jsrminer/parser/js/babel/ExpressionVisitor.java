@@ -3,10 +3,37 @@ package io.jsrminer.parser.js.babel;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
-
 public class ExpressionVisitor {
 
     private final Visitor visitor;
+    BabelNodeVisitor<ILeafFragment, Object> assignmentExpressionVisitor = (BabelNode node, ILeafFragment fragment, IContainer container) -> {
+        return visitAssignmentExpression(node, fragment, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> updateExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitUpdateExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> unaryExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitUnaryExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> identifierVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitIdentifier(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> thisExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitThisExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> memberExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        visitMemberExpression(node, parent, container);
+        return null;
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> binaryExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitBinaryExpression(node, parent, container);
+    };
 
     ExpressionVisitor(Visitor visitor) {
         this.visitor = visitor;
@@ -92,9 +119,10 @@ public class ExpressionVisitor {
      * }
      * An identifier. Note that an identifier may be an expression or a destructuring pattern
      */
-    void visitIdentifier(BabelNode node, ILeafFragment leaf, IContainer container) {
+    String visitIdentifier(BabelNode node, ILeafFragment leaf, IContainer container) {
         String name = node.getString("name");
         leaf.registerVariable(name);
+        return name;
     }
 
     /**
@@ -107,7 +135,7 @@ public class ExpressionVisitor {
      * <p>
      * E.G. !success, ++i, --i
      */
-    void visitUnaryExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+    String visitUnaryExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         boolean isPrefix = node.get("prefix").asBoolean();
         String operator = node.get("operator").asString();
         String text = this.visitor.getNodeUtil().getTextInSource(node, false);
@@ -119,15 +147,17 @@ public class ExpressionVisitor {
         }
 
         visitor.visitExpression(node.get("argument"), leaf, container);
+
+        return text;
     }
 
     /**
-     interface BinaryExpression<: Expression {
-     type: "BinaryExpression";
-     operator: BinaryOperator;
-     left: Expression;
-     right: Expression;
-     }
+     * interface BinaryExpression<: Expression {
+     * type: "BinaryExpression";
+     * operator: BinaryOperator;
+     * left: Expression;
+     * right: Expression;
+     * }
      */
     public String visitBinaryExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         String text = visitor.getNodeUtil().getTextInSource(node, false);
@@ -144,15 +174,17 @@ public class ExpressionVisitor {
         return text;
     }
 
-     /** An ++ or -- after or before and expression
-      * interface UpdateExpression <: Expression {
-     type: "UpdateExpression";
-     operator: UpdateOperator;
-     argument: Expression;
-     prefix: boolean;
-   }*/
+    /**
+     * An ++ or -- after or before and expression
+     * interface UpdateExpression <: Expression {
+     * type: "UpdateExpression";
+     * operator: UpdateOperator;
+     * argument: Expression;
+     * prefix: boolean;
+     * }
+     */
 
-    void visitUpdateExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+    String visitUpdateExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         boolean isPrefix = node.get("prefix").asBoolean();
         String operator = node.get("operator").asString();
         String text = this.visitor.getNodeUtil().getTextInSource(node, false);
@@ -164,6 +196,8 @@ public class ExpressionVisitor {
         }
 
         visitor.visitExpression(node.get("argument"), leaf, container);
+
+        return text;
     }
 
     public String visitThisExpression(BabelNode node, ILeafFragment parent, IContainer container) {

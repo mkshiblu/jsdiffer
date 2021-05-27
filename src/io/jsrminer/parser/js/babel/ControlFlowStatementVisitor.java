@@ -3,9 +3,14 @@ package io.jsrminer.parser.js.babel;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.SingleStatement;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
 
 public class ControlFlowStatementVisitor {
     private final Visitor visitor;
+
+    BabelNodeVisitor<BlockStatement, Object> returnStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitReturnStatement(node, parent, container);
+    };
 
     public ControlFlowStatementVisitor(Visitor visitor) {
         this.visitor = visitor;

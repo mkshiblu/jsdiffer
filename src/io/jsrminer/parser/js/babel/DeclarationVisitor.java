@@ -10,6 +10,19 @@ import org.apache.commons.lang3.NotImplementedException;
 public class DeclarationVisitor {
     private final Visitor visitor;
 
+    BabelNodeVisitor<ICodeFragment, Object> variableDeclarationVisitor = (BabelNode node, ICodeFragment fragment, IContainer container) -> {
+        visitVariableDeclaration(node, fragment, container);
+        return null;
+    };
+
+    BabelNodeVisitor<BlockStatement, Object> functionDeclarationVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitFunctionDeclaration(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> functionExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitFunctionExpression(node, parent, container);
+    };
+
     DeclarationVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -57,6 +70,7 @@ public class DeclarationVisitor {
      * kind: "var" | "let" | "const";
      * }
      */
+
     void visitVariableDeclaration(BabelNode node, ICodeFragment fragment, IContainer container) {
         String kindStr = node.get("kind").asString();
         var kind = VariableDeclarationKind.fromName(kindStr);
@@ -94,7 +108,7 @@ public class DeclarationVisitor {
      * @param parent
      * @param container
      */
-    public void visitFunctionDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
+    public FunctionDeclaration visitFunctionDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
         FunctionDeclaration function = new FunctionDeclaration();
         container.registerFunctionDeclaration(function);
         visitor.getNodeUtil().loadFunctionDeclarationInfo(node, function, container);
@@ -102,6 +116,7 @@ public class DeclarationVisitor {
         if (!successFullyParsed) {
             container.getFunctionDeclarations().remove(function);
         }
+        return function;
     }
 
     /**
@@ -114,7 +129,7 @@ public class DeclarationVisitor {
      * //     statements
      * //  }
      */
-    public void visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+    public AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
         anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));
@@ -128,6 +143,8 @@ public class DeclarationVisitor {
         }
 
         // TODO add unmatched things to leaf?
+
+        return anonymousFunctionDeclaration;
     }
 
     boolean processFunctionParamaterAndBody(BabelNode node, IContainer container, FunctionDeclaration function) {

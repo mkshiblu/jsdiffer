@@ -6,8 +6,8 @@ import io.jsrminer.sourcetree.CodeElementType;
 import java.util.*;
 
 public class BabelParserConfig {
-    public static final Set<String> ignoredNodeTypes = Set.of(
-            "EmptyStatement"
+    public static final Set<BabelNodeType> ignoredNodeTypes = Set.of(
+            BabelNodeType.EMPTY_STATEMENT
     );
 
     public final static EnumMap<BabelNodeType, CodeElementType> babelNodeToCodeElementTypeMap =

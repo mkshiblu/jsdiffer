@@ -7,6 +7,9 @@ import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.entities.SourceFile;
 import org.apache.commons.lang3.NotImplementedException;
 
+import java.util.EnumMap;
+
+import static io.jsrminer.parser.js.babel.BabelNodeType.*;
 
 public class Visitor {
     private final String filename;
@@ -17,11 +20,50 @@ public class Visitor {
     private final ExpressionVisitor expressionVisitor = new ExpressionVisitor(this);
     private final InvocationVisitor invocationVisitor = new InvocationVisitor(this);
     private final ControlFlowStatementVisitor controlFlowStatementVisitor = new ControlFlowStatementVisitor(this);
-    private final LoopVisitor loopVisitor = new LoopVisitor(this);
+    private final LoopStatementVisitor loopStatementVisitor = new LoopStatementVisitor(this);
+
+    private final EnumMap<BabelNodeType, BabelNodeVisitor<ICodeFragment, Object>> visitMethodsMap;
 
     public Visitor(String filename, String fileContent) {
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
         this.filename = filename;
+        this.visitMethodsMap = new EnumMap(BabelNodeType.class) {{
+            put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor);
+            put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor);
+        }};
+
+        new EnumMapBuilder(BabelNodeType.class)
+                // Declarations
+                .put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor)
+                .put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor)
+                .put(FUNCTION_EXPRESSION, declarationVisitor.functionExpressionVisitor)
+
+                // Expressions
+                .put(ASSIGNMENT_EXPRESSION, expressionVisitor.assignmentExpressionVisitor)
+                .put(MEMBER_EXPRESSION, expressionVisitor.memberExpressionVisitor)
+                .put(IDENTIFIER, expressionVisitor.identifierVisitor)
+                .put(BINARY_EXPRESSION, expressionVisitor.binaryExpressionVisitor)
+                .put(UNARY_EXPRESSION, expressionVisitor.unaryExpressionVisitor)
+                .put(THIS_EXPRESSION, expressionVisitor.thisExpressionVisitor)
+                .put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor)
+
+                // Invocations
+                .put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor)
+
+                // Control Flow
+                .put(RETURN_STATEMENT, controlFlowStatementVisitor.returnStatementVisitor)
+
+                // Loops
+                .put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor)
+
+                // Literals
+                .put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor)
+
+                // Statements
+                .put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor)
+                .put(EXPRESSION_STATEMENT, statementVisitor.expressionStatementVisitor)
+                .build();
+
     }
 
     public SourceFile loadFromAst(BabelNode programAST) {
@@ -52,77 +94,18 @@ public class Visitor {
     }
 
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
-        var type = node.getType();
-        switch (type) {
-            case VARIABLE_DECLARATION:
-                declarationVisitor.visitVariableDeclaration(node, parent, container);
-                break;
-            case NUMERIC_LITERAL:
-                literalVisitor.visitNumericLiteral(node, (ILeafFragment) parent, container);
-                break;
-
-            case FUNCTION_DECLARATION:
-                declarationVisitor.visitFunctionDeclaration(node, (BlockStatement) parent, container);
-                break;
-
-            case FUNCTION_EXPRESSION:
-                declarationVisitor.visitFunctionExpression(node, (ILeafFragment) parent, container);
-                break;
-            case EXPRESSION_STATEMENT:
-                statementVisitor.visitExpressionStatement(node, (BlockStatement) parent, container);
-                break;
-
-            case ASSIGNMENT_EXPRESSION:
-                expressionVisitor.visitAssignmentExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case MEMBER_EXPRESSION:
-                expressionVisitor.visitMemberExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case UNARY_EXPRESSION:
-                expressionVisitor.visitUnaryExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case UPDATE_EXPRESSION:
-                expressionVisitor.visitUpdateExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case NEW_EXPRESSION:
-                invocationVisitor.visitNewExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case THIS_EXPRESSION:
-                expressionVisitor.visitThisExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case IDENTIFIER:
-                expressionVisitor.visitIdentifier(node, (ILeafFragment) parent, container);
-                break;
-            case EMPTY_STATEMENT:
-                break;
-            case RETURN_STATEMENT:
-                controlFlowStatementVisitor.visitReturnStatement(node, (BlockStatement) parent, container);
-                break;
-            case FOR_STATEMENT:
-                loopVisitor.visitForStatement(node, (BlockStatement) parent, container);
-                break;
-
-            case BINARY_EXPRESSION:
-                expressionVisitor.visitBinaryExpression(node, (ILeafFragment) parent, container);
-                break;
-
-            case BLOCK_STATEMENT:
-                statementVisitor.visitBlockStatement(node, (BlockStatement) parent, container);
-                break;
-            default:
-                throw new NotImplementedException(type.toString());
+        var visitor = visitMethodsMap.get(node.getType());
+        if (visitor == null) {
+            if (!isIgnored(node.getType()))
+                throw new NotImplementedException("Processor not implemented for " + node.getType());
+        } else {
+            Object result = visitor.visit(node, parent, container);
+            return result;
         }
-
         return null;
     }
 
-    public boolean isIgnored(String type) {
+    public boolean isIgnored(BabelNodeType type) {
         return BabelParserConfig.ignoredNodeTypes.contains(type);
     }
 
