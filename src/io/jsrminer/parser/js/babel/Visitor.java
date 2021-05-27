@@ -17,6 +17,7 @@ public class Visitor {
     private final ExpressionVisitor expressionVisitor = new ExpressionVisitor(this);
     private final InvocationVisitor invocationVisitor = new InvocationVisitor(this);
     private final ControlFlowStatementVisitor controlFlowStatementVisitor = new ControlFlowStatementVisitor(this);
+    private final LoopVisitor loopVisitor = new LoopVisitor(this);
 
     public Visitor(String filename, String fileContent) {
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
@@ -102,6 +103,17 @@ public class Visitor {
                 break;
             case RETURN_STATEMENT:
                 controlFlowStatementVisitor.visitReturnStatement(node, (BlockStatement) parent, container);
+                break;
+            case FOR_STATEMENT:
+                loopVisitor.visitForStatement(node, (BlockStatement) parent, container);
+                break;
+
+            case BINARY_EXPRESSION:
+                expressionVisitor.visitBinaryExpression(node, (ILeafFragment) parent, container);
+                break;
+
+            case BLOCK_STATEMENT:
+                statementVisitor.visitBlockStatement(node, (BlockStatement) parent, container);
                 break;
             default:
                 throw new NotImplementedException(type.toString());

@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import io.jsrminer.sourcetree.CodeElementType;
 
 import java.util.*;
@@ -32,7 +33,7 @@ public class BabelParserConfig {
 //        put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
 //
 //        //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
-//        put(ParseTreeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT);
+                    .put(BabelNodeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT)
 //        put(ParseTreeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
 //        put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
 //        put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);

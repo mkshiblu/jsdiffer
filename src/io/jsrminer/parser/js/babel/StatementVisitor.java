@@ -25,5 +25,22 @@ public class StatementVisitor {
         return leaf;
     }
 
+    /**
+     * interface BlockStatement <: Statement {
+     * type: "BlockStatement";
+     * body: [ Statement ];
+     * directives: [ Directive ];
+     * }
+     */
+    public BlockStatement visitBlockStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var blockStatement = visitor.getNodeUtil().createBlockStatementPopulateAndAddToParent(node, parent);
 
+        // Parse statements
+        var body = node.get("body");
+        for (int i = 0; i < body.size(); i++) {
+            visitor.visitStatement(body.get(i), blockStatement, container);
+        }
+
+        return blockStatement;
+    }
 }

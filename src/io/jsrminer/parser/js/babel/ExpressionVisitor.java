@@ -3,6 +3,7 @@ package io.jsrminer.parser.js.babel;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
+
 public class ExpressionVisitor {
 
     private final Visitor visitor;
@@ -118,6 +119,29 @@ public class ExpressionVisitor {
         }
 
         visitor.visitExpression(node.get("argument"), leaf, container);
+    }
+
+    /**
+     interface BinaryExpression<: Expression {
+     type: "BinaryExpression";
+     operator: BinaryOperator;
+     left: Expression;
+     right: Expression;
+     }
+     */
+    public String visitBinaryExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        String text = visitor.getNodeUtil().getTextInSource(node, false);
+        var operator = node.getString("operator");
+
+        // TODO should treated as infix if =?
+        if (!"=".equals(operator)) {
+            leaf.getInfixOperators().add(operator);
+            leaf.getInfixExpressions().add(text);
+        }
+
+        visitor.visitExpression(node.get("left"), leaf, container);
+        visitor.visitExpression(node.get("right"), leaf, container);
+        return text;
     }
 
      /** An ++ or -- after or before and expression

@@ -1,16 +1,12 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.util.Lazy;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 import io.rminerx.core.api.ISourceFile;
 import io.rminerx.core.entities.DeclarationContainer;
-
-import java.util.function.Function;
 
 public class BabelNodeUtil {
 
@@ -27,6 +23,13 @@ public class BabelNodeUtil {
         populateSingleStatementData(node, singleStatement);
         addStatement(singleStatement, parent);
         return singleStatement;
+    }
+
+    BlockStatement createBlockStatementPopulateAndAddToParent(BabelNode node, BlockStatement parent) {
+        var blockStatement = new BlockStatement();
+        populateBlockStatementData(node, blockStatement);
+        addStatement(blockStatement, parent);
+        return blockStatement;
     }
 
     /**
@@ -120,7 +123,7 @@ public class BabelNodeUtil {
         statement.setParent(parent);
     }
 
-    void addExpression(Expression expression, BlockStatement parent) {
+    void addExpressionToBlockStatement(Expression expression, BlockStatement parent) {
         //an expression has the same index and depth as the composite statement it belong to
         expression.setDepth(parent.getDepth());
         expression.setPositionIndexInParent(parent.getPositionIndexInParent());

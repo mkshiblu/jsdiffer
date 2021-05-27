@@ -2,7 +2,7 @@ const { parse } = require('@babel/parser');
 const parser = require('./babel_parser');
 
 let content = `
-new function() {};
+var x = new Function () {  };
 `;
 
 const ast = parser.parse(content);

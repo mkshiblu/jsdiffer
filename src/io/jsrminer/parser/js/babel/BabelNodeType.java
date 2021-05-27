@@ -24,10 +24,13 @@ public enum BabelNodeType {
     EMPTY_STATEMENT("EmptyStatement"),
     BLOCK_STATEMENT("BlockStatement"),
     OBJECT_EXPRESSION("ObjectExpression"),
+    BINARY_EXPRESSION("BinaryExpression"),
     FILE("File"),
     PROGRAM("Program"),
     RETURN_STATEMENT("ReturnStatement"),
 
+    // Loops
+    FOR_STATEMENT("ForStatement"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

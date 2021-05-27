@@ -129,18 +129,15 @@ public class InvocationVisitor {
         invocation.setSourceLocation(node.getSourceLocation());
         invocation.setType(this.visitor.getNodeUtil().getCodeElementTypeFromBabelNodeType(node.getType()));
         invocation.setFunctionName(name);
-//
-//        var arguments = isNewExpression
-//                ? ((NewExpressionTree) tree).arguments
-//                : ((CallExpressionTree) tree).arguments;
-//
-//        if (arguments != null) {
-//            arguments.arguments.forEach(argumentTree -> {
-//                processArgument(argumentTree, leaf);
-//                invocation.getArguments().add(getTextInSource(argumentTree, false));
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(argumentTree, leaf, container);
-//            });
-//        }
+
+        // Parse the arguments
+        var argumentsNode  = node.get("arguments");
+        for (int i = 0; i < argumentsNode.size(); i++){
+            var argumentNode = argumentsNode.get(i);
+            registerArgument(argumentNode, leaf);
+            invocation.getArguments().add(visitor.getNodeUtil().getTextInSource(argumentNode, false));
+            visitor.visitExpression(argumentNode, leaf, container);
+        }
 
         return parsedProperly;
     }
@@ -149,7 +146,7 @@ public class InvocationVisitor {
 
     }
 
-    void processArgument(BabelNode argumentNode, ILeafFragment leaf) {
+    void registerArgument(BabelNode argumentNode, ILeafFragment leaf) {
 
         switch (argumentNode.getType()) {
             case IDENTIFIER:
@@ -161,13 +158,6 @@ public class InvocationVisitor {
             case OBJECT_EXPRESSION:
                 return;
         }
-//        if (TypeChecker.isIdentifier(argument)
-//                || TypeChecker.isStringLiteral(argument)
-//                || TypeChecker.isBooleanLiteral(argument)
-//                || TypeChecker.isMemberLookupExpression(argument)
-//                || TypeChecker.isFunctionDeclaration(argument)
-//                || TypeChecker.isObjectLiteralExpression(argument))
-//            return;
         leaf.getArguments().add(visitor.getNodeUtil().getTextInSource(argumentNode, false));
     }
 }

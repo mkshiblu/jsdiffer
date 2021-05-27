@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NewExpressionTest {
 
@@ -12,7 +13,7 @@ public class NewExpressionTest {
     @BeforeAll
     public static void setup() {
         var parser = new BabelParser();
-        var sourceFile = parser.parseSource("var x = new function () { let counter = 0; this.incrementAndGet = function () { return ++counter; }; }()", "file.js");
+        var sourceFile = parser.parseSource("var x = new Person(a1);", "file.js");
         leaf = (SingleStatement) sourceFile.getStatements().get(0);
     }
 
@@ -20,37 +21,32 @@ public class NewExpressionTest {
     public void testObjectCreationCount() {
         assertEquals(1, leaf.getCreationMap().size());
     }
-//
+
+    @Test
+    public void testObjectCreationText() {
+        var objectCreation  = leaf.getCreationMap().values().stream().findFirst().get();
+        assertTrue("new Person(a1)".equals(objectCreation.get(0).getText()));
+    }
+
+    @Test
+    public void testStatementVariablesCount() {
+        assertEquals(2, leaf.getVariables().size());
+    }
+
+    @Test
+    public void testArgumentsCount() {
+        var objectCreation  = leaf.getCreationMap().values().stream().findFirst().get().get(0);
+        assertEquals(1, objectCreation.getArguments().size());
+    }
+
+    @Test
+    public void testArgumentText() {
+        var objectCreation  = leaf.getCreationMap().values().stream().findFirst().get().get(0);
+        assertEquals("a1", objectCreation.getArguments().get(0));
+    }
+
 //    @Test
-//    public void testQualifiedName() {
-//        assertEquals("a.1", anonymous.getQualifiedName());
-//        assertEquals("a.1.1", innerAnonymous.getQualifiedName());
-//    }
-//
-//    @Test
-//    public void testParentContainerQualifiedName() {
-//        assertEquals("a", anonymous.getParentContainerQualifiedName());
-//        assertEquals("a.1", innerAnonymous.getParentContainerQualifiedName());
-//    }
-//
-//    @Test
-//    public void testParameterCount() {
-//        assertEquals(2, anonymous.getParameters().size());
-//    }
-//
-//    @Test
-//    public void testParameterNames() {
-//        assertEquals("p1", anonymous.getParameterNameList().get(0));
-//        assertEquals("p2", anonymous.getParameterNameList().get(1));
-//    }
-//
-//    @Test
-//    public void testStatementCount() {
-//        assertEquals(1, anonymous.getStatements().size());
-//    }
-//
-//    @Test
-//    public void testStatementParentText() {
-//        assertEquals("{", anonymous.getStatements().get(0).getParent().getText());
+//    public void testStatementTypeCount() {
+//        assertEquals(1, leaf.getVariables().size());
 //    }
 }
