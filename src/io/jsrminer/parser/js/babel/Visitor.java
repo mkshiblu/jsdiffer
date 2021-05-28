@@ -28,42 +28,36 @@ public class Visitor {
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
         this.filename = filename;
         this.visitMethodsMap = new EnumMap(BabelNodeType.class) {{
+            // Declarations;
             put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor);
             put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor);
+            put(FUNCTION_EXPRESSION, declarationVisitor.functionExpressionVisitor);
+
+            // Expressions
+            put(ASSIGNMENT_EXPRESSION, expressionVisitor.assignmentExpressionVisitor);
+            put(MEMBER_EXPRESSION, expressionVisitor.memberExpressionVisitor);
+            put(IDENTIFIER, expressionVisitor.identifierVisitor);
+            put(BINARY_EXPRESSION, expressionVisitor.binaryExpressionVisitor);
+            put(UNARY_EXPRESSION, expressionVisitor.unaryExpressionVisitor);
+            put(THIS_EXPRESSION, expressionVisitor.thisExpressionVisitor);
+            put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor);
+
+            // Invocations
+            put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);
+
+            // Control Flow
+            put(RETURN_STATEMENT, controlFlowStatementVisitor.returnStatementVisitor);
+
+            // Loops
+            put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor);
+
+            // Literals
+            put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor);
+
+            // Statements
+            put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor);
+            put(EXPRESSION_STATEMENT, statementVisitor.expressionStatementVisitor);
         }};
-
-        new EnumMapBuilder(BabelNodeType.class)
-                // Declarations
-                .put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor)
-                .put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor)
-                .put(FUNCTION_EXPRESSION, declarationVisitor.functionExpressionVisitor)
-
-                // Expressions
-                .put(ASSIGNMENT_EXPRESSION, expressionVisitor.assignmentExpressionVisitor)
-                .put(MEMBER_EXPRESSION, expressionVisitor.memberExpressionVisitor)
-                .put(IDENTIFIER, expressionVisitor.identifierVisitor)
-                .put(BINARY_EXPRESSION, expressionVisitor.binaryExpressionVisitor)
-                .put(UNARY_EXPRESSION, expressionVisitor.unaryExpressionVisitor)
-                .put(THIS_EXPRESSION, expressionVisitor.thisExpressionVisitor)
-                .put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor)
-
-                // Invocations
-                .put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor)
-
-                // Control Flow
-                .put(RETURN_STATEMENT, controlFlowStatementVisitor.returnStatementVisitor)
-
-                // Loops
-                .put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor)
-
-                // Literals
-                .put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor)
-
-                // Statements
-                .put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor)
-                .put(EXPRESSION_STATEMENT, statementVisitor.expressionStatementVisitor)
-                .build();
-
     }
 
     public SourceFile loadFromAst(BabelNode programAST) {
