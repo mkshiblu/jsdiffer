@@ -21,6 +21,8 @@ public class Visitor {
     private final InvocationVisitor invocationVisitor = new InvocationVisitor(this);
     private final ControlFlowStatementVisitor controlFlowStatementVisitor = new ControlFlowStatementVisitor(this);
     private final LoopStatementVisitor loopStatementVisitor = new LoopStatementVisitor(this);
+    private final ExceptionVisitor exceptionVisitor = new ExceptionVisitor(this);
+    private final ChoiceStatementVisitor choiceVisitor = new ChoiceStatementVisitor(this);
 
     private final EnumMap<BabelNodeType, BabelNodeVisitor<ICodeFragment, Object>> visitMethodsMap;
 
@@ -44,19 +46,34 @@ public class Visitor {
 
             // Invocations
             put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);
+            put(CALL_EXPRESSION, invocationVisitor.callExpressionVisitor);
 
             // Control Flow
             put(RETURN_STATEMENT, controlFlowStatementVisitor.returnStatementVisitor);
+            put(BREAK_STATEMENT, controlFlowStatementVisitor.breakStatementVisitor);
+            put(CONTINUE_STATEMENT, controlFlowStatementVisitor.continueStatementVisitor);
+            put(LABELLED_STATEMENT, controlFlowStatementVisitor.lablelledStatementVisitor);
 
             // Loops
             put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor);
 
             // Literals
             put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor);
+            put(STRING_LITERAL, literalVisitor.stringLiteralVisitor);
+            put(BOOLEAN_LITERAL, literalVisitor.booleanLiteralVisitor);
 
             // Statements
             put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor);
             put(EXPRESSION_STATEMENT, statementVisitor.expressionStatementVisitor);
+
+            // Exceptions
+            put(TRY_STATEMENT, exceptionVisitor.tryStatementVisitor);
+            put(CATCH_CLAUSE, exceptionVisitor.catchClausetVisitor);
+
+            // Choice
+            put(IF_STATEMENT, choiceVisitor.ifStatementVisitor);
+            put(SWITCH_STATEMENT, choiceVisitor.switchStatementVisitor);
+            put(SWITCH_CASE, choiceVisitor.switchCaseVisitor);
         }};
     }
 

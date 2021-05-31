@@ -2,6 +2,7 @@ package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.Invocation;
 import io.jsrminer.sourcetree.ObjectCreation;
+import io.jsrminer.sourcetree.OperationInvocation;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
@@ -14,10 +15,36 @@ public class InvocationVisitor {
         return visitNewExpression(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, Object> callExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitCallExpression(node, parent, container);
+    };
+
     InvocationVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
 
+    /**
+     * interface CallExpression <: Expression {
+     * type: "CallExpression";
+     * callee: Expression | Super | Import;
+     * arguments: [ Expression | SpreadElement ];
+     * optional: boolean | null;
+     * }
+     */
+    OperationInvocation visitCallExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        String text = visitor.getNodeUtil().getTextInSource(node, false);
+        final var invocation = new OperationInvocation();
+        // Add to the list
+        leaf.getMethodInvocationMap().computeIfAbsent(text, key -> new ArrayList<>()).add(invocation);
+        boolean success = processInvocation(node, leaf, container, invocation);
+        if (!success) {
+            leaf.getMethodInvocationMap().get(text).remove(invocation);
+            if (leaf.getMethodInvocationMap().get(text).size() == 0) {
+                leaf.getMethodInvocationMap().remove(text);
+            }
+        }
+        return invocation;
+    }
 
     /**
      * interface NewExpression <: CallExpression {

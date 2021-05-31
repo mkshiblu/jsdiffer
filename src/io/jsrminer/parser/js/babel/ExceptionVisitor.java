@@ -1,10 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-
-import com.google.javascript.jscomp.parsing.parser.trees.CatchTree;
-import io.jsrminer.parser.js.closurecompiler.DeclarationsVisitor;
-import io.jsrminer.parser.js.closurecompiler.INodeVisitor;
-import io.jsrminer.parser.js.closurecompiler.NodeVisitor;
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
 
@@ -16,6 +11,10 @@ public class ExceptionVisitor {
 
     BabelNodeVisitor<BlockStatement, BlockStatement> tryStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
         return visitTryStatement(node, parent, container);
+    };
+
+    BabelNodeVisitor<BlockStatement, BlockStatement> catchClausetVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitCatchClause(node, parent, container);
     };
 
     ExceptionVisitor(Visitor visitor) {
@@ -37,7 +36,7 @@ public class ExceptionVisitor {
         visitor.getNodeUtil().addStatement(tryStatement, parent);
 
         // Parse try body
-        visitor.visitStatement(node.get("body"), tryStatement, container);
+        visitor.visitStatement(node.get("block"), tryStatement, container);
 
         // Parse condition
         var catchBlockNode = node.get("handler");
@@ -58,9 +57,9 @@ public class ExceptionVisitor {
 
     /**
      * interface CatchClause <: Node {
-     *   type: "CatchClause";
-     *   param: Pattern | null;
-     *   body: BlockStatement;
+     * type: "CatchClause";
+     * param: Pattern | null;
+     * body: BlockStatement;
      * }
      * A catch clause following a try block.
      */
@@ -70,7 +69,7 @@ public class ExceptionVisitor {
         // Treat exception as variable declaration
         var paramNode = node.get("param");
         var variableDeclaration
-                = DeclarationsVisitor.createVariableDeclarationFromIdentifier()
+                = this.visitor.getNodeUtil().createVariableDeclarationFromIdentifier(paramNode
                 , VariableDeclarationKind.VAR
                 , composite);
 

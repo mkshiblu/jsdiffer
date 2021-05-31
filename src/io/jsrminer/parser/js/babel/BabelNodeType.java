@@ -1,7 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-import io.jsrminer.sourcetree.CodeElementType;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,9 +26,26 @@ public enum BabelNodeType {
     FILE("File"),
     PROGRAM("Program"),
     RETURN_STATEMENT("ReturnStatement"),
+    BREAK_STATEMENT("BreakStatement"),
+    CONTINUE_STATEMENT("ContinueStatement"),
+    LABELLED_STATEMENT("LabelledStatement"),
 
     // Loops
     FOR_STATEMENT("ForStatement"),
+
+    // Ex
+    TRY_STATEMENT("TryStatement"),
+    CATCH_CLAUSE("CatchClause"),
+    THROW_STATEMENT("ThrowStatement"),
+
+    IF_STATEMENT("IfStatement"),
+    SWITCH_STATEMENT("SwitchStatement"),
+    SWITCH_CASE("SwitchCase"),
+    ARRAY_EXPRESSION("ArrayExpression"),
+    LOGICAL_EXPRESSION("LogicalExpression"),
+    CALL_EXPRESSION("CallExpression"),
+
+
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

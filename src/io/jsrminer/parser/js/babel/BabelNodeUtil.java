@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
@@ -132,7 +133,7 @@ public class BabelNodeUtil {
     }
 
     CodeElementType getCodeElementTypeFromBabelNodeType(BabelNodeType babelNodeType) {
-            var type = BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
+        var type = BabelParserConfig.babelNodeToCodeElementTypeMap.get(babelNodeType);
         if (type == null) {
             throw new RuntimeException("Code Element Cannot be Found for babel type " + babelNodeType);
         }
@@ -226,5 +227,19 @@ public class BabelNodeUtil {
         if (blockStatement.getText() == null) {
             throw new RuntimeException("Block text was not populated for type " + blockStatement.getCodeElementType().toString());
         }
+    }
+
+    VariableDeclaration createVariableDeclarationFromIdentifier(BabelNode node
+            , VariableDeclarationKind kind
+            , INode scopeNode) {
+        String variableName = node.getString("name");
+        var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+        variableDeclaration.setSourceLocation(node.getSourceLocation());
+
+        // Set Scope (TODO set body source location
+        variableDeclaration.setScope(createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
+
+        return variableDeclaration;
     }
 }

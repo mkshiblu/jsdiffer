@@ -18,17 +18,17 @@ public class BabelParserConfig {
                     .put(BabelNodeType.RETURN_STATEMENT, CodeElementType.RETURN_STATEMENT)
                     .put(BabelNodeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION)
                     //        put(ParseTreeType.NEW_EXPRESSION, CodeElementType.OBJECT_CREATION);
-                    //        put(ParseTreeType.IF_STATEMENT, CodeElementType.IF_STATEMENT);
-//        put(ParseTreeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT);
-//        put(ParseTreeType.CASE_CLAUSE, CodeElementType.SWITCH_CASE);
+                    .put(BabelNodeType.IF_STATEMENT, CodeElementType.IF_STATEMENT)
+                    .put(BabelNodeType.SWITCH_STATEMENT, CodeElementType.SWITCH_STATEMENT)
+                    .put(BabelNodeType.SWITCH_CASE, CodeElementType.SWITCH_CASE)
 //        put(ParseTreeType.DEFAULT_CLAUSE, CodeElementType.SWITCH_CASE);
 //
 //        put(ParseTreeType.FUNCTION_DECLARATION, CodeElementType.FUNCTION_DECLARATION);
 //        put(ParseTreeType.EMPTY_STATEMENT, CodeElementType.EMPTY_STATEMENT);
-//        put(ParseTreeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION);
+                    .put(BabelNodeType.CALL_EXPRESSION, CodeElementType.FUNCTION_INVOCATION)
 //        //put(ParseTreeType., CodeElementType.SUPER_CONSTRUCTOR_INVOCATION);
-//        put(ParseTreeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT);
-//        put(ParseTreeType.CATCH, CodeElementType.CATCH_CLAUSE);
+                    .put(BabelNodeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT)
+                    .put(BabelNodeType.CATCH_CLAUSE, CodeElementType.CATCH_CLAUSE)
 //        put(ParseTreeType.FINALLY, CodeElementType.FINALLY_BLOCK);
 //        put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
 //
@@ -39,10 +39,9 @@ public class BabelParserConfig {
 //        put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);
 //        put(ParseTreeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT);
 //
-//        put(ParseTreeType.CONTINUE_STATEMENT, CodeElementType.CONTINUE_STATEMENT);
-//        put(ParseTreeType.BREAK_STATEMENT, CodeElementType.BREAK_STATEMENT);
-//
-//        put(ParseTreeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT);
+                    .put(BabelNodeType.CONTINUE_STATEMENT, CodeElementType.CONTINUE_STATEMENT)
+                    .put(BabelNodeType.BREAK_STATEMENT, CodeElementType.BREAK_STATEMENT)
+                    .put(BabelNodeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT)
 
 //
 //        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
