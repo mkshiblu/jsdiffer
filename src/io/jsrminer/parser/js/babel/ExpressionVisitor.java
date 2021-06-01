@@ -1,7 +1,13 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.sourcetree.CodeElementType;
+import io.jsrminer.sourcetree.Expression;
+import io.jsrminer.sourcetree.ObjectCreation;
+import io.jsrminer.sourcetree.TernaryOperatorExpression;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
+
+import java.util.ArrayList;
 
 public class ExpressionVisitor {
 
@@ -33,6 +39,18 @@ public class ExpressionVisitor {
 
     BabelNodeVisitor<ILeafFragment, Object> binaryExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
         return visitBinaryExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, String> logicalExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitLogicalExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, Object> arrayExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitArrayExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, String> conditionalExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitConditionalExpression(node, parent, container);
     };
 
     ExpressionVisitor(Visitor visitor) {
@@ -96,6 +114,7 @@ public class ExpressionVisitor {
 
         if (isComputed) {
             // Array  access?
+            leaf.getArrayAccesses().add(node.getText());
             // property is expression
             visitor.visitExpression(propertyNode, leaf, container);
         } else {
@@ -200,8 +219,93 @@ public class ExpressionVisitor {
         return text;
     }
 
-    public String visitThisExpression(BabelNode node, ILeafFragment parent, IContainer container) {
+    String visitThisExpression(BabelNode node, ILeafFragment parent, IContainer container) {
         parent.registerVariable("this");
         return this.visitor.getNodeUtil().getTextInSource(node, false);
+    }
+
+    /**
+     * LogicalExpression
+     * interface LogicalExpression <: Expression {
+     * type: "LogicalExpression";
+     * operator: LogicalOperator;
+     * left: Expression;
+     * right: Expression;
+     * }
+     * A logical operator expression.
+     * <p>
+     * LogicalOperator
+     * enum LogicalOperator {
+     * "||" | "&&" | "??"
+     * }
+     * A logical operator token.
+     */
+    String visitLogicalExpression(BabelNode node, ILeafFragment parent, IContainer container) {
+        var operator = node.getString("operator");
+        parent.getInfixOperators().add(operator);
+        parent.getInfixExpressions().add(node.getText());
+        visitor.visitExpression(node.get("left"), parent, container);
+        visitor.visitExpression(node.get("right"), parent, container);
+        return node.getText();
+    }
+
+    /**
+     * interface ConditionalExpression <: Expression {
+     * type: "ConditionalExpression";
+     * test: Expression;
+     * alternate: Expression;
+     * consequent: Expression;
+     * }
+     * A conditional expression, i.e., a ternary ?/: expression.
+     */
+    String visitConditionalExpression(BabelNode node, ILeafFragment parent, IContainer container) {
+        String text = visitor.getNodeUtil().getTextInSource(node, false);
+        var testNode = node.get("test");
+        var alternateNode = node.get("alternate");
+        var consequentNode = node.get("consequent");
+
+        Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(testNode, CodeElementType.TERNARY_OPERATOR_CONDITION);
+        Expression thenExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(consequentNode, CodeElementType.TERNARY_OPERATOR_THEN_EXPRESSION);
+        Expression elseExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(alternateNode, CodeElementType.TERNARY_OPERATOR_ELSE_EXPRESSION);
+
+        TernaryOperatorExpression ternaryOperatorExpression
+                = new TernaryOperatorExpression(text, expression, thenExpression, elseExpression);
+        parent.getTernaryOperatorExpressions().add(ternaryOperatorExpression);
+
+        visitor.visitExpression(testNode, expression, container);
+        visitor.visitExpression(consequentNode, thenExpression, container);
+        visitor.visitExpression(alternateNode, elseExpression, container);
+
+        return text;
+    }
+
+    /**
+     * interface ArrayExpression <: Expression {
+     * type: "ArrayExpression";
+     * elements: [ Expression | SpreadElement | null ];
+     * }
+     */
+    String visitArrayExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        var elementsNode = node.get("elements");
+        var isEmptyArrayCreation = elementsNode.isDefined() && elementsNode.size() == 0;
+
+        if (!isEmptyArrayCreation) {
+            String text = node.getText();//visitor.getNodeUtil().getTextInSource(node, false);
+            leaf.getArrayAccesses().add(text);
+
+            for (int i = 0; i < elementsNode.size(); i++) {
+                visitor.visitExpression(elementsNode.get(i), leaf, container);
+            }
+        } else {
+            // Empty array creation
+            ObjectCreation creation = new ObjectCreation();
+            creation.setSourceLocation(node.getSourceLocation());
+            creation.setText(node.getText());
+            creation.setType(CodeElementType.ARRAY_EXPRESSION);
+            creation.setFunctionName("");
+            leaf.getCreationMap().computeIfAbsent(creation.getText(), key -> new ArrayList<>()).add(creation);
+        }
+
+        return node.getText();
     }
 }

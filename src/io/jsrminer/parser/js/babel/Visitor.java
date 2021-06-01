@@ -40,9 +40,12 @@ public class Visitor {
             put(MEMBER_EXPRESSION, expressionVisitor.memberExpressionVisitor);
             put(IDENTIFIER, expressionVisitor.identifierVisitor);
             put(BINARY_EXPRESSION, expressionVisitor.binaryExpressionVisitor);
+            put(LOGICAL_EXPRESSION, expressionVisitor.logicalExpressionVisitor);
+            put(ARRAY_EXPRESSION, expressionVisitor.arrayExpressionVisitor);
             put(UNARY_EXPRESSION, expressionVisitor.unaryExpressionVisitor);
             put(THIS_EXPRESSION, expressionVisitor.thisExpressionVisitor);
             put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor);
+            put(CONDITIONAL_EXPRESSION, expressionVisitor.conditionalExpressionVisitor);
 
             // Invocations
             put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);
@@ -61,6 +64,7 @@ public class Visitor {
             put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor);
             put(STRING_LITERAL, literalVisitor.stringLiteralVisitor);
             put(BOOLEAN_LITERAL, literalVisitor.booleanLiteralVisitor);
+            put(NULL_LITERAL, literalVisitor.nullLiteralVisitor);
 
             // Statements
             put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor);

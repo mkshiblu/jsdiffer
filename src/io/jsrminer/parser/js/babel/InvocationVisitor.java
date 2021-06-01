@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import com.google.javascript.jscomp.parsing.parser.trees.MemberExpressionTree;
 import io.jsrminer.sourcetree.Invocation;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.OperationInvocation;
@@ -84,14 +85,40 @@ public class InvocationVisitor {
                 name = callee.getString("name");
                 break;
 
-//            case MEMBER_EXPRESSION:
-//                MemberExpressionTree calleeAsMember = callee.asMemberExpression();
-//                name = calleeAsMember.memberName.value;
-//                getSubExpression(calleeAsMember.operand, invocation);
-//                expressionText = getTextInSource(calleeAsMember.operand, false);
-//
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(calleeAsMember.operand, leaf, container);
-//                break;
+            case MEMBER_EXPRESSION:
+                // computed: a[b], static: a.b
+                boolean isComputed = callee.get("computed").asBoolean();
+                var objectNode = callee.get("object");
+                var propertyNode = callee.get("property");
+
+                if (isComputed) {
+                    //x.a[b]
+                    // Take remove text before the last "." if any from name
+                    //String str = calleeText.replaceAll()
+                    int lastDotIndex = calleeText.lastIndexOf(".");
+                    if (lastDotIndex >= 0) {
+                        name = calleeText.substring(lastDotIndex + 1, calleeText.length());
+                        expressionText = calleeText.substring(0, lastDotIndex);
+                    } else {
+                        name = calleeText;
+                    }
+
+                    getSubExpression(objectNode, invocation);
+                    visitor.visitExpression(callee, leaf, container);
+                    //visitor.visitExpression(objectNode, leaf, container);
+                    //visitor.visitExpression(propertyNode, leaf, container);
+
+                    parsedProperly = false;
+                } else {
+                    // a.b
+                    //Property is identifier?
+                    name = propertyNode.getString("name");
+                    expressionText = objectNode.getText();
+                    getSubExpression(objectNode, invocation);
+                    visitor.visitExpression(objectNode, leaf, container);
+                }
+
+                break;
 //            case MEMBER_LOOKUP_EXPRESSION:
 //                //dispatchListeners[i](event, dispatchInstances[i])
 //                var calleeAsMemberLookupExpression = callee.asMemberLookupExpression();
@@ -106,8 +133,8 @@ public class InvocationVisitor {
 //                }
 //
 //                getSubExpression(calleeAsMemberLookupExpression.operand, invocation);
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(calleeAsMemberLookupExpression.operand, leaf, container);
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(calleeAsMemberLookupExpression.memberExpression, leaf, container);
+//                visitor.visitExpression(calleeAsMemberLookupExpression.operand, leaf, container);
+//                visitor.visitExpression(calleeAsMemberLookupExpression.memberExpression, leaf, container);
 //
 //                parsedProperly = false;
 //                break;

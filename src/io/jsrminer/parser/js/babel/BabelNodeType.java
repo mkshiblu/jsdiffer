@@ -8,6 +8,7 @@ public enum BabelNodeType {
     VARIABLE_DECLARATOR("VariableDeclarator"),
     NUMERIC_LITERAL("NumericLiteral"),
     STRING_LITERAL("StringLiteral"),
+    NULL_LITERAL("NullLiteral"),
     BOOLEAN_LITERAL("BooleanLiteral"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     FUNCTION_EXPRESSION("FunctionExpression"),
@@ -44,8 +45,7 @@ public enum BabelNodeType {
     ARRAY_EXPRESSION("ArrayExpression"),
     LOGICAL_EXPRESSION("LogicalExpression"),
     CALL_EXPRESSION("CallExpression"),
-
-
+    CONDITIONAL_EXPRESSION("ConditionalExpression"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

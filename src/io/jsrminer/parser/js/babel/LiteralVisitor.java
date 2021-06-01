@@ -19,6 +19,11 @@ public class LiteralVisitor {
         return visitBooleanLiteral(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, String> nullLiteralVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitNullLiteral(node, parent, container);
+    };
+
+
     LiteralVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -47,6 +52,17 @@ public class LiteralVisitor {
     String visitStringLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
         final String value = node.getString("value");
         leaf.getStringLiterals().add(value);
+        return value;
+    }
+
+    /**
+     interface NullLiteral <: Literal {
+     type: "NullLiteral";
+     }
+     */
+    String visitNullLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
+        final String value = node.getText();
+        leaf.getNullLiterals().add(value);
         return value;
     }
 
