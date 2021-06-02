@@ -15,6 +15,10 @@ public class LiteralVisitor {
         return visitStringLiteral(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, String> regExpLiteralVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitRegExpLiteral(node, parent, container);
+    };
+
     BabelNodeVisitor<ILeafFragment, String> booleanLiteralVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
         return visitBooleanLiteral(node, parent, container);
     };
@@ -51,6 +55,21 @@ public class LiteralVisitor {
      */
     String visitStringLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
         final String value = node.getString("value");
+        leaf.getStringLiterals().add(value);
+        return value;
+    }
+
+
+    /**
+     * RegExpLiteral
+     * interface RegExpLiteral <: Literal {
+     *   type: "RegExpLiteral";
+     *   pattern: string;
+     *   flags: string;
+     * }
+     */
+    String visitRegExpLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
+        final String value = node.getText();
         leaf.getStringLiterals().add(value);
         return value;
     }

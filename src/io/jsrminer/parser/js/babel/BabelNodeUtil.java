@@ -201,16 +201,15 @@ public class BabelNodeUtil {
         UMLParameter parameter = new UMLParameter(name);
         parameter.setSourceLocation(location);
         parameter.setIndexPositionInParent(functionDeclaration.getParameters().size());
-        VariableDeclaration vd = new VariableDeclaration(name, VariableDeclarationKind.VAR);
+        VariableDeclaration vd = new VariableDeclaration(name, null/*, VariableDeclarationKind.VAR*/);
         vd.setIsParameter(true);
-        vd.setScope(createVariableScope(location, functionDeclaration));
+        vd.setScope(createVariableScope(location, functionDeclaration.getSourceLocation()));
         vd.setSourceLocation(parameter.getSourceLocation());
         parameter.setVariableDeclaration(vd);
         return parameter;
     }
 
-    SourceLocation createVariableScope(SourceLocation variableLocation, INode scopeNode) {
-        final SourceLocation parentLocation = scopeNode.getSourceLocation();
+    SourceLocation createVariableScope(SourceLocation variableLocation, SourceLocation parentLocation) {
         return new SourceLocation(parentLocation.getFilePath(),
                 variableLocation.startLine,
                 variableLocation.startColumn,
@@ -238,7 +237,7 @@ public class BabelNodeUtil {
         variableDeclaration.setSourceLocation(node.getSourceLocation());
 
         // Set Scope (TODO set body source location
-        variableDeclaration.setScope(createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
+        variableDeclaration.setScope(createVariableScope(variableDeclaration.getSourceLocation(), scopeNode.getSourceLocation()));
 
         return variableDeclaration;
     }

@@ -34,6 +34,8 @@ public class Visitor {
             put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor);
             put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor);
             put(FUNCTION_EXPRESSION, declarationVisitor.functionExpressionVisitor);
+            put(ARROW_FUNCTION_EXPRESSION, declarationVisitor.arrowFunctionExpressionVisitor);
+            put(OBJECT_EXPRESSION, declarationVisitor.objectExpressionVisitor);
 
             // Expressions
             put(ASSIGNMENT_EXPRESSION, expressionVisitor.assignmentExpressionVisitor);
@@ -59,10 +61,15 @@ public class Visitor {
 
             // Loops
             put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor);
+            put(WHILE_STATEMENT, loopStatementVisitor.whileStatementVisitor);
+            put(DO_WHILE_STATEMENT, loopStatementVisitor.doWhileStatementVisitor);
+            put(FOR_IN_STATEMENT, loopStatementVisitor.forInStatementVisitor);
+            put(FOR_OF_STATEMENT, loopStatementVisitor.forOfStatementVisitor);
 
             // Literals
             put(NUMERIC_LITERAL, literalVisitor.numericLiteralVisitor);
             put(STRING_LITERAL, literalVisitor.stringLiteralVisitor);
+            put(REG_EXP_LITERAL, literalVisitor.regExpLiteralVisitor);
             put(BOOLEAN_LITERAL, literalVisitor.booleanLiteralVisitor);
             put(NULL_LITERAL, literalVisitor.nullLiteralVisitor);
 

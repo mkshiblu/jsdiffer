@@ -9,9 +9,11 @@ public enum BabelNodeType {
     NUMERIC_LITERAL("NumericLiteral"),
     STRING_LITERAL("StringLiteral"),
     NULL_LITERAL("NullLiteral"),
+    REG_EXP_LITERAL("RegExpLiteral"),
     BOOLEAN_LITERAL("BooleanLiteral"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     FUNCTION_EXPRESSION("FunctionExpression"),
+    ARROW_FUNCTION_EXPRESSION("ArrowFunctionExpression"),
     EXPRESSION_STATEMENT("ExpressionStatement"),
     ASSIGNMENT_EXPRESSION("AssignmentExpression"),
     MEMBER_EXPRESSION("MemberExpression"),
@@ -33,6 +35,10 @@ public enum BabelNodeType {
 
     // Loops
     FOR_STATEMENT("ForStatement"),
+    WHILE_STATEMENT("WhileStatement"),
+    DO_WHILE_STATEMENT("DoWhileStatement"),
+    FOR_OF_STATEMENT("ForOfStatement"),
+    FOR_IN_STATEMENT("ForInStatement"),
 
     // Ex
     TRY_STATEMENT("TryStatement"),
@@ -46,6 +52,15 @@ public enum BabelNodeType {
     LOGICAL_EXPRESSION("LogicalExpression"),
     CALL_EXPRESSION("CallExpression"),
     CONDITIONAL_EXPRESSION("ConditionalExpression"),
+
+
+    OBJECT_PROPERTY("ObjectProperty"),
+    OBJECT_PATTERN("ObjectPattern"),
+    OBJECT_METHOD("ObjectMethod"),
+    SPREAD_ELEMENT("SpreadElement"),
+
+    IMPORT_DECLARATION("ImportDeclaration"),
+    EXPORT_DECLARATION("ExportDeclaration"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

@@ -7,7 +7,9 @@ import java.util.*;
 
 public class BabelParserConfig {
     public static final Set<BabelNodeType> ignoredNodeTypes = Set.of(
-            BabelNodeType.EMPTY_STATEMENT
+            BabelNodeType.EMPTY_STATEMENT,
+            BabelNodeType.EXPORT_DECLARATION,
+            BabelNodeType.IMPORT_DECLARATION
     );
 
     public final static EnumMap<BabelNodeType, CodeElementType> babelNodeToCodeElementTypeMap =

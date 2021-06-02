@@ -13,6 +13,19 @@ public class LoopStatementVisitor {
         return visitForStatement(node, parent, container);
     };
 
+    BabelNodeVisitor<BlockStatement, BlockStatement> whileStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitWhileStatement(node, parent, container);
+    };
+    BabelNodeVisitor<BlockStatement, BlockStatement> doWhileStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitDoWhileStatement(node, parent, container);
+    };
+    BabelNodeVisitor<BlockStatement, BlockStatement> forInStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitForInStatement(node, parent, container);
+    };
+    BabelNodeVisitor<BlockStatement, BlockStatement> forOfStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitForOfStatement(node, parent, container);
+    };
+
     LoopStatementVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -55,113 +68,116 @@ public class LoopStatementVisitor {
         visitor.visitStatement(node.get("body"), composite, container);
         return composite;
     }
-}
-//
-//    /**
-//     * The for...in statement iterates over all enumerable properties of an object that are keyed by strings
-//     * (ignoring ones keyed by Symbols), including inherited enumerable properties.
-//     * const object = { a: 1, b: 2, c: 3 };
-//     * for (const property in object)
-//     * <p>
-//     * Has initializer, collection and Body
-//     */
-//    public static final INodeVisitor<BlockStatement, ForInStatementTree, BlockStatement> forInStatementProcessor
-//            = new NodeVisitor<>() {
-//        @Override
-//        public BlockStatement visit(ForInStatementTree tree, BlockStatement parent, IContainer container) {
-//            var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
-//
-//            // Parse initializer
-//            Expression initializer = createBaseExpressionWithRMType(tree.initializer, CodeElementType.ENHANCED_FOR_STATEMENT_INITIALIZER);
-//            addExpression(initializer, composite);
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(tree.initializer, initializer, container);
-//            initializer.getVariableDeclarations().forEach(vd -> composite.addEnhancedForVariableDeclaration(vd));
-//
-//            // Parse collection
-//            Expression collectionExpression = createBaseExpressionWithRMType(tree.collection, CodeElementType.ENHANCED_FOR_STATEMENT_EXPRESSION);
-//            addExpression(collectionExpression, composite);
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(tree.collection, collectionExpression, container);
-//
-//            // Parse Body
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitStatement(tree.body, composite, container);
-//            return composite;
-//        }
-//    };
-//
-//    /**
-//     * The for...of statement creates a loop iterating over iterable objects, including: built-in String
-//     * , Array, array-like objects (e.g., arguments or NodeList), TypedArray, Map, Set, and user-defined iterables.
-//     * It invokes a custom iteration hook with statements to be executed for the value
-//     * of each distinct property of the object
-//     * <p>
-//     * const array1 = ['a', 'b', 'c'];
-//     * for (const element of array1) {
-//     * console.log(element);
-//     * }
-//     * <p>
-//     * Has initializer, collection and Body
-//     */
-//    public static final INodeVisitor<BlockStatement, ForOfStatementTree, BlockStatement> forOfStatementProcessor
-//            = new NodeVisitor<>() {
-//        @Override
-//        public BlockStatement visit(ForOfStatementTree tree, BlockStatement parent, IContainer container) {
-//            var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
-//
-//            // Parse initializer
-//            Expression initializer = createBaseExpressionWithRMType(tree.initializer, CodeElementType.ENHANCED_FOR_STATEMENT_INITIALIZER);
-//            addExpression(initializer, composite);
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(tree.initializer, initializer, container);
-//            initializer.getVariableDeclarations().forEach(vd -> composite.addEnhancedForVariableDeclaration(vd));
-//
-//            // Parse collection
-//            Expression collectionExpression = createBaseExpressionWithRMType(tree.collection, CodeElementType.ENHANCED_FOR_STATEMENT);
-//            addExpression(collectionExpression, composite);
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(tree.collection, collectionExpression, container);
-//
-//            // Parse Body
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitStatement(tree.body, composite, container);
-//            return composite;
-//        }
-//    };
-//
-//    /**
-//     * Has condition and Body
-//     */
-//    public static final INodeVisitor<BlockStatement, WhileStatementTree, BlockStatement> whileStatementProcessor
-//            = new NodeVisitor<>() {
-//        @Override
-//        public BlockStatement visit(WhileStatementTree tree, BlockStatement parent, IContainer container) {
-//            var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
-//
-//            // Parse condition
-//            Expression conditionExpression = createBaseExpressionWithRMType(tree.condition, CodeElementType.WHILE_STATEMENT_CONDITION);
-//            addExpression(conditionExpression, composite);
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(tree.condition, conditionExpression, container);
-//
-//            // Parse Body
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitStatement(tree.body, composite, container);
-//            return composite;
-//        }
-//    };
-//
-//    /**
-//     * Has Body and condition
-//     */
-//    public static final INodeVisitor<BlockStatement, DoWhileStatementTree, BlockStatement> doWhileStatementProcessor
-//            = new NodeVisitor<>() {
-//        @Override
-//        public BlockStatement visit(DoWhileStatementTree tree, BlockStatement parent, IContainer container) {
-//            var composite = createBlockStatementPopulateAndAddToParent(tree, parent);
-//
-//            // Parse Body
-//            io.jsrminer.parser.js.closurecompiler.Visitor.visitStatement(tree.body, composite, container);
-//
-//            // Parse condition
-//            Expression conditionExpression = createBaseExpressionWithRMType(tree.condition, CodeElementType.DO_STATEMENT_CONDITION);
-//            addExpression(conditionExpression, composite);
-//            Visitor.visitExpression(tree.condition, conditionExpression, container);
-//
-//            return composite;
-//        }
-//    };
 
+    /**
+     * ForInStatement
+     * interface ForInStatement <: Statement {
+     * type: "ForInStatement";
+     * left: VariableDeclaration |  Expression;
+     * right: Expression;
+     * body: Statement;
+     * }
+     * A for/in statement.
+     */
+    public BlockStatement visitForInStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var composite = visitor.getNodeUtil().createBlockStatementPopulateAndAddToParent(node, parent);
+
+        // Parse initializer
+        var leftNode = node.get("left");
+        var initializer = visitor.getNodeUtil().createBaseExpressionWithRMType(leftNode, CodeElementType.ENHANCED_FOR_STATEMENT_INITIALIZER);
+        visitor.getNodeUtil().addExpressionToBlockStatement(initializer, composite);
+        visitor.visitExpression(leftNode, initializer, container);
+        initializer.getVariableDeclarations().forEach(vd -> composite.addEnhancedForVariableDeclaration(vd));
+
+        // Parse collection
+        final var rightNode = node.get("right");
+        var collectionExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(rightNode, CodeElementType.ENHANCED_FOR_STATEMENT_EXPRESSION);
+        visitor.getNodeUtil().addExpressionToBlockStatement(collectionExpression, composite);
+        visitor.visitExpression(rightNode, collectionExpression, container);
+
+        // Parse Body
+        visitor.visitStatement(node.get("body"), composite, container);
+        return composite;
+    }
+
+    /**
+     * interface ForOfStatement <: ForInStatement {
+     * type: "ForOfStatement";
+     * await: boolean;
+     * }
+     * ForInStatement
+     * interface ForInStatement <: Statement {
+     * type: "ForInStatement";
+     * left: VariableDeclaration |  Expression;
+     * right: Expression;
+     * body: Statement;
+     * }
+     * A for/in statement.
+     */
+    public BlockStatement visitForOfStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var composite = visitor.getNodeUtil().createBlockStatementPopulateAndAddToParent(node, parent);
+
+        // Parse initializer
+        var leftNode = node.get("left");
+        var initializer = visitor.getNodeUtil().createBaseExpressionWithRMType(leftNode, CodeElementType.ENHANCED_FOR_STATEMENT_INITIALIZER);
+        visitor.getNodeUtil().addExpressionToBlockStatement(initializer, composite);
+        visitor.visitExpression(leftNode, initializer, container);
+        initializer.getVariableDeclarations().forEach(vd -> composite.addEnhancedForVariableDeclaration(vd));
+
+        // Parse collection
+        final var rightNode = node.get("right");
+        var collectionExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(rightNode, CodeElementType.ENHANCED_FOR_STATEMENT_EXPRESSION);
+        visitor.getNodeUtil().addExpressionToBlockStatement(collectionExpression, composite);
+        visitor.visitExpression(rightNode, collectionExpression, container);
+
+        // Parse Body
+        visitor.visitStatement(node.get("body"), composite, container);
+        return composite;
+    }
+
+    /**
+     * interface WhileStatement <: Statement {
+     * type: "WhileStatement";
+     * test: Expression;
+     * body: Statement;
+     * }
+     * A while statement.
+     */
+    public BlockStatement visitWhileStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var composite = visitor.getNodeUtil().createBlockStatementPopulateAndAddToParent(node, parent);
+
+        // Parse condition
+        var testNode = node.get("test");
+        var conditionExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(testNode, CodeElementType.WHILE_STATEMENT_CONDITION);
+        this.visitor.getNodeUtil().addExpressionToBlockStatement(conditionExpression, composite);
+        visitor.visitExpression(testNode, conditionExpression, container);
+
+        // Parse Body
+        visitor.visitStatement(node.get("body"), composite, container);
+        return composite;
+    }
+
+    /**
+     * DoWhileStatement
+     * interface DoWhileStatement <: Statement {
+     * type: "DoWhileStatement";
+     * body: Statement;
+     * test: Expression;
+     * }
+     * A do/while statement.
+     */
+    public BlockStatement visitDoWhileStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var composite = visitor.getNodeUtil().createBlockStatementPopulateAndAddToParent(node, parent);
+
+        // Parse Body
+        visitor.visitStatement(node.get("body"), composite, container);
+
+        // Parse condition
+        var testNode = node.get("test");
+        var conditionExpression = visitor.getNodeUtil().createBaseExpressionWithRMType(testNode, CodeElementType.DO_STATEMENT_CONDITION);
+        this.visitor.getNodeUtil().addExpressionToBlockStatement(conditionExpression, composite);
+        visitor.visitExpression(testNode, conditionExpression, container);
+
+        return composite;
+    }
+}

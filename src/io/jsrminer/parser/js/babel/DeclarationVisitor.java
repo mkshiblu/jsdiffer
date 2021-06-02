@@ -19,8 +19,16 @@ public class DeclarationVisitor {
         return visitFunctionDeclaration(node, parent, container);
     };
 
-    BabelNodeVisitor<ILeafFragment, Object> functionExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+    BabelNodeVisitor<ILeafFragment, AnonymousFunctionDeclaration> functionExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
         return visitFunctionExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, AnonymousFunctionDeclaration> arrowFunctionExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitArrowFunctionExpression(node, parent, container);
+    };
+
+    BabelNodeVisitor<ILeafFragment, AnonymousFunctionDeclaration> objectExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitObjectExpression(node, parent, container);
     };
 
     DeclarationVisitor(Visitor visitor) {
@@ -37,29 +45,43 @@ public class DeclarationVisitor {
      * @param {declaratorPath} path
      */
     VariableDeclaration processVariableDeclarator(BabelNode node, VariableDeclarationKind kind, ILeafFragment leaf, IContainer container) {
-        String variableName = node.get("id").get("name").asString();
-        VariableDeclaration variableDeclaration = createVariableDeclaration(node, variableName, kind, leaf.getParent());
+        var idNode = node.get("id");
+        String variableName;
 
+        switch (idNode.getType()) {
+            case IDENTIFIER:
+                variableName = idNode.get("name").asString();
+                break;
+            case OBJECT_PATTERN:
+                // e.g. { file, banner } = output a Destructuring assignment
+                // For now take the first one only
+                var properties = idNode.get("properties");
+                variableName = properties.get(0).getText();
+                break;
+            default:
+                throw new RuntimeException("Declarator Id of type " + idNode.getType() + " at " + idNode.getSourceLocation() + " not handled");
+        }
+
+        VariableDeclaration variableDeclaration = createVariableDeclaration(node.getSourceLocation(), variableName, kind, leaf.getParent().getSourceLocation());
         BabelNode initNode = node.get("init");
 
         if (initNode != null && initNode.isDefined()) {
             Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(initNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             visitor.visitExpression(initNode, expression, container);
-
             variableDeclaration.setInitializer(expression);
         }
 
         return variableDeclaration;
     }
 
-    VariableDeclaration createVariableDeclaration(BabelNode node, String variableName
+    VariableDeclaration createVariableDeclaration(SourceLocation variableNodeLocation, String variableName
             , VariableDeclarationKind kind
-            , INode scopeNode) {
+            , SourceLocation scopeNodeLocation) {
         var variableDeclaration = new VariableDeclaration(variableName, kind);
-        variableDeclaration.setSourceLocation(node.getSourceLocation());
+        variableDeclaration.setSourceLocation(variableNodeLocation);
 
         // Set Scope (TODO set body source location
-        variableDeclaration.setScope(visitor.getNodeUtil().createVariableScope(variableDeclaration.getSourceLocation(), scopeNode));
+        variableDeclaration.setScope(visitor.getNodeUtil().createVariableScope(variableDeclaration.getSourceLocation(), scopeNodeLocation));
         return variableDeclaration;
     }
 
@@ -129,7 +151,7 @@ public class DeclarationVisitor {
      * //     statements
      * //  }
      */
-    public AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+    AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
         anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));
@@ -142,7 +164,29 @@ public class DeclarationVisitor {
             container.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
         }
 
-        // TODO add unmatched things to leaf?
+        return anonymousFunctionDeclaration;
+    }
+
+    /**
+     * interface ArrowFunctionExpression <: Function, Expression {
+     * type: "ArrowFunctionExpression";
+     * body: BlockStatement | Expression;
+     * expression: boolean;
+     * }
+     * A fat arrow function expression, e.g., let foo = (bar) => { }
+     */
+    AnonymousFunctionDeclaration visitArrowFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+        var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
+        leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
+        anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));
+        visitor.getNodeUtil().loadAnonymousFunctionDeclarationInfo(node, anonymousFunctionDeclaration, container);
+        container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
+
+//        boolean isSuccessFullyParsed = processFunctionParamaterAndBody(node, container, anonymousFunctionDeclaration);
+//        if (!isSuccessFullyParsed) {
+//            leafFragment.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+//            container.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+//        }
 
         return anonymousFunctionDeclaration;
     }
@@ -189,5 +233,120 @@ public class DeclarationVisitor {
                     throw new NotImplementedException("paramter type not handled: " + function.getSourceLocation());
             }
         }
+    }
+
+    /**
+     * interface ObjectExpression <: Expression {
+     * type: "ObjectExpression";
+     * properties: [ ObjectProperty | ObjectMethod | SpreadElement ];
+     * }
+     * An object expression.
+     */
+    AnonymousFunctionDeclaration visitObjectExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
+        anonymousFunctionDeclaration.setSourceLocation(node.getSourceLocation());
+        String name = visitor.getNodeUtil().generateNameForAnonymousContainer(container);
+        visitor.getNodeUtil().populateContainerNamesAndLocation(anonymousFunctionDeclaration,
+                name, anonymousFunctionDeclaration.getSourceLocation(), container);
+        String text = visitor.getNodeUtil().getTextInSource(node, false);
+        anonymousFunctionDeclaration.setText(text);
+
+        BlockStatement blockStatement = new BlockStatement();
+        blockStatement.setSourceLocation(node.getSourceLocation());
+        blockStatement.setText("{");
+        blockStatement.setCodeElementType(CodeElementType.BLOCK_STATEMENT);
+
+        anonymousFunctionDeclaration.setBody(new FunctionBody(blockStatement));
+        leaf.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
+
+
+        var properties = node.get("properties");
+
+        for (int i = 0; i < properties.size(); i++) {
+            processProperty(properties.get(i), blockStatement, anonymousFunctionDeclaration);
+        }
+        return anonymousFunctionDeclaration;
+    }
+
+    /**
+     * Property of a class or object can be  of [ ObjectProperty | ObjectMethod | SpreadElement ];
+     */
+    void processProperty(BabelNode property, BlockStatement body, IContainer container) {
+
+        switch (property.getType()) {
+            case OBJECT_PROPERTY:
+
+                var keyNode = property.get("key"); // name
+                var valueNode = property.get("value");  // initialzier
+                var isShortHand = property.get("shorthand").asBoolean();
+
+                // assume keyNode is identifier;
+                var fieldName = keyNode.getString("name");
+
+                switch (valueNode.getType()) {
+                    case FUNCTION_DECLARATION:
+                        processObjectFunctionDeclaration(valueNode, body, container, fieldName);
+                        break;
+                    default:
+                        // Else this is an attribute i.e. field declaration
+                        processObjectFieldDeclaration(valueNode, body, container, fieldName);
+                }
+
+                break;
+            default:
+                throw new RuntimeException("Object  property at " + property.getSourceLocation() + " not handled");
+        }
+    }
+
+    /**
+     * interface ObjectMember <: Node {
+     * key: Expression;
+     * computed: boolean;
+     * decorators: [ Decorator ];
+     * }
+     * <p>
+     * interface ObjectProperty <: ObjectMember {
+     * type: "ObjectProperty";
+     * shorthand: boolean;
+     * value: Expression;
+     * }
+     */
+    VariableDeclaration processObjectFieldDeclaration(BabelNode node
+            , BlockStatement body
+            , IContainer container
+            , String fieldName) {
+
+        // Create a single statement
+        var leaf = new SingleStatement();
+        leaf.setSourceLocation(node.getSourceLocation());
+        leaf.setType(CodeElementType.VARIABLE_DECLARATION_STATEMENT);
+        leaf.setText(fieldName + " = " + visitor.getNodeUtil().getTextInSource(node, true));
+        visitor.getNodeUtil().addStatement(leaf, body);
+
+        var variableDeclaration = createVariableDeclaration(node.getSourceLocation(), fieldName, null, body.getSourceLocation());
+
+        // Process initializer
+        Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(node, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
+        visitor.visitExpression(node, expression, container);
+        variableDeclaration.setInitializer(expression);
+
+        // Keep track of all the vd
+        addVariableDeclarationToParent(leaf, variableDeclaration);
+
+        return variableDeclaration;
+    }
+
+    FunctionDeclaration processObjectFunctionDeclaration(BabelNode tree
+            , CodeFragment fragment
+            , IContainer container
+            , String propertyNameAsFunctionName) {
+        var function = new FunctionDeclaration();
+        container.getFunctionDeclarations().add(function);
+
+        // Load function info
+        visitor.getNodeUtil().populateContainerNamesAndLocation(function, propertyNameAsFunctionName, tree.getSourceLocation(), container);
+
+        processFunctionParamaterAndBody(tree, container, function);
+        return function;
     }
 }
