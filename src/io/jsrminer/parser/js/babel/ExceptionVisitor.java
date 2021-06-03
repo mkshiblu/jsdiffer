@@ -2,6 +2,7 @@ package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
 
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
@@ -15,6 +16,10 @@ public class ExceptionVisitor {
 
     BabelNodeVisitor<BlockStatement, BlockStatement> catchClausetVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
         return visitCatchClause(node, parent, container);
+    };
+
+    BabelNodeVisitor<BlockStatement, SingleStatement> throwStatementVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitThrowStatement(node, parent, container);
     };
 
     ExceptionVisitor(Visitor visitor) {
@@ -38,16 +43,16 @@ public class ExceptionVisitor {
         // Parse try body
         visitor.visitStatement(node.get("block"), tryStatement, container);
 
-        // Parse condition
+        // Parse catch
         var catchBlockNode = node.get("handler");
         if (catchBlockNode != null && catchBlockNode.isDefined()) {
             BlockStatement catchStatement = (BlockStatement) visitor.visitStatement(catchBlockNode, parent, container);
             tryStatement.getCatchClauses().add(catchStatement);
         }
 
-        // Parse condition
+        // Parse finally
         var finallyBlockNode = node.get("finalizer");
-        if (finallyBlockNode != null && finallyBlockNode.isDefined()) {
+        if (finallyBlockNode.isDefined()) {
             BlockStatement finallyStatement = (BlockStatement) visitor.visitStatement(finallyBlockNode, parent, container);
             tryStatement.setFinallyClause(finallyStatement);
         }
@@ -82,4 +87,21 @@ public class ExceptionVisitor {
 
         return composite;
     }
+
+    /**
+     * interface ThrowStatement <: Statement {
+     * type: "ThrowStatement";
+     * argument: Expression;
+     * }
+     */
+    SingleStatement visitThrowStatement(BabelNode node, BlockStatement parent, IContainer container) {
+        var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, parent);
+        visitor.visitExpression(node.get("argument"), leaf, container);
+        return leaf;
+    }
+//    public BlockStatement visitFinallyStatement(BabelNode node, BlockStatement parent, IContainer container) {
+//        var composite = createBlockStatementPopulateAndAddToParent(node, parent);
+//        visitor.visitStatement(node.block, composite, container);
+//        return composite;
+//    }
 }

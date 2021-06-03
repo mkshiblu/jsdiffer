@@ -174,7 +174,10 @@ public class InvocationVisitor {
 //                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(callee, leaf, container);
 //                parsedProperly = false;
 //                break;
-//            case MISSING_PRIMARY_EXPRESSION:
+            case LOGICAL_EXPRESSION:
+                visitor.visitExpression(callee, leaf, container);
+                parsedProperly = false;
+                break;
 //            case TEMPLATE_LITERAL_EXPRESSION:
 //                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(callee, leaf, container);
 //                parsedProperly = false;

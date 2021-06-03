@@ -8,7 +8,7 @@ import java.util.*;
 public class BabelParserConfig {
     public static final Set<BabelNodeType> ignoredNodeTypes = Set.of(
             BabelNodeType.EMPTY_STATEMENT,
-            BabelNodeType.EXPORT_DECLARATION,
+            //BabelNodeType.EXPORT_DECLARATION,
             BabelNodeType.IMPORT_DECLARATION
     );
 
@@ -32,25 +32,25 @@ public class BabelParserConfig {
                     .put(BabelNodeType.TRY_STATEMENT, CodeElementType.TRY_STATEMENT)
                     .put(BabelNodeType.CATCH_CLAUSE, CodeElementType.CATCH_CLAUSE)
 //        put(ParseTreeType.FINALLY, CodeElementType.FINALLY_BLOCK);
-//        put(ParseTreeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT);
+                    .put(BabelNodeType.THROW_STATEMENT, CodeElementType.THROW_STATEMENT)
 //
 //        //put(ParseTreeType.ARRAY_LITERAL_EXPRESSION, CodeElementType.ARRAY_EXPRESSION);
                     .put(BabelNodeType.FOR_STATEMENT, CodeElementType.FOR_STATEMENT)
-//        put(ParseTreeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
-//        put(ParseTreeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT);
-//        put(ParseTreeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT);
-//        put(ParseTreeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT);
+                    .put(BabelNodeType.FOR_IN_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT)
+                    .put(BabelNodeType.FOR_OF_STATEMENT, CodeElementType.ENHANCED_FOR_STATEMENT)
+                    .put(BabelNodeType.DO_WHILE_STATEMENT, CodeElementType.DO_WHILE_STATEMENT)
+                    .put(BabelNodeType.WHILE_STATEMENT, CodeElementType.WHILE_STATEMENT)
 //
                     .put(BabelNodeType.CONTINUE_STATEMENT, CodeElementType.CONTINUE_STATEMENT)
                     .put(BabelNodeType.BREAK_STATEMENT, CodeElementType.BREAK_STATEMENT)
                     .put(BabelNodeType.LABELLED_STATEMENT, CodeElementType.LABELED_STATEMENT)
 
+                    .put(BabelNodeType.EXPORT_DEFAULT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT)
 //
 //        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
 //        put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);
 //        put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
                     .build();
-    //        put(EXPORT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT);
     /**
      * require('./core/core.js')(p1, p2)
      */

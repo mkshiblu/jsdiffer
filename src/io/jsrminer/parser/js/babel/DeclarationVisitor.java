@@ -31,6 +31,10 @@ public class DeclarationVisitor {
         return visitObjectExpression(node, parent, container);
     };
 
+    BabelNodeVisitor<BlockStatement, SingleStatement> exportDefaultVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitExportDefaultDeclaration(node, parent, container);
+    };
+
     DeclarationVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -282,8 +286,18 @@ public class DeclarationVisitor {
                 var valueNode = property.get("value");  // initialzier
                 var isShortHand = property.get("shorthand").asBoolean();
 
-                // assume keyNode is identifier;
-                var fieldName = keyNode.getString("name");
+
+                String fieldName = null;
+                switch (keyNode.getType()) {
+                    case IDENTIFIER:
+                        fieldName = keyNode.getString("name");
+                        break;
+                    case STRING_LITERAL:
+                        fieldName = keyNode.getString("value");
+                        break;
+                    default:
+                        throw new RuntimeException("KeyNode type not handled at " + keyNode.getSourceLocation().toString());
+                }
 
                 switch (valueNode.getType()) {
                     case FUNCTION_DECLARATION:
@@ -350,5 +364,37 @@ public class DeclarationVisitor {
 
         processFunctionParamaterAndBody(tree, container, function);
         return function;
+    }
+
+
+    /**
+     * interface OptFunctionDeclaration <: FunctionDeclaration {
+     * id: Identifier | null;
+     * }
+     * <p>
+     * interface OptClasDeclaration <: ClassDeclaration {
+     * id: Identifier | null;
+     * }
+     * <p>
+     * interface ExportDefaultDeclaration <: ModuleDeclaration {
+     * type: "ExportDefaultDeclaration";
+     * declaration: OptFunctionDeclaration | OptClassDeclaration | Expression;
+     * }
+     */
+    SingleStatement visitExportDefaultDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
+        var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, parent);
+
+        var declaration = node.get("declaration");
+        if (declaration.getType() == BabelNodeType.OPT_CLASS_DECLARATION ||
+                declaration.getType() == BabelNodeType.OPT_FUNCTION_DECLARATION) {
+            var id = declaration.get("id");
+            if (id.isDefined()) {
+                visitor.visitExpression(id, leaf, container);
+            }
+        } else {
+            visitor.visitExpression(declaration, leaf, container);
+        }
+
+        return leaf;
     }
 }

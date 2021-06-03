@@ -48,6 +48,7 @@ public class Visitor {
             put(THIS_EXPRESSION, expressionVisitor.thisExpressionVisitor);
             put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor);
             put(CONDITIONAL_EXPRESSION, expressionVisitor.conditionalExpressionVisitor);
+            put(SEQUENCE_EXPRESSION, expressionVisitor.sequenceExpressionVisitor);
 
             // Invocations
             put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);
@@ -80,11 +81,15 @@ public class Visitor {
             // Exceptions
             put(TRY_STATEMENT, exceptionVisitor.tryStatementVisitor);
             put(CATCH_CLAUSE, exceptionVisitor.catchClausetVisitor);
+            put(THROW_STATEMENT, exceptionVisitor.throwStatementVisitor);
 
             // Choice
             put(IF_STATEMENT, choiceVisitor.ifStatementVisitor);
             put(SWITCH_STATEMENT, choiceVisitor.switchStatementVisitor);
             put(SWITCH_CASE, choiceVisitor.switchCaseVisitor);
+
+            // Export import
+            put(EXPORT_DEFAULT_DECLARATION, declarationVisitor.exportDefaultVisitor);
         }};
     }
 

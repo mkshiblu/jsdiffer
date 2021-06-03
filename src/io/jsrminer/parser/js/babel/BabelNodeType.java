@@ -21,6 +21,8 @@ public enum BabelNodeType {
     UPDATE_EXPRESSION("UpdateExpression"),
     NEW_EXPRESSION("NewExpression"),
     THIS_EXPRESSION("ThisExpression"),
+    SEQUENCE_EXPRESSION("SequenceExpression"),
+
     IDENTIFIER("Identifier"),
     EMPTY_STATEMENT("EmptyStatement"),
     BLOCK_STATEMENT("BlockStatement"),
@@ -61,6 +63,9 @@ public enum BabelNodeType {
 
     IMPORT_DECLARATION("ImportDeclaration"),
     EXPORT_DECLARATION("ExportDeclaration"),
+    EXPORT_DEFAULT_DECLARATION("ExportDefaultDeclaration"),
+    OPT_CLASS_DECLARATION("OptClassDeclaration"),
+    OPT_FUNCTION_DECLARATION("OptFunctionDeclaration"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

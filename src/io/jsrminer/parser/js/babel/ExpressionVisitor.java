@@ -53,6 +53,10 @@ public class ExpressionVisitor {
         return visitConditionalExpression(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, String> sequenceExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitSequenceExpression(node, parent, container);
+    };
+
     ExpressionVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -307,5 +311,22 @@ public class ExpressionVisitor {
         }
 
         return node.getText();
+    }
+
+    /**
+     * interface SequenceExpression <: Expression {
+     * type: "SequenceExpression";
+     * expressions: [ Expression ];
+     * }
+     * A sequence expression, i.e., a comma-separated sequence of expressions.
+     */
+    String visitSequenceExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        var expressions = node.get("expressions");
+
+        for (int i = 0; i < expressions.size(); i++) {
+            visitor.visitExpression(expressions.get(i), leaf, container);
+        }
+
+        return null;
     }
 }
