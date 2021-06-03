@@ -154,8 +154,10 @@ public class DeclarationVisitor {
     AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
+
         anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));
         visitor.getNodeUtil().loadAnonymousFunctionDeclarationInfo(node, anonymousFunctionDeclaration, container);
+
         container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
 
         boolean isSuccessFullyParsed = processFunctionParamaterAndBody(node, container, anonymousFunctionDeclaration);

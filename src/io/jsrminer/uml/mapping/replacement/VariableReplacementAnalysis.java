@@ -453,7 +453,8 @@ public class VariableReplacementAnalysis {
                 RenameVariableRefactoring ref = new RenameVariableRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                 if (!existsConflictingExtractVariableRefactoring(ref) && !existsConflictingMergeVariableRefactoring(ref) && !existsConflictingSplitVariableRefactoring(ref)) {
                     variableRenames.add(ref);
-                    if (!equalsKindIncludingNull(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
+                    if ((vdReplacement.getVariableDeclaration1().isParameter() == vdReplacement.getVariableDeclaration2().isParameter())
+                            && !equalsKindIncludingNull(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2()) /*|| !vdReplacement.getVariableDeclaration1().getType().equalsQualified(vdReplacement.getVariableDeclaration2().getType())*/) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(vdReplacement.getVariableDeclaration1(), vdReplacement.getVariableDeclaration2(), vdReplacement.getOperation1(), vdReplacement.getOperation2(), set);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
@@ -510,7 +511,8 @@ public class VariableReplacementAnalysis {
                 //       v1.getKey().isVarargsParameter() == v2.getKey().isVarargsParameter())
                 {
                     variableRenames.add(ref);
-                    if (!equalsKindIncludingNull(v1.getKey(), v2.getKey())) {
+                    if ((v1.getKey().isParameter() ==v2.getKey().isParameter())
+                    && !equalsKindIncludingNull(v1.getKey(), v2.getKey())) {
                         ChangeVariableKindRefactoring refactoring = new ChangeVariableKindRefactoring(v1.getKey(), v2.getKey(), v1.getValue(), v2.getValue(), variableReferences);
                         refactoring.addRelatedRefactoring(ref);
                         refactorings.add(refactoring);
