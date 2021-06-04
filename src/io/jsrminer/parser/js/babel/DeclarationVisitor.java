@@ -309,6 +309,10 @@ public class DeclarationVisitor {
                 }
 
                 break;
+            case SPREAD_ELEMENT:
+                var argument = property.get("argument");
+                // TODO not handled
+                break;
             default:
                 throw new RuntimeException("Object  property at " + property.getSourceLocation() + " not handled");
         }
