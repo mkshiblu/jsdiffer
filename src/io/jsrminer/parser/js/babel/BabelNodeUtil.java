@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.IdentifierExpressionTree;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.rminerx.core.api.IContainer;
@@ -157,7 +156,7 @@ public class BabelNodeUtil {
     }
 
     void loadAnonymousFunctionDeclarationInfo(BabelNode node, AnonymousFunctionDeclaration function, IContainer container) {
-        String name = generateNameForAnonymousContainer(container);
+        String name = generateNameForAnonymousFunction(container);
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
     }
 
@@ -168,9 +167,22 @@ public class BabelNodeUtil {
         if (nameNode != null) {
             name = nameNode.asString();
         } else {
-            name = generateNameForAnonymousContainer(container);
+            name = generateNameForAnonymousFunction(container);
         }
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
+        //function.setIsConstructor(function.);
+    }
+
+    void loadClassDeclarationInfo(BabelNode node, ClassDeclaration classDeclaration, IContainer container) {
+        var nameNode = node.get("id").get("name");
+
+        String name;
+        if (nameNode != null) {
+            name = nameNode.asString();
+        } else {
+            name = generateNameForAnonymousClassDeclaration(container);
+        }
+        populateContainerNamesAndLocation(classDeclaration, name, node.getSourceLocation(), container);
         //function.setIsConstructor(function.);
     }
 
@@ -183,8 +195,12 @@ public class BabelNodeUtil {
         function.setIsTopLevel(container instanceof ISourceFile);
     }
 
-    String generateNameForAnonymousContainer(IContainer parentContainer) {
+    String generateNameForAnonymousFunction(IContainer parentContainer) {
         return parentContainer.getAnonymousFunctionDeclarations().size() + 1 + "";
+    }
+
+    String generateNameForAnonymousClassDeclaration(IContainer parentContainer) {
+        return parentContainer.getAnonymousClassDeclarations().size() + 1 + "";
     }
 
     String generateQualifiedName(String name, IContainer parentContainer) {

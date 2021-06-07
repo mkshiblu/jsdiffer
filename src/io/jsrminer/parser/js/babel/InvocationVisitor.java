@@ -1,6 +1,5 @@
 package io.jsrminer.parser.js.babel;
 
-import com.google.javascript.jscomp.parsing.parser.trees.MemberExpressionTree;
 import io.jsrminer.sourcetree.Invocation;
 import io.jsrminer.sourcetree.ObjectCreation;
 import io.jsrminer.sourcetree.OperationInvocation;
@@ -146,7 +145,7 @@ public class InvocationVisitor {
                 if (idNode != null && idNode.isDefined()) {
                     name = idNode.getString("name");
                 } else {
-                    name = visitor.getNodeUtil().generateNameForAnonymousContainer(container);
+                    name = visitor.getNodeUtil().generateNameForAnonymousFunction(container);
                 }
                 visitor.visitExpression(callee, leaf, container);
                 break;

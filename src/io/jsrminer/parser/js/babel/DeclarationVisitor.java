@@ -1,10 +1,10 @@
 package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.UMLType;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
-import io.rminerx.core.api.INode;
 import org.apache.commons.lang3.NotImplementedException;
 
 public class DeclarationVisitor {
@@ -33,6 +33,10 @@ public class DeclarationVisitor {
 
     BabelNodeVisitor<BlockStatement, SingleStatement> exportDefaultVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
         return visitExportDefaultDeclaration(node, parent, container);
+    };
+
+    BabelNodeVisitor<BlockStatement, ClassDeclaration> classDeclarationVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitClassDeclaration(node, parent, container);
     };
 
     DeclarationVisitor(Visitor visitor) {
@@ -146,6 +150,44 @@ public class DeclarationVisitor {
     }
 
     /**
+     * interface Class <: Node {
+     * id: Identifier | null;
+     * superClass: Expression | null;
+     * body: ClassBody;
+     * decorators: [ Decorator ];
+     * }
+     * ClassBody
+     * interface ClassBody <: Node {
+     * type: "ClassBody";
+     * body: [ ClassMethod | ClassPrivateMethod | ClassProperty | ClassPrivateProperty ];
+     * }
+     * interface ClassDeclaration <: Class, Declaration {
+     * type: "ClassDeclaration";
+     * id: Identifier;
+     * }
+     */
+    public ClassDeclaration visitClassDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
+        var classDeclaration = new ClassDeclaration();
+        container.getClassDeclarations().add(classDeclaration);
+        visitor.getNodeUtil().loadClassDeclarationInfo(node, classDeclaration, container);
+
+        //  Super class
+        var superClassNode = node.get("superClass");
+        if (superClassNode.isDefined()) {
+            UMLType superClassType = null; // TODO
+            classDeclaration.setSuperClass(superClassType);
+        }
+//         Decorators
+
+        // Body
+//        boolean successFullyParsed = processFunctionParamaterAndBody(node, container, function);
+//        if (!successFullyParsed) {
+//            container.getFunctionDeclarations().remove(function);
+//        }
+        return classDeclaration;
+    }
+
+    /**
      * // interface FunctionExpression <: Function, Expression {
      * //     type: "FunctionExpression";
      * //   }
@@ -251,7 +293,7 @@ public class DeclarationVisitor {
     AnonymousFunctionDeclaration visitObjectExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         anonymousFunctionDeclaration.setSourceLocation(node.getSourceLocation());
-        String name = visitor.getNodeUtil().generateNameForAnonymousContainer(container);
+        String name = visitor.getNodeUtil().generateNameForAnonymousFunction(container);
         visitor.getNodeUtil().populateContainerNamesAndLocation(anonymousFunctionDeclaration,
                 name, anonymousFunctionDeclaration.getSourceLocation(), container);
         String text = visitor.getNodeUtil().getTextInSource(node, false);

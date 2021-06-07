@@ -33,6 +33,7 @@ public class Visitor {
             // Declarations;
             put(VARIABLE_DECLARATION, declarationVisitor.variableDeclarationVisitor);
             put(FUNCTION_DECLARATION, declarationVisitor.functionDeclarationVisitor);
+            put(CLASS_DECLARATION, declarationVisitor.classDeclarationVisitor);
             put(FUNCTION_EXPRESSION, declarationVisitor.functionExpressionVisitor);
             put(ARROW_FUNCTION_EXPRESSION, declarationVisitor.arrowFunctionExpressionVisitor);
             put(OBJECT_EXPRESSION, declarationVisitor.objectExpressionVisitor);
