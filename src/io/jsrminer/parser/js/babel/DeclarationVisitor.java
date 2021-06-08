@@ -174,17 +174,46 @@ public class DeclarationVisitor {
         //  Super class
         var superClassNode = node.get("superClass");
         if (superClassNode.isDefined()) {
-            UMLType superClassType = null; // TODO
+            UMLType superClassType = extractSuperClassTypeObject(superClassNode); // TODO
             classDeclaration.setSuperClass(superClassType);
         }
 //         Decorators
 
         // Body
+        var classBodyNode = node.get("body");
+        var parent =
+        visitor.visitStatement(classBodyNode.get("body"), , container);
+
 //        boolean successFullyParsed = processFunctionParamaterAndBody(node, container, function);
 //        if (!successFullyParsed) {
 //            container.getFunctionDeclarations().remove(function);
 //        }
         return classDeclaration;
+    }
+
+    private UMLType extractSuperClassTypeObject(BabelNode superClassNode) {
+
+        //UMLType umlType = new UMLType(typeName, typeQualifiedName);
+        String typeQualifiedName;
+        String typeName;
+        switch (superClassNode.getType()) {
+
+            case MEMBER_EXPRESSION:
+                typeName = superClassNode.get("property").getString("name");
+                typeQualifiedName = superClassNode.get("object").getText() + "." + typeName;
+                break;
+            case IDENTIFIER:
+
+                typeName = superClassNode.getString("name");
+                typeQualifiedName = typeName;
+                break;
+            default:
+                throw new RuntimeException("error super class type " + superClassNode.getSourceLocation());
+        }
+
+        if (typeName != null && typeQualifiedName != null)
+            return new UMLType(typeName, typeQualifiedName);
+        return null;
     }
 
     /**
