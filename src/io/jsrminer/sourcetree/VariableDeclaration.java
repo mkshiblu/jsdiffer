@@ -10,15 +10,12 @@ public class VariableDeclaration extends CodeEntity {
     private SourceLocation scope;
     private boolean isParameter;
 
+    private boolean isAttribute;
+
     public VariableDeclaration(String variableName, VariableDeclarationKind kind) {
         this.variableName = variableName;
         this.kind = kind;
         this.setType(CodeElementType.VARIABLE_DECLARATION);
-    }
-
-    public VariableDeclaration(String variableName, Expression optionalInitializer, VariableDeclarationKind kind) {
-        this(variableName, kind);
-        this.initializer = optionalInitializer;
     }
 
     /**
@@ -98,5 +95,13 @@ public class VariableDeclaration extends CodeEntity {
         } else if (!variableName.equals(other.variableName))
             return false;
         return true;
+    }
+
+    public boolean isAttribute() {
+        return isAttribute;
+    }
+
+    public void setAttribute(boolean attribute) {
+        isAttribute = attribute;
     }
 }

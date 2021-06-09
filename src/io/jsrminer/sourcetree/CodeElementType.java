@@ -48,6 +48,7 @@ public enum CodeElementType {
     TERNARY_OPERATOR_THEN_EXPRESSION,
     TERNARY_OPERATOR_ELSE_EXPRESSION,
     LIST_OF_STATEMENTS,
+    FIELD_DECLARATION,
     ;
 
     public final String titleCase;

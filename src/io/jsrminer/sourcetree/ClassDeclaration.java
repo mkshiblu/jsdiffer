@@ -39,4 +39,8 @@ public class ClassDeclaration extends DeclarationContainer implements IClassDecl
     public void addAttribute(UMLAttribute attribute) {
         this.attributes.add(attribute);
     }
+
+    public List<UMLAttribute> getAttributes() {
+        return attributes;
+    }
 }

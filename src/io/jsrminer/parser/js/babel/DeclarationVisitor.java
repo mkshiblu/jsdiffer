@@ -3,6 +3,7 @@ package io.jsrminer.parser.js.babel;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLAttribute;
 import io.jsrminer.uml.UMLType;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
@@ -213,57 +214,55 @@ public class DeclarationVisitor {
 
     /**
      * interface ClassProperty <: Node {
-     *   type: "ClassProperty";
-     *   key: Expression;
-     *   value: Expression;
-     *   static: boolean;
-     *   computed: boolean;
+     * type: "ClassProperty";
+     * key: Expression;
+     * value: Expression;
+     * static: boolean;
+     * computed: boolean;
      * }
      */
-    VariableDeclaration visitClassProperty(BabelNode node, ClassDeclaration classDeclaration) {
-        processFieldDeclaration(node);
-         return null;
+    List<UMLAttribute> visitClassProperty(BabelNode node, ClassDeclaration classDeclaration) {
+        return processFieldDeclaration(node, classDeclaration);
     }
 
-    private List<UMLAttribute> processFieldDeclaration(BabelNode node) {
+    private List<UMLAttribute> processFieldDeclaration(BabelNode node, IClassDeclaration classDeclaration) {
         var keyNode = node.get("key");
         var valueNode = node.get("value");
         boolean isStatic = node.get("static").asBoolean();
-
         List<UMLAttribute> attributes = new ArrayList<>();
-        Type fieldType = fieldDeclaration.getType();
-        List<VariableDeclarationFragment> fragments = fieldDeclaration.fragments();
-        for(VariableDeclarationFragment fragment : fragments) {
-            UMLType type = UMLType.extractTypeObject(cu, sourceFile, fieldType, fragment.getExtraDimensions());
-            String fieldName = fragment.getName().getFullyQualifiedName();
-            LocationInfo locationInfo = generateLocationInfo(cu, sourceFile, fragment, CodeElementType.FIELD_DECLARATION);
-            UMLAttribute umlAttribute = new UMLAttribute(fieldName, type, locationInfo);
-            VariableDeclaration variableDeclaration = new VariableDeclaration(cu, sourceFile, fragment);
-            variableDeclaration.setAttribute(true);
-            umlAttribute.setVariableDeclaration(variableDeclaration);
-            umlAttribute.setJavadoc(javadoc);
-            distributeComments(comments, locationInfo, umlAttribute.getComments());
 
-            int fieldModifiers = fieldDeclaration.getModifiers();
-            else if(isInterfaceField)
-                umlAttribute.setVisibility("public");
-            else
-                umlAttribute.setVisibility("package");
 
-            if((fieldModifiers & Modifier.FINAL) != 0)
-                umlAttribute.setFinal(true);
+        switch (keyNode.getType()) {
+            case IDENTIFIER:
+                String fieldName = keyNode.getString("name");
+                UMLAttribute attribute = new UMLAttribute(fieldName, node.getSourceLocation());
 
-            if((fieldModifiers & Modifier.STATIC) != 0)
-                umlAttribute.setStatic(true);
+                var variableDeclaration = new VariableDeclaration(fieldName, null);
+                variableDeclaration.setType(CodeElementType.FIELD_DECLARATION);
+                variableDeclaration.setAttribute(true);
 
-            if((fieldModifiers & Modifier.VOLATILE) != 0)
-                umlAttribute.setVolatile(true);
+                attribute.setVariableDeclaration(variableDeclaration);
+                attribute.setStatic(isStatic);
 
-            if((fieldModifiers & Modifier.TRANSIENT) != 0)
-                umlAttribute.setTransient(true);
+                attributes.add(attribute);
+                break;
 
-            attributes.add(umlAttribute);
+            case SEQUENCE_EXPRESSION:
+                break;
+
+            default:
+                throw new RuntimeException("Not handled " + keyNode.getSourceLocation());
         }
+
+        // Process Initializer
+        if (valueNode.isDefined()) {
+            var expression = visitor.getNodeUtil().createBaseExpressionWithRMType(valueNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
+            visitor.visitExpression(valueNode, expression, classDeclaration);
+        }
+
+
+        // Add to the class
+        attributes.forEach(attribute -> classDeclaration.addAttribute(attribute));
         return attributes;
     }
 
@@ -314,7 +313,8 @@ public class DeclarationVisitor {
      * //     statements
      * //  }
      */
-    AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+    AnonymousFunctionDeclaration visitFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer
+            container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
 
@@ -340,7 +340,8 @@ public class DeclarationVisitor {
      * }
      * A fat arrow function expression, e.g., let foo = (bar) => { }
      */
-    AnonymousFunctionDeclaration visitArrowFunctionExpression(BabelNode node, ILeafFragment leafFragment, IContainer container) {
+    AnonymousFunctionDeclaration visitArrowFunctionExpression(BabelNode node, ILeafFragment
+            leafFragment, IContainer container) {
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         leafFragment.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
         anonymousFunctionDeclaration.setText(visitor.getNodeUtil().getTextInSource(node, false));

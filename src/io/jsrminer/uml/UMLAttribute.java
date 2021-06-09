@@ -2,6 +2,7 @@ package io.jsrminer.uml;
 
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.VariableDeclaration;
+import io.jsrminer.sourcetree.VariableDeclarationKind;
 import io.jsrminer.uml.diff.StringDistance;
 
 import java.io.Serializable;
@@ -9,7 +10,6 @@ import java.io.Serializable;
 public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
     private SourceLocation locationInfo;
     private String name;
-    private String kind;
     private String visibility;
     private String className;
     private boolean isFinal;
@@ -17,10 +17,9 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
     private VariableDeclaration variableDeclaration;
     //private UMLJavadoc javadoc;
 
-    public UMLAttribute(String name, String kind, SourceLocation locationInfo) {
+    public UMLAttribute(String name, SourceLocation locationInfo) {
         this.locationInfo = locationInfo;
         this.name = name;
-        this.kind = kind;
     }
 
     public SourceLocation getLocationInfo() {
@@ -93,19 +92,11 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
             return false;
         if (this.isFinal != attribute.isFinal)
             return false;
-        if (this.name.equals(attribute.name) && this.kind.equals(attribute.kind)
-            // && this.type.equalsQualified(attribute.type)
-        )
-            return true;
-        if (!this.kind.equals(attribute.kind))
-            return this.name.equals(attribute.name);
-        return false;
+        return this.name.equals(attribute.name);
     }
 
     public boolean equalsIgnoringChangedVisibility(UMLAttribute attribute) {
-        if (this.name.equals(attribute.name) && this.kind.equals(attribute.kind))
-            return true;
-        return false;
+        return this.name.equals(attribute.name);
     }
 
 //    public CodeRange codeRange() {
@@ -121,8 +112,7 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
         if (o instanceof UMLAttribute) {
             UMLAttribute umlAttribute = (UMLAttribute) o;
             return this.name.equals(umlAttribute.name) &&
-                    this.visibility.equals(umlAttribute.visibility) &&
-                    this.kind.equals(umlAttribute.kind);
+                    this.visibility.equals(umlAttribute.visibility);
         }
         return false;
     }
@@ -140,7 +130,6 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
         sb.append(" ");
         sb.append(name);
         sb.append(" : ");
-        sb.append(kind);
         return sb.toString();
     }
 
@@ -165,4 +154,5 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
         double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
         return normalized;
     }
+
 }

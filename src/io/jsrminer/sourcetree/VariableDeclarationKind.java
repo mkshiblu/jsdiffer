@@ -21,7 +21,7 @@ public enum VariableDeclarationKind {
             nameKindMap.put(type.keywordName, type);
         }
     }
-    
+
     /**
      * @param kindName The kind name as appeared in the js source files
      * @return
