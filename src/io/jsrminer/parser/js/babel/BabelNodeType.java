@@ -13,6 +13,12 @@ public enum BabelNodeType {
     BOOLEAN_LITERAL("BooleanLiteral"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
     CLASS_DECLARATION("ClassDeclaration"),
+    CLASS_BODY("ClassBody"),
+    CLASS_METHOD("ClassMethod"),
+    CLASS_PRIVATE_METHOD("ClassPrivateMethod"),
+    CLASS_PROPERTY("ClassProperty"),
+    CLASS_PRIVATE_PROPERTY("ClassPrivateProperty"),
+
     FUNCTION_EXPRESSION("FunctionExpression"),
     ARROW_FUNCTION_EXPRESSION("ArrowFunctionExpression"),
     EXPRESSION_STATEMENT("ExpressionStatement"),

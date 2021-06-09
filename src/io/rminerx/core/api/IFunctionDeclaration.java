@@ -8,7 +8,6 @@ import java.util.List;
 public interface IFunctionDeclaration extends IDeclarationContainer{
     FunctionBody getBody();
     List<UMLParameter> getParameters();
-    String getName();
     boolean isConstructor();
     List<String> getParameterNameList();
 }

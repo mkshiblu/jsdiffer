@@ -1,4 +1,9 @@
 package io.rminerx.core.api;
 
-public interface IClassDeclaration {
+import io.jsrminer.uml.UMLType;
+
+import java.util.List;
+
+public interface IClassDeclaration extends IDeclarationContainer {
+
 }

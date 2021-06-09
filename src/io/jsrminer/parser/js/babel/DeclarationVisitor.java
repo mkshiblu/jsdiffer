@@ -1,11 +1,15 @@
 package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.UMLAttribute;
 import io.jsrminer.uml.UMLType;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import org.apache.commons.lang3.NotImplementedException;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeclarationVisitor {
     private final Visitor visitor;
@@ -181,14 +185,99 @@ public class DeclarationVisitor {
 
         // Body
         var classBodyNode = node.get("body");
-        var parent =
-        visitor.visitStatement(classBodyNode.get("body"), , container);
 
-//        boolean successFullyParsed = processFunctionParamaterAndBody(node, container, function);
-//        if (!successFullyParsed) {
-//            container.getFunctionDeclarations().remove(function);
-//        }
+        // Traverse the body statements
+        var blockBodyNodes = classBodyNode.get("body");
+        for (int i = 0; i < blockBodyNodes.size(); i++) {
+            var propertyNode = blockBodyNodes.get(i);
+
+            switch (propertyNode.getType()) {
+                case CLASS_PROPERTY:
+                    visitClassProperty(propertyNode, classDeclaration);
+                    break;
+                case CLASS_METHOD:
+                    visitClassMethod(propertyNode, classDeclaration);
+                    break;
+                case CLASS_PRIVATE_METHOD:
+                    visitClassPrivateMethod(propertyNode, classDeclaration);
+                    break;
+                case CLASS_PRIVATE_PROPERTY:
+                    visitClassPrivateProperty(propertyNode, classDeclaration);
+                    break;
+            }
+            //visitor.visitStatement(blockBodyNodes.get(i), bodyBlock, classDeclaration);
+        }
+
         return classDeclaration;
+    }
+
+    /**
+     * interface ClassProperty <: Node {
+     *   type: "ClassProperty";
+     *   key: Expression;
+     *   value: Expression;
+     *   static: boolean;
+     *   computed: boolean;
+     * }
+     */
+    VariableDeclaration visitClassProperty(BabelNode node, ClassDeclaration classDeclaration) {
+        processFieldDeclaration(node);
+         return null;
+    }
+
+    private List<UMLAttribute> processFieldDeclaration(BabelNode node) {
+        var keyNode = node.get("key");
+        var valueNode = node.get("value");
+        boolean isStatic = node.get("static").asBoolean();
+
+        List<UMLAttribute> attributes = new ArrayList<>();
+        Type fieldType = fieldDeclaration.getType();
+        List<VariableDeclarationFragment> fragments = fieldDeclaration.fragments();
+        for(VariableDeclarationFragment fragment : fragments) {
+            UMLType type = UMLType.extractTypeObject(cu, sourceFile, fieldType, fragment.getExtraDimensions());
+            String fieldName = fragment.getName().getFullyQualifiedName();
+            LocationInfo locationInfo = generateLocationInfo(cu, sourceFile, fragment, CodeElementType.FIELD_DECLARATION);
+            UMLAttribute umlAttribute = new UMLAttribute(fieldName, type, locationInfo);
+            VariableDeclaration variableDeclaration = new VariableDeclaration(cu, sourceFile, fragment);
+            variableDeclaration.setAttribute(true);
+            umlAttribute.setVariableDeclaration(variableDeclaration);
+            umlAttribute.setJavadoc(javadoc);
+            distributeComments(comments, locationInfo, umlAttribute.getComments());
+
+            int fieldModifiers = fieldDeclaration.getModifiers();
+            else if(isInterfaceField)
+                umlAttribute.setVisibility("public");
+            else
+                umlAttribute.setVisibility("package");
+
+            if((fieldModifiers & Modifier.FINAL) != 0)
+                umlAttribute.setFinal(true);
+
+            if((fieldModifiers & Modifier.STATIC) != 0)
+                umlAttribute.setStatic(true);
+
+            if((fieldModifiers & Modifier.VOLATILE) != 0)
+                umlAttribute.setVolatile(true);
+
+            if((fieldModifiers & Modifier.TRANSIENT) != 0)
+                umlAttribute.setTransient(true);
+
+            attributes.add(umlAttribute);
+        }
+        return attributes;
+    }
+
+
+    VariableDeclaration visitClassPrivateProperty(BabelNode node, ClassDeclaration classDeclaration) {
+        return null;
+    }
+
+    FunctionDeclaration visitClassMethod(BabelNode node, ClassDeclaration classDeclaration) {
+        return null;
+    }
+
+    FunctionDeclaration visitClassPrivateMethod(BabelNode node, ClassDeclaration classDeclaration) {
+        return null;
     }
 
     private UMLType extractSuperClassTypeObject(BabelNode superClassNode) {
@@ -203,7 +292,6 @@ public class DeclarationVisitor {
                 typeQualifiedName = superClassNode.get("object").getText() + "." + typeName;
                 break;
             case IDENTIFIER:
-
                 typeName = superClassNode.getString("name");
                 typeQualifiedName = typeName;
                 break;
@@ -212,7 +300,7 @@ public class DeclarationVisitor {
         }
 
         if (typeName != null && typeQualifiedName != null)
-            return new UMLType(typeName, typeQualifiedName);
+            return new UMLType(typeName, typeQualifiedName, superClassNode.getSourceLocation());
         return null;
     }
 
@@ -335,7 +423,6 @@ public class DeclarationVisitor {
 
         anonymousFunctionDeclaration.setBody(new FunctionBody(blockStatement));
         leaf.registerAnonymousFunctionDeclaration(anonymousFunctionDeclaration);
-
 
         var properties = node.get("properties");
 

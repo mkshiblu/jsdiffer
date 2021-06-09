@@ -11,6 +11,15 @@ import java.util.List;
 public class ClassDeclaration extends DeclarationContainer implements IClassDeclaration {
 
     private UMLType superClass;
+    private boolean isAbstract;
+
+    private boolean isInterface;
+    private boolean isEnum;
+    private List<UMLType> implementedInterfaces;
+    //private List<UMLTypeParameter> typeParameters;
+    //private List<UMLAnnotation> annotations;
+    //private List<UMLEnumConstant> enumConstants;
+
 
     protected List<UMLAttribute> attributes = new LinkedList<>();
 

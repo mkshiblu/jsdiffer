@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UMLType {
-    private SourceLocation locationInfo;
+    private final SourceLocation sourceLocation;
     private int arrayDimension;
     private List<UMLType> typeArguments = new ArrayList<>();
     //protected List<UMLAnnotation> annotations = new ArrayList<UMLAnnotation>();
@@ -14,13 +14,14 @@ public class UMLType {
     private final String typeName;
     private final String typeQualifiedName;
 
-    public UMLType(String typeName, String typeQualifiedName){
+    public UMLType(String typeName, String typeQualifiedName,SourceLocation sourceLocation){
         this.typeName = typeName;
         this.typeQualifiedName = typeQualifiedName;
+        this.sourceLocation = sourceLocation;
     }
 
-    public SourceLocation getLocationInfo() {
-        return locationInfo;
+    public SourceLocation getSourceLocation() {
+        return this.sourceLocation;
     }
 
     public List<UMLType> getTypeArguments() {
