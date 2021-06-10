@@ -57,6 +57,11 @@ public class ExpressionVisitor {
         return visitSequenceExpression(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, Void> typeCastExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitTypeCastExpression(node, parent, container);
+    };
+
+
     ExpressionVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -327,6 +332,11 @@ public class ExpressionVisitor {
             visitor.visitExpression(expressions.get(i), leaf, container);
         }
 
+        return null;
+    }
+
+    Void visitTypeCastExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        visitor.visitExpression(node.get("expression"), leaf, container);
         return null;
     }
 }

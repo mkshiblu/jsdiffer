@@ -43,4 +43,9 @@ public class ClassDeclaration extends DeclarationContainer implements IClassDecl
     public List<UMLAttribute> getAttributes() {
         return attributes;
     }
+
+    @Override
+    public String toString() {
+        return getQualifiedName() + "| " + getSourceLocation();
+    }
 }

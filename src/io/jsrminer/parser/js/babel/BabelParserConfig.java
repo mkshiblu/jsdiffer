@@ -10,7 +10,8 @@ public class BabelParserConfig {
             BabelNodeType.EMPTY_STATEMENT,
             //BabelNodeType.EXPORT_DECLARATION,
             BabelNodeType.IMPORT_DECLARATION,
-            BabelNodeType.TYPE_ALIAS
+            BabelNodeType.TYPE_ALIAS,
+            BabelNodeType.JSX_ELEMENT
     );
 
     public final static EnumMap<BabelNodeType, CodeElementType> babelNodeToCodeElementTypeMap =

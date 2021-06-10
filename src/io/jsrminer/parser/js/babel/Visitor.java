@@ -50,6 +50,7 @@ public class Visitor {
             put(UPDATE_EXPRESSION, expressionVisitor.updateExpressionVisitor);
             put(CONDITIONAL_EXPRESSION, expressionVisitor.conditionalExpressionVisitor);
             put(SEQUENCE_EXPRESSION, expressionVisitor.sequenceExpressionVisitor);
+            put(TYPE_CAST_EXPRESSION, expressionVisitor.typeCastExpressionVisitor);
 
             // Invocations
             put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);

@@ -74,6 +74,8 @@ public enum BabelNodeType {
     OPT_CLASS_DECLARATION("OptClassDeclaration"),
     OPT_FUNCTION_DECLARATION("OptFunctionDeclaration"),
     TYPE_ALIAS("TypeAlias"),
+    JSX_ELEMENT("JSXElement"),
+    TYPE_CAST_EXPRESSION("TypeCastExpression"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

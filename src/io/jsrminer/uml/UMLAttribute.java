@@ -2,7 +2,6 @@ package io.jsrminer.uml;
 
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.sourcetree.VariableDeclaration;
-import io.jsrminer.sourcetree.VariableDeclarationKind;
 import io.jsrminer.uml.diff.StringDistance;
 
 import java.io.Serializable;
@@ -11,7 +10,7 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
     private SourceLocation locationInfo;
     private String name;
     private String visibility;
-    private String className;
+    private String classQualfiiedName;
     private boolean isFinal;
     private boolean isStatic;
     private VariableDeclaration variableDeclaration;
@@ -59,15 +58,15 @@ public class UMLAttribute implements Comparable<UMLAttribute>, Serializable {
     }
 
     public String getNonQualifiedClassName() {
-        return className.contains(".") ? className.substring(className.lastIndexOf(".") + 1, className.length()) : className;
+        return classQualfiiedName.contains(".") ? classQualfiiedName.substring(classQualfiiedName.lastIndexOf(".") + 1, classQualfiiedName.length()) : classQualfiiedName;
     }
 
-    public String getClassName() {
-        return className;
+    public String getClassQualfiiedName() {
+        return classQualfiiedName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setClassQualifiedName(String classQualifiedName) {
+        this.classQualfiiedName = classQualifiedName;
     }
 
     public String getName() {

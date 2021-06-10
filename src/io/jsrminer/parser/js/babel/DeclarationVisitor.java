@@ -138,10 +138,7 @@ public class DeclarationVisitor {
      * }
      * A function declaration. Note that unlike in the parent interface Function,
      * the id cannot be null, except when this is the child of an ExportDefaultDeclaration.
-     *
-     * @param node
-     * @param parent
-     * @param container
+     * container
      */
     public FunctionDeclaration visitFunctionDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
         FunctionDeclaration function = new FunctionDeclaration();
@@ -231,7 +228,6 @@ public class DeclarationVisitor {
         boolean isStatic = node.get("static").asBoolean();
         List<UMLAttribute> attributes = new ArrayList<>();
 
-
         switch (keyNode.getType()) {
             case IDENTIFIER:
                 String fieldName = keyNode.getString("name");
@@ -243,6 +239,7 @@ public class DeclarationVisitor {
 
                 attribute.setVariableDeclaration(variableDeclaration);
                 attribute.setStatic(isStatic);
+                attribute.setClassQualifiedName(classDeclaration.getQualifiedName());
 
                 attributes.add(attribute);
                 break;
@@ -258,8 +255,8 @@ public class DeclarationVisitor {
         if (valueNode.isDefined()) {
             var expression = visitor.getNodeUtil().createBaseExpressionWithRMType(valueNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             visitor.visitExpression(valueNode, expression, classDeclaration);
+            attributes.forEach(attribute -> attribute.getVariableDeclaration().setInitializer(expression));
         }
-
 
         // Add to the class
         attributes.forEach(attribute -> classDeclaration.addAttribute(attribute));
@@ -271,8 +268,45 @@ public class DeclarationVisitor {
         return null;
     }
 
+    /**
+     * interface ClassMethod <: Function {
+     * type: "ClassMethod";
+     * key: Expression;
+     * kind: "constructor" | "method" | "get" | "set";
+     * computed: boolean;
+     * static: boolean;
+     * decorators: [ Decorator ];
+     * }
+     * <p>
+     * interface Function <: Node {
+     * id: Identifier | null;
+     * params: [ Pattern ];
+     * body: BlockStatement;
+     * generator: boolean;
+     * async: boolean;
+     * }
+     */
     FunctionDeclaration visitClassMethod(BabelNode node, ClassDeclaration classDeclaration) {
-        return null;
+        var function = new FunctionDeclaration();
+        classDeclaration.registerFunctionDeclaration(function);
+        function.setIsConstructor("constructor".equals(node.get("kind").asString()));
+        function.setStatic(node.get("static").asBoolean());
+        
+        var keyNode = node.get("key");
+        switch (keyNode.getType()) {
+            case IDENTIFIER:
+                String name = keyNode.get("name").asString();
+                visitor.getNodeUtil().populateContainerNamesAndLocation(function, name, node.getSourceLocation(), classDeclaration);
+                break;
+            default:
+                throw new RuntimeException("Not supported " + keyNode.getSourceLocation());
+        }
+
+        boolean successFullyParsed = processFunctionParamaterAndBody(node, classDeclaration, function);
+        if (!successFullyParsed) {
+            classDeclaration.getFunctionDeclarations().remove(function);
+        }
+        return function;
     }
 
     FunctionDeclaration visitClassPrivateMethod(BabelNode node, ClassDeclaration classDeclaration) {

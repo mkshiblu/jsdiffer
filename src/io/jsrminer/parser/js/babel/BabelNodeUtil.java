@@ -160,6 +160,7 @@ public class BabelNodeUtil {
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
     }
 
+
     void loadFunctionDeclarationInfo(BabelNode node, FunctionDeclaration function, IContainer container) {
         var nameNode = node.get("id").get("name");
 
