@@ -8,6 +8,8 @@ import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
 
+import static io.jsrminer.parser.js.babel.BabelParserConfig.treatCallExpressionOperandAsTheFunctionName;
+
 public class InvocationVisitor {
     private final Visitor visitor;
 
@@ -162,17 +164,18 @@ public class InvocationVisitor {
 //                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(calleeAsParenExpression.expression, leaf, container);
 //                break;
 //
-//            case CALL_EXPRESSION:
-////                var calleeAsCallExpression = callee.asCallExpression();
-////                if (treatCallExpressionOperandAsTheFunctionName) {
-////                    name = getTextInSource(calleeAsCallExpression, false);
-////                    if (calleeAsCallExpression.operand != null) {
-////                        expressionText = getTextInSource(calleeAsCallExpression.operand, false);
-////                    }
-////                }
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(callee, leaf, container);
-//                parsedProperly = false;
-//                break;
+            case CALL_EXPRESSION:
+                BabelNode operand = null;
+                if (treatCallExpressionOperandAsTheFunctionName) {
+                    name = visitor.getNodeUtil().getTextInSource(callee, false);
+                    operand = callee.get("callee");
+                    if (operand.isDefined()) {
+                        expressionText = visitor.getNodeUtil().getTextInSource(operand, false);
+                    }
+                }
+                visitor.visitExpression(callee, leaf, container);
+                parsedProperly = operand != null && operand.isDefined() && operand.getType() == BabelNodeType.IDENTIFIER;
+                break;
             case LOGICAL_EXPRESSION:
                 visitor.visitExpression(callee, leaf, container);
                 parsedProperly = false;

@@ -291,7 +291,7 @@ public class DeclarationVisitor {
         classDeclaration.registerFunctionDeclaration(function);
         function.setIsConstructor("constructor".equals(node.get("kind").asString()));
         function.setStatic(node.get("static").asBoolean());
-        
+
         var keyNode = node.get("key");
         switch (keyNode.getType()) {
             case IDENTIFIER:
@@ -382,11 +382,11 @@ public class DeclarationVisitor {
         visitor.getNodeUtil().loadAnonymousFunctionDeclarationInfo(node, anonymousFunctionDeclaration, container);
         container.getAnonymousFunctionDeclarations().add(anonymousFunctionDeclaration);
 
-//        boolean isSuccessFullyParsed = processFunctionParamaterAndBody(node, container, anonymousFunctionDeclaration);
-//        if (!isSuccessFullyParsed) {
-//            leafFragment.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
-//            container.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
-//        }
+        boolean isSuccessFullyParsed = processFunctionParamaterAndBody(node, container, anonymousFunctionDeclaration);
+        if (!isSuccessFullyParsed) {
+            leafFragment.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+            container.getAnonymousFunctionDeclarations().remove(anonymousFunctionDeclaration);
+        }
 
         return anonymousFunctionDeclaration;
     }

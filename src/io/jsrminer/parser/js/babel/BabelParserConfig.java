@@ -54,7 +54,7 @@ public class BabelParserConfig {
 //        put(ParseTreeType.LITERAL_EXPRESSION, CodeElementType.LITERAL_EXPRESSION);
                     .build();
     /**
-     * require('./core/core.js')(p1, p2)
+     *  e.g. require('./core/core.js')(p1, p2)
      */
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;
 
