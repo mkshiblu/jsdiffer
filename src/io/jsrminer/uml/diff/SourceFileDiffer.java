@@ -4,6 +4,7 @@ import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.ClassUtil;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -30,7 +31,7 @@ public class SourceFileDiffer extends BaseDiffer {
     public SourceFileDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
         this.container1 = container1;
         this.container2 = container2;
-        sourceFileDiff = new SourceFileDiff(container1, container2);
+        this.sourceFileDiff = new SourceFileDiff(container1, container2);
         this.modelDiff = modelDiff;
     }
 
@@ -61,20 +62,67 @@ public class SourceFileDiffer extends BaseDiffer {
     /**
      * Diff operations between two files
      */
-    private void diff(SourceFileDiff sourceDiff/*, final HashMap<String, FunctionDeclaration> functionMap1
-            , final HashMap<String, FunctionDeclaration> functionMap2*/) {
+    private void diff(SourceFileDiff sourceDiff) {
         // Process Annotations
         // Process Inheritance
-        reportAddedAndRemovedOperationsIfNotEquals(sourceDiff);
-        createBodyMapperForCommonNamedFunctions(sourceDiff);
+
+        reportAddedAndRemovedClassDeclarations();
+        diffCommonClasses();
+
+        reportAddedAndRemovedOperations(sourceDiff);
+        createBodyMapperForCommonFunctions(sourceDiff);
 //        processAttributes();
 //        checkForAttributeChanges();
         // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges(sourceDiff);
         checkForInlinedOperations(sourceDiff);
         checkForExtractedOperations(sourceDiff);
+
         // Match statements declared inside the body directly
         matchStatements(sourceDiff);
+    }
+
+    void diffCommonClasses() {
+        for (var class1 : sourceFileDiff.getSource1().getClassDeclarations()) {
+            for (var class2 : sourceFileDiff.getSource2().getClassDeclarations()) {
+                if (ClassUtil.isEqual(class1, class2)) {
+                    // do class diff
+                    var classDiffer = new ContainerDiffer(class1, class2);
+                    var classDiff = classDiffer.diff();
+
+                    if(classDiff.is)
+                }
+            }
+        }
+    }
+
+    protected void reportAddedAndRemovedClassDeclarations() {
+        boolean isEqual;
+        for (var class1 : sourceFileDiff.getSource1().getClassDeclarations()) {
+            isEqual = false;
+            for (var class2 : sourceFileDiff.getSource2().getClassDeclarations()) {
+                if (isEqual = ClassUtil.isEqual(class1, class2)) {
+                    break;
+                }
+            }
+
+            // If no match on model2 report as removed
+            if (!isEqual)
+                sourceFileDiff.reportRemovedClass(class1);
+        }
+
+        for (var class2 : sourceFileDiff.getSource2().getClassDeclarations()) {
+            isEqual = false;
+            for (var class1 : sourceFileDiff.getSource1().getClassDeclarations()) {
+                if (isEqual = ClassUtil.isEqual(class2, class1)) {
+                    break;
+                }
+            }
+
+            // If no match on model1 report as added
+            if (!isEqual)
+                sourceFileDiff.reportAddedOperation((FunctionDeclaration) class2);
+        }
     }
 
     /**
@@ -92,7 +140,7 @@ public class SourceFileDiffer extends BaseDiffer {
 //        }
     }
 
-    protected void createBodyMapperForCommonNamedFunctions(SourceFileDiff sourceDiff) {
+    protected void createBodyMapperForCommonFunctions(SourceFileDiff sourceDiff) {
         final List<IFunctionDeclaration> functions1 = sourceDiff.getSource1().getFunctionDeclarations();
         final List<IFunctionDeclaration> functions2 = sourceDiff.getSource2().getFunctionDeclarations();
         // First match by equalsQualified
@@ -434,7 +482,7 @@ public class SourceFileDiffer extends BaseDiffer {
     }
 
     // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperationsIfNotEquals(SourceFileDiff sourceDiff) {
+    private void reportAddedAndRemovedOperations(SourceFileDiff sourceDiff) {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added

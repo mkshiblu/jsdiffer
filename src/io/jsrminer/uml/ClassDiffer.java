@@ -1,13 +1,14 @@
-package io.jsrminer.uml.diff;
+package io.jsrminer.uml;
 
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.FunctionUtil;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
@@ -16,20 +17,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class ContainerDiffer extends BaseDiffer {
-    private final IContainer function1;
-    private final IContainer function2;
-    private final ContainerDiff containerDiff;
+public class ClassDiffer {
+    private final IClassDeclaration class1;
+    private final IClassDeclaration class2;
+    private final ClassDiff containerDiff;
 
-    public ContainerDiffer(IContainer container1, IContainer container2) {
-        this.function1 = container1;
-        this.function2 = container2;
-        this.containerDiff = new ContainerDiff(container1, container2);
+    public ClassDiffer(IClassDeclaration class1, IClassDeclaration class2) {
+        //super(class1, class2);
+        this.class1 = class1;
+        this.class2 = class2;
+        this.containerDiff = new ClassDiff(class1, class2);
     }
 
-    /**
-     * Diff all the children functions and statements
-     */
     public ContainerDiff diff() {
         diffChildFunctions();
         matchStatements(this.containerDiff);

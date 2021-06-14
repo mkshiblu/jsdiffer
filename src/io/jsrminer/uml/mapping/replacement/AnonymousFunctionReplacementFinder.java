@@ -80,8 +80,8 @@ public class AnonymousFunctionReplacementFinder {
         }
     }
 
-    Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousClassDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
-        ContainerDiffer differ = new ContainerDiffer(anonymousClassDeclaration1, anonymousClassDeclaration2);
+    Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousFunctionDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
+        ContainerDiffer differ = new ContainerDiffer(anonymousFunctionDeclaration1, anonymousClassDeclaration2);
         var diff = differ.diff();
 //                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
 //                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
@@ -98,7 +98,7 @@ public class AnonymousFunctionReplacementFinder {
 
         if (isAnonymousBodyMatched(diff)) {
             copyMappingsAndRefactoringsToParentMapper(diff);
-            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
+            Replacement replacement = new Replacement(anonymousFunctionDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
             return replacement;
         }
         return null;

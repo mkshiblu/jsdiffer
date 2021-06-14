@@ -10,34 +10,33 @@ import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
 public class ContainerDiff {
+    private FunctionBodyMapper bodyStatementMapper;
+
+    private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
+    private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
+    private final List<IClassDeclaration> addedClasses = new ArrayList<>();
+    private final List<IClassDeclaration> removedClasses = new ArrayList<>();
+    private final List<UMLOperationDiff> operationDiffList = new ArrayList<>();
 
     protected final List<IRefactoring> refactorings = new ArrayList<>();
     protected Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
-
     protected Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
     protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
     protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
 
     protected final List<FunctionBodyMapper> bodyMapperList = new ArrayList<>();
-    private List<UMLOperationDiff> operationDiffList = new ArrayList<>();
 
-    /**
-     * Name map
-     */
-    private FunctionBodyMapper bodyStatementMapper;
     MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
 
     final IContainer container1;
     final IContainer container2;
-
-    protected final List<FunctionDeclaration> addedOperations = new ArrayList<>();
-    protected final List<FunctionDeclaration> removedOperations = new ArrayList<>();
 
     public ContainerDiff(IContainer container1, IContainer container2) {
         this.container1 = container1;
@@ -272,8 +271,20 @@ public class ContainerDiff {
         return refactorings;
     }
 
-//    @Override
-//    public int compareTo(ContainerDiff o) {
-//        return this.container1.getQualifiedName().compareTo(o.container1.getQualifiedName());
-//    }
+
+    void reportAddedClass(IClassDeclaration classDeclaration) {
+        this.addedClasses.add(classDeclaration);
+    }
+
+    void reportRemovedClass(IClassDeclaration classDeclaration) {
+        this.removedClasses.add(classDeclaration);
+    }
+
+    public List<IClassDeclaration> getRemovedClasses() {
+        return this.removedClasses;
+    }
+
+    public List<IClassDeclaration> getAddedClasses() {
+        return this.addedClasses;
+    }
 }

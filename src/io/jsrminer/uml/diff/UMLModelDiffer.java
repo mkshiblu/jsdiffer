@@ -21,6 +21,7 @@ public class UMLModelDiffer {
         reportAddedAndRemovedSourceFiles(modelDiff);
         checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move(), modelDiff);
         checkForRenamedFiles(renamedFileHints, new UMLSourceFileMatcher.Rename(), modelDiff);
+
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
@@ -188,8 +189,6 @@ public class UMLModelDiffer {
 
             // Check if model2 contains files with similar contents
             List<ISourceFile> addedFiles = modelDiff.getAddedFiles();
-
-
 //
 //            if (umlModel1.getSourceFileModels() != null) {
 //                SourceDiffer sourceDiffer = new SourceDiffer(entry.getValue(), sourceFileModel2, modelDiff);
