@@ -9,7 +9,6 @@ import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IClassDeclaration;
-import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.ArrayList;
@@ -20,26 +19,26 @@ import java.util.TreeSet;
 public class ClassDiffer {
     private final IClassDeclaration class1;
     private final IClassDeclaration class2;
-    private final ClassDiff containerDiff;
+    private final ClassDiff classDiff;
 
     public ClassDiffer(IClassDeclaration class1, IClassDeclaration class2) {
         //super(class1, class2);
         this.class1 = class1;
         this.class2 = class2;
-        this.containerDiff = new ClassDiff(class1, class2);
+        this.classDiff = new ClassDiff(class1, class2);
     }
 
-    public ContainerDiff diff() {
+    public ClassDiff diff() {
         diffChildFunctions();
-        matchStatements(this.containerDiff);
-        return this.containerDiff;
+        matchStatements();
+        return this.classDiff;
     }
 
     /**
      * Diff all the children functions ony
      */
     public ContainerDiff diffChildFunctions() {
-        reportAddedAndRemovedOperations(this.containerDiff);
+        reportAddedAndRemovedOperations();
         createBodyMapperForCommonNamedFunctions(this.containerDiff);
 //        processAttributes();
 //        checkForAttributeChanges();
@@ -52,14 +51,14 @@ public class ClassDiffer {
     }
 
     // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperations(ContainerDiff containerDiff) {
+    private void reportAddedAndRemovedOperations() {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added
         boolean isEqual;
-        for (IFunctionDeclaration function1 : containerDiff.container1.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function1 : this.classDiff.getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function2 : containerDiff.container2.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function2 : this.class2.getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function1, function2)) {
                     break;
                 }
@@ -67,11 +66,11 @@ public class ClassDiffer {
 
             // If no match on model2 report as removed
             if (!isEqual)
-                containerDiff.reportRemovedOperation((FunctionDeclaration) function1);
+                classDiff.reportRemovedOperation((FunctionDeclaration) function1);
         }
-        for (IFunctionDeclaration function2 : containerDiff.container2.getFunctionDeclarations()) {
+        for (IFunctionDeclaration function2 : classDiff.container2.getFunctionDeclarations()) {
             isEqual = false;
-            for (IFunctionDeclaration function1 : containerDiff.container1.getFunctionDeclarations()) {
+            for (IFunctionDeclaration function1 : classDiff.container1.getFunctionDeclarations()) {
                 if (isEqual = FunctionUtil.isEqual(function2, function1)) {
                     break;
                 }
@@ -79,7 +78,7 @@ public class ClassDiffer {
 
             // If no match report as added
             if (!isEqual)
-                containerDiff.reportAddedOperation((FunctionDeclaration) function2);
+                classDiff.reportAddedOperation((FunctionDeclaration) function2);
         }
     }
 
@@ -118,7 +117,7 @@ public class ClassDiffer {
                 operationDiff.setMappings(mapper.getMappings());
                 this.containerDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
                 // save the mapper TODO
-                this.containerDiff.getBodyMapperList().add(mapper);
+                this.containerDiff.getOperationBodyMapperList().add(mapper);
             }
         }
 
@@ -153,7 +152,7 @@ public class ClassDiffer {
                         = new FunctionBodyMapper(operationDiff, containerDiff);
                 operationDiff.setMappings(bodyMapper.getMappings());
                 containerDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
-                containerDiff.getBodyMapperList().add(bodyMapper);
+                containerDiff.getOperationBodyMapperList().add(bodyMapper);
             }
         }
 
@@ -181,7 +180,7 @@ public class ClassDiffer {
                         RenameOperationRefactoring rename = new RenameOperationRefactoring(bodyMapper);
                         containerDiff.getRefactoringsBeforePostProcessing().add(rename);
                     }
-                    containerDiff.getBodyMapperList().add(bodyMapper);
+                    containerDiff.getOperationBodyMapperList().add(bodyMapper);
                     removedOperationsToBeRemoved.add(removedOperation);
                     addedOperationsToBeRemoved.add(addedOperation);
                 }
@@ -232,7 +231,7 @@ public class ClassDiffer {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
                         }
-                        sourceDiff.getBodyMapperList().add(bestMapper);
+                        sourceDiff.getOperationBodyMapperList().add(bestMapper);
                     }
                 }
             }
@@ -270,7 +269,7 @@ public class ClassDiffer {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
                         }
-                        sourceDiff.getBodyMapperList().add(bestMapper);
+                        sourceDiff.getOperationBodyMapperList().add(bestMapper);
                     }
                 }
             }
@@ -281,7 +280,7 @@ public class ClassDiffer {
      * Returns true if the mapper's operation one is equal to the test operation
      */
     public boolean containsMapperForOperation(FunctionDeclaration operation) {
-        for (FunctionBodyMapper mapper : this.containerDiff.getBodyMapperList()) {
+        for (FunctionBodyMapper mapper : this.containerDiff.getOperationBodyMapperList()) {
 //            if(mapper.getOperation1().equalsQualified(operation)) {
 //                return true;
 //            }
@@ -296,7 +295,7 @@ public class ClassDiffer {
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration removedOperation : removedOperations) {
-            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+            for (FunctionBodyMapper mapper : sourceDiff.getOperationBodyMapperList()) {
                 InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, sourceDiff/*, this.modelDiff*/);
                 List<InlineOperationRefactoring> refs = detection.check(removedOperation);
                 for (InlineOperationRefactoring refactoring : refs) {
@@ -321,7 +320,7 @@ public class ClassDiffer {
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration addedOperation : addedOperations) {
-            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+            for (FunctionBodyMapper mapper : sourceDiff.getOperationBodyMapperList()) {
                 ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceDiff/*, modelDiff*/);
                 List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
                 for (ExtractOperationRefactoring refactoring : refs) {
@@ -337,7 +336,7 @@ public class ClassDiffer {
         sourceDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
-    private void matchStatements(ContainerDiff sourceDiff) {
+    private void matchStatements() {
         // Create  two functions using to statemtens
         FunctionDeclaration function1 = (FunctionDeclaration) sourceDiff.getContainer1();
         FunctionDeclaration function2 = (FunctionDeclaration) sourceDiff.getContainer2();

@@ -19,11 +19,11 @@ import java.util.*;
 public class ContainerDiff {
     private FunctionBodyMapper bodyStatementMapper;
 
-    private final List<FunctionDeclaration> addedOperations = new ArrayList<>();
-    private final List<FunctionDeclaration> removedOperations = new ArrayList<>();
-    private final List<IClassDeclaration> addedClasses = new ArrayList<>();
-    private final List<IClassDeclaration> removedClasses = new ArrayList<>();
-    private final List<UMLOperationDiff> operationDiffList = new ArrayList<>();
+    protected final List<FunctionDeclaration> addedOperations = new ArrayList<>();
+    protected final List<FunctionDeclaration> removedOperations = new ArrayList<>();
+    protected final List<IClassDeclaration> addedClasses = new ArrayList<>();
+    protected final List<IClassDeclaration> removedClasses = new ArrayList<>();
+    protected final List<UMLOperationDiff> operationDiffList = new ArrayList<>();
 
     protected final List<IRefactoring> refactorings = new ArrayList<>();
     protected Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
@@ -31,7 +31,7 @@ public class ContainerDiff {
     protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
     protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
 
-    protected final List<FunctionBodyMapper> bodyMapperList = new ArrayList<>();
+    protected final List<FunctionBodyMapper> operationBodyMapperList = new ArrayList<>();
 
     MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
 
@@ -80,8 +80,8 @@ public class ContainerDiff {
         return null;
     }
 
-    public List<FunctionBodyMapper> getBodyMapperList() {
-        return bodyMapperList;
+    public List<FunctionBodyMapper> getOperationBodyMapperList() {
+        return operationBodyMapperList;
     }
 
     public List<IRefactoring> getRefactoringsBeforePostProcessing() {
@@ -132,7 +132,7 @@ public class ContainerDiff {
     }
 
     public FunctionBodyMapper findMapperWithMatchingSignature2(IFunctionDeclaration operation2) {
-        for (var mapper : this.bodyMapperList) {
+        for (var mapper : this.operationBodyMapperList) {
             if (FunctionUtil.equalNameAndParameterCount(mapper.function1, operation2)) {
                 return mapper;
             }
@@ -149,7 +149,7 @@ public class ContainerDiff {
     public List<IRefactoring> getAllRefactorings() {
         List<IRefactoring> refactorings = new ArrayList<>(this.refactorings);
 
-        for (FunctionBodyMapper mapper : this.bodyMapperList) {
+        for (FunctionBodyMapper mapper : this.operationBodyMapperList) {
             UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(mapper.getOperation1(), mapper.getOperation2(), mapper.getMappings());
             refactorings.addAll(operationSignatureDiff.getRefactorings());
             processMapperRefactorings(mapper, refactorings);

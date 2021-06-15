@@ -428,7 +428,7 @@ public abstract class BaseDiffer {
     protected Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(ContainerDiff sourceDiff) {
         Set<MethodInvocationReplacement> allConsistentMethodInvocationRenames = new LinkedHashSet<>();
         Set<MethodInvocationReplacement> allInconsistentMethodInvocationRenames = new LinkedHashSet<>();
-        for (FunctionBodyMapper bodyMapper : sourceDiff.getBodyMapperList()) {
+        for (FunctionBodyMapper bodyMapper : sourceDiff.getOperationBodyMapperList()) {
             Set<MethodInvocationReplacement> methodInvocationRenames = bodyMapper.getMethodInvocationRenameReplacements();
             ConsistentReplacementDetector.updateRenames(allConsistentMethodInvocationRenames, allInconsistentMethodInvocationRenames,
                     methodInvocationRenames);

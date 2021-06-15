@@ -4,6 +4,7 @@ import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.*;
+import io.jsrminer.uml.ClassDiffer;
 import io.jsrminer.uml.ClassUtil;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;
@@ -87,10 +88,12 @@ public class SourceFileDiffer extends BaseDiffer {
             for (var class2 : sourceFileDiff.getSource2().getClassDeclarations()) {
                 if (ClassUtil.isEqual(class1, class2)) {
                     // do class diff
-                    var classDiffer = new ContainerDiffer(class1, class2);
+                    var classDiffer = new ClassDiffer(class1, class2);
                     var classDiff = classDiffer.diff();
 
-                    if(classDiff.is)
+                    if (!classDiff.isEmpty()) {
+                        this.sourceFileDiff.reportCommonClassDiffList(classDiff);
+                    }
                 }
             }
         }
@@ -175,7 +178,7 @@ public class SourceFileDiffer extends BaseDiffer {
                 operationDiff.setMappings(mapper.getMappings());
                 this.sourceFileDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
                 // save the mapper TODO
-                this.sourceFileDiff.getBodyMapperList().add(mapper);
+                this.sourceFileDiff.getOperationBodyMapperList().add(mapper);
             }
         }
 
@@ -210,7 +213,7 @@ public class SourceFileDiffer extends BaseDiffer {
                         = new FunctionBodyMapper(operationDiff, sourceDiff);
                 operationDiff.setMappings(bodyMapper.getMappings());
                 sourceDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
-                sourceDiff.getBodyMapperList().add(bodyMapper);
+                sourceDiff.getOperationBodyMapperList().add(bodyMapper);
             }
         }
 
@@ -239,7 +242,7 @@ public class SourceFileDiffer extends BaseDiffer {
                         RenameOperationRefactoring rename = new RenameOperationRefactoring(bodyMapper);
                         sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
                     }
-                    sourceDiff.getBodyMapperList().add(bodyMapper);
+                    sourceDiff.getOperationBodyMapperList().add(bodyMapper);
                     removedOperationsToBeRemoved.add(removedOperation);
                     addedOperationsToBeRemoved.add(addedOperation);
                 }
@@ -290,7 +293,7 @@ public class SourceFileDiffer extends BaseDiffer {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
                         }
-                        sourceDiff.getBodyMapperList().add(bestMapper);
+                        sourceDiff.getOperationBodyMapperList().add(bestMapper);
                     }
                 }
             }
@@ -328,7 +331,7 @@ public class SourceFileDiffer extends BaseDiffer {
                             RenameOperationRefactoring rename = new RenameOperationRefactoring(bestMapper);
                             sourceDiff.getRefactoringsBeforePostProcessing().add(rename);
                         }
-                        sourceDiff.getBodyMapperList().add(bestMapper);
+                        sourceDiff.getOperationBodyMapperList().add(bestMapper);
                     }
                 }
             }
@@ -440,7 +443,7 @@ public class SourceFileDiffer extends BaseDiffer {
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration removedOperation : removedOperations) {
-            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+            for (FunctionBodyMapper mapper : sourceDiff.getOperationBodyMapperList()) {
                 InlineOperationDetection detection = new InlineOperationDetection(mapper, removedOperations, this.sourceFileDiff/*, this.modelDiff*/);
                 List<InlineOperationRefactoring> refs = detection.check(removedOperation);
                 for (InlineOperationRefactoring refactoring : refs) {
@@ -465,7 +468,7 @@ public class SourceFileDiffer extends BaseDiffer {
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
         for (FunctionDeclaration addedOperation : addedOperations) {
-            for (FunctionBodyMapper mapper : sourceDiff.getBodyMapperList()) {
+            for (FunctionBodyMapper mapper : sourceDiff.getOperationBodyMapperList()) {
                 ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, sourceFileDiff/*, modelDiff*/);
                 List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
                 for (ExtractOperationRefactoring refactoring : refs) {
@@ -518,7 +521,7 @@ public class SourceFileDiffer extends BaseDiffer {
      * Returns true if the mapper's operation one is equal to the test operation
      */
     public boolean containsMapperForOperation(FunctionDeclaration operation) {
-        for (FunctionBodyMapper mapper : sourceFileDiff.getBodyMapperList()) {
+        for (FunctionBodyMapper mapper : sourceFileDiff.getOperationBodyMapperList()) {
 //            if(mapper.getOperation1().equalsQualified(operation)) {
 //                return true;
 //            }

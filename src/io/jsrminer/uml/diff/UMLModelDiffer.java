@@ -173,7 +173,7 @@ public class UMLModelDiffer {
                         && sourceDiff.getOperationDiffList().isEmpty()
                         //&& attributeDiffList.isEmpty()
                         && sourceDiff.getBodyStatementMapper() == null
-                        && sourceDiff.getBodyMapperList().isEmpty();
+                        && sourceDiff.getOperationBodyMapperList().isEmpty();
                 //&& enumConstantDiffList.isEmpty()
                 //&& !visibilityChanged && !abstractionChanged;
 

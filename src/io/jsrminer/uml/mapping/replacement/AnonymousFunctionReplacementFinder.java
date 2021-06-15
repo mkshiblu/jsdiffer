@@ -105,7 +105,7 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     boolean isAnonymousBodyMatched(ContainerDiff anonymousDiff) {
-        int matchedOperations = anonymousDiff.getBodyMapperList().size();
+        int matchedOperations = anonymousDiff.getOperationBodyMapperList().size();
         if (matchedOperations > 0) {
             return true;
         }
@@ -131,7 +131,7 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff anonymousClassDiff) {
-        var matchedOperationMappers = anonymousClassDiff.getBodyMapperList();
+        var matchedOperationMappers = anonymousClassDiff.getOperationBodyMapperList();
         if (matchedOperationMappers.size() > 0) {
 
             // Copy operation mapper mappings ?
