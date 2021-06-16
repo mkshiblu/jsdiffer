@@ -44,6 +44,11 @@ public class DeclarationVisitor {
         return visitClassDeclaration(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, AnonymousClassDeclaration> classExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitClassExpression(node, parent, container);
+    };
+
+
     DeclarationVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -158,15 +163,6 @@ public class DeclarationVisitor {
      * body: ClassBody;
      * decorators: [ Decorator ];
      * }
-     * ClassBody
-     * interface ClassBody <: Node {
-     * type: "ClassBody";
-     * body: [ ClassMethod | ClassPrivateMethod | ClassProperty | ClassPrivateProperty ];
-     * }
-     * interface ClassDeclaration <: Class, Declaration {
-     * type: "ClassDeclaration";
-     * id: Identifier;
-     * }
      */
     public ClassDeclaration visitClassDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
         var classDeclaration = new ClassDeclaration();
@@ -183,7 +179,60 @@ public class DeclarationVisitor {
 
         // Body
         var classBodyNode = node.get("body");
+        visitClassBody(classDeclaration, classBodyNode);
 
+        return classDeclaration;
+    }
+
+    /**
+     * interface Class <: Node {
+     *   id: Identifier | null;
+     *   superClass: Expression | null;
+     *   body: ClassBody;
+     *   decorators: [ Decorator ];
+     * }
+     * interface ClassExpression <: Class, Expression {
+     *   type: "ClassExpression";
+     * }
+     * MetaProperty
+     * interface MetaProperty <: Expression {
+     *   type: "MetaProperty";
+     *   meta: Identifier;
+     *   property: Identifier;
+     * }
+     *
+     *
+     */
+    AnonymousClassDeclaration visitClassExpression(BabelNode node, ILeafFragment leafFragment, IContainer
+            container) {
+        var anonymousClassDeclaration = new AnonymousClassDeclaration();
+        anonymousClassDeclaration.setSourceLocation(node.getSourceLocation());
+        String name = visitor.getNodeUtil().generateNameForAnonymousClassDeclaration(container);
+        visitor.getNodeUtil().populateContainerNamesAndLocation(anonymousClassDeclaration,
+                name, anonymousClassDeclaration.getSourceLocation(), container);
+        String text = visitor.getNodeUtil().getTextInSource(node, false);
+        anonymousClassDeclaration.setText(text);
+
+        // Body
+        var classBodyNode = node.get("body");
+        visitClassBody(anonymousClassDeclaration, classBodyNode);
+
+        return anonymousClassDeclaration;
+    }
+
+    /**
+     *
+     * ClassBody
+     * interface ClassBody <: Node {
+     * type: "ClassBody";
+     * body: [ ClassMethod | ClassPrivateMethod | ClassProperty | ClassPrivateProperty ];
+     * }
+     * interface ClassDeclaration <: Class, Declaration {
+     * type: "ClassDeclaration";
+     * id: Identifier;
+     * }
+     */
+    private void visitClassBody(ClassDeclaration classDeclaration, BabelNode classBodyNode) {
         // Traverse the body statements
         var blockBodyNodes = classBodyNode.get("body");
         for (int i = 0; i < blockBodyNodes.size(); i++) {
@@ -203,10 +252,7 @@ public class DeclarationVisitor {
                     visitClassPrivateProperty(propertyNode, classDeclaration);
                     break;
             }
-            //visitor.visitStatement(blockBodyNodes.get(i), bodyBlock, classDeclaration);
         }
-
-        return classDeclaration;
     }
 
     /**
@@ -366,6 +412,7 @@ public class DeclarationVisitor {
         return anonymousFunctionDeclaration;
     }
 
+
     /**
      * interface ArrowFunctionExpression <: Function, Expression {
      * type: "ArrowFunctionExpression";
@@ -395,11 +442,15 @@ public class DeclarationVisitor {
         extractFunctionParamters(node, function);
 
         var functionBodyNode = node.get("body");
+
+        BlockStatement bodyBlock = new BlockStatement();
+        bodyBlock.setText("{");
+        function.setBody(new FunctionBody(bodyBlock));
+
         switch (functionBodyNode.getType()) {
+
+
             case BLOCK_STATEMENT:
-                BlockStatement bodyBlock = new BlockStatement();
-                bodyBlock.setText("{");
-                function.setBody(new FunctionBody(bodyBlock));
                 visitor.getNodeUtil().populateBlockStatementData(functionBodyNode, bodyBlock);
 
                 // Traverse the body statements
@@ -410,7 +461,11 @@ public class DeclarationVisitor {
                 break;
 
             default:
-                throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
+                // TODO load expression as statements
+                //var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(functionBodyNode, bodyBlock);
+                //visitor.visitStatement(functionBodyNode, null, function);
+                break;
+                //throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
         }
 
         return true;
