@@ -1,5 +1,6 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
@@ -16,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class ClassDiffer extends BaseDiffer{
+public class ClassDiffer extends BaseDiffer {
     private final IClassDeclaration class1;
     private final IClassDeclaration class2;
     private final ClassDiff classDiff;
@@ -28,23 +29,17 @@ public class ClassDiffer extends BaseDiffer{
     }
 
     public ClassDiff diff() {
-       // matchStatements();
-        diffChildFunctions();
-        return this.classDiff;
-    }
-
-    /**
-     * Diff all the children functions ony
-     */
-    public void diffChildFunctions() {
         reportAddedAndRemovedOperations();
         createBodyMapperForCommonNamedFunctions();
-//        processAttributes();
-//        checkForAttributeChanges();
+
         // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges();
+        processAttributes();
+        checkForAttributeChanges();
         checkForInlinedOperations();
         checkForExtractedOperations();
+
+        return this.classDiff;
     }
 
     // Adds the added and removed ops in the model diff
@@ -333,26 +328,49 @@ public class ClassDiffer extends BaseDiffer{
         classDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
-    private void matchStatements() {
-        // Create  two functions using to statemtens
-        var function1 = (FunctionDeclaration) classDiff.getContainer1();
-        FunctionDeclaration function2 = (FunctionDeclaration) classDiff.getContainer2();
-        FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
+    protected void processAttributes() {
+        var originalClass = class1;
+        var nextClass = class2;
 
-        int mappings = mapper.mappingsWithoutBlocks();
-        if (mappings > 0) {
-//            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
-//            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
-//            if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
-            if (mappings > mapper.nonMappedElementsT1() && mappings > mapper.nonMappedElementsT2()) {
-//                this.mappings.addAll(mapper.mappings);
-//                this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
-//                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
-//                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
-//                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
-                //this.refactorings.addAll(mapper.getRefactorings());
-                classDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
-                classDiff.setBodyStatementMapper(mapper);
+        for (UMLAttribute attribute : originalClass.getAttributes()) {
+            var matchingAttribute = ClassUtil.containsAttribute(nextClass, attribute);
+            if (matchingAttribute == null) {
+                this.classDiff.reportRemovedAttribute(attribute);
+            } else {
+                var attributeDiff = new UMLAttributeDiff(attribute, matchingAttribute/*, this, modelDiff*/);
+                if (!attributeDiff.isEmpty()) {
+                    this.classDiff.getRefactoringsBeforePostProcessing().addAll(attributeDiff.getRefactorings());
+                    this.classDiff.getAttributeDiffList().add(attributeDiff);
+                }
+            }
+        }
+        for (UMLAttribute attribute : nextClass.getAttributes()) {
+            UMLAttribute matchingAttribute = ClassUtil.containsAttribute(originalClass, attribute);
+            if (matchingAttribute == null) {
+                this.classDiff.reportAddedAttribute(attribute);
+            } else {
+                var attributeDiff = new UMLAttributeDiff(matchingAttribute, attribute/*, this, modelDiff*/);
+                if (!attributeDiff.isEmpty()) {
+                    this.classDiff.getRefactoringsBeforePostProcessing().addAll(attributeDiff.getRefactorings());
+                    this.classDiff.getAttributeDiffList().add(attributeDiff);
+                }
+            }
+        }
+    }
+
+    protected void checkForAttributeChanges() throws RefactoringMinerTimedOutException {
+        for (Iterator<UMLAttribute> removedAttributeIterator = classDiff.getRemovedAttributes().iterator(); removedAttributeIterator.hasNext(); ) {
+            UMLAttribute removedAttribute = removedAttributeIterator.next();
+            for (Iterator<UMLAttribute> addedAttributeIterator = classDiff.getAddedAttributes().iterator(); addedAttributeIterator.hasNext(); ) {
+                UMLAttribute addedAttribute = addedAttributeIterator.next();
+                if (removedAttribute.getName().equals(addedAttribute.getName())) {
+                    UMLAttributeDiff attributeDiff = new UMLAttributeDiff(removedAttribute, addedAttribute/*, this, modelDiff*/);
+                    this.classDiff.getRefactoringsBeforePostProcessing().addAll(attributeDiff.getRefactorings());
+                    addedAttributeIterator.remove();
+                    removedAttributeIterator.remove();
+                    this.classDiff.getAttributeDiffList().add(attributeDiff);
+                    break;
+                }
             }
         }
     }

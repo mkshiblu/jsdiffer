@@ -20,4 +20,22 @@ public class ClassUtil {
             , IClassDeclaration class2) {
         return class1.getName().equals(class1.getName());
     }
+
+    public static boolean containsAttributeWithName(IClassDeclaration classDeclaration, UMLAttribute attribute) {
+        return classDeclaration.getAttributes()
+                .stream()
+                .anyMatch(field -> field.getName().equals(attribute.getName()));
+    }
+
+    public static UMLAttribute findAttributeWithName(IClassDeclaration classDeclaration, UMLAttribute attribute) {
+        return classDeclaration.getAttributes()
+                .stream()
+                .filter(field -> field.getName().equals(attribute.getName()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static UMLAttribute containsAttribute(IClassDeclaration classDeclaration, UMLAttribute attribute) {
+        return findAttributeWithName(classDeclaration, attribute);
+    }
 }

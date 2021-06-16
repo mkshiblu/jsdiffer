@@ -36,4 +36,24 @@ public class ClassDiff extends ContainerDiff {
     public boolean getStaticChanged() {
         return this.staticChanged;
     }
+
+    public void reportRemovedAttribute(UMLAttribute attribute) {
+        this.removedAttributes.add(attribute);
+    }
+
+    public void reportAddedAttribute(UMLAttribute attribute) {
+        this.addedAttributes.add(attribute);
+    }
+
+    public List<UMLAttributeDiff> getAttributeDiffList() {
+        return attributeDiffList;
+    }
+
+    public List<UMLAttribute> getAddedAttributes() {
+        return addedAttributes;
+    }
+
+    public List<UMLAttribute> getRemovedAttributes() {
+        return removedAttributes;
+    }
 }
