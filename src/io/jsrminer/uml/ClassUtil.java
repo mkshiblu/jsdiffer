@@ -21,6 +21,11 @@ public class ClassUtil {
         return class1.getName().equals(class1.getName());
     }
 
+    public static boolean qualifiedNameEquals(IClassDeclaration class1
+            , IClassDeclaration class2) {
+        return class1.getQualifiedName().equals(class1.getQualifiedName());
+    }
+
     public static boolean containsAttributeWithName(IClassDeclaration classDeclaration, UMLAttribute attribute) {
         return classDeclaration.getAttributes()
                 .stream()
@@ -37,5 +42,8 @@ public class ClassUtil {
 
     public static UMLAttribute containsAttribute(IClassDeclaration classDeclaration, UMLAttribute attribute) {
         return findAttributeWithName(classDeclaration, attribute);
+    }
+
+    public static boolean hasSameKind(IClassDeclaration class1, IClassDeclaration class2) {
     }
 }

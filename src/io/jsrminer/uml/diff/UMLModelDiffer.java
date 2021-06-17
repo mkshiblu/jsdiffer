@@ -22,7 +22,7 @@ public class UMLModelDiffer {
         checkForMovedFiles(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLSourceFileMatcher.Move(), modelDiff);
         checkForRenamedFiles(renamedFileHints, new UMLSourceFileMatcher.Rename(), modelDiff);
 
-        //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.Move());
+        checkForMovedClasses(renamedFileHints, umlModel1.getRepositoryDirectories(), new UMLClassMatcher.Move());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
 
         diffCommonNamedFiles(modelDiff);
@@ -46,6 +46,13 @@ public class UMLModelDiffer {
             if (!umlModel1.getSourceFileModels().containsKey(umlClass.getFilepath()))
                 modelDiff.reportAddedFile(umlClass);
         }
+    }
+
+    public void checkForMovedClasses(Map<String, String> renamedFileHints
+            , Set<String> repositoryDirectories
+            , UMLSourceFileMatcher matcher
+            , UMLModelDiff modelDiff) {
+
     }
 
     public void checkForMovedFiles(Map<String, String> renamedFileHints
