@@ -45,5 +45,33 @@ public class ClassUtil {
     }
 
     public static boolean hasSameKind(IClassDeclaration class1, IClassDeclaration class2) {
+//        if(this.isInterface != umlClass.isInterface)
+//            return false;
+//        if(!equalTypeParameters(umlClass))
+//            return false;
+//        return true;
+//
+        return true;
+    }
+
+    public static boolean containsOperationWithTheSameSignatureIgnoringChangedTypes(IClassDeclaration classDeclaration, IFunctionDeclaration operation) {
+        for (var originalOperation : classDeclaration.getFunctionDeclarations()) {
+            if (FunctionUtil.equalSignatureIgnoringChangedTypes(originalOperation, operation)) {
+                boolean originalOperationEmptyBody = originalOperation.getBody() == null
+                        || originalOperation.hasEmptyBody();
+                boolean operationEmptyBody = operation.getBody() == null || operation.hasEmptyBody();
+                if (originalOperationEmptyBody == operationEmptyBody)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean containsAttributeWithTheSameNameIgnoringChangedType(IClassDeclaration classDeclaration, UMLAttribute attribute) {
+        for (UMLAttribute originalAttribute : classDeclaration.getAttributes()) {
+            if (originalAttribute.equalsIgnoringChangedType(attribute))
+                return true;
+        }
+        return false;
     }
 }

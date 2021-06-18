@@ -196,4 +196,59 @@ public class FunctionUtil {
     public static boolean equalTopLevelAnonymousFunctionDeclarationCount(IContainer container1, IContainer container2) {
         return container1.getAnonymousFunctionDeclarations().size() == container2.getAnonymousFunctionDeclarations().size();
     }
+
+    public static boolean equalSignatureIgnoringChangedTypes(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        if (!(operation1.isConstructor() && operation2.isConstructor() || equivalentName(operation1, operation2)))
+            return false;
+
+//        if(operation1.isAbstract != operation.isAbstract)
+//            return false;
+		/*if(this.isStatic != operation.isStatic)
+			return false;
+		if(this.isFinal != operation.isFinal)
+			return false;*/
+        if (!equalParameterCount(operation1, operation2))
+            return false;
+//        if (!equalTypeParameters(operation))
+//            return false;
+        int i = 0;
+        for (UMLParameter thisParameter : operation1.getParameters()) {
+            UMLParameter otherParameter = operation2.getParameters().get(i);
+            if (!thisParameter.equals(otherParameter)
+                    && !parameterEqualsExcludingType(thisParameter, otherParameter))
+                return false;
+            i++;
+        }
+        return true;
+    }
+
+    public static boolean parameterEqualsExcludingType(UMLParameter parameter1, UMLParameter parameter2) {
+        return parameter1.name.equals(parameter2.name);
+        //&& parameter1.get.equals(parameter.kind);
+    }
+
+    private static boolean equivalentName(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        return nameEquals(operation1, operation2) || equivalentNames(operation1, operation2) || equivalentNames(operation2, operation1);
+    }
+
+    private static boolean equivalentNames(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        boolean equalReturn = true;//operation1.equalReturnParameter(operation2)
+//                && operation1.getParametersWithoutReturnType().size() > 0
+//                && operation2.getParametersWithoutReturnType().size() > 0;
+
+        if (operation1.getName().startsWith(operation2.getName())
+                && !operation2.getName().equals("get")
+                && !operation2.getName().equals("set")
+                && !operation2.getName().equals("print")) {
+            String suffix1 = operation1.getName().substring(operation2.getName().length(), operation1.getName().length());
+            String className2 = operation2.getParentContainerQualifiedName().contains(".")
+                    ? operation2.getParentContainerQualifiedName().substring(operation2.getParentContainerQualifiedName().lastIndexOf(".") + 1, operation2.getParentContainerQualifiedName().length())
+                    : operation2.getParentContainerQualifiedName();
+
+            return operation2.getName().length() > operation1.getName().length() - operation2.getName().length()
+                    || equalReturn
+                    || className2.contains(suffix1);
+        }
+        return false;
+    }
 }

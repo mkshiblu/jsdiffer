@@ -18,14 +18,22 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class UMLClassMatcher {
-    public abstract boolean match(ClassDeclaration removedClass, ClassDeclaration addedClass, String renamedFile);
+    public abstract boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile);
 
     public static class Move extends UMLClassMatcher {
-        public boolean match(ClassDeclaration removedClass, ClassDeclaration addedClass, String renamedFile) {
+        public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
 
             return (addedClass.getSourceLocation().getFilePath().equals(renamedFile)
                     || hasSameAttributesAndOperations(removedClass, addedClass))
                     && hasSameNameAndKind(removedClass, addedClass);
+        }
+    }
+
+    public static class Rename extends UMLClassMatcher {
+        public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
+            return ClassUtil.hasSameKind(removedClass, addedClass)
+                    && (hasSameAttributesAndOperations(removedClass, addedClass)
+                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile));
         }
     }
 
@@ -36,14 +44,7 @@ public abstract class UMLClassMatcher {
 //                    || hasCommonAttributesAndOperations(removedFile, addedFile));
 //        }
 //    }
-//
-//    public static class Rename extends UMLClassMatcher {
-//        public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFileHint) {
-//            return removedFile.getDirectoryPath().equals(addedFile.getDirectoryPath())
-//                    && (addedFile.getFilepath().equals(renamedFileHint)
-//                    || hasSameOperationsAndStatements(removedFile, addedFile));
-//        }
-//    }
+
 //
 //    public static class RelaxedRename extends UMLClassMatcher {
 //        public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFileHint) {
@@ -73,22 +74,23 @@ public abstract class UMLClassMatcher {
             return false;
 
         for (var operation : class1.getFunctionDeclarations()) {
-            if (!class1.containsOperationWithTheSameSignatureIgnoringChangedTypes(operation)) {
+            if (!ClassUtil.containsOperationWithTheSameSignatureIgnoringChangedTypes(class1, operation)) {
                 return false;
             }
         }
         for (var operation : class2.getFunctionDeclarations()) {
-            if (!class2.containsOperationWithTheSameSignatureIgnoringChangedTypes(operation)) {
+            if (!ClassUtil.containsOperationWithTheSameSignatureIgnoringChangedTypes(class2, operation)) {
                 return false;
             }
         }
-        for (UMLAttribute attribute : attributes) {
-            if (!umlClass.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
+        for (UMLAttribute attribute : class1.getAttributes()) {
+            if (!ClassUtil.containsAttributeWithTheSameNameIgnoringChangedType(class2, attribute)) {
                 return false;
             }
         }
-        for (UMLAttribute attribute : umlClass.attributes) {
-            if (!this.containsAttributeWithTheSameNameIgnoringChangedType(attribute)) {
+
+        for (UMLAttribute attribute : class2.getAttributes()) {
+            if (!ClassUtil.containsAttributeWithTheSameNameIgnoringChangedType(class1, attribute)) {
                 return false;
             }
         }
