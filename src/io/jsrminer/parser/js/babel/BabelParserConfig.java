@@ -59,4 +59,5 @@ public class BabelParserConfig {
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;
 
     public static boolean appendSemicolonToStatementIfNotPresent = true;
+    public static boolean addAllClassDeclarationsToModelInsteadOfTheirContainers = true;
 }
