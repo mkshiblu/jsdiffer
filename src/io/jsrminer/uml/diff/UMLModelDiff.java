@@ -11,6 +11,7 @@ import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
@@ -29,6 +30,8 @@ public class UMLModelDiff extends Diff {
     private List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
     private List<SourceFileMoveDiff> fileMoveDiffList = new ArrayList<>();
     private List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
+
+    private List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
 
     public UMLModelDiff(UMLModel model1, UMLModel model2) {
         this.model1 = model1;
@@ -959,8 +962,16 @@ public class UMLModelDiff extends Diff {
         return false;
     }
 
-    void reportClassMoveDiff(SourceFileMoveDiff sourceFileMoveDiff) {
+    void reportFileMoveDiff(SourceFileMoveDiff sourceFileMoveDiff) {
         this.fileMoveDiffList.add(sourceFileMoveDiff);
+    }
+
+    void reportClassMoveDiff(UMLClassMoveDiff classMoveDiff) {
+        this.classMoveDiffList.add(classMoveDiff);
+    }
+
+    public List<UMLClassMoveDiff> getClassMoveDiffList() {
+        return classMoveDiffList;
     }
 
     public List<SourceFileMoveDiff> getFileMoveDiffList() {

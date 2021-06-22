@@ -1,22 +1,21 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.RefactoringMinerTimedOutException;
-import io.jsrminer.sourcetree.ClassDeclaration;
 import io.jsrminer.uml.UMLClassMatcher;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLSourceFileMatcher;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UMLModelDiffer {
     UMLModel umlModel1;
     UMLModel umlModel2;
 
-    private final List<ClassDeclaration> addedClasses = new ArrayList<>();
-    private final List<ClassDeclaration> removedClasses = new ArrayList<>();
+    private final List<IClassDeclaration> addedClasses = new ArrayList<>();
+    private final List<IClassDeclaration> removedClasses = new ArrayList<>();
 
     public UMLModelDiffer(UMLModel umlModel1, UMLModel umlModel2) {
         this.umlModel1 = umlModel1;
@@ -71,14 +70,35 @@ public class UMLModelDiffer {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        // Find removed and added
+        // Find removed and added classes
+        classDeclarations1.forEach(classDeclaration1 -> {
+            boolean found = false;
+            for (var classDeclaration2 : classDeclarations2) {
+                if (classNameEqual(classDeclaration1, classDeclaration2)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                removedClasses.add(classDeclaration1);
+            }
+        });
 
-//        var removedClasses = classDeclarations1.stream()
-//                .filter(classDeclaration -> )
-
+        classDeclarations2.forEach(classDeclaration2 -> {
+            boolean found = false;
+            for (var classDeclaration1 : classDeclarations1) {
+                if (classNameEqual(classDeclaration2, classDeclaration1)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                addedClasses.add(classDeclaration2);
+            }
+        });
     }
 
-    boolean classNameEqual(ClassDeclaration removedClass, ClassDeclaration addedClass) {
+    boolean classNameEqual(IClassDeclaration removedClass, IClassDeclaration addedClass) {
         return removedClass.getParentContainerQualifiedName().equals(addedClass.getParentContainerQualifiedName())
                 && removedClass.getQualifiedName().equals(addedClass.getQualifiedName())
                 && removedClass.getSourceLocation().getFilePath()
@@ -89,13 +109,13 @@ public class UMLModelDiffer {
             , UMLModelDiff modelDiff) throws RefactoringMinerTimedOutException {
 
         //
+        for (var removedClassIterator = removedClasses.iterator(); removedClassIterator.hasNext(); ) {
+            var removedClass = removedClassIterator.next();
+            TreeSet<UMLClassMoveDiff> diffSet = new TreeSet<>(new ClassMoveComparator());
 
-        for (Iterator<ClassDeclaration> removedClassIterator = removedClasses.iterator(); removedClassIterator.hasNext(); ) {
-            UMLClass removedClass = removedClassIterator.next();
-            TreeSet<UMLClassMoveDiff> diffSet = new TreeSet<UMLClassMoveDiff>(new ClassMoveComparator());
-            for (Iterator<UMLClass> addedClassIterator = addedClasses.iterator(); addedClassIterator.hasNext(); ) {
-                UMLClass addedClass = addedClassIterator.next();
-                String removedClassSourceFile = removedClass.getSourceFile();
+            for (var addedClassIterator = addedClasses.iterator(); addedClassIterator.hasNext(); ) {
+                var addedClass = addedClassIterator.next();
+                String removedClassSourceFile = removedClass.getSourceLocation().getFilePath();
                 String renamedFile = renamedFileHints.get(removedClassSourceFile);
                 String removedClassSourceFolder = "";
                 if (removedClassSourceFile.contains("/")) {
@@ -122,14 +142,15 @@ public class UMLModelDiffer {
             if (!diffSet.isEmpty()) {
                 UMLClassMoveDiff minClassMoveDiff = diffSet.first();
                 minClassMoveDiff.process();
-                classMoveDiffList.add(minClassMoveDiff);
-                addedClasses.remove(minClassMoveDiff.getMovedClass());
+                modelDiff.reportClassMoveDiff(minClassMoveDiff);
+                addedClasses.remove(minClassMoveDiff.getNextClass());
                 removedClassIterator.remove();
             }
         }
 
-        List<UMLClassMoveDiff> allClassMoves = new ArrayList<UMLClassMoveDiff>(this.classMoveDiffList);
-        Collections.sort(allClassMoves);
+        List<UMLClassMoveDiff> allClassMoves = new ArrayList<>(modelDiff.getClassMoveDiffList());
+        Collections.sort(allClassMoves, (classMove1, classMove2) -> classMove1.getOriginalClass().getQualifiedName()
+                .compareTo(classMove2.originalClass.getName()));
 
         for (int i = 0; i < allClassMoves.size(); i++) {
             UMLClassMoveDiff classMoveI = allClassMoves.get(i);
@@ -198,7 +219,7 @@ public class UMLModelDiffer {
                 SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minClassMoveDiff.getSource1()
                         , minClassMoveDiff.getSource2(), modelDiff);
                 SourceFileDiff sourceDiff = sourceFileDiffer.diff();
-                modelDiff.reportClassMoveDiff(minClassMoveDiff);
+                modelDiff.reportFileMoveDiff(minClassMoveDiff);
                 modelDiff.getAddedFiles().remove(minClassMoveDiff.getMovedFile());
                 removedFilesIterator.remove();
             }
