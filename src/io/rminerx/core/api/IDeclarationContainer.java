@@ -8,11 +8,13 @@ public interface IDeclarationContainer extends IContainer {
      * Returns the qualified name (i.e. using dots to prefix its name by joining parent names)
      */
     @NonNull
-    public String getQualifiedName();
+     String getQualifiedName();
 
     /**
      * Returns the qualified name of the parent container
      * @return
      */
-    public String getParentContainerQualifiedName();
+     String getParentContainerQualifiedName();
+
+    boolean isTopLevel();
 }

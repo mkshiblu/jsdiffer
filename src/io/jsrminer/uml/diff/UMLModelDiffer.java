@@ -1,6 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.RefactoringMinerTimedOutException;
+import io.jsrminer.sourcetree.ClassDeclaration;
 import io.jsrminer.uml.UMLClassMatcher;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLSourceFileMatcher;
@@ -16,6 +17,7 @@ public class UMLModelDiffer {
 
     private final List<IClassDeclaration> addedClasses = new ArrayList<>();
     private final List<IClassDeclaration> removedClasses = new ArrayList<>();
+    private final Set<String> deletedFolderPaths = new LinkedHashSet<>();
 
     public UMLModelDiffer(UMLModel umlModel1, UMLModel umlModel2) {
         this.umlModel1 = umlModel1;
@@ -133,15 +135,15 @@ public class UMLModelDiffer {
                     }
                 }
                 if (matcher.match(removedClass, addedClass, renamedFile)) {
-                    if (!conflictingMoveOfTopLevelClass(removedClass, addedClass)) {
-                        UMLClassMoveDiff classMoveDiff = new UMLClassMoveDiff(removedClass, addedClass, this);
+                    if (!conflictingMoveOfTopLevelClass(modelDiff, removedClass, addedClass)) {
+                        UMLClassMoveDiff classMoveDiff = new UMLClassMoveDiff(removedClass, addedClass);
                         diffSet.add(classMoveDiff);
                     }
                 }
             }
             if (!diffSet.isEmpty()) {
                 UMLClassMoveDiff minClassMoveDiff = diffSet.first();
-                minClassMoveDiff.process();
+                //minClassMoveDiff.process();
                 modelDiff.reportClassMoveDiff(minClassMoveDiff);
                 addedClasses.remove(minClassMoveDiff.getNextClass());
                 removedClassIterator.remove();
@@ -157,12 +159,27 @@ public class UMLModelDiffer {
             for (int j = i + 1; j < allClassMoves.size(); j++) {
                 UMLClassMoveDiff classMoveJ = allClassMoves.get(j);
                 if (classMoveI.isInnerClassMove(classMoveJ)) {
-                    innerClassMoveDiffList.add(classMoveJ);
+                    modelDiff.reportInnerClassMoveDiffList(classMoveJ);
                 }
             }
         }
 
-        this.classMoveDiffList.removeAll(innerClassMoveDiffList);
+        modelDiff.getClassMoveDiffList().removeAll(modelDiff.getInnerClassMoveDiffList());
+    }
+
+    private boolean conflictingMoveOfTopLevelClass(UMLModelDiff modelDiff, IClassDeclaration removedClass, IClassDeclaration addedClass) {
+        if (!removedClass.isTopLevel() && !addedClass.isTopLevel()) {
+//            //check if classMoveDiffList contains already a move for the outer class to a different target
+//            for (UMLClassMoveDiff diff : modelDiff.getClassMoveDiffList()) {
+//                if ((diff.getOriginalClass().getQualifiedName().startsWith(removedClass.getPackageName())
+//                        && !diff.getNextClass().getQualifiedName().startsWith(addedClass.getPackageName()))
+//                        || (!diff.getOriginalClass().getName().startsWith(removedClass.getPackageName())
+//                        &&  diff.getNextClass().getName().startsWith(addedClass.getPackageName()))) {
+//                    return true;
+//                }
+//            }
+        }
+        return false;
     }
 
     public void checkForMovedFiles(Map<String, String> renamedFileHints

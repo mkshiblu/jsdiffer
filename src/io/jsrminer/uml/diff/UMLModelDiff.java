@@ -27,11 +27,12 @@ public class UMLModelDiff extends Diff {
     private final List<ISourceFile> addedFiles = new ArrayList<>();
     private final List<ISourceFile> removedFiles = new ArrayList<>();
 
-    private List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
-    private List<SourceFileMoveDiff> fileMoveDiffList = new ArrayList<>();
-    private List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
+    private final List<SourceFileDiff> commonFilesDiffList = new ArrayList<>();
+    private final List<SourceFileMoveDiff> fileMoveDiffList = new ArrayList<>();
+    private final List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
 
-    private List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
+    private final List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
+    private final List<UMLClassMoveDiff> innerClassMoveDiffList = new ArrayList<>();
 
     public UMLModelDiff(UMLModel model1, UMLModel model2) {
         this.model1 = model1;
@@ -980,5 +981,13 @@ public class UMLModelDiff extends Diff {
 
     public List<SourceFileRenameDiff> getFileRenameDiffList() {
         return fileRenameDiffList;
+    }
+
+    public List<UMLClassMoveDiff> getInnerClassMoveDiffList() {
+        return innerClassMoveDiffList;
+    }
+
+    public void reportInnerClassMoveDiffList(UMLClassMoveDiff classMoveDiff){
+        this.innerClassMoveDiffList.add(classMoveDiff);
     }
 }

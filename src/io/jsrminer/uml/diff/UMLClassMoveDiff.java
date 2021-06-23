@@ -2,6 +2,7 @@ package io.jsrminer.uml.diff;
 
 import com.google.javascript.jscomp.deps.PathUtil;
 import io.jsrminer.io.FileUtil;
+import io.jsrminer.uml.ClassUtil;
 import io.rminerx.core.api.IClassDeclaration;
 
 import java.nio.file.Path;
@@ -30,5 +31,11 @@ public class UMLClassMoveDiff {
         int distance = StringDistance.editDistance(s1, s2);
         double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
         return normalized;
+    }
+
+    //return true if "classMoveDiff" represents the move of a class that is inner to this.originalClass
+    public boolean isInnerClassMove(UMLClassMoveDiff classDiff) {
+        return ClassUtil.isInnerClass(originalClass, classDiff.originalClass)
+                && ClassUtil.isInnerClass(nextClass, nextClass);
     }
 }

@@ -183,6 +183,7 @@ public class BabelNodeUtil {
         } else {
             name = generateNameForAnonymousClassDeclaration(container);
         }
+        classDeclaration.setIsTopLevel(container.getContainerType() == IContainer.ContainerType.File);
         populateContainerNamesAndLocation(classDeclaration, name, node.getSourceLocation(), container);
         //function.setIsConstructor(function.);
     }

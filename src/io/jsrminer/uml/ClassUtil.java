@@ -74,4 +74,12 @@ public class ClassUtil {
         }
         return false;
     }
+
+    public static boolean isInnerClass(IClassDeclaration parentClass, IClassDeclaration childClass) {
+        var parentQualifiedNameWithFilename = parentClass.getSourceLocation().getFilePath()
+                + "\\" + parentClass.getQualifiedName();
+        var childPackageName = childClass.getSourceLocation().getFilePath()
+                + "\\" + childClass.getParentContainerQualifiedName();
+        return parentQualifiedNameWithFilename == childPackageName;
+    }
 }
