@@ -279,7 +279,9 @@ public class DeclarationVisitor {
                 String fieldName = keyNode.getString("name");
                 UMLAttribute attribute = new UMLAttribute(fieldName, node.getSourceLocation());
 
-                var variableDeclaration = new VariableDeclaration(fieldName, null);
+                var variableDeclaration =
+                        createVariableDeclaration(node.getSourceLocation()
+                        , fieldName, null, classDeclaration.getSourceLocation());
                 variableDeclaration.setType(CodeElementType.FIELD_DECLARATION);
                 variableDeclaration.setAttribute(true);
 

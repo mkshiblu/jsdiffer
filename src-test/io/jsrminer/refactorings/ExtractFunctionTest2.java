@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class class2 extends BaseTest {
+public class ExtractFunctionTest2 extends BaseTest {
 
     static List<IRefactoring> refactorings;
     static ExtractOperationRefactoring extractOperationRefactoring;

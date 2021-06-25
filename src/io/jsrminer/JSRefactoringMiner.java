@@ -151,6 +151,21 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         return null;
     }
 
+    public List<IRefactoring> detectBetweenCodeSnippets(String snippetName1, String codeSnippet1,
+                                                        String snippetName2, String codeSnippet2) {
+        try {
+            Map<String, String> fileContentsBefore = Map.of(snippetName1, codeSnippet1);
+            Map<String, String> fileContentsCurrent = Map.of(snippetName2, codeSnippet2);
+            List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings.forEach(r -> log.info(r.toString()));
+            return refactorings;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     Map<String, String> populateFileContents(SourceFile[] files) throws IOException {
         Map<String, String> fileContents = new LinkedHashMap<>();
         for (int i = 0; i < files.length; i++) {

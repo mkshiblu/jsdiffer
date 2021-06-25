@@ -9,4 +9,6 @@ public interface IClassDeclaration extends IDeclarationContainer {
     void addAttribute(UMLAttribute attribute);
 
     List<UMLAttribute> getAttributes();
+
+    UMLType getSuperClass();
 }

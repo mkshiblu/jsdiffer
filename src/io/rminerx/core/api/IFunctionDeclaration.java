@@ -10,4 +10,5 @@ public interface IFunctionDeclaration extends IDeclarationContainer{
     List<UMLParameter> getParameters();
     boolean isConstructor();
     List<String> getParameterNameList();
+    boolean hasEmptyBody();
 }

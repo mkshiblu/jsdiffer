@@ -7,6 +7,8 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static io.jsrminer.parser.js.babel.BabelParserConfig.treatCallExpressionOperandAsTheFunctionName;
 
@@ -84,6 +86,10 @@ public class InvocationVisitor {
         switch (callee.getType()) {
             case IDENTIFIER:
                 name = callee.getString("name");
+                break;
+
+            case SUPER:
+                name = calleeText;
                 break;
 
             case MEMBER_EXPRESSION:
@@ -180,10 +186,6 @@ public class InvocationVisitor {
                 visitor.visitExpression(callee, leaf, container);
                 parsedProperly = false;
                 break;
-//            case TEMPLATE_LITERAL_EXPRESSION:
-//                io.jsrminer.parser.js.closurecompiler.Visitor.visitExpression(callee, leaf, container);
-//                parsedProperly = false;
-//                break;
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getType() + " at " + callee.getSourceLocation().toString());
         }

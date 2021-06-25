@@ -50,6 +50,4 @@ public interface IContainer extends INode {
     Map<String, IFunctionDeclaration> getFunctionDeclarationsQualifiedNameMapUpToDepth(int depth);
 
     void registerFunctionDeclaration(IFunctionDeclaration functionDeclaration);
-
-    boolean hasEmptyBody();
 }

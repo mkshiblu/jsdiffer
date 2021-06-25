@@ -66,7 +66,7 @@ public class UMLModelDiffer {
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
 
-        var classDeclarations2 = modelDiff.model1.getSourceFileModels().values()
+        var classDeclarations2 = modelDiff.model2.getSourceFileModels().values()
                 .stream()
                 .map(sourceFile -> sourceFile.getClassDeclarations())
                 .flatMap(List::stream)

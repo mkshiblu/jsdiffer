@@ -29,6 +29,7 @@ public enum BabelNodeType {
     UPDATE_EXPRESSION("UpdateExpression"),
     NEW_EXPRESSION("NewExpression"),
     THIS_EXPRESSION("ThisExpression"),
+    SUPER("Super"),
     SEQUENCE_EXPRESSION("SequenceExpression"),
 
     IDENTIFIER("Identifier"),
