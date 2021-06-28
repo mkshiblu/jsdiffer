@@ -9,6 +9,8 @@ public interface IFunctionDeclaration extends IDeclarationContainer{
     FunctionBody getBody();
     List<UMLParameter> getParameters();
     boolean isConstructor();
+    boolean isStatic();
     List<String> getParameterNameList();
     boolean hasEmptyBody();
+    String getSignatureText();
 }

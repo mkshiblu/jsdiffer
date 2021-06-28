@@ -1,7 +1,11 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.uml.diff.StringDistance;
 import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClassUtil {
     public static boolean isEqual(IClassDeclaration class1
@@ -73,6 +77,36 @@ public class ClassUtil {
                 return true;
         }
         return false;
+    }
+
+    public static IFunctionDeclaration operationWithTheSameSignatureIgnoringChangedTypes(IClassDeclaration classDeclaration, IFunctionDeclaration operation) {
+        List<IFunctionDeclaration> matchingOperations = new ArrayList<>();
+        for (var originalOperation : classDeclaration.getFunctionDeclarations()) {
+            boolean matchesOperation = //isInterface() ?
+                    //originalOperation.equalSignatureIgnoringChangedTypes(operation) :
+                    FunctionUtil.equalSignatureWithIdenticalNameIgnoringChangedTypes(originalOperation, operation);
+            if (matchesOperation) {
+                boolean originalOperationEmptyBody = originalOperation.getBody() == null || originalOperation.hasEmptyBody();
+                boolean operationEmptyBody = operation.getBody() == null || operation.hasEmptyBody();
+                if (originalOperationEmptyBody == operationEmptyBody)
+                    matchingOperations.add(originalOperation);
+            }
+        }
+        if (matchingOperations.size() == 1) {
+            return matchingOperations.get(0);
+        } else if (matchingOperations.size() > 1) {
+            int minDistance = StringDistance.editDistance(matchingOperations.get(0).toString(), operation.toString());
+            var matchingOperation = matchingOperations.get(0);
+            for (int i = 1; i < matchingOperations.size(); i++) {
+                int distance = StringDistance.editDistance(matchingOperations.get(i).toString(), operation.toString());
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    matchingOperation = matchingOperations.get(i);
+                }
+            }
+            return matchingOperation;
+        }
+        return null;
     }
 
     public static boolean isInnerClass(IClassDeclaration parentClass, IClassDeclaration childClass) {

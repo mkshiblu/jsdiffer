@@ -143,7 +143,7 @@ public class UMLModelDiffer {
             }
             if (!diffSet.isEmpty()) {
                 UMLClassMoveDiff minClassMoveDiff = diffSet.first();
-                //minClassMoveDiff.process();
+                minClassMoveDiff.process();
                 modelDiff.reportClassMoveDiff(minClassMoveDiff);
                 addedClasses.remove(minClassMoveDiff.getNextClass());
                 removedClassIterator.remove();

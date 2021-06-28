@@ -40,6 +40,12 @@ public class FunctionUtil {
                 && equalParameterNames(function1, function2);
     }
 
+
+    public static boolean equalQualifiedName(IFunctionDeclaration function1
+            , IFunctionDeclaration function2) {
+        return function1.getQualifiedName() == function2.getQualifiedName();
+    }
+
     /**
      * Returns true if all these are eaual of two IsEmptyBody, ParentContainerQualifiedName, name,
      * and parameter names and count are same in order
@@ -203,8 +209,9 @@ public class FunctionUtil {
 
 //        if(operation1.isAbstract != operation.isAbstract)
 //            return false;
-		/*if(this.isStatic != operation.isStatic)
-			return false;
+        if (operation1.isStatic() != operation2.isStatic())
+            return false;
+		/*
 		if(this.isFinal != operation.isFinal)
 			return false;*/
         if (!equalParameterCount(operation1, operation2))
@@ -214,8 +221,8 @@ public class FunctionUtil {
         int i = 0;
         for (UMLParameter thisParameter : operation1.getParameters()) {
             UMLParameter otherParameter = operation2.getParameters().get(i);
-            if (!thisParameter.equals(otherParameter)
-                    && !parameterEqualsExcludingType(thisParameter, otherParameter))
+            if (/*!thisParameter.equals(otherParameter)
+                    &&*/ !parameterEqualsExcludingType(thisParameter, otherParameter))
                 return false;
             i++;
         }
@@ -250,5 +257,31 @@ public class FunctionUtil {
                     || className2.contains(suffix1);
         }
         return false;
+    }
+
+    public static boolean equalSignatureWithIdenticalNameIgnoringChangedTypes(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        if (!(operation1.isConstructor() && operation2.isConstructor() || operation1.getName().equals(operation2.getName())))
+            return false;
+
+//        if(operation1.isAbstract != operation.isAbstract)
+//            return false;
+        /*if(operation1.isStatic() != operation2.isStatic())
+            return false;
+
+		if(this.isFinal != operation.isFinal)
+			return false;*/
+        if (!equalParameterCount(operation1, operation2))
+            return false;
+//        if (!equalTypeParameters(operation))
+//            return false;
+        int i = 0;
+        for (UMLParameter thisParameter : operation1.getParameters()) {
+            UMLParameter otherParameter = operation2.getParameters().get(i);
+            if (/*!thisParameter.equals(otherParameter)
+                    &&*/ !parameterEqualsExcludingType(thisParameter, otherParameter))
+                return false;
+            i++;
+        }
+        return true;
     }
 }

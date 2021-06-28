@@ -32,7 +32,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private ContainerDiff sourceFileDiff;
+    private ContainerDiff containerDiff;
     private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
@@ -44,31 +44,31 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , ContainerDiff sourceFileDiff) {
+            , ContainerDiff containerDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
-        this.sourceFileDiff = sourceFileDiff;
+        this.containerDiff = containerDiff;
         map();
         mapChildFunctionDeclarations(function1, function2);
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
-            , ContainerDiff sourceFileDiff) {
-        this(new UMLOperationDiff(function1, function2), sourceFileDiff);
+            , ContainerDiff containerDiff) {
+        this(new UMLOperationDiff(function1, function2), containerDiff);
     }
 
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
-    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff sourceFileDiff
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff containerDiff
 
             , Map<String, String> parameterToArgumentMap1
             , Map<String, String> parameterToArgumentMap2) {
         this.function1 = mapper.function1;
         this.function2 = addedOperation;
         this.callerFunction = mapper.function2;
-        this.sourceFileDiff = sourceFileDiff;
+        this.containerDiff = containerDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
         this.parentMapper = mapper;
         this.parameterToArgumentMap1 = parameterToArgumentMap1;
@@ -82,7 +82,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;
         this.callerFunction = operationBodyMapper.function1;
-        this.sourceFileDiff = classDiff;
+        this.containerDiff = classDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
         mapRemovedOperation(parameterToArgumentMap);
     }
@@ -608,7 +608,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private List<TreeSet<LeafCodeFragmentMapping>> matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends
             CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
-        ReplacementFinder replacementFinder = new ReplacementFinder(this, sourceFileDiff);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
         List<TreeSet<LeafCodeFragmentMapping>> postponedMappingSets = new ArrayList<>();
 
         Iterator<? extends CodeFragment> it1 = leaves1.iterator();
@@ -702,8 +702,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap
             , boolean ignoreNestingDepth) {
 
-        List<FunctionDeclaration> removedOperations = sourceFileDiff != null ? sourceFileDiff.getRemovedOperations() : new ArrayList<>();
-        List<FunctionDeclaration> addedOperations = sourceFileDiff != null ? sourceFileDiff.getAddedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
 
         if (innerNodes1.size() <= innerNodes2.size()) {
             for (ListIterator<BlockStatement> listIterator1 = new ArrayList<>(innerNodes1).listIterator(); listIterator1.hasNext(); ) {
@@ -777,7 +777,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void matchInnerNodesWithVariableRenames
             (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
-        ReplacementFinder replacementFinder = new ReplacementFinder(this, sourceFileDiff);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, containerDiff);
 
         if (innerNodes1.size() <= innerNodes2.size()) {
             // exact matching - inner nodes - with variable renames
@@ -836,8 +836,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
-        List<FunctionDeclaration> removedOperations = sourceFileDiff != null ? sourceFileDiff.getRemovedOperations() : new ArrayList<>();
-        List<FunctionDeclaration> addedOperations = sourceFileDiff != null ? sourceFileDiff.getAddedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> removedOperations = containerDiff != null ? containerDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = containerDiff != null ? containerDiff.getAddedOperations() : new ArrayList<>();
 
         Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(statement1
                 , statement2
@@ -916,11 +916,11 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public ContainerDiff getContainerDiff() {
-        return sourceFileDiff;
+        return containerDiff;
     }
 
     public Set<IRefactoring> getRefactoringsByVariableAnalysis() {
-        VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, sourceFileDiff);
+        VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, containerDiff);
         // Local (variables & Paramters)
         refactorings.addAll(analysis.getVariableRenames());
         refactorings.addAll(analysis.getVariableMerges());
