@@ -2,31 +2,36 @@ package io.jsrminer.uml.diff;
 
 import io.rminerx.core.api.ISourceFile;
 
-public class SourceFileRenameDiff extends SourceFileDiff {
+public class SourceFileRenameDiff extends ContainerDiff {
 
     private final double normalizedNameDistance;
     private final double normalizedDirectoryPathDistance;
 
-    public SourceFileRenameDiff(ISourceFile originalClass, ISourceFile renamedClass/*, UMLModelDiff modelDiff*/) {
-        super(originalClass, renamedClass/*, modelDiff*/);
+    ISourceFile originalFile;
+    ISourceFile renamedFile;
+
+    public SourceFileRenameDiff(ISourceFile originalFile, ISourceFile renamedFile/*, UMLModelDiff modelDiff*/) {
+        super(originalFile, renamedFile/*, modelDiff*/);
         this.normalizedNameDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getName(), getOriginalFile().getName());
         this.normalizedDirectoryPathDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getDirectoryPath(), getOriginalFile().getDirectoryPath());
+        this.originalFile = originalFile;
+        this.renamedFile = renamedFile;
     }
 
     public ISourceFile getRenamedFile() {
-        return super.getSource2();
+        return renamedFile;
     }
 
     public ISourceFile getOriginalFile() {
-        return super.getSource1();
+        return originalFile;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("file ");
-        sb.append(getSource1().getFilepath());
+        sb.append(originalFile.getFilepath());
         sb.append(" was renamed to ");
-        sb.append(getSource2().getFilepath());
+        sb.append(renamedFile.getFilepath());
         sb.append(System.lineSeparator());
         return sb.toString();
     }

@@ -16,7 +16,7 @@ import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
-public class ContainerDiff {
+public class ContainerDiff<T extends IContainer> {
     private FunctionBodyMapper bodyStatementMapper;
 
     protected final List<FunctionDeclaration> addedOperations = new ArrayList<>();
@@ -24,30 +24,30 @@ public class ContainerDiff {
     protected final List<IClassDeclaration> addedClasses = new ArrayList<>();
     protected final List<IClassDeclaration> removedClasses = new ArrayList<>();
     protected final List<UMLOperationDiff> operationDiffList = new ArrayList<>();
+    private final List<ClassDiff> commonClassDiffList = new ArrayList<>();
 
     protected final List<IRefactoring> refactorings = new ArrayList<>();
     protected Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
     protected Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
-    protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
-    protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
-
+    protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<>();
+    protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<>();
     protected final List<FunctionBodyMapper> operationBodyMapperList = new ArrayList<>();
 
     MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
 
-    final IContainer container1;
-    final IContainer container2;
+    final T container1;
+    final T container2;
 
-    public ContainerDiff(IContainer container1, IContainer container2) {
+    public ContainerDiff(T container1, T container2) {
         this.container1 = container1;
         this.container2 = container2;
     }
 
-    public IContainer getContainer1() {
+    public T getContainer1() {
         return container1;
     }
 
-    public IContainer getContainer2() {
+    public T getContainer2() {
         return container2;
     }
 
@@ -143,8 +143,6 @@ public class ContainerDiff {
 
     /**
      * Similar to Rminer UMLBaseClass.getRefactoring()
-     *
-     * @return
      */
     public List<IRefactoring> getAllRefactorings() {
         List<IRefactoring> refactorings = new ArrayList<>(this.refactorings);
@@ -286,5 +284,13 @@ public class ContainerDiff {
 
     public List<IClassDeclaration> getAddedClasses() {
         return this.addedClasses;
+    }
+
+    public void reportCommonClassDiffList(ClassDiff diff) {
+        this.commonClassDiffList.add(diff);
+    }
+
+    public List<ClassDiff> getCommonClassDiffList() {
+        return commonClassDiffList;
     }
 }

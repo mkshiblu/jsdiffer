@@ -81,7 +81,7 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousFunctionDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
-        ContainerDiffer differ = new ContainerDiffer(anonymousFunctionDeclaration1, anonymousClassDeclaration2);
+        ContainerDiffer<IAnonymousFunctionDeclaration> differ = new ContainerDiffer<>(anonymousFunctionDeclaration1, anonymousClassDeclaration2);
         var diff = differ.diff();
 //                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
 //                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
@@ -104,7 +104,7 @@ public class AnonymousFunctionReplacementFinder {
         return null;
     }
 
-    boolean isAnonymousBodyMatched(ContainerDiff anonymousDiff) {
+    boolean isAnonymousBodyMatched(ContainerDiff<IAnonymousFunctionDeclaration> anonymousDiff) {
         int matchedOperations = anonymousDiff.getOperationBodyMapperList().size();
         if (matchedOperations > 0) {
             return true;
@@ -130,7 +130,7 @@ public class AnonymousFunctionReplacementFinder {
         return false;
     }
 
-    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff anonymousClassDiff) {
+    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff<IAnonymousFunctionDeclaration> anonymousClassDiff) {
         var matchedOperationMappers = anonymousClassDiff.getOperationBodyMapperList();
         if (matchedOperationMappers.size() > 0) {
 

@@ -5,14 +5,12 @@ import io.jsrminer.refactorings.*;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.ContainerDiff;
-import io.jsrminer.uml.diff.SourceFileDiff;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.diff.UMLParameterDiff;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
-import io.rminerx.core.entities.Container;
 
 import java.util.*;
 

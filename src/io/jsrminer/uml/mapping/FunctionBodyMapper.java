@@ -10,6 +10,7 @@ import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.replacement.*;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
@@ -32,7 +33,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private ContainerDiff containerDiff;
+    private ContainerDiff<? extends IContainer> containerDiff;
     private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
@@ -44,7 +45,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , ContainerDiff containerDiff) {
+            , ContainerDiff<? extends IContainer> containerDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
@@ -54,14 +55,14 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
-            , ContainerDiff containerDiff) {
+            , ContainerDiff<? extends IContainer> containerDiff) {
         this(new UMLOperationDiff(function1, function2), containerDiff);
     }
 
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
-    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff containerDiff
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff<? extends IContainer> containerDiff
 
             , Map<String, String> parameterToArgumentMap1
             , Map<String, String> parameterToArgumentMap2) {
@@ -77,7 +78,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public FunctionBodyMapper(FunctionDeclaration removedOperation, FunctionBodyMapper operationBodyMapper
-            , Map<String, String> parameterToArgumentMap, ContainerDiff classDiff) {
+            , Map<String, String> parameterToArgumentMap, ContainerDiff<? extends IContainer> classDiff) {
         this.parentMapper = operationBodyMapper;
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;
@@ -174,7 +175,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void mapChildFunctionDeclarations(FunctionDeclaration function1, FunctionDeclaration function2) {
         // Maps the functions that are immediately declared into this mapper
         if (function1.getFunctionDeclarations().size() > 0 && function2.getFunctionDeclarations().size() > 0) {
-            var differ = new ContainerDiffer(function1, function2);
+            var differ = new ContainerDiffer<IFunctionDeclaration>(function1, function2);
             var diff = differ.diffChildFunctions();
             this.refactorings.addAll(diff.getAllRefactorings());
         }
@@ -915,7 +916,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return refactorings;
     }
 
-    public ContainerDiff getContainerDiff() {
+    public ContainerDiff<? extends IContainer> getContainerDiff() {
         return containerDiff;
     }
 

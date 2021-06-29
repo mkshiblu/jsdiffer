@@ -6,6 +6,7 @@ import io.jsrminer.uml.UMLClassMatcher;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLSourceFileMatcher;
 import io.rminerx.core.api.IClassDeclaration;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
@@ -152,7 +153,7 @@ public class UMLModelDiffer {
 
         List<UMLClassMoveDiff> allClassMoves = new ArrayList<>(modelDiff.getClassMoveDiffList());
         Collections.sort(allClassMoves, (classMove1, classMove2) -> classMove1.getOriginalClass().getQualifiedName()
-                .compareTo(classMove2.originalClass.getName()));
+                .compareTo(classMove2.getOriginalClass().getName()));
 
         for (int i = 0; i < allClassMoves.size(); i++) {
             UMLClassMoveDiff classMoveI = allClassMoves.get(i);
@@ -231,13 +232,13 @@ public class UMLModelDiffer {
             }
 
             if (!diffSet.isEmpty()) {
-                SourceFileMoveDiff minClassMoveDiff = diffSet.first();
+                SourceFileMoveDiff minFileMoveDiff = diffSet.first();
                 //minClassMoveDiff.process();
-                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minClassMoveDiff.getSource1()
-                        , minClassMoveDiff.getSource2(), modelDiff);
-                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
-                modelDiff.reportFileMoveDiff(minClassMoveDiff);
-                modelDiff.getAddedFiles().remove(minClassMoveDiff.getMovedFile());
+                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minFileMoveDiff.getOriginalFile()
+                        , minFileMoveDiff.getMovedFile(), modelDiff);
+                var sourceDiff = sourceFileDiffer.diff();
+                modelDiff.reportFileMoveDiff(minFileMoveDiff);
+                modelDiff.getAddedFiles().remove(minFileMoveDiff.getMovedFile());
                 removedFilesIterator.remove();
             }
         }
@@ -279,12 +280,12 @@ public class UMLModelDiffer {
             }
 
             if (!diffSet.isEmpty()) {
-                var minClassRenameDiff = diffSet.first();
-                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minClassRenameDiff.getSource1()
-                        , minClassRenameDiff.getSource2(), modelDiff);
-                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
-                modelDiff.getFileRenameDiffList().add(minClassRenameDiff);
-                modelDiff.getAddedFiles().remove(minClassRenameDiff.getRenamedFile());
+                var minFileRenameDiff = diffSet.first();
+                SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minFileRenameDiff.getOriginalFile()
+                        , minFileRenameDiff.getRenamedFile(), modelDiff);
+                var containerDiff = sourceFileDiffer.diff();
+                modelDiff.getFileRenameDiffList().add(minFileRenameDiff);
+                modelDiff.getAddedFiles().remove(minFileRenameDiff.getRenamedFile());
                 removedClassIterator.remove();
             }
         }
@@ -298,21 +299,21 @@ public class UMLModelDiffer {
             // Check if model2 contains the same file
             if (sourceFileModel2 != null) {
                 SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(entry.getValue(), sourceFileModel2, modelDiff);
-                SourceFileDiff sourceDiff = sourceFileDiffer.diff();
+                ContainerDiff<ISourceFile> containerDiff = sourceFileDiffer.diff();
 
-                boolean isEmpty = sourceDiff.getAddedOperations().isEmpty()
-                        && sourceDiff.getRemovedOperations().isEmpty()
+                boolean isEmpty = containerDiff.getAddedOperations().isEmpty()
+                        && containerDiff.getRemovedOperations().isEmpty()
                         //&& addedAttributes.isEmpty() && removedAttributes.isEmpty() &&
                         // addedEnumConstants.isEmpty() && removedEnumConstants.isEmpty()
-                        && sourceDiff.getOperationDiffList().isEmpty()
+                        && containerDiff.getOperationDiffList().isEmpty()
                         //&& attributeDiffList.isEmpty()
-                        && sourceDiff.getBodyStatementMapper() == null
-                        && sourceDiff.getOperationBodyMapperList().isEmpty();
+                        && containerDiff.getBodyStatementMapper() == null
+                        && containerDiff.getOperationBodyMapperList().isEmpty();
                 //&& enumConstantDiffList.isEmpty()
                 //&& !visibilityChanged && !abstractionChanged;
 
                 if (!isEmpty) {
-                    modelDiff.getCommonFilesDiffList().add(sourceDiff);
+                    modelDiff.getCommonFilesDiffList().add(containerDiff);
                 }
             }
         }

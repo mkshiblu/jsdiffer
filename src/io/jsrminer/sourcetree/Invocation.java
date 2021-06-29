@@ -1,6 +1,6 @@
 package io.jsrminer.sourcetree;
 
-import io.jsrminer.uml.diff.SourceFileDiff;
+import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.SourceFileDiffer;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
@@ -317,7 +317,7 @@ public abstract class Invocation extends CodeEntity {
     public boolean renamedWithIdenticalArgumentsAndNoExpression(Invocation call, double distance, List<FunctionBodyMapper> lambdaMappers) {
         boolean allExactLambdaMappers = lambdaMappers.size() > 0;
         for (FunctionBodyMapper lambdaMapper : lambdaMappers) {
-            if (!SourceFileDiff.allMappingsAreExactMatches(lambdaMapper)) {
+            if (!ContainerDiff.allMappingsAreExactMatches(lambdaMapper)) {
                 allExactLambdaMappers = false;
                 break;
             }

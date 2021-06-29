@@ -40,6 +40,11 @@ public interface IContainer extends INode {
     String getQualifiedName();
 
     /**
+     * Returns the qualified name of the parent container
+     * @return
+     */
+    String getParentContainerQualifiedName();
+    /**
      * For depth 2 it will return all the functions including in statements, anonymous etc.
      */
     List<IFunctionDeclaration> getFunctionDeclarationsUpToDepth(int depth);

@@ -6,7 +6,7 @@ import io.rminerx.core.api.IClassDeclaration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassDiff extends ContainerDiff {
+public class ClassDiff extends ContainerDiff<IClassDeclaration> {
 
     protected List<UMLAttribute> addedAttributes = new ArrayList<>();
     protected List<UMLAttribute> removedAttributes = new ArrayList<>();
