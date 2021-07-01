@@ -1,12 +1,7 @@
 package io.jsrminer.uml.diff;
 
-import com.google.javascript.jscomp.deps.PathUtil;
-import io.jsrminer.io.FileUtil;
-import io.jsrminer.sourcetree.UMLClassBaseDiff;
 import io.jsrminer.uml.ClassUtil;
 import io.rminerx.core.api.IClassDeclaration;
-
-import java.nio.file.Path;
 
 public class UMLClassMoveDiff extends UMLClassBaseDiff {
 

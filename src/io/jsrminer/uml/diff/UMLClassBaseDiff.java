@@ -1,4 +1,4 @@
-package io.jsrminer.sourcetree;
+package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.io.FileUtil;
@@ -75,8 +75,8 @@ public class UMLClassBaseDiff {
             if (operationWithTheSameSignature == null) {
                 this.removedOperations.add(operation);
             } else if (!mapperListContainsOperation(operation, operationWithTheSameSignature)) {
-                var mapper = new FunctionBodyMapper(operation, operationWithTheSameSignature, this);
-                this.operationBodyMapperList.add(mapper);
+              //  var mapper = new FunctionBodyMapper(operation, operationWithTheSameSignature, this);
+                //this.operationBodyMapperList.add(mapper);
             }
         }
         for (var operation : nextClass.getFunctionDeclarations()) {
@@ -84,8 +84,8 @@ public class UMLClassBaseDiff {
             if (operationWithTheSameSignature == null) {
                 this.addedOperations.add(operation);
             } else if (!mapperListContainsOperation(operationWithTheSameSignature, operation)) {
-                var mapper = new FunctionBodyMapper(operationWithTheSameSignature, operation, this);
-                this.operationBodyMapperList.add(mapper);
+              //  var mapper = new FunctionBodyMapper(operationWithTheSameSignature, operation, this);
+                //this.operationBodyMapperList.add(mapper);
             }
         }
     }

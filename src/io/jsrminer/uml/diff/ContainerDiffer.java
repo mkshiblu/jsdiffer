@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
-    private final ContainerDiff<T> containerDiff;
+    protected final ContainerDiff<T> containerDiff;
 
     public ContainerDiffer(T container1, T container2) {
         this.containerDiff = new ContainerDiff<>(container1, container2);
@@ -28,7 +28,7 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
      */
     public ContainerDiff<T> diff() {
         diffChildFunctions();
-        matchStatements(this.containerDiff);
+        matchStatements();
         return this.containerDiff;
     }
 
@@ -37,19 +37,14 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
      */
     public ContainerDiff<T> diffChildFunctions() {
         reportAddedAndRemovedOperations();
-        createBodyMapperForCommonNamedFunctions();
-//        processAttributes();
-//        checkForAttributeChanges();
-        // processAnonymousFunctions(sourceDiff);
+        createBodyMapperForCommonFunctions();
         checkForOperationSignatureChanges();
         checkForInlinedOperations();
         checkForExtractedOperations();
-//        // Match statements declared inside the body directly NO need for childdiffers
         return this.containerDiff;
     }
 
-   
-    protected void createBodyMapperForCommonNamedFunctions() {
+    protected void createBodyMapperForCommonFunctions() {
         final List<IFunctionDeclaration> functions1 = containerDiff.container1.getFunctionDeclarations();
         final List<IFunctionDeclaration> functions2 = containerDiff.container2.getFunctionDeclarations();
         // First match by equalsQualified
@@ -63,21 +58,6 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
                     .orElse(null);
 
             if (function2 != null) {
-//                if (getModelDiff() != null) {
-//                    List<FunctionBodyMapper> mappers
-//                            = getModelDiff().findMappersWithMatchingSignature2(function2);
-//                    if (mappers.size() > 0) {
-//                        var operation1 = mappers.get(0).getOperation1();
-//                        if (!FunctionUtil.equalNameAndParameterCount(operation1, function1)//operation1.equalSignature(function1)
-//                                && getModelDiff().commonlyImplementedOperations(operation1, function2, this)) {
-//                            if (!containerDiff.getRemovedOperations().contains(function1)) {
-//                                containerDiff.getRemovedOperations().add(function1);
-//                            }
-//                            break;
-//                        }
-//                    }
-//                }
-
                 // Map and find refactorings between two functions
                 UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
                 FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, containerDiff);
@@ -127,14 +107,6 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
         List<FunctionDeclaration> addedOperationsToBeRemoved = new ArrayList<>();
         for (FunctionDeclaration removedOperation : containerDiff.getRemovedOperations()) {
             for (FunctionDeclaration addedOperation : containerDiff.getAddedOperations()) {
-                /*if (removedOperation.equalsIgnoringVisibility(addedOperation)) {
-                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(removedOperation, addedOperation, this);
-                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, operationBodyMapper.getMappings());
-                    refactorings.addAll(operationSignatureDiff.getRefactorings());
-                    this.addOperationBodyMapper(operationBodyMapper);
-                    removedOperationsToBeRemoved.add(removedOperation);
-                    addedOperationsToBeRemoved.add(addedOperation);
-                } else*/
                 if (FunctionUtil.nameEqualsIgnoreCaseAndEqualParameterCount(removedOperation, addedOperation)) {
                     UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
                     FunctionBodyMapper bodyMapper
@@ -263,6 +235,7 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
         containerDiff.getRemovedOperations().removeAll(operationsToBeRemoved);
     }
 
+
     /**
      * Extract is detected by Checking if the already mapped operations contains any calls to
      * any addedOperations.
@@ -288,7 +261,7 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
         containerDiff.getAddedOperations().removeAll(operationsToBeRemoved);
     }
 
- // Adds the added and removed ops in the model diff
+    // Adds the added and removed ops in the model diff
     private void reportAddedAndRemovedOperations() {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
@@ -334,10 +307,10 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
         return false;
     }
 
-    private void matchStatements(ContainerDiff<T> sourceDiff) {
+    protected void matchStatements() {
         // Create  two functions using to statemtens
-        FunctionDeclaration function1 = (FunctionDeclaration) sourceDiff.getContainer1();
-        FunctionDeclaration function2 = (FunctionDeclaration) sourceDiff.getContainer2();
+        FunctionDeclaration function1 = (FunctionDeclaration) containerDiff.getContainer1();
+        FunctionDeclaration function2 = (FunctionDeclaration) containerDiff.getContainer2();
         FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
 
         int mappings = mapper.mappingsWithoutBlocks();
@@ -352,8 +325,8 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
 //                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
 //                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
                 //this.refactorings.addAll(mapper.getRefactorings());
-                sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
-                sourceDiff.setBodyStatementMapper(mapper);
+                containerDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+                containerDiff.setBodyStatementMapper(mapper);
             }
         }
     }

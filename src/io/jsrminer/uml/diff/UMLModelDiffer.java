@@ -110,8 +110,6 @@ public class UMLModelDiffer {
 
     public void checkForMovedClasses(Map<String, String> renamedFileHints, Set<String> repositoryDirectories, UMLClassMatcher matcher
             , UMLModelDiff modelDiff) throws RefactoringMinerTimedOutException {
-
-        //
         for (var removedClassIterator = removedClasses.iterator(); removedClassIterator.hasNext(); ) {
             var removedClass = removedClassIterator.next();
             TreeSet<UMLClassMoveDiff> diffSet = new TreeSet<>(new ClassMoveComparator());
