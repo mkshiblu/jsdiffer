@@ -67,6 +67,8 @@ public enum BabelNodeType {
 
     OBJECT_PROPERTY("ObjectProperty"),
     OBJECT_PATTERN("ObjectPattern"),
+    ASSIGNMENT_PROPERTY("AssignmentProperty"),
+    REST_ELEMENT("RestElement"),
     OBJECT_METHOD("ObjectMethod"),
     SPREAD_ELEMENT("SpreadElement"),
 

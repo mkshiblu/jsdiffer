@@ -15,11 +15,6 @@ public class UMLModelFactory {
 
         // Populate repository directories
         for (String path : fileContents.keySet()) {
-//            String directory = path;
-//            while (directory.contains(File.separator)) {
-//                directory = directory.substring(0, directory.lastIndexOf("/"));
-//                //umlModel.repositoryDirectories.add(directory);
-//            }
             FileUtil.allDirectoriesInPath(path, model.getRepositoryDirectories());
         }
 

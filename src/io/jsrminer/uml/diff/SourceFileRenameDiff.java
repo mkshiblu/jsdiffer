@@ -12,10 +12,10 @@ public class SourceFileRenameDiff extends ContainerDiff {
 
     public SourceFileRenameDiff(ISourceFile originalFile, ISourceFile renamedFile/*, UMLModelDiff modelDiff*/) {
         super(originalFile, renamedFile/*, modelDiff*/);
-        this.normalizedNameDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getName(), getOriginalFile().getName());
-        this.normalizedDirectoryPathDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getDirectoryPath(), getOriginalFile().getDirectoryPath());
         this.originalFile = originalFile;
         this.renamedFile = renamedFile;
+        this.normalizedNameDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getName(), getOriginalFile().getName());
+        this.normalizedDirectoryPathDistance = StringDistance.normalizedDistanceIgnoringCase(getRenamedFile().getDirectoryPath(), getOriginalFile().getDirectoryPath());
     }
 
     public ISourceFile getRenamedFile() {

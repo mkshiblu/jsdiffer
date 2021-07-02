@@ -1,10 +1,13 @@
-package io.jsrminer.uml;
+package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.refactorings.ExtractOperationRefactoring;
 import io.jsrminer.refactorings.InlineOperationRefactoring;
 import io.jsrminer.refactorings.RenameOperationRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.ClassUtil;
+import io.jsrminer.uml.FunctionUtil;
+import io.jsrminer.uml.UMLAttribute;
 import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.diff.detection.ExtractOperationDetection;
 import io.jsrminer.uml.diff.detection.InlineOperationDetection;

@@ -2,6 +2,7 @@ package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLAttribute;
+import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.UMLType;
 import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.ICodeFragment;
@@ -9,8 +10,7 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DeclarationVisitor {
     private final Visitor visitor;
@@ -186,22 +186,20 @@ public class DeclarationVisitor {
 
     /**
      * interface Class <: Node {
-     *   id: Identifier | null;
-     *   superClass: Expression | null;
-     *   body: ClassBody;
-     *   decorators: [ Decorator ];
+     * id: Identifier | null;
+     * superClass: Expression | null;
+     * body: ClassBody;
+     * decorators: [ Decorator ];
      * }
      * interface ClassExpression <: Class, Expression {
-     *   type: "ClassExpression";
+     * type: "ClassExpression";
      * }
      * MetaProperty
      * interface MetaProperty <: Expression {
-     *   type: "MetaProperty";
-     *   meta: Identifier;
-     *   property: Identifier;
+     * type: "MetaProperty";
+     * meta: Identifier;
+     * property: Identifier;
      * }
-     *
-     *
      */
     AnonymousClassDeclaration visitClassExpression(BabelNode node, ILeafFragment leafFragment, IContainer
             container) {
@@ -221,7 +219,6 @@ public class DeclarationVisitor {
     }
 
     /**
-     *
      * ClassBody
      * interface ClassBody <: Node {
      * type: "ClassBody";
@@ -281,7 +278,7 @@ public class DeclarationVisitor {
 
                 var variableDeclaration =
                         createVariableDeclaration(node.getSourceLocation()
-                        , fieldName, null, classDeclaration.getSourceLocation());
+                                , fieldName, null, classDeclaration.getSourceLocation());
                 variableDeclaration.setType(CodeElementType.FIELD_DECLARATION);
                 variableDeclaration.setAttribute(true);
 
@@ -467,7 +464,7 @@ public class DeclarationVisitor {
                 //var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(functionBodyNode, bodyBlock);
                 //visitor.visitStatement(functionBodyNode, null, function);
                 break;
-                //throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
+            //throw new NotImplementedException("Body Type: " + functionBodyNode.getSourceLocation());
         }
 
         return true;
@@ -477,19 +474,58 @@ public class DeclarationVisitor {
         // Load parameters
         var paramterNodes = node.get("params");
         BabelNode parameterNode;
+        UMLParameter umlParameter;
+
         for (int i = 0; i < paramterNodes.size(); i++) {
             parameterNode = paramterNodes.get(i);
 
             switch (parameterNode.getType()) {
                 case IDENTIFIER:
-                    var umlParamter = visitor.getNodeUtil().createUmlParameter(parameterNode.getString("name"), function, parameterNode.getSourceLocation());
-                    function.registerParameter(umlParamter);
+                    umlParameter = visitor.getNodeUtil().createUmlParameter(
+                            parameterNode.getString("name")
+                            , function, parameterNode.getSourceLocation()
+                    );
+                    function.registerParameter(umlParameter);
                     break;
 
+                case OBJECT_PATTERN:
+                    // e.g. { file, banner } = output //a Destructuring assignment
+                    var identifiers = extractIdentifiersFromObjectPatternNode(parameterNode);
+                    for (var entry : identifiers.entrySet()) {
+                        umlParameter = visitor.getNodeUtil().createUmlParameter(
+                                entry.getKey()
+                                , function
+                                , entry.getValue()
+                        );
+                        function.registerParameter(umlParameter);
+                    }
+                    break;
                 default:
-                    throw new NotImplementedException("paramter type not handled: " + function.getSourceLocation());
+                    throw new NotImplementedException("Paramter type not handled: " + function.getSourceLocation());
             }
         }
+    }
+
+    private Map<String, SourceLocation> extractIdentifiersFromObjectPatternNode(BabelNode node) {
+        Map<String, SourceLocation> identifiers = new HashMap<>();
+
+        var propertiesNode = node.get("properties");
+        for (int i = 0; i < propertiesNode.size(); i++) {
+            var propertyNode = propertiesNode.get(i);
+            String name = null;
+            switch (propertyNode.getType()) {
+                case OBJECT_PROPERTY:
+                    var keyNode = propertyNode.get("key");
+                    if (keyNode.getType() == BabelNodeType.IDENTIFIER) {
+                        name = keyNode.getString("name");
+                    }
+                    break;
+            }
+
+            if (name != null)
+                identifiers.put(name, propertyNode.getSourceLocation());
+        }
+        return identifiers;
     }
 
     /**
