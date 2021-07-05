@@ -188,7 +188,7 @@ public class BabelNodeUtil {
         //function.setIsConstructor(function.);
     }
 
-    void populateContainerNamesAndLocation(DeclarationContainer function, String name, SourceLocation location, IContainer container) {
+    void populateContainerNamesAndLocation(DeclarationContainer function, String  name, SourceLocation location, IContainer container) {
         function.setSourceLocation(location);
         function.setName(name);
         function.setQualifiedName(generateQualifiedName(function.getName(), container));

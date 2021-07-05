@@ -564,44 +564,50 @@ public class DeclarationVisitor {
      * Property of a class or object can be  of [ ObjectProperty | ObjectMethod | SpreadElement ];
      */
     void processProperty(BabelNode property, BlockStatement body, IContainer container) {
+        if (property.getType() == BabelNodeType.OBJECT_PROPERTY
+                || property.getType() == BabelNodeType.OBJECT_METHOD) {
+            var keyNode = property.get("key"); // name
+            var valueNode = property.get("value");  // initialzier
+            //var isShortHand = property.get("shorthand").asBoolean();
+            String fieldName = getFieldNameFromObjectMemberKeyNode(keyNode);
 
-        switch (property.getType()) {
-            case OBJECT_PROPERTY:
+            switch (property.getType()) {
+                case OBJECT_PROPERTY:
+                    switch (valueNode.getType()) {
+                        case FUNCTION_DECLARATION:
+                            processObjectFunctionDeclaration(valueNode, container, fieldName);
+                            break;
+                        default:
+                            // Else this is an attribute i.e. field declaration
+                            processObjectFieldDeclaration(valueNode, body, container, fieldName);
+                    }
 
-                var keyNode = property.get("key"); // name
-                var valueNode = property.get("value");  // initialzier
-                var isShortHand = property.get("shorthand").asBoolean();
+                    break;
+                case OBJECT_METHOD:
+                    processObjectFunctionDeclaration(property, container, fieldName);
+                    break;
+            }
+        } else {
+            // Rest element not handled
+            throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
+        }
+    }
 
+    private String getFieldNameFromObjectMemberKeyNode(BabelNode objectMemberNodeKeyNode) {
 
-                String fieldName = null;
-                switch (keyNode.getType()) {
-                    case IDENTIFIER:
-                        fieldName = keyNode.getString("name");
-                        break;
-                    case STRING_LITERAL:
-                        fieldName = keyNode.getString("value");
-                        break;
-                    default:
-                        throw new RuntimeException("KeyNode type not handled at " + keyNode.getSourceLocation().toString());
-                }
-
-                switch (valueNode.getType()) {
-                    case FUNCTION_DECLARATION:
-                        processObjectFunctionDeclaration(valueNode, body, container, fieldName);
-                        break;
-                    default:
-                        // Else this is an attribute i.e. field declaration
-                        processObjectFieldDeclaration(valueNode, body, container, fieldName);
-                }
-
+        String fieldName = null;
+        switch (objectMemberNodeKeyNode.getType()) {
+            case IDENTIFIER:
+                fieldName = objectMemberNodeKeyNode.getString("name");
                 break;
-            case SPREAD_ELEMENT:
-                var argument = property.get("argument");
-                // TODO not handled
+            case STRING_LITERAL:
+                fieldName = objectMemberNodeKeyNode.getString("value");
                 break;
             default:
-                throw new RuntimeException("Object  property at " + property.getSourceLocation() + " not handled");
+                throw new RuntimeException("KeyNode type not handled at " + objectMemberNodeKeyNode.getSourceLocation().toString());
         }
+
+        return fieldName;
     }
 
     /**
@@ -643,7 +649,6 @@ public class DeclarationVisitor {
     }
 
     FunctionDeclaration processObjectFunctionDeclaration(BabelNode tree
-            , CodeFragment fragment
             , IContainer container
             , String propertyNameAsFunctionName) {
         var function = new FunctionDeclaration();
