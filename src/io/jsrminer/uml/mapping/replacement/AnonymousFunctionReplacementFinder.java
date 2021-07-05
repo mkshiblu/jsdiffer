@@ -81,7 +81,8 @@ public class AnonymousFunctionReplacementFinder {
     }
 
     Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousFunctionDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
-        ContainerDiffer<IAnonymousFunctionDeclaration> differ = new ContainerDiffer<>(anonymousFunctionDeclaration1, anonymousClassDeclaration2);
+        ContainerDiffer<IAnonymousFunctionDeclaration, ContainerDiff<IAnonymousFunctionDeclaration>> differ
+                = new ContainerDiffer<>(new ContainerDiff<>(anonymousFunctionDeclaration1, anonymousClassDeclaration2));
         var diff = differ.diff();
 //                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
 //                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {

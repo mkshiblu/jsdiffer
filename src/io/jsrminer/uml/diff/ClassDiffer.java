@@ -20,20 +20,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class ClassDiffer extends BaseDiffer {
-    private final IClassDeclaration class1;
-    private final IClassDeclaration class2;
-    private final ClassDiff classDiff;
-
+public class ClassDiffer extends ContainerDiffer<IClassDeclaration, ClassDiff> {
+    ClassDiff classDiff;
     public ClassDiffer(IClassDeclaration class1, IClassDeclaration class2) {
-        this.class1 = class1;
-        this.class2 = class2;
-        this.classDiff = new ClassDiff(class1, class2);
+        super(new ClassDiff(class1, class2));
+        this.classDiff = super.containerDiff;
     }
 
     public ClassDiff diff() {
-        reportAddedAndRemovedOperations();
-        createBodyMapperForCommonNamedFunctions();
+        super.reportAddedAndRemovedOperations();
+        super.createBodyMapperForCommonFunctions();
 
         // processAnonymousFunctions(sourceDiff);
         checkForOperationSignatureChanges();
@@ -42,147 +38,7 @@ public class ClassDiffer extends BaseDiffer {
         checkForInlinedOperations();
         checkForExtractedOperations();
 
-        return this.classDiff;
-    }
-
-    // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperations() {
-        // region Find uncommon functions between the two files
-        // For model1 uncommon / not matched functions are the functions that were removed
-        // For model2 uncommon/ not matched functions are the functions that were added
-        boolean isEqual;
-        for (IFunctionDeclaration function1 : this.class1.getFunctionDeclarations()) {
-            isEqual = false;
-            for (IFunctionDeclaration function2 : this.class2.getFunctionDeclarations()) {
-                if (isEqual = FunctionUtil.isEqual(function1, function2)) {
-                    break;
-                }
-            }
-
-            // If no match on model2 report as removed
-            if (!isEqual)
-                classDiff.reportRemovedOperation((FunctionDeclaration) function1);
-        }
-        for (IFunctionDeclaration function2 : classDiff.getContainer2().getFunctionDeclarations()) {
-            isEqual = false;
-            for (IFunctionDeclaration function1 : classDiff.getContainer1().getFunctionDeclarations()) {
-                if (isEqual = FunctionUtil.isEqual(function2, function1)) {
-                    break;
-                }
-            }
-
-            // If no match report as added
-            if (!isEqual)
-                classDiff.reportAddedOperation((FunctionDeclaration) function2);
-        }
-    }
-
-    protected void createBodyMapperForCommonNamedFunctions() {
-        final List<IFunctionDeclaration> functions1 = classDiff.getContainer1().getFunctionDeclarations();
-        final List<IFunctionDeclaration> functions2 = classDiff.getContainer2().getFunctionDeclarations();
-        // First match by equalsQualified
-        // (In RM it's equals signature which checks modifiers, qualified name and parameter types
-        for (IFunctionDeclaration if1 : functions1) {
-            FunctionDeclaration function1 = (FunctionDeclaration) if1;
-
-            IFunctionDeclaration function2 = functions2.stream()
-                    .filter(f2 -> FunctionUtil.equalsNameParentQualifiedNameAndParamerNames(f2, function1))
-                    .findFirst()
-                    .orElse(null);
-
-            if (function2 != null) {
-//                if (getModelDiff() != null) {
-//                    List<FunctionBodyMapper> mappers
-//                            = getModelDiff().findMappersWithMatchingSignature2(function2);
-//                    if (mappers.size() > 0) {
-//                        var operation1 = mappers.get(0).getOperation1();
-//                        if (!FunctionUtil.equalNameAndParameterCount(operation1, function1)//operation1.equalSignature(function1)
-//                                && getModelDiff().commonlyImplementedOperations(operation1, function2, this)) {
-//                            if (!containerDiff.getRemovedOperations().contains(function1)) {
-//                                containerDiff.getRemovedOperations().add(function1);
-//                            }
-//                            break;
-//                        }
-//                    }
-//                }
-
-                // Map and find refactorings between two functions
-                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
-                FunctionBodyMapper mapper = new FunctionBodyMapper(operationDiff, classDiff);
-                operationDiff.setMappings(mapper.getMappings());
-                this.classDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
-                // save the mapper TODO
-                this.classDiff.getOperationBodyMapperList().add(mapper);
-            }
-        }
-
-        // Second Not qualified but the 2nd file contains the operation
-        for (IFunctionDeclaration if1 : functions1) {
-            FunctionDeclaration function1 = (FunctionDeclaration) if1;
-            IFunctionDeclaration function2 = functions2.stream()
-                    .filter(f2 -> FunctionUtil.isEqual(f2, function1))
-                    .findFirst()
-                    .orElse(null);
-
-            if (function2 != null
-                    && !containsMapperForOperation(function1)
-                    // && functions2.getOperations().contains(operation)
-                    && !classDiff.getRemovedOperations().contains(function1)) {
-
-//                int index = functions2.indexOf(operation);
-//                int lastIndex = functions2.lastIndexOf(operation);
-//                int finalIndex = index;
-//                if (index != lastIndex) {
-//                    double d1 = operation.getReturnParameter().getType()
-//                            .normalizedNameDistance(nextClass.getOperations().get(index).getReturnParameter().getType());
-//                    double d2 = operation.getReturnParameter().getType()
-//                            .normalizedNameDistance(nextClass.getOperations().get(lastIndex).getReturnParameter().getType());
-//                    if (d2 < d1) {
-//                        finalIndex = lastIndex;
-//                    }
-//                }
-
-                UMLOperationDiff operationDiff = new UMLOperationDiff(function1, (FunctionDeclaration) function2);
-                FunctionBodyMapper bodyMapper
-                        = new FunctionBodyMapper(operationDiff, classDiff);
-                operationDiff.setMappings(bodyMapper.getMappings());
-                classDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
-                classDiff.getOperationBodyMapperList().add(bodyMapper);
-            }
-        }
-
-        List<FunctionDeclaration> removedOperationsToBeRemoved = new ArrayList<>();
-        List<FunctionDeclaration> addedOperationsToBeRemoved = new ArrayList<>();
-        for (FunctionDeclaration removedOperation : classDiff.getRemovedOperations()) {
-            for (FunctionDeclaration addedOperation : classDiff.getAddedOperations()) {
-                /*if (removedOperation.equalsIgnoringVisibility(addedOperation)) {
-                    UMLOperationBodyMapper operationBodyMapper = new UMLOperationBodyMapper(removedOperation, addedOperation, this);
-                    UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(removedOperation, addedOperation, operationBodyMapper.getMappings());
-                    refactorings.addAll(operationSignatureDiff.getRefactorings());
-                    this.addOperationBodyMapper(operationBodyMapper);
-                    removedOperationsToBeRemoved.add(removedOperation);
-                    addedOperationsToBeRemoved.add(addedOperation);
-                } else*/
-                if (FunctionUtil.nameEqualsIgnoreCaseAndEqualParameterCount(removedOperation, addedOperation)) {
-                    UMLOperationDiff operationDiff = new UMLOperationDiff(removedOperation, addedOperation);
-                    FunctionBodyMapper bodyMapper
-                            = new FunctionBodyMapper(operationDiff, classDiff);
-                    operationDiff.setMappings(bodyMapper.getMappings());
-                    classDiff.getRefactoringsBeforePostProcessing().addAll(operationDiff.getRefactorings());
-
-                    if (!removedOperation.getName().equals(addedOperation.getName()) &&
-                            !(removedOperation.isConstructor() && addedOperation.isConstructor())) {
-                        RenameOperationRefactoring rename = new RenameOperationRefactoring(bodyMapper);
-                        classDiff.getRefactoringsBeforePostProcessing().add(rename);
-                    }
-                    classDiff.getOperationBodyMapperList().add(bodyMapper);
-                    removedOperationsToBeRemoved.add(removedOperation);
-                    addedOperationsToBeRemoved.add(addedOperation);
-                }
-            }
-        }
-        classDiff.getRemovedOperations().removeAll(removedOperationsToBeRemoved);
-        classDiff.getAddedOperations().removeAll(addedOperationsToBeRemoved);
+        return this.containerDiff;
     }
 
     private void checkForOperationSignatureChanges() {
@@ -332,8 +188,8 @@ public class ClassDiffer extends BaseDiffer {
     }
 
     protected void processAttributes() {
-        var originalClass = class1;
-        var nextClass = class2;
+        var originalClass = classDiff.getContainer1();
+        var nextClass = classDiff.getContainer1();
 
         for (UMLAttribute attribute : originalClass.getAttributes()) {
             var matchingAttribute = ClassUtil.containsAttribute(nextClass, attribute);

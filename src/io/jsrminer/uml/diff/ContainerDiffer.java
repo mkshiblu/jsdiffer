@@ -16,11 +16,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
-    protected final ContainerDiff<T> containerDiff;
+public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> extends BaseDiffer<T> {
+    protected final D containerDiff;
 
-    public ContainerDiffer(T container1, T container2) {
-        this.containerDiff = new ContainerDiff<>(container1, container2);
+    public ContainerDiffer(D containerDiff) {
+        this.containerDiff = containerDiff;
     }
 
     /**
@@ -262,7 +262,7 @@ public class ContainerDiffer<T extends IContainer> extends BaseDiffer<T> {
     }
 
     // Adds the added and removed ops in the model diff
-    private void reportAddedAndRemovedOperations() {
+    void reportAddedAndRemovedOperations() {
         // region Find uncommon functions between the two files
         // For model1 uncommon / not matched functions are the functions that were removed
         // For model2 uncommon/ not matched functions are the functions that were added

@@ -15,12 +15,12 @@ import java.util.List;
 /**
  * Diff between two source File?
  */
-public class SourceFileDiffer extends ContainerDiffer<ISourceFile> {
+public class SourceFileDiffer extends ContainerDiffer<ISourceFile, ContainerDiff<ISourceFile>> {
 
     public final UMLModelDiff modelDiff;
 
     public SourceFileDiffer(final ISourceFile container1, final ISourceFile container2, final UMLModelDiff modelDiff) {
-        super(container1, container2);
+        super(new ContainerDiff<>(container1, container2));
         this.modelDiff = modelDiff;
     }
 
