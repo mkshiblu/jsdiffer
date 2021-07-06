@@ -11,7 +11,6 @@ import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.LeafCodeFragmentMapping;
 import io.jsrminer.uml.mapping.replacement.MergeVariableReplacement;
 import io.jsrminer.uml.mapping.replacement.Replacement;
-import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
@@ -51,21 +50,30 @@ public class UMLModelDiff extends Diff {
         this.removedFiles.add(sourceFile);
     }
 
+    public Set<IRefactoring> getClassRefactorings() {
+        Set<IRefactoring> refactorings = new LinkedHashSet<>();
+        refactorings.addAll(getMoveClassRefactorings());
+        return refactorings;
+    }
+
     public List<IRefactoring> getRefactorings() throws RefactoringMinerTimedOutException {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
+
+        refactorings.addAll(getClassRefactorings());
+
         refactorings.addAll(getMoveFileRefactorings());
         refactorings.addAll(getRenameFileRefactorings());
         //refactorings.addAll(identifyConvertAnonymousClassToTypeRefactorings());
         Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
         Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap
                 = new LinkedHashMap<>();
-        for (var classDiff : commonFilesDiffList) {
-            refactorings.addAll(classDiff.getAllRefactorings());
-            //extractMergePatterns(classDiff, mergeMap);
-            //extractRenamePatterns(classDiff, renameMap);
+        for (var fileDiff : commonFilesDiffList) {
+            refactorings.addAll(fileDiff.getAllRefactorings());
+            //extractMergePatterns(fileDiff, mergeMap);
+            //extractRenamePatterns(fileDiff, renameMap);
         }
-        for (var classDiff : fileMoveDiffList) {
-            refactorings.addAll(classDiff.getAllRefactorings());
+        for (var fileDiff : fileMoveDiffList) {
+            refactorings.addAll(fileDiff.getAllRefactorings());
 //            extractMergePatterns(classDiff, mergeMap);
 //            extractRenamePatterns(classDiff, renameMap);
         }
@@ -76,10 +84,10 @@ public class UMLModelDiff extends Diff {
 //            extractRenamePatterns(classDiff, renameMap);
 //        }
 
-        for (var classDiff : fileRenameDiffList) {
-            refactorings.addAll(classDiff.getAllRefactorings());
-//            extractMergePatterns(classDiff, mergeMap);
-//            extractRenamePatterns(classDiff, renameMap);
+        for (var fileDiff : fileRenameDiffList) {
+            refactorings.addAll(fileDiff.getAllRefactorings());
+//            extractMergePatterns(fileDiff, mergeMap);
+//            extractRenamePatterns(fileDiff, renameMap);
         }
 
         //Map<RenamePattern, Integer> typeRenamePatternMap = typeRenamePatternMap(refactorings);
@@ -232,9 +240,9 @@ public class UMLModelDiff extends Diff {
         //refactorings.addAll(identifyExtractClassRefactorings(classMoveDiffList));
         // refactorings.addAll(identifyExtractClassRefactorings(innerClassMoveDiffList));
         //refactorings.addAll(identifyExtractClassRefactorings(classRenameDiffList));
-        checkForOperationMovesBetweenCommonClasses();// Only the removed and common classes that are already matchc (has diff)
-        checkForOperationMovesIncludingAddedClasses();  // If a method has
-        checkForOperationMovesIncludingRemovedClasses(); // If a method has been moved from a deleted file
+        checkForOperationMovesBetweenCommonFiles();// Only the removed and common classes that are already matchc (has diff)
+        checkForOperationMovesIncludingAddedFiles();  // If a method has
+        checkForOperationMovesIncludingRemovedFiles(); // If a method has been moved from a deleted file
 //        checkForExtractedAndMovedOperations(getOperationBodyMappersInCommonClasses(), getAddedAndExtractedOperationsInCommonClasses());
 //        checkForExtractedAndMovedOperations(getOperationBodyMappersInMovedAndRenamedClasses(), getAddedOperationsInMovedAndRenamedClasses());
 //        checkForMovedAndInlinedOperations(getOperationBodyMappersInCommonClasses(), getRemovedAndInlinedOperationsInCommonClasses());
@@ -262,77 +270,68 @@ public class UMLModelDiff extends Diff {
 
     private List<Refactoring> getMoveFileRefactorings() {
         List<Refactoring> refactorings = new ArrayList<>();
-        //List<RenamePackageRefactoring> renamePackageRefactorings = new ArrayList<RenamePackageRefactoring>();
-        //      List<MoveSourceFolderRefactoring> moveSourceFolderRefactorings = new ArrayList<>();
         for (var fileMoveDiff : fileMoveDiffList) {
-            var originalClass = fileMoveDiff.getOriginalFile();
-            String originalName = originalClass.getName();
-            var movedClass = fileMoveDiff.getMovedFile();
-            String movedName = movedClass.getName();
-
-//            String originalPath = originalClass.getFilepath();//originalClass.getSourceFile();
-//            String movedPath = movedClass.getFilepath();//movedClass.getSourceFile();
-            String originalPathPrefix = originalClass.getDirectoryPath();//"";
-//            if (originalPath.contains("/")) {
-//                originalPathPrefix = originalPath.substring(0, originalPath.lastIndexOf('/'));
-//            }
-            String movedPathPrefix = movedClass.getDirectoryPath();//"";
-//            if (movedPath.contains("/")) {
-//                movedPathPrefix = movedPath.substring(0, movedPath.lastIndexOf('/'));
-//            }
-//
+            var originalFile = fileMoveDiff.getOriginalFile();
+            String originalName = originalFile.getName();
+            var movedFile = fileMoveDiff.getMovedFile();
+            String originalPathPrefix = originalFile.getDirectoryPath();
+            String movedPathPrefix = movedFile.getDirectoryPath();
             if (originalPathPrefix != null && !originalPathPrefix.equals(movedPathPrefix)) {
-                var refactoring = new MoveFileRefactoring(originalClass, movedClass);
+                var refactoring = new MoveFileRefactoring(originalFile, movedFile);
                 refactorings.add(refactoring);
             }
-//            if (!originalName.equals(movedName)) {
-//                var refactoring = new MoveClassRefactoring(originalClass, movedClass);
-//                RenamePattern renamePattern = refactoring.getRenamePattern();
-//                //check if the the original path is a substring of the moved path and vice versa
-//                if (renamePattern.getBefore().contains(renamePattern.getAfter()) ||
-//                        renamePattern.getAfter().contains(renamePattern.getBefore()) ||
-//                        !originalClass.isTopLevel() || !movedClass.isTopLevel()) {
-//                    refactorings.add(refactoring);
-//                } else {
-//                    boolean foundInMatchingRenamePackageRefactoring = false;
-//                    for (RenamePackageRefactoring renamePackageRefactoring : renamePackageRefactorings) {
-//                        if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
-//                            renamePackageRefactoring.addMoveClassRefactoring(refactoring);
-//                            foundInMatchingRenamePackageRefactoring = true;
-//                            break;
-//                        }
-//                    }
-//                    if (!foundInMatchingRenamePackageRefactoring) {
-//                        renamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
-//                    }
-//                }
-//            }
-//            else if (originalPathPrefix != null && !originalPathPrefix.equals(movedPathPrefix)) {
-//                var refactoring = new MoveFileToAnotherSourceFolderRefactoring(originalClass, movedClass);
-//                RenamePattern renamePattern = refactoring.getRenamePattern();
-//                boolean foundInMatchingMoveSourceFolderRefactoring = false;
-//                for (MoveSourceFolderRefactoring moveSourceFolderRefactoring : moveSourceFolderRefactorings) {
-//                    if (moveSourceFolderRefactoring.getPattern().equals(renamePattern)) {
-//                        moveSourceFolderRefactoring.addMovedClassToAnotherSourceFolder(refactoring);
-//                        foundInMatchingMoveSourceFolderRefactoring = true;
-//                        break;
-//                    }
-//                }
-//                if (!foundInMatchingMoveSourceFolderRefactoring) {
-//                    moveSourceFolderRefactorings.add(new MoveSourceFolderRefactoring(refactoring));
-//                }
-//            }
         }
-//        for (RenamePackageRefactoring renamePackageRefactoring : renamePackageRefactorings) {
-//            List<MoveClassRefactoring> moveClassRefactorings = renamePackageRefactoring.getMoveClassRefactorings();
-//            if (moveClassRefactorings.size() > 1 && isSourcePackageDeleted(renamePackageRefactoring)) {
-//                refactorings.add(renamePackageRefactoring);
-//            }
-//            //else {
-//            refactorings.addAll(moveClassRefactorings);
-//            //}
-//        }
-//        refactorings.addAll(moveSourceFolderRefactorings);
+        return refactorings;
+    }
+
+    private List<Refactoring> getMoveClassRefactorings() {
+        List<Refactoring> refactorings = new ArrayList<Refactoring>();
+        List<MoveSourceFolderRefactoring> moveSourceFolderRefactoringRefactorings = new ArrayList<>();
+        for (UMLClassMoveDiff classMoveDiff : classMoveDiffList) {
+            var originalClass = classMoveDiff.getOriginalClass();
+            String originalName = originalClass.getQualifiedName();
+            var movedClass = classMoveDiff.getMovedClass();
+            String movedName = movedClass.getQualifiedName();
+
+            String originalPath = originalClass.getSourceLocation().getFilePath();
+            String movedPath = movedClass.getSourceLocation().getFilePath();
+            String originalPathPrefix = "";
+            if (originalPath.contains("/")) {
+                originalPathPrefix = originalPath.substring(0, originalPath.lastIndexOf('/'));
+            }
+            String movedPathPrefix = "";
+            if (movedPath.contains("/")) {
+                movedPathPrefix = movedPath.substring(0, movedPath.lastIndexOf('/'));
+            }
+
+            boolean isFilenameDifferent = !originalPath.equals(movedPath);
+            if (!originalName.equals(movedName)
+            || isFilenameDifferent) {
+                MoveClassRefactoring refactoring = new MoveClassRefactoring(originalClass, movedClass);
+                RenamePattern renamePattern = refactoring.getRenamePattern();
+                //check if the the original path is a substring of the moved path and vice versa
+                if (renamePattern.getBefore().contains(renamePattern.getAfter()) ||
+                        renamePattern.getAfter().contains(renamePattern.getBefore()) ||
+                        !originalClass.isTopLevel() || !movedClass.isTopLevel()) {
+                    refactorings.add(refactoring);
+                }
+            } else if (!originalPathPrefix.equals(movedPathPrefix)) {
+                MovedClassToAnotherSourceFolder refactoring = new MovedClassToAnotherSourceFolder(originalClass, movedClass, originalPathPrefix, movedPathPrefix);
+                RenamePattern renamePattern = refactoring.getRenamePattern();
+                boolean foundInMatchingMoveSourceFolderRefactoring = false;
+                for (MoveSourceFolderRefactoring moveSourceFolderRefactoring : moveSourceFolderRefactoringRefactorings) {
+                    if (moveSourceFolderRefactoring.getPattern().equals(renamePattern)) {
+                        moveSourceFolderRefactoring.addMovedClassToAnotherSourceFolder(refactoring);
+                        foundInMatchingMoveSourceFolderRefactoring = true;
+                        break;
+                    }
+                }
+                if (!foundInMatchingMoveSourceFolderRefactoring) {
+                    moveSourceFolderRefactoringRefactorings.add(new MoveSourceFolderRefactoring(refactoring));
+                }
+            }
+        }
+        refactorings.addAll(moveSourceFolderRefactoringRefactorings);
         return refactorings;
     }
 
@@ -363,7 +362,7 @@ public class UMLModelDiff extends Diff {
 //    }
 
 
-    private void checkForOperationMovesIncludingAddedClasses() throws RefactoringMinerTimedOutException {
+    private void checkForOperationMovesIncludingAddedFiles() throws RefactoringMinerTimedOutException {
         List<FunctionDeclaration> addedOperations = getAddedOperationsInCommonClasses();
         for (ISourceFile addedClass : this.addedFiles) {
             addedOperations.addAll(addedClass.getFunctionDeclarations().stream().map(x -> (FunctionDeclaration) x).collect(Collectors.toList()));
@@ -382,7 +381,7 @@ public class UMLModelDiff extends Diff {
         return commonFilesDiffList;
     }
 
-    private void checkForOperationMovesBetweenCommonClasses()
+    private void checkForOperationMovesBetweenCommonFiles()
             throws RefactoringMinerTimedOutException {
         List<FunctionDeclaration> addedOperations = getAddedAndExtractedOperationsInCommonClasses();
         List<FunctionDeclaration> removedOperations = getRemovedOperationsInCommonMovedRenamedClasses();
@@ -885,7 +884,7 @@ public class UMLModelDiff extends Diff {
         return removedOperations;
     }
 
-    private void checkForOperationMovesIncludingRemovedClasses() throws RefactoringMinerTimedOutException {
+    private void checkForOperationMovesIncludingRemovedFiles() throws RefactoringMinerTimedOutException {
         List<FunctionDeclaration> addedOperations = getAddedAndExtractedOperationsInCommonClasses();
         List<FunctionDeclaration> removedOperations = getRemovedOperationsInCommonClasses();
         for (ISourceFile removedClass : this.removedFiles) {
@@ -987,7 +986,7 @@ public class UMLModelDiff extends Diff {
         return innerClassMoveDiffList;
     }
 
-    public void reportInnerClassMoveDiffList(UMLClassMoveDiff classMoveDiff){
+    public void reportInnerClassMoveDiffList(UMLClassMoveDiff classMoveDiff) {
         this.innerClassMoveDiffList.add(classMoveDiff);
     }
 }
