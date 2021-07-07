@@ -39,7 +39,7 @@ public class UMLModelDiffer {
 
         reportAddedAndRemovedClasses(modelDiff);
         checkForMovedClasses(renamedFileHints, umlModel1.getRepositoryDirectories(), new UMLClassMatcher.Move(), modelDiff);
-        //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename());
+        checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename(), modelDiff);
         //diffCommonNamedClasses(modelDiff);
         //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.RelaxedMove());
         //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.RelaxedRename());
@@ -287,6 +287,43 @@ public class UMLModelDiffer {
                 removedClassIterator.remove();
             }
         }
+    }
+
+    public void checkForRenamedClasses(Map<String, String> renamedFileHints, UMLClassMatcher matcher, UMLModelDiff modelDiff) throws RefactoringMinerTimedOutException {
+        for(Iterator<IClassDeclaration> removedClassIterator = removedClasses.iterator(); removedClassIterator.hasNext();) {
+            IClassDeclaration removedClass = removedClassIterator.next();
+            TreeSet<UMLClassRenameDiff> diffSet = new TreeSet<>(new ClassRenameComparator());
+            for(Iterator<IClassDeclaration> addedClassIterator = addedClasses.iterator(); addedClassIterator.hasNext();) {
+                IClassDeclaration addedClass = addedClassIterator.next();
+                String renamedFile =  renamedFileHints.get(removedClass.getSourceLocation().getFilePath());
+                if(matcher.match(removedClass, addedClass, renamedFile)) {
+                    if(!conflictingMoveOfTopLevelClass(removedClass, addedClass)
+                            && !innerClassWithTheSameName(removedClass, addedClass)) {
+                        UMLClassRenameDiff classRenameDiff = new UMLClassRenameDiff(removedClass, addedClass, this);
+                        diffSet.add(classRenameDiff);
+                    }
+                }
+            }
+            if(!diffSet.isEmpty()) {
+                UMLClassRenameDiff minClassRenameDiff = diffSet.first();
+                minClassRenameDiff.process();
+                classRenameDiffList.add(minClassRenameDiff);
+                addedClasses.remove(minClassRenameDiff.getRenamedClass());
+                removedClassIterator.remove();
+            }
+        }
+
+        List<UMLClassMoveDiff> allClassMoves = new ArrayList<UMLClassMoveDiff>(modelDiff.getClassMoveDiffList());
+        Collections.sort(allClassMoves);
+
+        for(UMLClassRenameDiff classRename : classRenameDiffList) {
+            for(UMLClassMoveDiff classMove : allClassMoves) {
+                if(classRename.isInnerClassMove(classMove)) {
+                    innerClassMoveDiffList.add(classMove);
+                }
+            }
+        }
+        modelDiff.getClassMoveDiffList().removeAll(innerClassMoveDiffList);
     }
 
     private void diffCommonNamedFiles(UMLModelDiff modelDiff) {

@@ -53,12 +53,12 @@ public class UMLModelDiff extends Diff {
     public Set<IRefactoring> getClassRefactorings() {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
         refactorings.addAll(getMoveClassRefactorings());
+
         return refactorings;
     }
 
     public List<IRefactoring> getRefactorings() throws RefactoringMinerTimedOutException {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
-
         refactorings.addAll(getClassRefactorings());
 
         refactorings.addAll(getMoveFileRefactorings());

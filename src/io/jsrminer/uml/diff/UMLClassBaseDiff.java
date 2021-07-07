@@ -75,7 +75,7 @@ public class UMLClassBaseDiff {
             if (operationWithTheSameSignature == null) {
                 this.removedOperations.add(operation);
             } else if (!mapperListContainsOperation(operation, operationWithTheSameSignature)) {
-              //  var mapper = new FunctionBodyMapper(operation, operationWithTheSameSignature, this);
+                //  var mapper = new FunctionBodyMapper(operation, operationWithTheSameSignature, this);
                 //this.operationBodyMapperList.add(mapper);
             }
         }
@@ -84,16 +84,40 @@ public class UMLClassBaseDiff {
             if (operationWithTheSameSignature == null) {
                 this.addedOperations.add(operation);
             } else if (!mapperListContainsOperation(operationWithTheSameSignature, operation)) {
-              //  var mapper = new FunctionBodyMapper(operationWithTheSameSignature, operation, this);
+                //  var mapper = new FunctionBodyMapper(operationWithTheSameSignature, operation, this);
                 //this.operationBodyMapperList.add(mapper);
             }
         }
     }
 
-
     public double normalizedSourceFolderDistance() {
         String s1 = FileUtil.getFolder(originalClass.getSourceLocation().getFilePath().toLowerCase());
         String s2 = FileUtil.getFolder(nextClass.getSourceLocation().getFilePath().toLowerCase());
+        int distance = StringDistance.editDistance(s1, s2);
+        double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
+        return normalized;
+    }
+
+    public double normalizedNameDistance() {
+        String s1 = getOriginalClass().getName().toLowerCase();
+        String s2 = getNextClass().getName().toLowerCase();
+        int distance = StringDistance.editDistance(s1, s2);
+        double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
+        return normalized;
+    }
+
+    /**
+     * Similar to  normalized package distance
+     *
+     * @param c
+     * @return
+     */
+    public double normalizedContainerQualifiedNameDistance() {
+        String s1 = getOriginalClass().getParentContainerQualifiedName();
+        String s2 = getNextClass().getParentContainerQualifiedName();
+        if (s1.length() == 0 && s2.length() == 0) {
+            return 0;
+        }
         int distance = StringDistance.editDistance(s1, s2);
         double normalized = (double) distance / (double) Math.max(s1.length(), s2.length());
         return normalized;
