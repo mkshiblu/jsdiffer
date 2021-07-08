@@ -13,7 +13,7 @@ import io.rminerx.core.api.IFunctionDeclaration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UMLClassBaseDiff {
+public class UMLClassBaseDiff implements Comparable<UMLClassBaseDiff> {
     protected IClassDeclaration originalClass;
     protected IClassDeclaration nextClass;
     private boolean superclassChanged;
@@ -109,7 +109,7 @@ public class UMLClassBaseDiff {
     /**
      * Similar to  normalized package distance
      *
-     * @param c
+     * @param
      * @return
      */
     public double normalizedContainerQualifiedNameDistance() {
@@ -164,6 +164,18 @@ public class UMLClassBaseDiff {
     public UMLType getNewSuperclass() {
         return newSuperclass;
     }
-
     //endregion
+
+    /**
+     * return true if "classMoveDiff" represents the move of a class that is inner to this.originalClass
+     */
+    public boolean isInnerClassMove(UMLClassBaseDiff classDiff) {
+        return ClassUtil.isInnerClass(this.getOriginalClass(), classDiff.getOriginalClass())
+                && ClassUtil.isInnerClass(this.getNextClass(), classDiff.getNextClass());
+    }
+
+    @Override
+    public int compareTo(UMLClassBaseDiff other) {
+        return this.originalClass.getQualifiedName().compareTo(other.originalClass.getQualifiedName());
+    }
 }

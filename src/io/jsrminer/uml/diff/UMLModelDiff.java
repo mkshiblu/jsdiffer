@@ -31,6 +31,7 @@ public class UMLModelDiff extends Diff {
     private final List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
 
     private final List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
+    private final List<UMLClassRenameDiff> classRenameDiffList = new ArrayList<>();
     private final List<UMLClassMoveDiff> innerClassMoveDiffList = new ArrayList<>();
 
     public UMLModelDiff(UMLModel model1, UMLModel model2) {
@@ -306,7 +307,7 @@ public class UMLModelDiff extends Diff {
 
             boolean isFilenameDifferent = !originalPath.equals(movedPath);
             if (!originalName.equals(movedName)
-            || isFilenameDifferent) {
+                    || isFilenameDifferent) {
                 MoveClassRefactoring refactoring = new MoveClassRefactoring(originalClass, movedClass);
                 RenamePattern renamePattern = refactoring.getRenamePattern();
                 //check if the the original path is a substring of the moved path and vice versa
@@ -986,7 +987,15 @@ public class UMLModelDiff extends Diff {
         return innerClassMoveDiffList;
     }
 
-    public void reportInnerClassMoveDiffList(UMLClassMoveDiff classMoveDiff) {
+    public List<UMLClassRenameDiff> getClassRenameDiffList() {
+        return classRenameDiffList;
+    }
+
+    public void addInnerClassMoveDiffList(UMLClassMoveDiff classMoveDiff) {
         this.innerClassMoveDiffList.add(classMoveDiff);
+    }
+
+    public void addClassRenameDiffList(UMLClassRenameDiff classRenameDiff) {
+        this.classRenameDiffList.add(classRenameDiff);
     }
 }

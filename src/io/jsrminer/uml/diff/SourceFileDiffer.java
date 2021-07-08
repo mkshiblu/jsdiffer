@@ -24,6 +24,11 @@ public class SourceFileDiffer extends ContainerDiffer<ISourceFile, ContainerDiff
         this.modelDiff = modelDiff;
     }
 
+    public SourceFileDiffer(final ContainerDiff<ISourceFile> fileDiff, final UMLModelDiff modelDiff) {
+        super(fileDiff);
+        this.modelDiff = modelDiff;
+    }
+
     @Override
     public ContainerDiff<ISourceFile> diff() {
         reportAddedAndRemovedClassDeclarations();
