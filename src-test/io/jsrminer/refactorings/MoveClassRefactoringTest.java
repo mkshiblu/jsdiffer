@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class MoveClassRefactoringTest {
     static String code1 = """
                 class ImportParserPlugin {
@@ -51,16 +53,27 @@ public class MoveClassRefactoringTest {
             """;
 
     static List<IRefactoring> refactorings;
+    static MoveClassRefactoring moveClassRefactoring;
 
     @BeforeAll
     public static void setup() {
         refactorings = new JSRefactoringMiner().detectBetweenCodeSnippets("snippet1.js"
                 , code1, "snippet2.js", code2);
-       // moveOperationRefactoring = (MoveOperationRefactoring) refactorings.stream().filter(r -> r.getRefactoringType().equals(RefactoringType.MOVE_OPERATION)).findFirst().orElse(null);
+        moveClassRefactoring = (MoveClassRefactoring) refactorings.stream()
+                .filter(r -> r.getRefactoringType().equals(RefactoringType.MOVE_CLASS))
+                .findFirst().orElse(null);
     }
 
     @Test
-    public void testRefactoringType(){
+    public void testRefactoringType() {
+        assertEquals(RefactoringType.MOVE_CLASS, moveClassRefactoring.getRefactoringType());
+    }
 
+    @Test
+    public void testMovedClassName() {
+        assertEquals("CommentCompilationWarning", moveClassRefactoring.getMovedClass().getName());
+        assertEquals("CommentCompilationWarning", moveClassRefactoring.getMovedClass().getQualifiedName());
+
+        assertEquals("snippet2.js", moveClassRefactoring.getMovedClass().getParentContainerQualifiedName());
     }
 }
