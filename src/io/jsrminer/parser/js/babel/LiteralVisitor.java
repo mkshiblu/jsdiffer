@@ -27,6 +27,9 @@ public class LiteralVisitor {
         return visitNullLiteral(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, String> templateLiteralVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitTemplateLiteral(node, parent, container);
+    };
 
     LiteralVisitor(Visitor visitor) {
         this.visitor = visitor;
@@ -63,9 +66,9 @@ public class LiteralVisitor {
     /**
      * RegExpLiteral
      * interface RegExpLiteral <: Literal {
-     *   type: "RegExpLiteral";
-     *   pattern: string;
-     *   flags: string;
+     * type: "RegExpLiteral";
+     * pattern: string;
+     * flags: string;
      * }
      */
     String visitRegExpLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
@@ -75,9 +78,9 @@ public class LiteralVisitor {
     }
 
     /**
-     interface NullLiteral <: Literal {
-     type: "NullLiteral";
-     }
+     * interface NullLiteral <: Literal {
+     * type: "NullLiteral";
+     * }
      */
     String visitNullLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
         final String value = node.getText();
@@ -87,11 +90,24 @@ public class LiteralVisitor {
 
     /**
      * interface BooleanLiteral <: Literal {
-     *   type: "BooleanLiteral";
-     *   value: boolean;
+     * type: "BooleanLiteral";
+     * value: boolean;
      * }
      */
     String visitBooleanLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
+        final String value = node.getText();
+        leaf.getStringLiterals().add(value);
+        return value;
+    }
+
+    /**
+     * interface TemplateLiteral <: Expression {
+     * type: "TemplateLiteral";
+     * quasis: [ TemplateElement ];
+     * expressions: [ Expression ];
+     * }
+     */
+    String visitTemplateLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
         final String value = node.getText();
         leaf.getStringLiterals().add(value);
         return value;

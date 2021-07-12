@@ -589,7 +589,7 @@ public class DeclarationVisitor {
             }
         } else {
             // Rest element not handled
-            throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
+           // throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
         }
     }
 

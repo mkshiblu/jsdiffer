@@ -76,6 +76,7 @@ public class Visitor {
             put(REG_EXP_LITERAL, literalVisitor.regExpLiteralVisitor);
             put(BOOLEAN_LITERAL, literalVisitor.booleanLiteralVisitor);
             put(NULL_LITERAL, literalVisitor.nullLiteralVisitor);
+            put(TEMPLATE_LITERAL, literalVisitor.templateLiteralVisitor);
 
             // Statements
             put(BLOCK_STATEMENT, statementVisitor.blockStatementVisitor);
@@ -124,6 +125,13 @@ public class Visitor {
     }
 
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
+        if (node.getType() == null) {
+            throw new BabelException("Cannot found BabelNodeType for "
+                    + node.getString("type")
+                    + " at "
+                    + node.getSourceLocation().toString());
+        }
+
         var visitor = visitMethodsMap.get(node.getType());
         if (visitor == null) {
             if (!isIgnored(node.getType()))

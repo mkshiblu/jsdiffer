@@ -9,6 +9,7 @@ public enum BabelNodeType {
     NUMERIC_LITERAL("NumericLiteral"),
     STRING_LITERAL("StringLiteral"),
     NULL_LITERAL("NullLiteral"),
+    TEMPLATE_LITERAL("TemplateLiteral"),
     REG_EXP_LITERAL("RegExpLiteral"),
     BOOLEAN_LITERAL("BooleanLiteral"),
     FUNCTION_DECLARATION("FunctionDeclaration"),
@@ -96,10 +97,6 @@ public enum BabelNodeType {
     }
 
     public static BabelNodeType fromTitleCase(String typeInTitleCase) {
-        var babelNodeType = typeTitleCaseMap.get(typeInTitleCase);
-        if (babelNodeType == null) {
-            System.out.println("No Code Element Tpe for " + typeInTitleCase);
-        }
-        return babelNodeType;
+        return typeTitleCaseMap.get(typeInTitleCase);
     }
 }

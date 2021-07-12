@@ -39,8 +39,8 @@ public class UMLModelDiffer {
         checkForMovedClasses(renamedFileHints, umlModel1.getRepositoryDirectories(), new UMLClassMatcher.Move(), modelDiff);
         checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename(), modelDiff);
         //diffCommonNamedClasses(modelDiff);
-        //modelDiff.checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.RelaxedMove());
-        //modelDiff.checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.RelaxedRename());
+        //checkForMovedClasses(renamedFileHints, umlModel.repositoryDirectories, new UMLClassMatcher.RelaxedMove());
+        //checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename(), modelDiff);
 
         diffUncommonFiles(modelDiff);
         return modelDiff;
