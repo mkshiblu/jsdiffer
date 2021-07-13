@@ -11,10 +11,7 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public abstract class UMLClassMatcher {
@@ -37,22 +34,22 @@ public abstract class UMLClassMatcher {
         }
     }
 
-//    public static class RelaxedMove extends UMLClassMatcher {
-//        public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFileHint) {
-//            return removedFile.getName().equals(addedFile.getName())
-//                    && (addedFile.getFilepath().equals(renamedFileHint)
-//                    || hasCommonAttributesAndOperations(removedFile, addedFile));
-//        }
-//    }
+    public static class RelaxedMove extends UMLClassMatcher {
+        public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
+            return hasSameNameAndKind(removedClass, addedClass)
+                    && (hasCommonAttributesAndOperations(removedClass, addedClass)
+                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile));
+        }
+    }
 
-//
-//    public static class RelaxedRename extends UMLClassMatcher {
-//        public boolean match(ISourceFile removedFile, ISourceFile addedFile, String renamedFileHint) {
-//            return //removedClass.hasSameKind(addedClass) &&
-//                    (addedFile.getFilepath().equals(renamedFileHint)
-//                            || hasCommonAttributesAndOperations(removedFile, addedFile));
-//        }
-//    }
+
+    public static class RelaxedRename extends UMLClassMatcher {
+        public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
+            return ClassUtil.hasSameKind(removedClass, addedClass)
+                    && (hasCommonAttributesAndOperations(removedClass, addedClass)
+                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile));
+        }
+    }
 
     public boolean hasSameNameAndKind(IClassDeclaration class1, IClassDeclaration class2) {
         return ClassUtil.qualifiedNameEquals(class1, class2)
@@ -97,7 +94,89 @@ public abstract class UMLClassMatcher {
         return true;
     }
 
-    public boolean hasCommonAttributesAndOperations(IContainer container1, IContainer container2) {
-        return ContainerMatcher.COMMON.match(container1, container2);
+    public boolean hasCommonAttributesAndOperations(IClassDeclaration class1, IClassDeclaration class2) {
+            String commonPrefix = PrefixSuffixUtils.longestCommonPrefix(class1.getName(), class2.getName());
+            String commonSuffix = PrefixSuffixUtils.longestCommonSuffix(class1.getName(), class2.getName());
+            RenamePattern pattern = null;
+            if(!commonPrefix.isEmpty() && !commonSuffix.isEmpty()) {
+                int beginIndexS1 = class1.getName().indexOf(commonPrefix) + commonPrefix.length();
+                int endIndexS1 = class1.getName().lastIndexOf(commonSuffix);
+                String diff1 = beginIndexS1 > endIndexS1 ? "" :	class1.getName().substring(beginIndexS1, endIndexS1);
+                int beginIndexS2 = class2.getName().indexOf(commonPrefix) + commonPrefix.length();
+                int endIndexS2 = class2.getName().lastIndexOf(commonSuffix);
+                String diff2 = beginIndexS2 > endIndexS2 ? "" :	class2.getName().substring(beginIndexS2, endIndexS2);
+                pattern = new RenamePattern(diff1, diff2);
+            }
+            Set<IFunctionDeclaration> commonOperations = new LinkedHashSet<>();
+            int totalOperations = 0;
+            for(var operation : class1.getFunctionDeclarations()) {
+                if(!operation.isConstructor() /*&& !operation.overridesObject()*/) {
+                    totalOperations++;
+                    if( ClassUtil.containsOperationWithTheSameSignatureIgnoringChangedTypes(class2, operation)
+                            || (pattern != null && class2.containsOperationWithTheSameRenamePattern(operation, pattern.reverse()))) {
+                        commonOperations.add(operation);
+                    }
+                }
+            }
+            for(var operation : class2.getFunctionDeclarations()) {
+                if(!operation.isConstructor() /*&& !operation.overridesObject()*/) {
+                    totalOperations++;
+                    if(this.containsOperationWithTheSameSignatureIgnoringChangedTypes(operation) ||
+                            (pattern != null && this.containsOperationWithTheSameRenamePattern(operation, pattern))) {
+                        commonOperations.add(operation);
+                    }
+                }
+            }
+            Set<UMLAttribute> commonAttributes = new LinkedHashSet<UMLAttribute>();
+            int totalAttributes = 0;
+            for(UMLAttribute attribute : class1.getAttributes()) {
+                totalAttributes++;
+                if(class2.containsAttributeWithTheSameNameIgnoringChangedType(attribute) ||
+                        class2.containsRenamedAttributeWithIdenticalTypeAndInitializer(attribute) ||
+                        (pattern != null && umlClass.containsAttributeWithTheSameRenamePattern(attribute, pattern.reverse()))) {
+                    commonAttributes.add(attribute);
+                }
+            }
+            for(UMLAttribute attribute : umlClass.attributes) {
+                totalAttributes++;
+                if(this.containsAttributeWithTheSameNameIgnoringChangedType(attribute) ||
+                        this.containsRenamedAttributeWithIdenticalTypeAndInitializer(attribute) ||
+                        (pattern != null && this.containsAttributeWithTheSameRenamePattern(attribute, pattern))) {
+                    commonAttributes.add(attribute);
+                }
+            }
+            if(this.isTestClass() && umlClass.isTestClass()) {
+                return commonOperations.size() > Math.floor(totalOperations/2.0) || commonOperations.containsAll(this.operations);
+            }
+            if(this.isSingleAbstractMethodInterface() && umlClass.isSingleAbstractMethodInterface()) {
+                return commonOperations.size() == totalOperations;
+            }
+            if((commonOperations.size() > Math.floor(totalOperations/2.0) && (commonAttributes.size() > 2 || totalAttributes == 0)) ||
+                    (commonOperations.size() > Math.floor(totalOperations/3.0*2.0) && (commonAttributes.size() >= 2 || totalAttributes == 0)) ||
+                    (commonAttributes.size() > Math.floor(totalAttributes/2.0) && (commonOperations.size() > 2 || totalOperations == 0)) ||
+                    (commonOperations.size() == totalOperations && commonOperations.size() > 2 && this.attributes.size() == umlClass.attributes.size()) ||
+                    (commonOperations.size() == totalOperations && commonOperations.size() > 2 && totalAttributes == 1)) {
+                return true;
+            }
+            Set<UMLOperation> unmatchedOperations = new LinkedHashSet<UMLOperation>(umlClass.operations);
+            unmatchedOperations.removeAll(commonOperations);
+            Set<UMLOperation> unmatchedCalledOperations = new LinkedHashSet<UMLOperation>();
+            for(UMLOperation operation : umlClass.operations) {
+                if(commonOperations.contains(operation)) {
+                    for(OperationInvocation invocation : operation.getAllOperationInvocations()) {
+                        for(UMLOperation unmatchedOperation : unmatchedOperations) {
+                            if(invocation.matchesOperation(unmatchedOperation, operation, null)) {
+                                unmatchedCalledOperations.add(unmatchedOperation);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if((commonOperations.size() + unmatchedCalledOperations.size() > Math.floor(totalOperations/2.0) && (commonAttributes.size() > 2 || totalAttributes == 0))) {
+                return true;
+            }
+            return false;
+        }
     }
 }
