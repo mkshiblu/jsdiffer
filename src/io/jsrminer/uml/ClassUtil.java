@@ -1,5 +1,6 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.uml.diff.RenamePattern;
 import io.jsrminer.uml.diff.StringDistance;
 import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;
@@ -107,6 +108,21 @@ public class ClassUtil {
             return matchingOperation;
         }
         return null;
+    }
+
+
+    public static boolean containsAttributeWithTheSameRenamePattern(IClassDeclaration classDeclaration, UMLAttribute attribute, RenamePattern pattern) {
+        if (pattern == null)
+            return false;
+        for (UMLAttribute originalAttribute : classDeclaration.getAttributes()) {
+            String originalAttributeName = originalAttribute.getName();
+            if (originalAttributeName.contains(pattern.getBefore())) {
+                String originalAttributeNameAfterReplacement = originalAttributeName.replace(pattern.getBefore(), pattern.getAfter());
+                if (originalAttributeNameAfterReplacement.equals(attribute.getName()))
+                    return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isInnerClass(IClassDeclaration parentClass, IClassDeclaration childClass) {
