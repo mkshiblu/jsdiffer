@@ -54,7 +54,7 @@ public class UMLModelDiff extends Diff {
     public Set<IRefactoring> getClassRefactorings() {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
         refactorings.addAll(getMoveClassRefactorings());
-
+        refactorings.addAll(getRenameClassRefactorings(renamePackageRefactorings));
         return refactorings;
     }
 
@@ -333,6 +333,48 @@ public class UMLModelDiff extends Diff {
             }
         }
         refactorings.addAll(moveSourceFolderRefactoringRefactorings);
+        return refactorings;
+    }
+
+    private List<Refactoring> getRenameClassRefactorings(List<RenameFileRefactoring> previousRenamePackageRefactorings) {
+        List<Refactoring> refactorings = new ArrayList<Refactoring>();
+        List<RenameFileRefactoring> newRenamePackageRefactorings = new ArrayList<>();
+        for (UMLClassRenameDiff classRenameDiff : classRenameDiffList) {
+            if (classRenameDiff.isInSameFile()) {
+                RenameClassRefactoring refactoring = new RenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
+                refactorings.add(refactoring);
+            } else {
+                MoveAndRenameClassRefactoring refactoring = new MoveAndRenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
+                RenamePattern renamePattern = refactoring.getRenamePattern();
+                boolean foundInMatchingRenamePackageRefactoring = false;
+                //search first in RenamePackage refactorings established from Move Class refactorings
+                for (RenameFileRefactoring renamePackageRefactoring : previousRenamePackageRefactorings) {
+                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
+                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
+                        foundInMatchingRenamePackageRefactoring = true;
+                        break;
+                    }
+                }
+                for (RenamePackageRefactoring renamePackageRefactoring : newRenamePackageRefactorings) {
+                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
+                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
+                        foundInMatchingRenamePackageRefactoring = true;
+                        break;
+                    }
+                }
+                if (!foundInMatchingRenamePackageRefactoring) {
+                    newRenamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
+                }
+                refactorings.add(refactoring);
+            }
+        }
+        for (RenamePackageRefactoring renamePackageRefactoring : newRenamePackageRefactorings) {
+            List<PackageLevelRefactoring> moveClassRefactorings = renamePackageRefactoring.getMoveClassRefactorings();
+            if (moveClassRefactorings.size() >= 1 && isSourcePackageDeleted(renamePackageRefactoring)) {
+                refactorings.add(renamePackageRefactoring);
+                previousRenamePackageRefactorings.add(renamePackageRefactoring);
+            }
+        }
         return refactorings;
     }
 

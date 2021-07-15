@@ -21,6 +21,8 @@ public class JSRMinerConfig {
     @JsonProperty("projects")
     private Map<String, List<String>> repositoryCommits = new LinkedHashMap<>();
 
+    public static final String FILE_PATH_SEPARATOR = File.separator;
+
     public static void fromConfigFile() throws IOException {
 
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());

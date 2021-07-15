@@ -10,6 +10,8 @@ import io.rminerx.core.api.ISourceFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.jsrminer.JSRMinerConfig.FILE_PATH_SEPARATOR;
+
 public class UMLModelDiffer {
     UMLModel umlModel1;
     UMLModel umlModel2;
@@ -117,9 +119,10 @@ public class UMLModelDiffer {
                 String removedClassSourceFile = removedClass.getSourceLocation().getFilePath();
                 String renamedFile = renamedFileHints.get(removedClassSourceFile);
                 String removedClassSourceFolder = "";
-                if (removedClassSourceFile.contains("/")) {
-                    removedClassSourceFolder = removedClassSourceFile.substring(0, removedClassSourceFile.lastIndexOf("/"));
+                if (removedClassSourceFile.contains(FILE_PATH_SEPARATOR)) {
+                    removedClassSourceFolder = removedClassSourceFile.substring(0, removedClassSourceFile.lastIndexOf(FILE_PATH_SEPARATOR));
                 }
+
                 if (!repositoryDirectories.contains(removedClassSourceFolder)) {
                     deletedFolderPaths.add(removedClassSourceFolder);
                     //add deleted sub-directories

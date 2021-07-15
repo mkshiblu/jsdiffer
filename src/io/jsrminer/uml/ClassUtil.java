@@ -28,7 +28,7 @@ public class ClassUtil {
 
     public static boolean qualifiedNameEquals(IClassDeclaration class1
             , IClassDeclaration class2) {
-        return class1.getQualifiedName().equals(class1.getQualifiedName());
+        return class1.getQualifiedName().equals(class2.getQualifiedName());
     }
 
     public static boolean containsAttributeWithName(IClassDeclaration classDeclaration, UMLAttribute attribute) {

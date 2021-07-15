@@ -18,8 +18,8 @@ public abstract class UMLClassMatcher {
         public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
 
             return (addedClass.getSourceLocation().getFilePath().equals(renamedFile)
-                    || hasSameAttributesAndOperations(removedClass, addedClass))
-                    && hasSameNameAndKind(removedClass, addedClass);
+                    || (hasSameAttributesAndOperations(removedClass, addedClass))
+                    && hasSameNameAndKind(removedClass, addedClass));
         }
     }
 
@@ -34,8 +34,8 @@ public abstract class UMLClassMatcher {
     public static class RelaxedMove extends UMLClassMatcher {
         public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
             return hasSameNameAndKind(removedClass, addedClass)
-                    && (hasCommonAttributesAndOperations(removedClass, addedClass)
-                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile));
+                    && ((hasCommonAttributesAndOperations(removedClass, addedClass)
+                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile)));
         }
     }
 
@@ -43,8 +43,8 @@ public abstract class UMLClassMatcher {
     public static class RelaxedRename extends UMLClassMatcher {
         public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
             return ClassUtil.hasSameKind(removedClass, addedClass)
-                    && (hasCommonAttributesAndOperations(removedClass, addedClass)
-                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile));
+                    && ((hasCommonAttributesAndOperations(removedClass, addedClass)
+                    || addedClass.getSourceLocation().getFilePath().equals(renamedFile)));
         }
     }
 
