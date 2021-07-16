@@ -51,7 +51,7 @@ public class UMLModelDiff extends Diff {
         this.removedFiles.add(sourceFile);
     }
 
-    public Set<IRefactoring> getClassRefactorings() {
+    public Set<IRefactoring> getClassRefactorings(List<RenameFileRefactoring> renamePackageRefactorings) {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
         refactorings.addAll(getMoveClassRefactorings());
         refactorings.addAll(getRenameClassRefactorings(renamePackageRefactorings));
@@ -60,10 +60,19 @@ public class UMLModelDiff extends Diff {
 
     public List<IRefactoring> getRefactorings() throws RefactoringMinerTimedOutException {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
-        refactorings.addAll(getClassRefactorings());
 
         refactorings.addAll(getMoveFileRefactorings());
         refactorings.addAll(getRenameFileRefactorings());
+
+        List<RenameFileRefactoring> renamePackageRefactorings = new ArrayList<RenameFileRefactoring>();
+        for(var r : refactorings) {
+            if(r instanceof RenameFileRefactoring) {
+                renamePackageRefactorings.add((RenameFileRefactoring)r);
+            }
+        }
+
+        refactorings.addAll(getClassRefactorings(renamePackageRefactorings));
+
         //refactorings.addAll(identifyConvertAnonymousClassToTypeRefactorings());
         Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
         Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap
@@ -355,7 +364,7 @@ public class UMLModelDiff extends Diff {
                         break;
                     }
                 }
-                for (RenamePackageRefactoring renamePackageRefactoring : newRenamePackageRefactorings) {
+                for (var renamePackageRefactoring : newRenamePackageRefactorings) {
                     if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
                         renamePackageRefactoring.addMoveClassRefactoring(refactoring);
                         foundInMatchingRenamePackageRefactoring = true;
@@ -368,7 +377,7 @@ public class UMLModelDiff extends Diff {
                 refactorings.add(refactoring);
             }
         }
-        for (RenamePackageRefactoring renamePackageRefactoring : newRenamePackageRefactorings) {
+        for (var renamePackageRefactoring : newRenamePackageRefactorings) {
             List<PackageLevelRefactoring> moveClassRefactorings = renamePackageRefactoring.getMoveClassRefactorings();
             if (moveClassRefactorings.size() >= 1 && isSourcePackageDeleted(renamePackageRefactoring)) {
                 refactorings.add(renamePackageRefactoring);
