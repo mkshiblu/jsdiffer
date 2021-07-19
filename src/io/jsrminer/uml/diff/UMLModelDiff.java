@@ -353,37 +353,37 @@ public class UMLModelDiff extends Diff {
                 RenameClassRefactoring refactoring = new RenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
                 refactorings.add(refactoring);
             } else {
-                MoveAndRenameClassRefactoring refactoring = new MoveAndRenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
-                RenamePattern renamePattern = refactoring.getRenamePattern();
-                boolean foundInMatchingRenamePackageRefactoring = false;
-                //search first in RenamePackage refactorings established from Move Class refactorings
-                for (RenameFileRefactoring renamePackageRefactoring : previousRenamePackageRefactorings) {
-                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
-                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
-                        foundInMatchingRenamePackageRefactoring = true;
-                        break;
-                    }
-                }
-                for (var renamePackageRefactoring : newRenamePackageRefactorings) {
-                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
-                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
-                        foundInMatchingRenamePackageRefactoring = true;
-                        break;
-                    }
-                }
-                if (!foundInMatchingRenamePackageRefactoring) {
-                    newRenamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
-                }
-                refactorings.add(refactoring);
+//                MoveAndRenameClassRefactoring refactoring = new MoveAndRenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
+//                RenamePattern renamePattern = refactoring.getRenamePattern();
+//                boolean foundInMatchingRenamePackageRefactoring = false;
+//                //search first in RenamePackage refactorings established from Move Class refactorings
+//                for (RenameFileRefactoring renamePackageRefactoring : previousRenamePackageRefactorings) {
+//                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
+//                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
+//                        foundInMatchingRenamePackageRefactoring = true;
+//                        break;
+//                    }
+//                }
+//                for (var renamePackageRefactoring : newRenamePackageRefactorings) {
+//                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
+//                        renamePackageRefactoring.addMoveClassRefactoring(refactoring);
+//                        foundInMatchingRenamePackageRefactoring = true;
+//                        break;
+//                    }
+//                }
+//                if (!foundInMatchingRenamePackageRefactoring) {
+//                    newRenamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
+//                }
+               // refactorings.add(refactoring);
             }
         }
-        for (var renamePackageRefactoring : newRenamePackageRefactorings) {
-            List<PackageLevelRefactoring> moveClassRefactorings = renamePackageRefactoring.getMoveClassRefactorings();
-            if (moveClassRefactorings.size() >= 1 && isSourcePackageDeleted(renamePackageRefactoring)) {
-                refactorings.add(renamePackageRefactoring);
-                previousRenamePackageRefactorings.add(renamePackageRefactoring);
-            }
-        }
+//        for (var renamePackageRefactoring : newRenamePackageRefactorings) {
+//            List<PackageLevelRefactoring> moveClassRefactorings = renamePackageRefactoring.getMoveClassRefactorings();
+//            if (moveClassRefactorings.size() >= 1 && isSourcePackageDeleted(renamePackageRefactoring)) {
+//                refactorings.add(renamePackageRefactoring);
+//                previousRenamePackageRefactorings.add(renamePackageRefactoring);
+//            }
+//        }
         return refactorings;
     }
 
