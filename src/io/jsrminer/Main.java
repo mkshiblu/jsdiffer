@@ -15,12 +15,12 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            //commitsExample();
+            commitsExample();
             //angular();
           //  atom();
             //commitsExample();
-         //   vueExample();
-     reactNativeExample();
+//            vueExample();
+//     reactNativeExample();
 //            socketIoExample();
 //            commitExample();
 //            directoryExample();

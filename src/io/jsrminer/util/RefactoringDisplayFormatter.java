@@ -151,6 +151,15 @@ public class RefactoringDisplayFormatter {
             case ADD_PARAMETER:
             case RENAME_PARAMETER:
                 break;
+            case RENAME_CLASS:
+                var renameClassRefactoring = (RenameClassRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        renameClassRefactoring.getOriginalClass().getName()
+                        , renameClassRefactoring.getRenamedClass().getName()
+                        , getLocationString(renameClassRefactoring.getOriginalClass().getSourceLocation())
+                        , getLocationString(renameClassRefactoring.getRenamedClass().getSourceLocation())
+                );
+                break;
             default:
                 throw new UnsupportedOperationException();
         }

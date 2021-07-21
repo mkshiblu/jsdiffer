@@ -55,6 +55,10 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
 
+tasks.withType(JavaExec) {
+    jvmArgs += '--enable-preview'
+}
+
 tasks.withType(JavaCompile).each {
     it.options.compilerArgs.add('--enable-preview')
 }
