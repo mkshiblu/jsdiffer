@@ -30,6 +30,7 @@ public class UMLModelDiff extends Diff {
     private final List<SourceFileMoveDiff> fileMoveDiffList = new ArrayList<>();
     private final List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
 
+    private List<ClassDiff> commonClassDiffList;
     private final List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
     private final List<UMLClassRenameDiff> classRenameDiffList = new ArrayList<>();
     private final List<UMLClassMoveDiff> innerClassMoveDiffList = new ArrayList<>();
@@ -65,9 +66,9 @@ public class UMLModelDiff extends Diff {
         refactorings.addAll(getRenameFileRefactorings());
 
         List<RenameFileRefactoring> renamePackageRefactorings = new ArrayList<RenameFileRefactoring>();
-        for(var r : refactorings) {
-            if(r instanceof RenameFileRefactoring) {
-                renamePackageRefactorings.add((RenameFileRefactoring)r);
+        for (var r : refactorings) {
+            if (r instanceof RenameFileRefactoring) {
+                renamePackageRefactorings.add((RenameFileRefactoring) r);
             }
         }
 
@@ -374,7 +375,7 @@ public class UMLModelDiff extends Diff {
 //                if (!foundInMatchingRenamePackageRefactoring) {
 //                    newRenamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
 //                }
-               // refactorings.add(refactoring);
+                // refactorings.add(refactoring);
             }
         }
 //        for (var renamePackageRefactoring : newRenamePackageRefactorings) {
@@ -1048,5 +1049,9 @@ public class UMLModelDiff extends Diff {
 
     public void addClassRenameDiffList(UMLClassRenameDiff classRenameDiff) {
         this.classRenameDiffList.add(classRenameDiff);
+    }
+
+    public void addUMLClassDiff(ClassDiff classDiff) {
+        this.commonClassDiffList.add(classDiff);
     }
 }

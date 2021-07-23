@@ -1,6 +1,7 @@
 package io.jsrminer.uml.diff;
 
 import io.jsrminer.api.RefactoringMinerTimedOutException;
+import io.jsrminer.sourcetree.ClassDeclaration;
 import io.jsrminer.uml.UMLClassMatcher;
 import io.jsrminer.uml.UMLModel;
 import io.jsrminer.uml.UMLSourceFileMatcher;
@@ -8,6 +9,7 @@ import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.jsrminer.JSRMinerConfig.FILE_PATH_SEPARATOR;
@@ -19,6 +21,7 @@ public class UMLModelDiffer {
     private final List<IClassDeclaration> addedClasses = new ArrayList<>();
     private final List<IClassDeclaration> removedClasses = new ArrayList<>();
     private final Set<String> deletedFolderPaths = new LinkedHashSet<>();
+    private UMLModelDiff modelDiff;
 
     public UMLModelDiffer(UMLModel umlModel1, UMLModel umlModel2) {
         this.umlModel1 = umlModel1;
@@ -40,7 +43,7 @@ public class UMLModelDiffer {
         reportAddedAndRemovedClasses(modelDiff);
         checkForMovedClasses(renamedFileHints, umlModel1.getRepositoryDirectories(), new UMLClassMatcher.Move(), modelDiff);
         checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.Rename(), modelDiff);
-        //diffCommonNamedClasses(modelDiff);
+        diffCommonNamedClasses(modelDiff);
         checkForMovedClasses(renamedFileHints, umlModel2.getRepositoryDirectories(), new UMLClassMatcher.RelaxedMove(), modelDiff);
         checkForRenamedClasses(renamedFileHints, new UMLClassMatcher.RelaxedRename(), modelDiff);
 
@@ -61,17 +64,8 @@ public class UMLModelDiffer {
     }
 
     private void reportAddedAndRemovedClasses(UMLModelDiff modelDiff) {
-        var classDeclarations1 = modelDiff.model1.getSourceFileModels().values()
-                .stream()
-                .map(sourceFile -> sourceFile.getClassDeclarations())
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        var classDeclarations2 = modelDiff.model2.getSourceFileModels().values()
-                .stream()
-                .map(sourceFile -> sourceFile.getClassDeclarations())
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+        var classDeclarations1 = getModelClassDeclaration(modelDiff.model1);
+        var classDeclarations2 = getModelClassDeclaration(modelDiff.model2);
 
         // Find removed and added classes
         classDeclarations1.forEach(classDeclaration1 -> {
@@ -232,7 +226,7 @@ public class UMLModelDiffer {
 
             if (!diffSet.isEmpty()) {
                 SourceFileMoveDiff minFileMoveDiff = diffSet.first();
-                //minClassMoveDiff.process();
+                //minFileMoveDiff.process();
                 SourceFileDiffer sourceFileDiffer = new SourceFileDiffer(minFileMoveDiff.getOriginalFile()
                         , minFileMoveDiff.getMovedFile(), modelDiff);
                 var sourceDiff = sourceFileDiffer.diff();
@@ -328,6 +322,7 @@ public class UMLModelDiffer {
     }
 
     private void diffCommonNamedFiles(UMLModelDiff modelDiff) {
+        this.modelDiff = modelDiff;
         for (Map.Entry<String, ISourceFile> entry : umlModel1.getSourceFileModels().entrySet()) {
             final String file = entry.getKey();
             final ISourceFile sourceFileModel2 = umlModel2.getSourceFileModel(file);
@@ -353,6 +348,39 @@ public class UMLModelDiffer {
                 }
             }
         }
+    }
+
+    private void diffCommonNamedClasses(UMLModelDiff modelDiff) {
+        var class2List = getModelClassDeclaration(modelDiff.model2);
+        var classes2FullyQualifiedNameMap = class2List.stream()
+                .collect(Collectors.toMap(classDeclaration
+                                -> classDeclaration.getSourceLocation().getFilePath()
+                                + "|"
+                                + "classDeclaration.getQualifiedName()",
+                        Function.identity()));
+
+        for (var class1 : getModelClassDeclaration(modelDiff.model1)) {
+            String class1FullyQualifiedName = class1.getSourceLocation().getFilePath()
+                    + "|"
+                    + class1.getQualifiedName();
+
+            if (classes2FullyQualifiedNameMap.containsKey(class1FullyQualifiedName)) {
+                var classDiffer = new ClassDiffer(class1,
+                        classes2FullyQualifiedNameMap.get(class1FullyQualifiedName)/*, modelDiff*/);
+                var classDiff = classDiffer.diff();
+
+                if (!classDiff.isEmpty())
+                    modelDiff.addUMLClassDiff(classDiff);
+            }
+        }
+    }
+
+    private List<IClassDeclaration> getModelClassDeclaration(UMLModel model) {
+        return model.getSourceFileModels().values()
+                .stream()
+                .map(sourceFile -> sourceFile.getClassDeclarations())
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
     }
 
     private boolean innerClassWithTheSameName(IClassDeclaration removedClass, IClassDeclaration addedClass) {
