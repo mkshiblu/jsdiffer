@@ -27,7 +27,6 @@ public class ClassDiffer extends ContainerDiffer<IClassDeclaration, ClassDiff> {
         this.classDiff = super.containerDiff;
     }
 
-
     public ClassDiff diff() {
         super.reportAddedAndRemovedOperations();
         super.createBodyMapperForCommonFunctions();
