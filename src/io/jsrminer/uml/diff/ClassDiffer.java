@@ -189,7 +189,7 @@ public class ClassDiffer extends ContainerDiffer<IClassDeclaration, ClassDiff> {
 
     protected void processAttributes() {
         var originalClass = classDiff.getContainer1();
-        var nextClass = classDiff.getContainer1();
+        var nextClass = classDiff.getContainer2();
 
         for (UMLAttribute attribute : originalClass.getAttributes()) {
             var matchingAttribute = ClassUtil.containsAttribute(nextClass, attribute);

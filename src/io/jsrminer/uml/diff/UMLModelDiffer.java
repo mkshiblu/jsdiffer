@@ -356,7 +356,7 @@ public class UMLModelDiffer {
                 .collect(Collectors.toMap(classDeclaration
                                 -> classDeclaration.getSourceLocation().getFilePath()
                                 + "|"
-                                + "classDeclaration.getQualifiedName()",
+                                + classDeclaration.getQualifiedName(),
                         Function.identity()));
 
         for (var class1 : getModelClassDeclaration(modelDiff.model1)) {

@@ -19,6 +19,7 @@ public class RenameAttributeRefactoringTest {
                 	}
                 }
                 class CommentCompilationWarning extends WebpackError {
+                static x = 1;
                 constructor(message, module, loc) {
                     super(message);
 
