@@ -129,7 +129,7 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
         containerDiff.getAddedOperations().removeAll(addedOperationsToBeRemoved);
     }
 
-    private void checkForOperationSignatureChanges() {
+    protected void checkForOperationSignatureChanges() {
         containerDiff.setConsistentMethodInvocationRenames(findConsistentMethodInvocationRenames(containerDiff));
 
         if (containerDiff.getRemovedOperations().size() <= containerDiff.getAddedOperations().size()) {
@@ -215,7 +215,7 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
         }
     }
 
-    private void checkForInlinedOperations() {
+    protected void checkForInlinedOperations() {
         List<FunctionDeclaration> removedOperations = containerDiff.getRemovedOperations();
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
@@ -240,7 +240,7 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
      * Extract is detected by Checking if the already mapped operations contains any calls to
      * any addedOperations.
      */
-    private void checkForExtractedOperations() {
+    protected void checkForExtractedOperations() {
         List<FunctionDeclaration> addedOperations = new ArrayList<>(containerDiff.getAddedOperations());
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 

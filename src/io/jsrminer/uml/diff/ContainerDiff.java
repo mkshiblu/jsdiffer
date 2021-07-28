@@ -16,7 +16,7 @@ import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
-public class ContainerDiff<T extends IContainer> {
+public class ContainerDiff<T extends IContainer> extends Diff{
     private FunctionBodyMapper bodyStatementMapper;
 
     protected final List<FunctionDeclaration> addedOperations = new ArrayList<>();
