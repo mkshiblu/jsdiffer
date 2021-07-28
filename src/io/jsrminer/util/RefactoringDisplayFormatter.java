@@ -141,7 +141,7 @@ public class RefactoringDisplayFormatter {
                 );
                 break;
             case RENAME_FILE:
-                var renameFile = (RenameFileRefactoring)refactoring;
+                var renameFile = (RenameFileRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
                         renameFile.getOriginalFileName()
                         , renameFile.getRenamedFileName()
@@ -158,6 +158,25 @@ public class RefactoringDisplayFormatter {
                         , renameClassRefactoring.getRenamedClass().getName()
                         , getLocationString(renameClassRefactoring.getOriginalClass().getSourceLocation())
                         , getLocationString(renameClassRefactoring.getRenamedClass().getSourceLocation())
+                );
+                break;
+
+            case MOVE_CLASS:
+                var moveClassRefactoring = (MoveClassRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        moveClassRefactoring.getOriginalClassName()
+                        , moveClassRefactoring.getMovedClassName()
+                        , getLocationString(moveClassRefactoring.getOriginalClass().getSourceLocation())
+                        , getLocationString(moveClassRefactoring.getMovedClass().getSourceLocation())
+                );
+                break;
+            case MOVE_AND_RENAME_FILE:
+                var moveAndRenameFileRefactoring = (MoveAndRenameFileRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        moveAndRenameFileRefactoring.getOriginalFileName()
+                        , moveAndRenameFileRefactoring.getRenamedFileName()
+                        , getLocationString(moveAndRenameFileRefactoring.getOriginalFile().getSourceLocation())
+                        , getLocationString(moveAndRenameFileRefactoring.getMovedFile().getSourceLocation())
                 );
                 break;
             default:

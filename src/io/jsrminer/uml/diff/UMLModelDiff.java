@@ -30,7 +30,7 @@ public class UMLModelDiff extends Diff {
     private final List<SourceFileMoveDiff> fileMoveDiffList = new ArrayList<>();
     private final List<SourceFileRenameDiff> fileRenameDiffList = new ArrayList<>();
 
-    private List<ClassDiff> commonClassDiffList;
+    private List<ClassDiff> commonClassDiffList = new ArrayList<>();
     private final List<UMLClassMoveDiff> classMoveDiffList = new ArrayList<>();
     private final List<UMLClassRenameDiff> classRenameDiffList = new ArrayList<>();
     private final List<UMLClassMoveDiff> innerClassMoveDiffList = new ArrayList<>();
