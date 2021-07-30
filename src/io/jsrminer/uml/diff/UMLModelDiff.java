@@ -315,9 +315,9 @@ public class UMLModelDiff extends Diff {
                 movedPathPrefix = movedPath.substring(0, movedPath.lastIndexOf('/'));
             }
 
-            boolean isFilenameDifferent = !originalPath.equals(movedPath);
+            //boolean isFilenameDifferent = !originalPath.equals(movedPath);
             if (!originalName.equals(movedName)
-                    || isFilenameDifferent) {
+                    /*|| isFilenameDifferent*/) {
                 MoveClassRefactoring refactoring = new MoveClassRefactoring(originalClass, movedClass);
                 RenamePattern renamePattern = refactoring.getRenamePattern();
                 //check if the the original path is a substring of the moved path and vice versa
@@ -354,9 +354,9 @@ public class UMLModelDiff extends Diff {
                 RenameClassRefactoring refactoring = new RenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
                 refactorings.add(refactoring);
             } else {
-//                MoveAndRenameClassRefactoring refactoring = new MoveAndRenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
-//                RenamePattern renamePattern = refactoring.getRenamePattern();
-//                boolean foundInMatchingRenamePackageRefactoring = false;
+                MoveAndRenameClassRefactoring refactoring = new MoveAndRenameClassRefactoring(classRenameDiff.getOriginalClass(), classRenameDiff.getRenamedClass());
+                RenamePattern renamePattern = refactoring.getRenamePattern();
+                boolean foundInMatchingRenamePackageRefactoring = false;
 //                //search first in RenamePackage refactorings established from Move Class refactorings
 //                for (RenameFileRefactoring renamePackageRefactoring : previousRenamePackageRefactorings) {
 //                    if (renamePackageRefactoring.getPattern().equals(renamePattern)) {
@@ -375,7 +375,7 @@ public class UMLModelDiff extends Diff {
 //                if (!foundInMatchingRenamePackageRefactoring) {
 //                    newRenamePackageRefactorings.add(new RenamePackageRefactoring(refactoring));
 //                }
-                // refactorings.add(refactoring);
+                refactorings.add(refactoring);
             }
         }
 //        for (var renamePackageRefactoring : newRenamePackageRefactorings) {

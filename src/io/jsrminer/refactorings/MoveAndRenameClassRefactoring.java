@@ -8,7 +8,7 @@ public class MoveAndRenameClassRefactoring extends Refactoring {
     private IClassDeclaration originalClass;
     private IClassDeclaration renamedClass;
 
-    public MoveAndRenameClassRefactoring(IClassDeclaration originalClass,  IClassDeclaration renamedClass) {
+    public MoveAndRenameClassRefactoring(IClassDeclaration originalClass, IClassDeclaration renamedClass) {
         this.originalClass = originalClass;
         this.renamedClass = renamedClass;
     }
@@ -16,9 +16,9 @@ public class MoveAndRenameClassRefactoring extends Refactoring {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getName()).append("\t");
-        sb.append(originalClass.getName());
+        sb.append(originalClass.getSourceLocation().getFilePath() + "|" + originalClass.getName());
         sb.append(" moved and renamed to ");
-        sb.append(renamedClass.getName());
+        sb.append(renamedClass.getSourceLocation().getFilePath() + "|" + renamedClass.getName());
         return sb.toString();
     }
 

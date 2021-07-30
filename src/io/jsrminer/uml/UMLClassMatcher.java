@@ -17,9 +17,9 @@ public abstract class UMLClassMatcher {
     public static class Move extends UMLClassMatcher {
         public boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile) {
 
-            return (addedClass.getSourceLocation().getFilePath().equals(renamedFile)
-                    || (hasSameAttributesAndOperations(removedClass, addedClass))
-                    && hasSameNameAndKind(removedClass, addedClass));
+            return hasSameNameAndKind(removedClass, addedClass)
+                    && (addedClass.getSourceLocation().getFilePath().equals(renamedFile)
+                        || (hasSameAttributesAndOperations(removedClass, addedClass)));
         }
     }
 
