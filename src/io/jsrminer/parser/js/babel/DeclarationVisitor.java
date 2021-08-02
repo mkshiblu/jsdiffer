@@ -65,31 +65,38 @@ public class DeclarationVisitor {
     VariableDeclaration processVariableDeclarator(BabelNode node, VariableDeclarationKind kind, ILeafFragment leaf, IContainer container) {
         var idNode = node.get("id");
         String variableName;
+        var type = idNode.getType();
+        if (type != null) {
+            switch (type) {
+                case IDENTIFIER:
+                    variableName = idNode.get("name").asString();
+                    break;
+                case OBJECT_PATTERN:
+                    // e.g. { file, banner } = output a Destructuring assignment
+                    // For now take the first one only
+                    var properties = idNode.get("properties");
+                    variableName = properties.get(0).getText();
+                    break;
+                case ARRAY_PATTERN:
+                    // NOT HANDLED
+                    variableName = "";
+                    break;
+                default:
+                    throw new RuntimeException("Declarator Id of type " + idNode.getType() + " at " + idNode.getSourceLocation() + " not handled");
+            }
 
-        switch (idNode.getType()) {
-            case IDENTIFIER:
-                variableName = idNode.get("name").asString();
-                break;
-            case OBJECT_PATTERN:
-                // e.g. { file, banner } = output a Destructuring assignment
-                // For now take the first one only
-                var properties = idNode.get("properties");
-                variableName = properties.get(0).getText();
-                break;
-            default:
-                throw new RuntimeException("Declarator Id of type " + idNode.getType() + " at " + idNode.getSourceLocation() + " not handled");
+            VariableDeclaration variableDeclaration = createVariableDeclaration(node.getSourceLocation(), variableName, kind, leaf.getParent().getSourceLocation());
+            BabelNode initNode = node.get("init");
+
+            if (initNode != null && initNode.isDefined()) {
+                Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(initNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
+                visitor.visitExpression(initNode, expression, container);
+                variableDeclaration.setInitializer(expression);
+            }
+            return variableDeclaration;
+        } else {
+            return null;
         }
-
-        VariableDeclaration variableDeclaration = createVariableDeclaration(node.getSourceLocation(), variableName, kind, leaf.getParent().getSourceLocation());
-        BabelNode initNode = node.get("init");
-
-        if (initNode != null && initNode.isDefined()) {
-            Expression expression = visitor.getNodeUtil().createBaseExpressionWithRMType(initNode, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
-            visitor.visitExpression(initNode, expression, container);
-            variableDeclaration.setInitializer(expression);
-        }
-
-        return variableDeclaration;
     }
 
     VariableDeclaration createVariableDeclaration(SourceLocation variableNodeLocation, String variableName
@@ -123,7 +130,8 @@ public class DeclarationVisitor {
 
         for (int i = 0; i < declarations.size(); i++) {
             VariableDeclaration variableDeclaration = processVariableDeclarator(declarations.get(i), kind, leaf, container);
-            addVariableDeclarationToParent(leaf, variableDeclaration);
+            if (variableDeclaration != null)
+                addVariableDeclarationToParent(leaf, variableDeclaration);
         }
     }
 
@@ -500,8 +508,15 @@ public class DeclarationVisitor {
                         function.registerParameter(umlParameter);
                     }
                     break;
+                case REST_ELEMENT:
+                    umlParameter = visitor.getNodeUtil().createUmlParameter(
+                            parameterNode.get("argument").getText()
+                            , function, parameterNode.getSourceLocation()
+                    );
+                    function.registerParameter(umlParameter);
+                    break;
                 default:
-                    throw new NotImplementedException("Paramter type not handled: " + function.getSourceLocation());
+                    throw new NotImplementedException("Parameter type not handled: " + function.getSourceLocation());
             }
         }
     }
@@ -589,7 +604,7 @@ public class DeclarationVisitor {
             }
         } else {
             // Rest element not handled
-           // throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
+            // throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
         }
     }
 

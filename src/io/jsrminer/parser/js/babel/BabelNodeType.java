@@ -72,6 +72,7 @@ public enum BabelNodeType {
     REST_ELEMENT("RestElement"),
     OBJECT_METHOD("ObjectMethod"),
     SPREAD_ELEMENT("SpreadElement"),
+    ARRAY_PATTERN("ArrayPattern"),
 
     IMPORT_DECLARATION("ImportDeclaration"),
     EXPORT_DECLARATION("ExportDeclaration"),
