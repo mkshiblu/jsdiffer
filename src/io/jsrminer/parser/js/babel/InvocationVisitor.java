@@ -201,11 +201,21 @@ public class InvocationVisitor {
         for (int i = 0; i < argumentsNode.size(); i++) {
             var argumentNode = argumentsNode.get(i);
             registerArgument(argumentNode, leaf);
-            invocation.getArguments().add(visitor.getNodeUtil().getTextInSource(argumentNode, false));
+            invocation.getArguments().add(getArgumentText(argumentNode));
             visitor.visitExpression(argumentNode, leaf, container);
         }
 
         return parsedProperly;
+    }
+
+    String getArgumentText(BabelNode argumentNode) {
+        String text = visitor.getNodeUtil().getTextInSource(argumentNode, false);
+        switch (argumentNode.getType()) {
+            case SPREAD_ELEMENT:
+                return text.substring(3, text.length());
+            default:
+                return text;
+        }
     }
 
     void getSubExpression(BabelNode operand, Invocation invocation) {

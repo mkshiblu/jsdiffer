@@ -62,6 +62,10 @@ public class ExpressionVisitor {
     };
 
 
+    BabelNodeVisitor<ILeafFragment, Void> spreadElementVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitSpreadElement(node, parent, container);
+    };
+
     ExpressionVisitor(Visitor visitor) {
         this.visitor = visitor;
     }
@@ -337,6 +341,11 @@ public class ExpressionVisitor {
 
     Void visitTypeCastExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
         visitor.visitExpression(node.get("expression"), leaf, container);
+        return null;
+    }
+
+    Void visitSpreadElement(BabelNode node, ILeafFragment leaf, IContainer container) {
+        visitor.visitExpression(node.get("argument"), leaf, container);
         return null;
     }
 }

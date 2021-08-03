@@ -23,7 +23,6 @@ public class BabelParser extends JavaScriptParser {
             JBabel jBabel = new JBabel();
             for (String filepath : fileContents.keySet()) {
                 final String content = fileContents.get(filepath);
-
                 try {
                     log.info("Processing " + filepath + "...");
                     SourceFile sourceFile = parseAndLoadSourceFile(content, filepath, jBabel);
