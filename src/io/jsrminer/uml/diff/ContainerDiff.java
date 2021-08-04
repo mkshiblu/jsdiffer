@@ -142,7 +142,7 @@ public class ContainerDiff<T extends IContainer> extends Diff{
 
 
     /**
-     * Similar to Rminer UMLBaseClass.getRefactoring()
+     * Similar to Rminer UMLBaseClass.getRefactorings()
      */
     public List<IRefactoring> getAllRefactorings() {
         List<IRefactoring> refactorings = new ArrayList<>(this.refactorings);

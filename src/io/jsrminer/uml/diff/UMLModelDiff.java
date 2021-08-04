@@ -56,6 +56,11 @@ public class UMLModelDiff extends Diff {
         Set<IRefactoring> refactorings = new LinkedHashSet<>();
         refactorings.addAll(getMoveClassRefactorings());
         refactorings.addAll(getRenameClassRefactorings(renamePackageRefactorings));
+
+        for (var classDiff : commonClassDiffList) {
+            refactorings.addAll(classDiff.getAllRefactorings());
+        }
+
         return refactorings;
     }
 
@@ -317,7 +322,7 @@ public class UMLModelDiff extends Diff {
 
             //boolean isFilenameDifferent = !originalPath.equals(movedPath);
             if (!originalName.equals(movedName)
-                    /*|| isFilenameDifferent*/) {
+                /*|| isFilenameDifferent*/) {
                 MoveClassRefactoring refactoring = new MoveClassRefactoring(originalClass, movedClass);
                 RenamePattern renamePattern = refactoring.getRenamePattern();
                 //check if the the original path is a substring of the moved path and vice versa
