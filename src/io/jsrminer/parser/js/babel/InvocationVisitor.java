@@ -186,6 +186,10 @@ public class InvocationVisitor {
                 visitor.visitExpression(callee, leaf, container);
                 parsedProperly = false;
                 break;
+
+            case IMPORT:
+                parsedProperly = false;
+                break;
             default:
                 throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getType() + " at " + callee.getSourceLocation().toString());
         }

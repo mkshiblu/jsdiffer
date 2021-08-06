@@ -75,7 +75,9 @@ public enum BabelNodeType {
     ARRAY_PATTERN("ArrayPattern"),
 
     IMPORT_DECLARATION("ImportDeclaration"),
+    IMPORT("Import"),
     EXPORT_DECLARATION("ExportDeclaration"),
+    EXPORT_NAMED_DECLARATION("ExportNamedDeclaration"),
     EXPORT_DEFAULT_DECLARATION("ExportDefaultDeclaration"),
     OPT_CLASS_DECLARATION("OptClassDeclaration"),
     OPT_FUNCTION_DECLARATION("OptFunctionDeclaration"),
