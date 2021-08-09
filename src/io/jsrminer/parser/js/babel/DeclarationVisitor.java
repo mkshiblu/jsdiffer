@@ -515,6 +515,18 @@ public class DeclarationVisitor {
                     );
                     function.registerParameter(umlParameter);
                     break;
+
+                case ASSIGNMENT_PATTERN:
+                    // Parameter with default value
+                    var variableNode = parameterNode.get("left");
+                    if (variableNode.getType() == BabelNodeType.IDENTIFIER) {
+                        umlParameter = visitor.getNodeUtil().createUmlParameter(
+                                variableNode.getString("name")
+                                , function, parameterNode.getSourceLocation()
+                        );
+                        function.registerParameter(umlParameter);
+                    }
+                    break;
                 default:
                     throw new NotImplementedException("Parameter type not handled: " + function.getSourceLocation());
             }

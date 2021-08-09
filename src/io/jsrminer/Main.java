@@ -100,7 +100,7 @@ public class Main {
 
     private static void webpackExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\webpack";
-        String commitId = "9156be961d890b9877ddef3a70964c9665662abb";
+        String commitId = "4b1a76bdb00ebf89b977c2cc1199870d0c180c72";
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 
