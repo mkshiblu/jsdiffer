@@ -149,6 +149,7 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(renameFile.getRenamedFile().getSourceLocation())
                 );
             case ADD_PARAMETER:
+            case REMOVE_PARAMETER:
             case RENAME_PARAMETER:
                 break;
             case RENAME_CLASS:

@@ -39,6 +39,8 @@ public class BabelParser extends JavaScriptParser {
         return umlModel;
     }
 
+
+
     @Override
     public ISourceFile parseSource(String content, @NonNull String filepath) {
         if (filepath == null) {
