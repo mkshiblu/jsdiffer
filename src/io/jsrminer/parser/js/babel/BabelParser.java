@@ -9,8 +9,12 @@ import org.eclipse.jgit.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.print.Book;
 import java.lang.invoke.MethodHandles;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class BabelParser extends JavaScriptParser {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -19,27 +23,30 @@ public class BabelParser extends JavaScriptParser {
     public UMLModel parse(Map<String, String> fileContents) {
         final UMLModel umlModel = new UMLModel();
         try {
-
-            JBabel jBabel = new JBabel();
-            for (String filepath : fileContents.keySet()) {
-                final String content = fileContents.get(filepath);
-                try {
-                    log.info("Processing " + filepath + "...");
-                    SourceFile sourceFile = parseAndLoadSourceFile(content, filepath, jBabel);
-                    sourceFile.setFilepath(filepath);
-                    umlModel.getSourceFileModels().put(filepath, sourceFile);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    //System.out.println("Ignoring file " + filepath + " due to exception" + ex.toString());
-                }
-            }
+            var sourceFileMap = parseAsync(fileContents);
+            sourceFileMap.entrySet().forEach((entry) -> {
+                umlModel.getSourceFileModels().put(entry.getKey(), entry.getValue());
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return umlModel;
     }
 
+    private Map<String, SourceFile> parseAsync(Map<String, String> fileContents) {
+        final var tasks = fileContents.keySet();
 
+        List<CompletableFuture<SourceFile>> futures = tasks.stream()
+                .map(filepath -> CompletableFuture.supplyAsync(() -> {
+                    String content = fileContents.get(filepath);
+                    return parseAndLoadSourceFile(content, filepath, new JBabel());
+                }))
+                .collect(Collectors.toList());
+
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .collect(Collectors.toMap(SourceFile::getName, Function.identity()));
+    }
 
     @Override
     public ISourceFile parseSource(String content, @NonNull String filepath) {
@@ -57,26 +64,27 @@ public class BabelParser extends JavaScriptParser {
      *
      * @return
      */
-    private SourceFile parseAndLoadSourceFile(String fileContent, String filePath, JBabel jBabel) {
-        StopWatch watch = new StopWatch();
-        watch.start();
-
+    private SourceFile parseAndLoadSourceFile(String fileContent, String filepath, JBabel jBabel) {
+//        StopWatch watch = new StopWatch();
+//        watch.start();
+//        log.info("Processing " + filepath + "...");
         // Get AST
-        ParseResult result = parseAndMakeAst(filePath, fileContent, jBabel);
+        ParseResult result = parseAndMakeAst(filepath, fileContent, jBabel);
         // Traverse AST and load model
         if (result.getProgramAST() == null) {
-            watch.stop();
-            throw new RuntimeException("Error parsing " + filePath);
+//            watch.stop();
+            throw new RuntimeException("Error parsing " + filepath);
         } else {
-            var builder = new Visitor(filePath, fileContent);
+            var builder = new Visitor(filepath, fileContent);
             SourceFile file = builder.loadFromAst(result.getProgramAST());
-            watch.stop();
-            log.debug("Parse and Load time: " + watch.toString());
+            file.setFilepath(filepath);
+//            watch.stop();
+//            log.debug("Parse and Load time: " + watch.toString());
             return file;
         }
     }
 
-    public ParseResult parseAndMakeAst(String fileName, String fileContent, JBabel babel) {
+    private ParseResult parseAndMakeAst(String fileName, String fileContent, JBabel babel) {
         final List<SyntaxMessage> warnings = new LinkedList<>();
         final List<SyntaxMessage> errors = new LinkedList<>();
 

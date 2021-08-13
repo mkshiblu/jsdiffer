@@ -20,7 +20,7 @@ public class ParallelTaskExecutor extends Thread {
     }
 
     public void run() {
-        model.printCount();
-        System.out.println("Thread " +  threadName + " exiting.");
+        //model.printCount();
+        //System.out.println("Thread " +  threadName + " exiting.");
     }
 }
