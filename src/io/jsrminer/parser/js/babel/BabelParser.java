@@ -1,5 +1,7 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.parser.ParseResult;
+import io.jsrminer.parser.SyntaxMessage;
 import io.jsrminer.parser.js.JavaScriptParser;
 import io.jsrminer.uml.UMLModel;
 import io.rminerx.core.api.ISourceFile;
@@ -23,7 +25,7 @@ public class BabelParser extends JavaScriptParser {
     public UMLModel parse(Map<String, String> fileContents) {
         final UMLModel umlModel = new UMLModel();
         try {
-            var sourceFileMap = parseAsync(fileContents);
+            var sourceFileMap = internalParse(fileContents);
             sourceFileMap.entrySet().forEach((entry) -> {
                 umlModel.getSourceFileModels().put(entry.getKey(), entry.getValue());
             });
@@ -33,19 +35,44 @@ public class BabelParser extends JavaScriptParser {
         return umlModel;
     }
 
-    private Map<String, SourceFile> parseAsync(Map<String, String> fileContents) {
-        final var tasks = fileContents.keySet();
+    private Map<String, SourceFile> internalParse(Map<String, String> fileContents) {
+        JBabel babel = new JBabel();
+        Map<String, SourceFile> map = new HashMap<>();
+        for (Map.Entry<String, String> entry : fileContents.entrySet()) {
+            try {
+                log.debug("Parsing and loading " + entry.getKey() + "...");
+                SourceFile file = parseAndLoadSourceFile(entry.getValue(), entry.getKey(), babel);
+                map.put(file.getFilepath(), file);
+            } catch (Exception ex) {
+                log.error("Ignoring file: " + entry.getKey());
+                ex.printStackTrace();
+            }
+        }
+        return map;
+    }
 
-        List<CompletableFuture<SourceFile>> futures = tasks.stream()
-                .map(filepath -> CompletableFuture.supplyAsync(() -> {
-                    String content = fileContents.get(filepath);
-                    return parseAndLoadSourceFile(content, filepath, new JBabel());
-                }))
-                .collect(Collectors.toList());
+    private Map<String, SourceFile> parseParallel(Map<String, String> fileContents) {
+        final var tasks = fileContents.entrySet();
+        Map<String, SourceFile> map = new HashMap<>();
+        try {
+            List<CompletableFuture<SourceFile>> futures = tasks.stream()
+                    .map(entry -> CompletableFuture.supplyAsync(() -> {
+                                return parseAndLoadSourceFile(entry.getValue(), entry.getKey(), new JBabel());
+                            }).exceptionally(ex -> {
+                                System.out.println(ex);
+                                return null;
+                            })
+                    ).collect(Collectors.toList());
 
-        return futures.stream()
-                .map(CompletableFuture::join)
-                .collect(Collectors.toMap(SourceFile::getName, Function.identity()));
+            var resultList = futures.stream()
+                    .map(CompletableFuture::join)
+                    .collect(Collectors.toList());
+            map = resultList.stream()
+                    .collect(Collectors.toMap(SourceFile::getFilepath, Function.identity()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return map;
     }
 
     @Override
@@ -65,21 +92,13 @@ public class BabelParser extends JavaScriptParser {
      * @return
      */
     private SourceFile parseAndLoadSourceFile(String fileContent, String filepath, JBabel jBabel) {
-//        StopWatch watch = new StopWatch();
-//        watch.start();
-//        log.info("Processing " + filepath + "...");
-        // Get AST
-        ParseResult result = parseAndMakeAst(filepath, fileContent, jBabel);
-        // Traverse AST and load model
+        ParseResult<BabelNode> result = parseAndMakeAst(filepath, fileContent, jBabel);
         if (result.getProgramAST() == null) {
-//            watch.stop();
             throw new RuntimeException("Error parsing " + filepath);
         } else {
             var builder = new Visitor(filepath, fileContent);
             SourceFile file = builder.loadFromAst(result.getProgramAST());
             file.setFilepath(filepath);
-//            watch.stop();
-//            log.debug("Parse and Load time: " + watch.toString());
             return file;
         }
     }
@@ -98,85 +117,5 @@ public class BabelParser extends JavaScriptParser {
         }
 
         return new ParseResult(programAst, errors, warnings);
-    }
-
-    /**
-     * Syntax error message.
-     */
-    static class SyntaxMessage {
-        private final String message;
-        private final int line;
-        private final int column;
-
-        /**
-         * Constructs a new syntax error message object.
-         */
-        SyntaxMessage(String message, int line, int column) {
-            this.message = message;
-            this.line = line;
-            this.column = column;
-        }
-
-        /**
-         * Returns the message.
-         */
-        public String getMessage() {
-            return message;
-        }
-
-        /**
-         * Returns the source location.
-         */
-        public int getLine() {
-            return line;
-        }
-
-        public int getColumn() {
-            return column;
-        }
-
-        @Override
-        public String toString() {
-            return line + "," + column + ": " + getMessage();
-        }
-    }
-
-    /**
-     * Result from parser.
-     */
-    public static class ParseResult {
-
-        private final List<SyntaxMessage> errors;
-
-        private final List<SyntaxMessage> warnings;
-
-        private BabelNode programAST;
-
-        private ParseResult(BabelNode programAST, List<SyntaxMessage> errors, List<SyntaxMessage> warnings) {
-            this.programAST = programAST;
-            this.errors = errors;
-            this.warnings = warnings;
-        }
-
-        /**
-         * Returns the AST, or null if parse error.
-         */
-        public BabelNode getProgramAST() {
-            return programAST;
-        }
-
-        /**
-         * Returns the list of parse errors.
-         */
-        List<SyntaxMessage> getErrors() {
-            return errors;
-        }
-
-        /**
-         * Returns the list of parse warnings.
-         */
-        List<SyntaxMessage> getWarnings() {
-            return warnings;
-        }
     }
 }
