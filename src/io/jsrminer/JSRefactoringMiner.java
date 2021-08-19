@@ -33,6 +33,9 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -255,12 +258,13 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 // TODO Multi thread?
                 log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
 
                 // TODO multi thread?
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
+                var list = LoadModels(fileContentsBefore, fileContentsCurrent);
+                var umlModelBefore = list.get(0);
+                var umlModelCurrent = list.get(1);
 
                 stopWatch.stop();
                 log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
@@ -278,6 +282,18 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             walk.dispose();
         }
         return refactoringsAtRevision;
+    }
+
+    private List<UMLModel> LoadModels(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
+        CompletableFuture<UMLModel> model1Future
+                = CompletableFuture.supplyAsync(() -> UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/));
+
+        CompletableFuture<UMLModel> model2Future
+                = CompletableFuture.supplyAsync(() -> UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/));
+
+        return Stream.of(model1Future, model2Future)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
     }
 
     public List<IRefactoring> detectRefactorings(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
