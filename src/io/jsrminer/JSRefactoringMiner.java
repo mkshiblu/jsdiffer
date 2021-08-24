@@ -7,7 +7,7 @@ import io.jsrminer.io.GitUtil;
 import io.jsrminer.io.SourceFile;
 import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.uml.UMLModel;
-import io.jsrminer.uml.UMLModelFactory;
+import io.jsrminer.uml.UMLModelBuilder;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
@@ -262,7 +262,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 // TODO multi thread?
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                var list = LoadModels(fileContentsBefore, fileContentsCurrent);
+                var list = LoadModelsParallel(fileContentsBefore, fileContentsCurrent);
                 var umlModelBefore = list.get(0);
                 var umlModelCurrent = list.get(1);
 
@@ -285,11 +285,34 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     private List<UMLModel> LoadModels(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
+        var model1 = UMLModelBuilder.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
+
+        var model2 = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/);
+
+        return List.of(model1, model2);
+    }
+
+    private List<UMLModel> LoadModelsParallel(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) throws InterruptedException {
+
+        final UMLModel[] model1 = new UMLModel[1];
+        final UMLModel[] model2 = new UMLModel[1];
+        Thread model1Thread = new Thread(() -> model1[0] = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore));
+        Thread model2Thread = new Thread(() -> model2[0] = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent));
+        model1Thread.start();
+        model2Thread.start();
+
+        model1Thread.join();
+        model2Thread.join();
+
+        return List.of(model1[0], model2[0]);
+    }
+
+    private List<UMLModel> LoadModelsParallelAsync(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
         CompletableFuture<UMLModel> model1Future
-                = CompletableFuture.supplyAsync(() -> UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/));
+                = CompletableFuture.supplyAsync(() -> io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/));
 
         CompletableFuture<UMLModel> model2Future
-                = CompletableFuture.supplyAsync(() -> UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/));
+                = CompletableFuture.supplyAsync(() -> io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/));
 
         return Stream.of(model1Future, model2Future)
                 .map(CompletableFuture::join)
@@ -299,10 +322,10 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     public List<IRefactoring> detectRefactorings(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
 
         // TODO Multi thread?
-        UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore);
+        UMLModel umlModelBefore = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore);
 
         // TODO multi thread?
-        UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
+        UMLModel umlModelCurrent = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent);
 
         log.info("Detecting Refactorings...");
         UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(new LinkedHashMap<>());
