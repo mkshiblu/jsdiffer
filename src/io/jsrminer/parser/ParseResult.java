@@ -25,14 +25,14 @@ public class ParseResult<T> {
     /**
      * Returns the list of parse errors.
      */
-    List<SyntaxMessage> getErrors() {
+    public List<SyntaxMessage> getErrors() {
         return errors;
     }
 
     /**
      * Returns the list of parse warnings.
      */
-    List<SyntaxMessage> getWarnings() {
+    public List<SyntaxMessage> getWarnings() {
         return warnings;
     }
 }

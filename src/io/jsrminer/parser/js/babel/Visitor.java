@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.parser.ErrorReporter;
 import io.jsrminer.sourcetree.BlockStatement;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
@@ -26,7 +27,10 @@ public class Visitor {
 
     private final EnumMap<BabelNodeType, BabelNodeVisitor<ICodeFragment, Object>> visitMethodsMap;
 
-    public Visitor(String filename, String fileContent) {
+    private ErrorReporter errorReporter;
+
+    public Visitor(String filename, String fileContent, ErrorReporter errorReporter) {
+        this.errorReporter = errorReporter;
         this.nodeUtil = new BabelNodeUtil(filename, fileContent);
         this.filename = filename;
         this.visitMethodsMap = new EnumMap(BabelNodeType.class) {{
@@ -127,16 +131,22 @@ public class Visitor {
 
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
         if (node.getType() == null) {
-            throw new BabelException("Cannot found BabelNodeType for "
-                    + node.getString("type")
-                    + " at "
-                    + node.getSourceLocation().toString());
+//            throw new BabelException("Cannot found BabelNodeType for "
+//                    + node.getString("type")
+//                    + " at "
+//                    + node.getSourceLocation().toString());
+
+            errorReporter.reportError(node.getSourceLocation(),
+                    "Cannot found BabelNodeType for "
+                    + node.getString("type"));
         }
 
         var visitor = visitMethodsMap.get(node.getType());
         if (visitor == null) {
             if (!isIgnored(node.getType()))
-                throw new NotImplementedException("Processor not implemented for " + node.getType());
+                //throw new NotImplementedException("Processor not implemented for " + node.getType());
+                errorReporter.reportWarning(node.getSourceLocation(),
+                        "Ignored because processor not implemented for " + node.getType());
         } else {
             Object result = visitor.visit(node, parent, container);
             return result;
@@ -150,5 +160,9 @@ public class Visitor {
 
     public BabelNodeUtil getNodeUtil() {
         return nodeUtil;
+    }
+
+    public ErrorReporter getErrorReporter() {
+        return errorReporter;
     }
 }

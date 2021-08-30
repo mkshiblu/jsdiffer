@@ -1,8 +1,10 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.parser.ErrorReporter;
 import io.jsrminer.parser.ParseResult;
 import io.jsrminer.parser.SyntaxMessage;
 import io.jsrminer.parser.js.JavaScriptParser;
+import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 import io.rminerx.core.api.ISourceFile;
 import io.rminerx.core.entities.SourceFile;
@@ -94,9 +96,25 @@ public class BabelParser extends JavaScriptParser {
     private SourceFile parseAndLoadSourceFile(String fileContent, String filepath, JBabel jBabel) {
         ParseResult<BabelNode> result = parseAndMakeAst(filepath, fileContent, jBabel);
         if (result.getProgramAST() == null) {
-            throw new RuntimeException("Error parsing " + filepath);
+            throw new RuntimeException("Error parsing " + filepath + System.lineSeparator() + result.getErrors());
         } else {
-            var builder = new Visitor(filepath, fileContent);
+
+            final List<SyntaxMessage> warnings = new LinkedList<>();
+            final List<SyntaxMessage> errors = new LinkedList<>();
+
+            ErrorReporter errorReporter = new ErrorReporter() {
+                @Override
+                public void reportError(SourceLocation sourcePosition, String message) {
+                    errors.add(new SyntaxMessage(message, sourcePosition.startLine, sourcePosition.startColumn));
+                }
+
+                @Override
+                public void reportWarning(SourceLocation sourcePosition, String message) {
+                    warnings.add(new SyntaxMessage(message, sourcePosition.startLine, sourcePosition.startColumn));
+                }
+            };
+
+            var builder = new Visitor(filepath, fileContent, errorReporter);
             SourceFile file = builder.loadFromAst(result.getProgramAST());
             file.setFilepath(filepath);
             return file;
