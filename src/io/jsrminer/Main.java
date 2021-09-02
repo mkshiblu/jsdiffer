@@ -15,8 +15,8 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            webpackExample();
-            //commitsExample();
+            //webpackExample();
+            threeJsExample();
             //angular();
             //  atom();
             //commitsExample();
@@ -140,6 +140,12 @@ public class Main {
     static void socketIoExample() throws IOException {
         String repoPath = "E:\\PROJECTS_REPO\\socket.io";
         String commitId = "3aa3213b13e914a668a76bc5eab1cef80708bf01";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+    }
+
+    static void threeJsExample() throws IOException {
+        String repoPath = "E:\\PROJECTS_REPO\\three.js";
+        String commitId = "01b263d3362f8bab63dc26b04e4a7ac1fb1d2641";
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 }

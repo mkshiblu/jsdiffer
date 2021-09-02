@@ -116,6 +116,13 @@ public class BabelParser extends JavaScriptParser {
 
             var builder = new Visitor(filepath, fileContent, errorReporter);
             SourceFile file = builder.loadFromAst(result.getProgramAST());
+            result.getErrors().forEach(msg -> log.error(filepath + "(" +
+                    msg.getLine() + "-"
+                    + msg.getColumn() + "): " + msg.getMessage()));
+
+            result.getWarnings().forEach(msg -> log.warn(filepath + "(" +
+                    msg.getLine() + "-"
+                    + msg.getColumn() + "): " + msg.getMessage()));
             file.setFilepath(filepath);
             return file;
         }
