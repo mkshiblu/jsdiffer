@@ -330,4 +330,9 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return containerDiff.toString();
+    }
 }

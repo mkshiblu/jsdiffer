@@ -65,7 +65,6 @@ public enum BabelNodeType {
     CALL_EXPRESSION("CallExpression"),
     CONDITIONAL_EXPRESSION("ConditionalExpression"),
 
-
     OBJECT_PROPERTY("ObjectProperty"),
     OBJECT_PATTERN("ObjectPattern"),
     ASSIGNMENT_PROPERTY("AssignmentProperty"),

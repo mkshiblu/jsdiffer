@@ -293,4 +293,9 @@ public class ContainerDiff<T extends IContainer> extends Diff{
     public List<ClassDiff> getCommonClassDiffList() {
         return commonClassDiffList;
     }
+
+    @Override
+    public String toString() {
+        return container1 + System.lineSeparator() + container2;
+    }
 }

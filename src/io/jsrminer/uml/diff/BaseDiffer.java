@@ -174,7 +174,8 @@ public abstract class BaseDiffer<T extends IContainer> {
                     }
                 }
                 return (countableStatements == parameterizedVariableDeclarationStatements || countableStatements == nonMappedLeavesExactlyMatchedInTheBodyOfAddedOperation + parameterizedVariableDeclarationStatements) && countableStatements > 0;
-            } else if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() > 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
+            } else if (operationBodyMapper.nonMappedElementsT1() == 0
+                    && operationBodyMapper.nonMappedElementsT2() > 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
                 int countableStatements = 0;
                 int parameterizedVariableDeclarationStatements = 0;
                 FunctionDeclaration removedOperation = operationBodyMapper.function1;

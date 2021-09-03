@@ -4,10 +4,7 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLAttribute;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.UMLType;
-import io.rminerx.core.api.IClassDeclaration;
-import io.rminerx.core.api.ICodeFragment;
-import io.rminerx.core.api.IContainer;
-import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.api.*;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.*;
@@ -316,7 +313,6 @@ public class DeclarationVisitor {
         return attributes;
     }
 
-
     VariableDeclaration visitClassPrivateProperty(BabelNode node, ClassDeclaration classDeclaration) {
         return null;
     }
@@ -591,6 +587,7 @@ public class DeclarationVisitor {
      * Property of a class or object can be  of [ ObjectProperty | ObjectMethod | SpreadElement ];
      */
     void processProperty(BabelNode property, BlockStatement body, IContainer container) {
+
         if (property.getType() == BabelNodeType.OBJECT_PROPERTY
                 || property.getType() == BabelNodeType.OBJECT_METHOD) {
             var keyNode = property.get("key"); // name
@@ -603,6 +600,10 @@ public class DeclarationVisitor {
                     switch (valueNode.getType()) {
                         case FUNCTION_DECLARATION:
                             processObjectFunctionDeclaration(valueNode, container, fieldName);
+                            break;
+
+                        case FUNCTION_EXPRESSION:
+                            prcesssObjectPropertyFunction(property, container);
                             break;
                         default:
                             // Else this is an attribute i.e. field declaration
@@ -617,7 +618,43 @@ public class DeclarationVisitor {
         } else {
             // Rest element not handled
             // throw new RuntimeException("Rest Object  property at " + property.getSourceLocation() + " not handled");
+            this.visitor.getErrorReporter().reportWarning(property.getSourceLocation(), "Could not parse Object  property");
         }
+    }
+
+    FunctionDeclaration processObjectFunctionDeclaration(BabelNode tree
+            , IContainer container
+            , String propertyNameAsFunctionName) {
+        var function = new FunctionDeclaration();
+        container.getFunctionDeclarations().add(function);
+
+        // Load function info
+        visitor.getNodeUtil().populateContainerNamesAndLocation(function, propertyNameAsFunctionName, tree.getSourceLocation(), container);
+
+        processFunctionParamaterAndBody(tree, container, function);
+        return function;
+    }
+
+    FunctionDeclaration prcesssObjectPropertyFunction(BabelNode propertyNode, IContainer anonymousFunctionDeclaration) {
+        var function = new FunctionDeclaration();
+        anonymousFunctionDeclaration.registerFunctionDeclaration(function);
+
+        var keyNode = propertyNode.get("key");
+        if (keyNode.getType() == BabelNodeType.IDENTIFIER) {
+            String name = keyNode.get("name").asString();
+            visitor.getNodeUtil()
+                    .populateContainerNamesAndLocation(function, name
+                            , propertyNode.getSourceLocation(), anonymousFunctionDeclaration);
+        } else {
+            throw new RuntimeException("Not supported " + keyNode.getSourceLocation());
+        }
+
+        boolean successFullyParsed = processFunctionParamaterAndBody(propertyNode.get("value")
+                , anonymousFunctionDeclaration, function);
+        if (!successFullyParsed) {
+            anonymousFunctionDeclaration.getFunctionDeclarations().remove(function);
+        }
+        return function;
     }
 
     private String getFieldNameFromObjectMemberKeyNode(BabelNode objectMemberNodeKeyNode) {
@@ -673,19 +710,6 @@ public class DeclarationVisitor {
         addVariableDeclarationToParent(leaf, variableDeclaration);
 
         return variableDeclaration;
-    }
-
-    FunctionDeclaration processObjectFunctionDeclaration(BabelNode tree
-            , IContainer container
-            , String propertyNameAsFunctionName) {
-        var function = new FunctionDeclaration();
-        container.getFunctionDeclarations().add(function);
-
-        // Load function info
-        visitor.getNodeUtil().populateContainerNamesAndLocation(function, propertyNameAsFunctionName, tree.getSourceLocation(), container);
-
-        processFunctionParamaterAndBody(tree, container, function);
-        return function;
     }
 
 
