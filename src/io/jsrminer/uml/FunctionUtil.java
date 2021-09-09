@@ -1,14 +1,12 @@
 package io.jsrminer.uml;
 
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.util.DiffUtil;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Contains helper for function signature matching
@@ -283,5 +281,39 @@ public class FunctionUtil {
             i++;
         }
         return true;
+    }
+
+    public static boolean compatibleSignature(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        return overloadedParameterNames(operation1, operation2)
+                || equalParameterNames(operation1, operation2)
+                || isCommonParameterNamesMoreThanUncommon(operation1, operation2);
+    }
+
+    /**
+     * Returns true if all paramters is operation1 is in Operation2 or vice versa
+     */
+    public static boolean overloadedParameterNames(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        return operation1.getParameterNameList().containsAll(operation2.getParameterNameList())
+                || operation2.getParameterNameList().containsAll(operation1.getParameterNameList());
+    }
+
+    /**
+     * Returns true if comman paramters count are more than
+     */
+    public static boolean isCommonParameterNamesMoreThanUncommon(IFunctionDeclaration operation1, IFunctionDeclaration operation2) {
+        var parameters1 = operation1.getParameterNameList();
+        var parameters2 = operation2.getParameterNameList();
+        var commonNames = DiffUtil.common(parameters1, parameters2);
+        if (commonNames.isEmpty())
+            return false;
+
+        List<String> differentNames;
+        if (parameters1.size() > parameters2.size())
+            differentNames = DiffUtil.getUnmatchedInFirstCollection(parameters1, parameters2);
+        else {
+            differentNames = DiffUtil.getUnmatchedInFirstCollection(parameters2, parameters1);
+        }
+
+        return commonNames.size() >= differentNames.size();
     }
 }

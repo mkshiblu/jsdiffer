@@ -26,7 +26,7 @@ public class RenameFunctionInsideObjectExpressionTest extends BaseTest {
         refactorings = new JSRefactoringMiner().detectBetweenDirectories(
                 getRootResourceDirectory() + "renamefunction\\v1",
                 getRootResourceDirectory() + "renamefunction\\v2");
-        //renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
+        renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
     }
 
     @Test
