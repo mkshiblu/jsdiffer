@@ -15,7 +15,6 @@ import io.jsrminer.uml.diff.UMLModelDiffer;
 import io.jsrminer.util.RefactoringDisplayFormatter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.eclipse.jgit.errors.InvalidObjectIdException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -26,7 +25,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -72,9 +74,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             log.info("Time taken: " + watch.toString());
 
         } catch (IOException e) {
-            e.printStackTrace();
-            log.error(e.toString());
-        } catch (InvalidObjectIdException e){
             e.printStackTrace();
             log.error(e.toString());
         }

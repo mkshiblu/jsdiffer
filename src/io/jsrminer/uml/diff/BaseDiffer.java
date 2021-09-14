@@ -6,7 +6,6 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.sourcetree.SingleStatement;
-import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -319,15 +318,26 @@ public abstract class BaseDiffer<T extends IContainer> {
 
     private boolean compatibleSignatures(FunctionDeclaration removedOperation
             , FunctionDeclaration addedOperation, int absoluteDifferenceInPosition, IContainer container1, IContainer container2) {
-        boolean isCompatibleParameters = FunctionUtil.compatibleSignature(removedOperation, addedOperation);
+
+        // TODO addedOperation.compatibleSignature
+
+        boolean isCompatibleParameters = false;
+
+        if (removedOperation.getParameters().size() == addedOperation.getParameters().size()) {
+            Set<String> params1 = addedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
+            Set<String> params2 = removedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
+            isCompatibleParameters = params1.equals(params2);
+        }
+
         return isCompatibleParameters ||
-                ((absoluteDifferenceInPosition == 0
-                        || operationsBeforeAndAfterMatch(removedOperation, addedOperation, container1, container2))
-                        && (addedOperation.getParameters().size() == removedOperation.getParameters().size())
-                        || normalizedNameDistance(removedOperation, addedOperation) <= MAX_OPERATION_NAME_DISTANCE
+                (
+                        (absoluteDifferenceInPosition == 0 || operationsBeforeAndAfterMatch(removedOperation, addedOperation, container1, container2)) &&
+                                /*!gettersWithDifferentReturnType(removedOperation, addedOperation) &&*/
+                                ( /*addedOperation.getParameterTypeList().equals(removedOperation.getParameterTypeList()*/
+                                        addedOperation.getParameters().size() == removedOperation.getParameters().size())
+                                || normalizedNameDistance(removedOperation, addedOperation) <= MAX_OPERATION_NAME_DISTANCE
                 );
     }
-
 
     public double normalizedNameDistance(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         String s1 = operation1.getName().toLowerCase();

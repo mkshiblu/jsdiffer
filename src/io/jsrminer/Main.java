@@ -16,12 +16,12 @@ public class Main {
         log.info("Program Starts");
         try {
             //webpackExample();
-//            threeJsExample();
+            threeJsExample();
             //angular();
             //  atom();
             //commitsExample();
 //            vueExample();
-     reactNativeExample();
+//     reactNativeExample();
 //            socketIoExample();
 //            commitExample();
 //            directoryExample();
@@ -94,8 +94,8 @@ public class Main {
 
     private static void reactNativeExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\react-native";
-        String[] commitIds = new String[]{"0125813f213662ec1d9bb4a456f5671adcff9d83", "0125813f213662ec1d9bb4a456f5671adcff9d83", "06c05e744d8af9582bde348210f254d76dae48b9", "2f4ca831bfd936be9ae71a8a5700003abb65a0f5", "4435f087713e1d0ac3639e3b3196d71c6402898e", "488a4c7e1c86ac5900ff9194106511fbf5a8e3cb", "5259450c143f71c65e157d6b7d3f0e1655eb7aa1", "7014a30baae0b01378740113d15e4a7d721d916a", "83169c95a3525fcb74e34853022475093b9a1a77", "95e8592dcb9b50772336d2801f46305fdc95250d", "970caa4552d4ba87c1a954391535ff42b00832e7", "9fbff62b5ff9b3effb18f135e1cd9bd34a83c985", "a90d0e3614c467c33cf85bcbe65be71903d5aecc", "ad67f556fb145d38fe547e1e8baa73ccc7a431b0", "b549e364e0025e0e1b4005f04a9de2d767006da1", "c749d951ada829c6f6fb76f35e68142e61054433", "d1336ab16efc26449509b938dd46cf606d3caf34", "e708010d18f938e2d6b6424cfc9485d8e5dd2800", "f59e5a8d28491c64e4d0c08fec3a2b0b3fabb38b", "f6da9e1a9a932d2775cc998469d2f9b4ebd858c5", "f80000b9e72596392567a3deda59441e43f6327d", "f8c8231706492b588331354d45b833aa21434e13", "fbd1beaf666be9c09a380784f8c0cd34ba083a6b"};
-        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
+        String commitId = "e708010d18f938e2d6b6424cfc9485d8e5dd2800";
+        new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
 
     private static void webpackExample() throws Exception {

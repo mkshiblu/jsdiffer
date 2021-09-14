@@ -31,12 +31,12 @@ public class CommitRefactoringsDiff {
         }
 //
         builder.append(System.lineSeparator());
-        builder.append(getUnmatchedInRdCount() + " Unmatched in Rd-lines: ");
+        builder.append(getUnmatchedInRdCount() + " Unmatched in Rd: ");
         var missedLines = getAllUnmatchedInRds().stream().map(rdRow -> rdRow.lineNo).toArray(Integer[]::new);
         builder.append(Arrays.toString(missedLines));
 
         builder.append(System.lineSeparator());
-        builder.append(getTotalMatchedCount() + " Matched-lines: ");
+        builder.append(getTotalMatchedCount() + " Matched: ");
         var matchedLines = getAllMatched().stream().map(rdRow -> rdRow.lineNo).toArray(Integer[]::new);
         builder.append(Arrays.toString(matchedLines));
 
