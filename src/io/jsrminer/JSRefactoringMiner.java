@@ -235,7 +235,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
         List<String> filePathsBefore = new ArrayList<String>();
         List<String> filePathsCurrent = new ArrayList<String>();
-        Map<String, String> renamedFilesHint = new HashMap<>();
+        Map<String, String> renamedFilesHint = new LinkedHashMap<>();
 
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();

@@ -26,7 +26,7 @@ public class InlineFunctionTest extends BaseTest {
         refactorings = new JSRefactoringMiner().detectBetweenDirectories(getRootResourceDirectory() + "ExtractOrInlineFunction\\src2"
                 , getRootResourceDirectory() + "ExtractOrInlineFunction\\src1");
 
-        IRefactoring refactoring = refactorings.get(0);
+        IRefactoring refactoring = refactorings.get(7);
         inlineOperationRefactoring = (InlineOperationRefactoring) refactoring;
     }
 

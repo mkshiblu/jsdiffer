@@ -320,9 +320,9 @@ public class UMLModelDiff extends Diff {
                 movedPathPrefix = movedPath.substring(0, movedPath.lastIndexOf('/'));
             }
 
-            //boolean isFilenameDifferent = !originalPath.equals(movedPath);
+            boolean isFilenameDifferent = !originalPath.equals(movedPath);
             if (!originalName.equals(movedName)
-                /*|| isFilenameDifferent*/) {
+                    || isFilenameDifferent) {
                 MoveClassRefactoring refactoring = new MoveClassRefactoring(originalClass, movedClass);
                 RenamePattern renamePattern = refactoring.getRenamePattern();
                 //check if the the original path is a substring of the moved path and vice versa

@@ -26,7 +26,7 @@ public class ExtractFunctionTest extends BaseTest {
         refactorings = new JSRefactoringMiner().detectBetweenDirectories(getRootResourceDirectory() + "ExtractOrInlineFunction\\src1"
                 , getRootResourceDirectory() + "ExtractOrInlineFunction\\src2");
 
-        IRefactoring refactoring = refactorings.get(0);
+        IRefactoring refactoring = refactorings.get(6);
         assertEquals(RefactoringType.EXTRACT_OPERATION, refactoring.getRefactoringType());
         extractOperationRefactoring = (ExtractOperationRefactoring) refactoring;
         //vueExtractRefactoring = (ExtractOperationRefactoring) refactorings.get(2);
