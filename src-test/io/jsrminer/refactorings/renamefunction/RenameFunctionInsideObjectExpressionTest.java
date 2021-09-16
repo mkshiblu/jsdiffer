@@ -26,7 +26,7 @@ public class RenameFunctionInsideObjectExpressionTest extends BaseTest {
         refactorings = new JSRefactoringMiner().detectBetweenDirectories(
                 getRootResourceDirectory() + "renamefunction\\v1",
                 getRootResourceDirectory() + "renamefunction\\v2");
-        //renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
+        renameOperationRefactoring = (RenameOperationRefactoring) refactorings.get(0);
     }
 
     @Test
@@ -34,4 +34,27 @@ public class RenameFunctionInsideObjectExpressionTest extends BaseTest {
         assertEquals(1, refactorings.size());
     }
 
+    @Test
+    void testOriginalOperationName(){
+        assertEquals("svgEllipsisToThreeEllipsis", renameOperationRefactoring.getOriginalOperation().getName());
+    }
+    @Test
+    void  testOriginalOperationQualifiedName(){
+        assertEquals("1.parse.svgEllipsisToThreeEllipsis", renameOperationRefactoring.getOriginalOperation().getQualifiedName());
+    }
+
+    @Test
+    void testMapperMappingsCount() {
+        assertEquals(26, renameOperationRefactoring.getBodyMapper().getMappings().size());
+    }
+
+    @Test
+    void  testRenameOperationName(){
+        assertEquals("parseArcCommand", renameOperationRefactoring.getRenamedOperation().getName());
+    }
+
+    @Test
+    void  testRenameOperationQualifiedName(){
+        assertEquals("1.parse.parseArcCommand", renameOperationRefactoring.getRenamedOperation().getQualifiedName());
+    }
 }

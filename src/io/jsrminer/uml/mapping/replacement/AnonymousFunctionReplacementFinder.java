@@ -164,7 +164,7 @@ public class AnonymousFunctionReplacementFinder {
 
     private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         boolean isMatched = false;
-        FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getContainerDiff());
+        FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getParentDiff());
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
             int nonMappedElementsT1 = mapper.nonMappedElementsT1();

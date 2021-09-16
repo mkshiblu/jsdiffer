@@ -1,9 +1,6 @@
 package io.jsrminer.refactorings;
 
-import io.jsrminer.api.CodeRange;
-import io.jsrminer.uml.diff.MovedClassToAnotherSourceFolder;
 import io.jsrminer.uml.diff.RenamePattern;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.util.*;
 

@@ -152,20 +152,15 @@ public class SourceFileDiffer extends ContainerDiffer<ISourceFile, ContainerDiff
         FunctionBodyMapper mapper = new FunctionBodyMapper(function1, function2);
 
         int mappings = mapper.mappingsWithoutBlocks();
-        if (mappings > 0) {
-//            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
-//            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
-//            if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
-            if (mappings > mapper.nonMappedElementsT1() && mappings > mapper.nonMappedElementsT2()) {
-//                this.mappings.addAll(mapper.mappings);
-//                this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
-//                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
-//                this.nonMappedLeavesT1.addAll(mapper.nonMappedLeavesT1);
-//                this.nonMappedLeavesT2.addAll(mapper.nonMappedLeavesT2);
-                //sourceDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsAfterPostProcessing());
-                containerDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
-                containerDiff.setBodyStatementMapper(mapper);
-            }
+
+        boolean statementMappingsMatched =
+                mappings > 0
+                        && mappings > mapper.nonMappedElementsT1()
+                        && mappings > mapper.nonMappedElementsT2();
+
+        if (statementMappingsMatched) {
+            containerDiff.getRefactoringsBeforePostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
+            containerDiff.setBodyStatementMapper(mapper);
         }
     }
 
