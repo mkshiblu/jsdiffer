@@ -74,7 +74,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         } catch (IOException e) {
             e.printStackTrace();
             log.error(e.toString());
-        } catch (InvalidObjectIdException e){
+        } catch (InvalidObjectIdException e) {
             e.printStackTrace();
             log.error(e.toString());
         }
@@ -124,6 +124,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     public List<IRefactoring> detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
+        List<IRefactoring> refactorings = new ArrayList<>();
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
@@ -131,14 +132,13 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         try {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
-            List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
             refactorings.forEach(r -> log.info(r.toString()));
-            return refactorings;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return refactorings;
     }
 
     public List<IRefactoring> detectBetweenFiles(String filePath1, String filePath2) {

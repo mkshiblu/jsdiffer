@@ -1,5 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
+import io.jsrminer.exception.ParsingException;
 import io.jsrminer.parser.ErrorReporter;
 import io.jsrminer.parser.ParseResult;
 import io.jsrminer.parser.SyntaxMessage;
@@ -105,7 +106,9 @@ public class BabelParser extends JavaScriptParser {
             ErrorReporter errorReporter = new ErrorReporter() {
                 @Override
                 public void reportError(SourceLocation sourcePosition, String message) {
-                    errors.add(new SyntaxMessage(message, sourcePosition.startLine, sourcePosition.startColumn));
+                    var syntaxMessage = new SyntaxMessage(message, sourcePosition.startLine, sourcePosition.startColumn);
+                    errors.add(syntaxMessage);
+                    throw new ParsingException(syntaxMessage);
                 }
 
                 @Override
