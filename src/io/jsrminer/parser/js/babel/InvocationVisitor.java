@@ -191,7 +191,9 @@ public class InvocationVisitor {
                 parsedProperly = false;
                 break;
             default:
-                throw new RuntimeException("Unsupported CallExpression Operand of type " + callee.getType() + " at " + callee.getSourceLocation().toString());
+                visitor.getErrorReporter().reportWarning(node.getSourceLocation(),
+                        "Unsupported CallExpression Operand of type: "  + callee.getType()
+                + " Text: " + node.getText());
         }
 
         invocation.setText(this.visitor.getNodeUtil().getTextInSource(node, false));

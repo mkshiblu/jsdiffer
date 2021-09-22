@@ -43,7 +43,7 @@ public enum BabelNodeType {
     RETURN_STATEMENT("ReturnStatement"),
     BREAK_STATEMENT("BreakStatement"),
     CONTINUE_STATEMENT("ContinueStatement"),
-    LABELLED_STATEMENT("LabelledStatement"),
+    LABELED_STATEMENT("LabeledStatement"),
 
     // Loops
     FOR_STATEMENT("ForStatement"),

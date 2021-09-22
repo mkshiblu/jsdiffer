@@ -6,7 +6,6 @@ import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.entities.SourceFile;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.EnumMap;
 
@@ -66,7 +65,7 @@ public class Visitor {
             put(RETURN_STATEMENT, controlFlowStatementVisitor.returnStatementVisitor);
             put(BREAK_STATEMENT, controlFlowStatementVisitor.breakStatementVisitor);
             put(CONTINUE_STATEMENT, controlFlowStatementVisitor.continueStatementVisitor);
-            put(LABELLED_STATEMENT, controlFlowStatementVisitor.lablelledStatementVisitor);
+            put(LABELED_STATEMENT, controlFlowStatementVisitor.lablelledStatementVisitor);
 
             // Loops
             put(FOR_STATEMENT, loopStatementVisitor.forStatementVisitor);

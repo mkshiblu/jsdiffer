@@ -594,6 +594,9 @@ public class DeclarationVisitor {
             var valueNode = property.get("value");  // initialzier
             //var isShortHand = property.get("shorthand").asBoolean();
             String fieldName = getFieldNameFromObjectMemberKeyNode(keyNode);
+            if (fieldName == null){
+                return;
+            }
 
             switch (property.getType()) {
                 case OBJECT_PROPERTY:
@@ -645,14 +648,15 @@ public class DeclarationVisitor {
             visitor.getNodeUtil()
                     .populateContainerNamesAndLocation(function, name
                             , propertyNode.getSourceLocation(), anonymousFunctionDeclaration);
-        } else {
-            throw new RuntimeException("Not supported " + keyNode.getSourceLocation());
-        }
 
-        boolean successFullyParsed = processFunctionParamaterAndBody(propertyNode.get("value")
-                , anonymousFunctionDeclaration, function);
-        if (!successFullyParsed) {
-            anonymousFunctionDeclaration.getFunctionDeclarations().remove(function);
+            boolean successFullyParsed = processFunctionParamaterAndBody(propertyNode.get("value")
+                    , anonymousFunctionDeclaration, function);
+            if (!successFullyParsed) {
+                anonymousFunctionDeclaration.getFunctionDeclarations().remove(function);
+            }
+        } else {
+            this.visitor.getErrorReporter().reportWarning(propertyNode.getSourceLocation(),
+                    "Unsupported object key type : "  + keyNode.getType() + " Text: " + propertyNode.getText());
         }
         return function;
     }
@@ -668,7 +672,9 @@ public class DeclarationVisitor {
                 fieldName = objectMemberNodeKeyNode.getString("value");
                 break;
             default:
-                throw new RuntimeException("KeyNode type not handled at " + objectMemberNodeKeyNode.getSourceLocation().toString());
+                this.visitor.getErrorReporter().reportWarning(objectMemberNodeKeyNode.getSourceLocation()
+                        , "Unsupported Object member KeyNode type: " +  objectMemberNodeKeyNode.getType()
+                + " Text: " + objectMemberNodeKeyNode.getText());
         }
 
         return fieldName;

@@ -17,11 +17,11 @@ public class Main {
         try {
             //webpackExample();
 //            threeJsExample();
-            //angular();
+            angular();
             //  atom();
             //commitsExample();
 //            vueExample();
-     reactNativeExample();
+//     reactNativeExample();
 //            socketIoExample();
 //            commitExample();
 //            directoryExample();
@@ -37,6 +37,8 @@ public class Main {
 
         log.info("-----------------Program Ends--------------------");
     }
+
+
 
     private static void commitsExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\vue";

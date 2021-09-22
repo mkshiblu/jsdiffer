@@ -151,6 +151,7 @@ public class RefactoringDisplayFormatter {
             case ADD_PARAMETER:
             case REMOVE_PARAMETER:
             case RENAME_PARAMETER:
+            case PARAMETERIZE_VARIABLE:
                 break;
             case RENAME_CLASS:
                 var renameClassRefactoring = (RenameClassRefactoring) refactoring;
@@ -181,7 +182,7 @@ public class RefactoringDisplayFormatter {
                 );
                 break;
             default:
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException(refactoring.getRefactoringType().toString());
         }
         return afterBeforeInfo;
     }
