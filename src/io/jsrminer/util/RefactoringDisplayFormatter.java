@@ -86,7 +86,7 @@ public class RefactoringDisplayFormatter {
 
             return builder.toString();
         } else {
-            return "\t\t\t\t";
+            return "\t\t\t";
         }
     }
 
