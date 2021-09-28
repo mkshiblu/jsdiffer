@@ -17,8 +17,8 @@ public class Main {
         try {
             //webpackExample();
 //            threeJsExample();
-            angular();
-            //  atom();
+//            angular();
+              atom();
             //commitsExample();
 //            vueExample();
 //     reactNativeExample();
@@ -91,7 +91,7 @@ public class Main {
 
     private static void atom() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\atom";
-        String[] commitIds = new String[]{/*"062dfdea80861f9c918c99a3f86895f908635862", "113453a219e692fe1e5f0eb3c1c09703daaa0a89", "1cdb804824546e8572912df8cf51c9d5072c33ba",*/ "48d36776648149c4170fed630207ef9ec1cb962a", "4dbfadd0d5a603fec292519c9115c857e26201eb", "72c30d7e78f94e432874b54e2c9d71857a06211a", "7ce5b000e448552bb4ba9556c8f38ccfef127162", "adbd5400295494173e59285bbcb6ac967ed3ebfb", "bf6a4e3db4b28bfe068feb72199746dad98d6a83", "cb783fd15cea1d06b254799e7af8ff71d7d7ed33", "e2c480847c81f6f97cc184cb5353080ffbcd590d", "f6d2d5729944abbff8a2db1ab2a35d223e998b8c"};
+        String[] commitIds = new String[]{"062dfdea80861f9c918c99a3f86895f908635862", "113453a219e692fe1e5f0eb3c1c09703daaa0a89", "1cdb804824546e8572912df8cf51c9d5072c33ba", "48d36776648149c4170fed630207ef9ec1cb962a", "4dbfadd0d5a603fec292519c9115c857e26201eb", "72c30d7e78f94e432874b54e2c9d71857a06211a", "7ce5b000e448552bb4ba9556c8f38ccfef127162", "adbd5400295494173e59285bbcb6ac967ed3ebfb", "bf6a4e3db4b28bfe068feb72199746dad98d6a83", "cb783fd15cea1d06b254799e7af8ff71d7d7ed33", "e2c480847c81f6f97cc184cb5353080ffbcd590d", "f6d2d5729944abbff8a2db1ab2a35d223e998b8c"};
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
 

@@ -83,7 +83,9 @@ public enum BabelNodeType {
     TYPE_ALIAS("TypeAlias"),
     JSX_ELEMENT("JSXElement"),
     TYPE_CAST_EXPRESSION("TypeCastExpression"),
+    AWAIT_EXPRESSION("AwaitExpression"),
     ASSIGNMENT_PATTERN("AssignmentPattern"),
+    TAGGED_TEMPLATE_EXPRESSION("TaggedTemplateExpression"),
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

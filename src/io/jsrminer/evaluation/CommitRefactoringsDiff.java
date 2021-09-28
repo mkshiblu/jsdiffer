@@ -84,4 +84,20 @@ public class CommitRefactoringsDiff {
     void registerCompletelyUnmatchedTypeRefsInRd(Ref.RefType refType, List<RdRow> rdRefactorings) {
         this.completelyUnmatchedTypeRefsInRd.put(refType, rdRefactorings);
     }
+
+    public String getCommitId() {
+        return commitId;
+    }
+
+    public Map<Ref.RefType, List<RdRow>> getCompletelyUnmatchedTypeRefsInRd() {
+        return completelyUnmatchedTypeRefsInRd;
+    }
+
+    public Map<Ref.RefType, List<RdRow>> getUnmatchedRdsRefTypeMap() {
+        return unmatchedRdsRefTypeMap;
+    }
+
+    public Map<Ref.RefType, List<RmRow>> getUnmatchedRms() {
+        return unmatchedRms;
+    }
 }

@@ -53,8 +53,7 @@ public class Evaluator {
                 }
             }
         }
-
-        System.out.println(diff.toString());
+        System.out.println(diff);
     }
 
     public void evaluate(String project, String commit) {

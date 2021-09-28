@@ -130,13 +130,8 @@ public class Visitor {
 
     private Object visit(BabelNode node, ICodeFragment parent, IContainer container) {
         if (node.getType() == null) {
-//            throw new BabelException("Cannot found BabelNodeType for "
-//                    + node.getString("type")
-//                    + " at "
-//                    + node.getSourceLocation().toString());
-
             errorReporter.reportError(node.getSourceLocation(),
-                    "Cannot found BabelNodeType for "
+                    "Unsupported BabelNodeType "
                     + node.getString("type"));
         }
 

@@ -524,7 +524,7 @@ public class DeclarationVisitor {
                     }
                     break;
                 default:
-                    throw new NotImplementedException("Parameter type not handled: " + function.getSourceLocation());
+                    visitor.getErrorReporter().reportWarning(function.getSourceLocation(), "Parameter type " + parameterNode.getType().toString() + "not handled");
             }
         }
     }

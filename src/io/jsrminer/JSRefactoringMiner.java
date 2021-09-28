@@ -17,6 +17,7 @@ import io.jsrminer.util.RefactoringDisplayFormatter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -68,7 +69,10 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
             log.info("Total Duration for " + commitIds.size() +" commits: " + timer.stop());
 
-        } catch (IOException e) {
+        } catch (MissingObjectException ex){
+            ex.printStackTrace();
+            log.error("Could not locate {0} at repository {1}", ex.getObjectId(), gitRepositoryPath);
+        }catch (IOException e) {
             e.printStackTrace();
             log.error(e.toString());
         } catch (InvalidObjectIdException e) {

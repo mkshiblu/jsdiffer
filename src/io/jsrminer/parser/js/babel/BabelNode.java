@@ -176,7 +176,12 @@ class BabelNode implements AutoCloseable {
     private BabelNodeType createNodeType() {
         if (v8Object != null && v8Object.contains("type")) {
             var typeString = v8Object.getString("type");
-            return  BabelNodeType.fromTitleCase(typeString);
+            var type = BabelNodeType.fromTitleCase(typeString);
+
+            if (type == null){
+                throw  new BabelException("Unsupported Babel Node type " + typeString);
+            }
+            return type;
         }
         return null;
     }

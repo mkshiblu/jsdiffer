@@ -44,7 +44,8 @@ public class DataSetDiff {
 
         //builder.append("commit\tMatchedCount\tUnmatchedCount");
         for (var diff : commitDiffs) {
-            builder.append(diff.toString());
+            var printer = new CommitRefactoringsDiffFormatter(diff);
+            builder.append(printer.formatAsTable());
             builder.append("\n");
         }
 
