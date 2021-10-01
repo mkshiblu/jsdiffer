@@ -91,7 +91,7 @@ public abstract class ContainerMatcher {
 
         if (!commonPrefix.isEmpty() && !commonSuffix.isEmpty()) {
             int beginIndexS1 = name1.indexOf(commonPrefix) + commonPrefix.length();
-            int endIndexS1 = name2.lastIndexOf(commonSuffix);
+            int endIndexS1 = name1.lastIndexOf(commonSuffix);
             String diff1 = beginIndexS1 > endIndexS1 ? "" : name1.substring(beginIndexS1, endIndexS1);
             int beginIndexS2 = name2.indexOf(commonPrefix) + commonPrefix.length();
             int endIndexS2 = name2.lastIndexOf(commonSuffix);

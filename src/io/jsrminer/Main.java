@@ -15,10 +15,11 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
+//            angular();
+            //atom();
+            axios();
             //webpackExample();
 //            threeJsExample();
-//            angular();
-              atom();
             //commitsExample();
 //            vueExample();
 //     reactNativeExample();
@@ -95,6 +96,12 @@ public class Main {
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
 
+    private static void axios() throws Exception {
+        String repoPath = "E:\\PROJECTS_REPO\\axios";
+        String[] commitIds = new String[]{"0e2f4f14171ccd161e85478c7b1aba61c3b431a2", "1629a026da17a1e1d8999a02f3fe6b6b60aaac9c", "1e2cb9bdca0e19298aa7c242a7db4b45427967ea", "203cbc2da0ef0f68d517ba2a6176df1d48efc2fb", "2797f10ea5d2cd963a8e5c80da319848bad9f499", "3d65057d7111d7873cf4fad40805cd9ebe327574", "46e275c407f81c44dd9aad419b6e861d8a936580", "4ac0fbd1c1dc0c5f9ac290b635d6eee3783e355b", "4d1269cb4a9773db128f459046b6c4c2a0926859", "61617543268b024e42996e20ff0435b94a893c5d", "72c66dfdecbcc165c52fcd19d1f8444ad8c011c6", "7ec97dd26b3af7bb0995eef178c4edd8989c3152", "986647be59259125750fd44dbb429658d67dc156", "a59bc8d2ae218484cdcb1d7e6a295a4ff93225a1", "b10874fa67ed77dd6ecbe1fd1f6eb2045ce9854f", "bce07e53aa681367082ce9f683de366918647cd6", "ca0617061e77f8fca502cacd0cced92242b3712e", "cd0cd1805434dea0d250d195a466a1236b98e502", "d23f9d5d4782e5849362895f8b648ed587999706", "dcbb35226245483930a1f2969927a3b348bb2558", "df6d3ce6cf10432b7920d8c3ac0efb7254989bc4", "e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93", "fc12b933f729f236b2149872c42961a8626dafb7", "ff919487e13430098d3da37a37cc04c3f24b59c4"};
+        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
+    }
+
     private static void reactNativeExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\react-native";
         String[] commitIds = new String[]{"0125813f213662ec1d9bb4a456f5671adcff9d83", "0125813f213662ec1d9bb4a456f5671adcff9d83", "06c05e744d8af9582bde348210f254d76dae48b9", "2f4ca831bfd936be9ae71a8a5700003abb65a0f5", "4435f087713e1d0ac3639e3b3196d71c6402898e", "488a4c7e1c86ac5900ff9194106511fbf5a8e3cb", "5259450c143f71c65e157d6b7d3f0e1655eb7aa1", "7014a30baae0b01378740113d15e4a7d721d916a", "83169c95a3525fcb74e34853022475093b9a1a77", "95e8592dcb9b50772336d2801f46305fdc95250d", "970caa4552d4ba87c1a954391535ff42b00832e7", "9fbff62b5ff9b3effb18f135e1cd9bd34a83c985", "a90d0e3614c467c33cf85bcbe65be71903d5aecc", "ad67f556fb145d38fe547e1e8baa73ccc7a431b0", "b549e364e0025e0e1b4005f04a9de2d767006da1", "c749d951ada829c6f6fb76f35e68142e61054433", "d1336ab16efc26449509b938dd46cf606d3caf34", "e708010d18f938e2d6b6424cfc9485d8e5dd2800", "f59e5a8d28491c64e4d0c08fec3a2b0b3fabb38b", "f6da9e1a9a932d2775cc998469d2f9b4ebd858c5", "f80000b9e72596392567a3deda59441e43f6327d", "f8c8231706492b588331354d45b833aa21434e13", "fbd1beaf666be9c09a380784f8c0cd34ba083a6b"};
@@ -151,4 +158,6 @@ public class Main {
         String commitId = "01b263d3362f8bab63dc26b04e4a7ac1fb1d2641";
         new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
     }
+
+
 }

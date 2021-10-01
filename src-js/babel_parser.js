@@ -29,9 +29,6 @@ exports.format = function format(node, appendSemicolon = false) {
   return generator.default(node, {
     comments: false,
     concise: true,
-    //sourceFileName: 'dsa',
-
-    //sourceMaps: true,
-    //retainLines: true,
+    shouldPrintComment : ()=> false,
   }).code;
 };

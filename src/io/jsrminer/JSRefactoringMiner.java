@@ -65,6 +65,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 public void onFinish(int refactoringsCount, int commitsCount, int errorCommitsCount) {
                     log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
                 }
+
+                @Override
+                public void onException(String commitId, Exception e) {
+                    log.warn(String.format("Ignored revision %s due to error", commitId), e);
+                }
             });
 
             log.info("Total Duration for " + commitIds.size() +" commits: " + timer.stop());
@@ -214,7 +219,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
             } catch (Exception e) {
                 log.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
-                handler.handleException(currentCommit.getId().getName(), e);
+                handler.onException(currentCommit.getId().getName(), e);
                 errorCommitsCount++;
             }
 
@@ -254,16 +259,12 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // If no java files changed, there is no refactoring. Also, if there are
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
-
-                //Instant startTime = Instant.now();
                 Stopwatch timer = Stopwatch.createStarted();
-                // TODO Multi thread?
                 log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-
-                // TODO multi thread?
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
+
                 var list = LoadModelsParallel(fileContentsBefore, fileContentsCurrent);
                 var umlModelBefore = list.get(0);
                 var umlModelCurrent = list.get(1);
@@ -340,7 +341,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     private void populateFileContents(Repository repository, RevCommit commit,
                                       List<String> filePaths, Map<String, String> fileContents,
                                       Set<String> repositoryDirectories) throws Exception {
-        //log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
         RevTree parentTree = commit.getTree();
         try (TreeWalk treeWalk = new TreeWalk(repository)) {
             treeWalk.addTree(parentTree);
@@ -353,9 +353,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                     StringWriter writer = new StringWriter();
                     IOUtils.copy(loader.openStream(), writer, StandardCharsets.UTF_8);
                     fileContents.put(pathString, writer.toString());
-//                    var content = new String(repository.newObjectReader().open(objectId).getBytes()
-//                            , StandardCharsets.UTF_8.name());
-                    //fileContents.put(pathString, content);
                 }
                 populateSubDirectories(repositoryDirectories, pathString, '/');
             }
