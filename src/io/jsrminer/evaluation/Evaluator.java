@@ -173,7 +173,7 @@ public class Evaluator {
         var tokens = line.split("\t");
         row.repository = tokens[0];
         row.commit = tokens[1];
-        row.refType = toRefType(tokens[2].replaceAll("(?i)method", "function"));
+        row.refType = toRefType(tokens[2].replaceAll("(?i)(method|operation)", "function"));
 
         if (tokens.length == 8) {
             row.localNameBefore = tokens[3];
