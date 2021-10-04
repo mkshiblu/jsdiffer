@@ -21,6 +21,8 @@ public class Ref {
     private String locationBeforeStr;
     private String locationAfterStr;
 
+    private ValidationType validationType = ValidationType.Unknown;
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(200);
@@ -33,7 +35,17 @@ public class Ref {
         builder.append(locationAfterStr);
         builder.append(") ");
         builder.append(localNameAfter);
+        builder.append(" ");
+        builder.append(validationType);
         return builder.toString();
+    }
+
+    public ValidationType getValidationType() {
+        return validationType;
+    }
+
+    public void setValidationType(ValidationType validationType) {
+        this.validationType = validationType;
     }
 
     enum RefType {

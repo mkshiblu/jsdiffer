@@ -8,11 +8,11 @@ public class DataSetDiff {
     Map<String, List<String>> projectCommitsNotReportedByRm = new LinkedHashMap<>();
     List<CommitRefactoringsDiff> commitDiffs = new ArrayList<>();
 
-    public void registerProjectNotReportedByRm(String project) {
+    public void registerRepositoryNotReportedByDataset2(String project) {
         this.projectNotReportedByRm.add(project);
     }
 
-    public void registerCommitNotReportedByRm(String project, String commit) {
+    public void registerCommitNotReportedByDataset2(String project, String commit) {
         this.projectCommitsNotReportedByRm
                 .computeIfAbsent(project, mapping -> new ArrayList<>())
                 .add(commit);
@@ -24,7 +24,7 @@ public class DataSetDiff {
 
     public String toString() {
         StringBuilder builder = new StringBuilder(128000);
-        builder.append(projectNotReportedByRm.size() + " Missed Projects:\n");
+        builder.append(projectNotReportedByRm.size() + " Missed Projects: ");
         builder.append(projectNotReportedByRm.toString());
         builder.append("\n");
 

@@ -10,12 +10,12 @@ public class CommitRefactoringsDiff {
         this.commitId = commitId;
     }
 
-    private Map<Ref.RefType, List<RdRow>> completelyUnmatchedTypeRefsInRd = new LinkedHashMap<>();
+    private Map<Ref.RefType, List<Ref>> completelyUnmatchedTypeRefsInRd = new LinkedHashMap<>();
 
     private List<Ref> allMatched = new ArrayList<>();
-    private List<RdRow> allUnmatchedInRds = new ArrayList<>();
+    private List<Ref> allUnmatchedInRds = new ArrayList<>();
 
-    private Map<Ref.RefType, List<RdRow>> unmatchedRdsRefTypeMap = new LinkedHashMap<>();
+    private Map<Ref.RefType, List<Ref>> unmatchedRdsRefTypeMap = new LinkedHashMap<>();
     private Map<Ref.RefType, List<RmRow>> unmatchedRms = new LinkedHashMap<>();
     private Map<Ref.RefType, List<Ref>> matchedRefTypeMap = new LinkedHashMap<>();
 
@@ -51,7 +51,7 @@ public class CommitRefactoringsDiff {
         return allUnmatchedInRds.size();
     }
 
-    public List<RdRow> getAllUnmatchedInRds() {
+    public List<Ref> getAllUnmatchedInRds() {
         return allUnmatchedInRds;
     }
 
@@ -67,7 +67,7 @@ public class CommitRefactoringsDiff {
         return matchedRefTypeMap.values().stream().mapToInt(List::size).sum();
     }
 
-    void registerUnmatchedInRd(RdRow rdRef) {
+    void registerUnmatchedInRd(Ref rdRef) {
         allUnmatchedInRds.add(rdRef);
         this.unmatchedRdsRefTypeMap.computeIfAbsent(rdRef.refType, key -> new ArrayList<>()).add(rdRef);
     }
@@ -81,7 +81,7 @@ public class CommitRefactoringsDiff {
         this.matchedRefTypeMap.computeIfAbsent(ref.refType, key -> new ArrayList<>()).add(ref);
     }
 
-    void registerCompletelyUnmatchedTypeRefsInRd(Ref.RefType refType, List<RdRow> rdRefactorings) {
+    void registerCompletelyUnmatchedTypeRefsInRd(Ref.RefType refType, List<Ref> rdRefactorings) {
         this.completelyUnmatchedTypeRefsInRd.put(refType, rdRefactorings);
     }
 
@@ -89,11 +89,11 @@ public class CommitRefactoringsDiff {
         return commitId;
     }
 
-    public Map<Ref.RefType, List<RdRow>> getCompletelyUnmatchedTypeRefsInRd() {
+    public Map<Ref.RefType, List<Ref>> getCompletelyUnmatchedTypeRefsInRd() {
         return completelyUnmatchedTypeRefsInRd;
     }
 
-    public Map<Ref.RefType, List<RdRow>> getUnmatchedRdsRefTypeMap() {
+    public Map<Ref.RefType, List<Ref>> getUnmatchedRdsRefTypeMap() {
         return unmatchedRdsRefTypeMap;
     }
 
