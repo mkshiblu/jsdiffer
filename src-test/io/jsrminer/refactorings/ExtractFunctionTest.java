@@ -1,7 +1,7 @@
 package io.jsrminer.refactorings;
 
-import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.BaseTest;
+import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -14,7 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExtractFunctionTest extends BaseTest {
 

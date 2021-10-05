@@ -6,7 +6,9 @@ import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains helper for function signature matching

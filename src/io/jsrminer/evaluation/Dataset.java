@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 public class Dataset {
     private Map<String, RepositoryCommits> repositoryCommitsMap = new HashMap<>();
     private List<Ref> refactorings = new ArrayList<>();
+    private final Set<String> repositoryNames = new TreeSet<>();
 
     void addRefactoring(Ref refactoring) {
         this.refactorings.add(refactoring);
@@ -39,5 +40,9 @@ public class Dataset {
     @Override
     public String toString() {
         return "Ref Count : " + getRefactoringsCount();
+    }
+
+    public Set<String> getRepositoryNames() {
+        return repositoryNames;
     }
 }

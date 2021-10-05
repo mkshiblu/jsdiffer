@@ -5,7 +5,6 @@ import io.jsrminer.sourcetree.Statement;
 import io.rminerx.core.api.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class Container implements IContainer {
     protected String name;

@@ -3,18 +3,9 @@ package io.jsrminer.refactorings;
 import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.uml.mapping.CodeFragmentMapping;
-import io.jsrminer.uml.mapping.replacement.Replacement;
-import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RenameOperationRefactoringTest2 extends BaseTest {
     static RenameOperationRefactoring renameOperationRefactoring;

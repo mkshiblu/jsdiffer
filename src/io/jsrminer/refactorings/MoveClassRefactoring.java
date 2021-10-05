@@ -1,16 +1,9 @@
 package io.jsrminer.refactorings;
 
 
-import io.jsrminer.api.CodeRange;
 import io.jsrminer.uml.diff.RenamePattern;
 import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
 import io.rminerx.core.api.IClassDeclaration;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 public class MoveClassRefactoring extends Refactoring {
     private IClassDeclaration originalClass;

@@ -4,11 +4,8 @@ import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoveAndRenameFunctionRefactoringTest extends BaseTest {
     static List<IRefactoring> refactorings;

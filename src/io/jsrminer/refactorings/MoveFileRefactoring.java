@@ -1,7 +1,5 @@
 package io.jsrminer.refactorings;
 
-import io.jsrminer.uml.diff.RenamePattern;
-import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
 import io.rminerx.core.api.ISourceFile;
 
 public class MoveFileRefactoring extends Refactoring {

@@ -1,7 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.BlockStatement;
-import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 

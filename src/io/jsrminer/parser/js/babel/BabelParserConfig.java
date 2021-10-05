@@ -2,7 +2,8 @@ package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.CodeElementType;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Set;
 
 public class BabelParserConfig {
     public static final Set<BabelNodeType> ignoredNodeTypes = Set.of(

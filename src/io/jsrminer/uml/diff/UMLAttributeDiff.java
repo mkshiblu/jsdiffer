@@ -1,6 +1,5 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.api.RefactoringMinerTimedOutException;
 import io.jsrminer.refactorings.CandidateAttributeRefactoring;
 import io.jsrminer.refactorings.Refactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;

@@ -3,7 +3,10 @@ package io.jsrminer.uml.mapping.replacement;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.sourcetree.Invocation.InvocationCoverageType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.jsrminer.sourcetree.JsConfig.STATEMENT_TERMINATOR_CHAR;
 

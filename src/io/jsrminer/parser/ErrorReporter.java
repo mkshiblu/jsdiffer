@@ -1,6 +1,5 @@
 package io.jsrminer.parser;
 
-import com.google.javascript.jscomp.parsing.parser.util.SourcePosition;
 import io.jsrminer.sourcetree.SourceLocation;
 
 public interface ErrorReporter {

@@ -3,7 +3,6 @@ package io.jsrminer.parser.js.babel;
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;

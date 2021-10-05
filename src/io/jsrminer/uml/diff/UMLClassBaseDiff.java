@@ -5,7 +5,6 @@ import io.jsrminer.io.FileUtil;
 import io.jsrminer.uml.ClassUtil;
 import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.UMLType;
-import io.jsrminer.uml.diff.StringDistance;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IFunctionDeclaration;

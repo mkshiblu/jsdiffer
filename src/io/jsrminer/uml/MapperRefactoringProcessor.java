@@ -7,7 +7,10 @@ import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.*;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MapperRefactoringProcessor {
 //    private final Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap;

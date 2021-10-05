@@ -1,15 +1,14 @@
 package io.jsrminer.uml;
 
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.Expression;
+import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.uml.diff.RenamePattern;
 import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
 import io.rminerx.core.api.IClassDeclaration;
-import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
-import io.rminerx.core.api.ISourceFile;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public abstract class UMLClassMatcher {
     public abstract boolean match(IClassDeclaration removedClass, IClassDeclaration addedClass, String renamedFile);

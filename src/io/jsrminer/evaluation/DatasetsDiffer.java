@@ -11,8 +11,8 @@ public class DatasetsDiffer {
         this.dataSet2 = dataSet2;
     }
 
-    public DataSetDiff diff() {
-        DataSetDiff diff = new DataSetDiff();
+    public DatasetDiff diff() {
+        DatasetDiff diff = new DatasetDiff(dataSet1, dataSet2);
         for (var repository1Entry :
                 dataSet1.getRepositoryCommitsMap().entrySet()) {
             var repository1 = repository1Entry.getKey();
@@ -32,7 +32,7 @@ public class DatasetsDiffer {
                     } else {
                         // Common commit
                         var commitDiff = diffRepositoryCommit(repository1, commit);
-                        diff.registerCommitDiff(commitDiff);
+                        diff.registerCommitDiff(commitDiff, repository1);
                     }
                 }
             }
@@ -100,6 +100,8 @@ public class DatasetsDiffer {
                 rmRef = rmIterator.next();
                 if (RefactoringMatcher.isMatch(rdRef, rmRef)) {
                     matchFound = true;
+                    rdRef.setValidationType(ValidationType.TruePositive);
+                    rmRef.setValidationType(ValidationType.TruePositive);
                     rmIterator.remove();
                     rdIterator.remove();
                     break;

@@ -1,9 +1,7 @@
 package io.jsrminer.evaluation;
 
-import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.SourceLocation;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +46,7 @@ public class Ref {
         this.validationType = validationType;
     }
 
-    enum RefType {
+    public enum RefType {
 
         // SUPPORTED BY RD
         EXTRACT_AND_MOVE_FUNCTION,
@@ -69,7 +67,8 @@ public class Ref {
         REMOVE_PARAMETER,
         RENAME_PARAMETER,
         ADD_PARAMETER,
-        RENAME_VARIABLE;
+        RENAME_VARIABLE,
+        PARAMETERIZE_VARIABLE;
 
         public static Map<String, RefType> fromStringMap = new HashMap<>();
 
@@ -93,6 +92,7 @@ public class Ref {
             fromStringMap.put("ADD_PARAMETER", ADD_PARAMETER);
             fromStringMap.put("RENAME_PARAMETER", RENAME_PARAMETER);
             fromStringMap.put("RENAME_VARIABLE", RENAME_VARIABLE);
+            fromStringMap.put("PARAMETERIZE_VARIABLE", PARAMETERIZE_VARIABLE);
         }
     }
 
@@ -147,5 +147,25 @@ public class Ref {
 
     public SourceLocation getLocationAfter() {
         return locationAfter;
+    }
+
+    public String getRepository() {
+        return repository;
+    }
+
+    public RefType getRefType() {
+        return refType;
+    }
+
+    public String getCommit() {
+        return commit;
+    }
+
+    public String getLocalNameAfter() {
+        return localNameAfter;
+    }
+
+    public String getLocalNameBefore() {
+        return localNameBefore;
     }
 }

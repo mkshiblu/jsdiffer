@@ -1,8 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public final class EnumMapBuilder<K extends Enum<K>, V> {

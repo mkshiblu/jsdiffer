@@ -1,15 +1,15 @@
 package io.jsrminer.evaluation;
 
 import com.google.javascript.jscomp.jarjar.com.google.common.base.Strings;
-import io.jsrminer.sourcetree.SourceLocation;
+import io.jsrminer.evaluation.util.RefactoringFormatterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
 
 public class Evaluator {
 
@@ -30,21 +30,34 @@ public class Evaluator {
         loadDatasets();
         var differ = new DatasetsDiffer(rdDataSet, rmDataSet);
         var diff = differ.diff();
-
-        RefactoringValidator refactoringValidator = new RefactoringValidator(rmDataSet.getRefactorings());
-        var truePositives = refactoringValidator.validateTruePositives(rdDataSet.getRefactorings());
-
         System.out.println(diff);
-        System.out.println("True Positives: ");
-        truePositives.forEach(ref -> System.out.println(ref));
+        saveValidations(diff);
+        stats(diff);
     }
 
-    void validateTruePositives() {
-
+    void stats(DatasetDiff diff) {
+        int tps = truePositiveCount(diff, "angular.js");
     }
 
-    void saveValidations() {
+    int truePositiveCount(DatasetDiff diff, String project) {
+        return diff.getProjectCommonRefactorings(project).size();
+    }
 
+    int falsePositiveCount(DatasetDiff diff, String project) {
+        return diff.getProjectCommonRefactorings(project).size();
+    }
+
+    void saveValidations(DatasetDiff diff) {
+        var util = new RefactoringFormatterUtil();
+        var csvTable = util.formatAsCsv(rmDataSet.getRefactorings());
+        try {
+            FileWriter myWriter = new FileWriter("rm_automated_tps.txt");
+            myWriter.write(csvTable);
+            myWriter.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     public void evaluate(String project, String commit) {
@@ -76,10 +89,33 @@ public class Evaluator {
             var lines = Files.readAllLines(Paths.get(filePath));
             for (int i = 1; i < lines.size(); i++) {
                 var row = parseRmRefactoring(lines.get(i), i + 1);
-                rmDataSet.addRefactoring(row);
+
+                if (isRefactoringSupportedByOtherTools(row.refType))
+                    rmDataSet.addRefactoring(row);
             }
         } catch (IOException ex) {
             log.error(ex.getMessage());
+        }
+    }
+
+    boolean isRefactoringSupportedByOtherTools(Ref.RefType refType) {
+        switch (refType) {
+            case EXTRACT_AND_MOVE_FUNCTION:
+            case MOVE_AND_RENAME_FILE:
+            case MOVE_AND_RENAME_FUNCTION:
+            case RENAME_FUNCTION:
+            case MOVE_FUNCTION:
+            case MOVE_FILE:
+            case RENAME_FILE:
+            case EXTRACT_FUNCTION:
+            case INLINE_FUNCTION:
+            case CONVERT_TYPE_FUNCTION:
+            case CONVERT_TYPE_CLASS:
+            case MOVE_CLASS:
+            case RENAME_CLASS:
+                return true;
+            default:
+                return false;
         }
     }
 

@@ -1,7 +1,5 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.uml.ClassUtil;
-
 import java.util.Comparator;
 
 public class ClassRenameComparator implements Comparator<UMLClassRenameDiff> {

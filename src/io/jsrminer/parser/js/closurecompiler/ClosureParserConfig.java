@@ -1,13 +1,10 @@
 package io.jsrminer.parser.js.closurecompiler;
 
-import com.google.javascript.jscomp.parsing.parser.trees.ParseTree;
 import com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType;
 import io.jsrminer.sourcetree.CodeElementType;
 
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 
 import static com.google.javascript.jscomp.parsing.parser.trees.ParseTreeType.*;
 

@@ -17,7 +17,6 @@ import io.rminerx.core.api.IContainer;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class BaseDiffer<T extends IContainer> {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;

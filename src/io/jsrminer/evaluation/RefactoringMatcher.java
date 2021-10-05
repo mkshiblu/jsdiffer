@@ -7,7 +7,7 @@ class RefactoringMatcher {
         boolean equalBeforeName = rd.localNameBefore.equals(rm.localNameBefore);
         boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
 
-        if (((RdRow) rd).nodeType.equalsIgnoreCase("File")) {
+        if (rd.refType.name().toLowerCase().contains("file")) {
             return rd.commit.equals(rm.commit)
                     && rm.refType.equals(rd.refType)
                     && equalBeforeName

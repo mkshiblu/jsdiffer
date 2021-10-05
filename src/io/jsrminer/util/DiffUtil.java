@@ -1,11 +1,8 @@
 package io.jsrminer.util;
 
 
-import com.google.javascript.jscomp.jarjar.org.apache.tools.ant.util.CollectionUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class DiffUtil {

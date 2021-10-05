@@ -4,10 +4,15 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLAttribute;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.UMLType;
-import io.rminerx.core.api.*;
-import org.apache.commons.lang3.NotImplementedException;
+import io.rminerx.core.api.IClassDeclaration;
+import io.rminerx.core.api.ICodeFragment;
+import io.rminerx.core.api.IContainer;
+import io.rminerx.core.api.ILeafFragment;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DeclarationVisitor {
     private final Visitor visitor;

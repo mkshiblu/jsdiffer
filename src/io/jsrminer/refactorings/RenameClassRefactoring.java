@@ -1,10 +1,6 @@
 package io.jsrminer.refactorings;
 
 import io.rminerx.core.api.IClassDeclaration;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 public class RenameClassRefactoring extends Refactoring {
     private IClassDeclaration originalClass;

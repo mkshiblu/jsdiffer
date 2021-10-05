@@ -1,7 +1,6 @@
 package io.jsrminer.parser.js.babel;
 
 import io.rminerx.core.api.IClassDeclaration;
-import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

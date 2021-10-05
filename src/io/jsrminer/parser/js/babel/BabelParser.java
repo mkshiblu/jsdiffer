@@ -9,14 +9,15 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.uml.UMLModel;
 import io.rminerx.core.api.ISourceFile;
 import io.rminerx.core.entities.SourceFile;
-import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.jgit.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.print.Book;
 import java.lang.invoke.MethodHandles;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;

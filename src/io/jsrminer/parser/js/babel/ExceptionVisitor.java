@@ -2,9 +2,6 @@ package io.jsrminer.parser.js.babel;
 
 import io.jsrminer.sourcetree.*;
 import io.rminerx.core.api.IContainer;
-import io.rminerx.core.api.ILeafFragment;
-
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
 public class ExceptionVisitor {
 

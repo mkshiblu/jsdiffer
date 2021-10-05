@@ -14,7 +14,7 @@ public class RefactoringValidator {
         List<Ref> truePositives = new ArrayList<>();
         for (var refactoring : refactorings) {
             for (var reportedRefactoring : reportedRefactoringsByOtherToolsOrDocumentation) {
-                if (RefactoringMatcher.isMatch(refactoring, refactoring)) {
+                if (RefactoringMatcher.isMatch(reportedRefactoring, refactoring)) {
                     refactoring.setValidationType(ValidationType.TruePositive);
                     truePositives.add(refactoring);
                     break;

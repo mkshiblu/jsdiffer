@@ -1,13 +1,13 @@
 package io.jsrminer.parser.js.babel;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-
 import com.eclipsesource.v8.V8Array;
 import com.eclipsesource.v8.V8Object;
 import io.jsrminer.sourcetree.SourceLocation;
 import io.jsrminer.util.Lazy;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 
 class BabelNode implements AutoCloseable {
 

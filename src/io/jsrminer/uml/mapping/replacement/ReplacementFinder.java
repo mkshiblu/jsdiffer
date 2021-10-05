@@ -5,7 +5,6 @@ import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.*;
 import io.jsrminer.uml.mapping.Argumentizer;
-import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.replacers.BooleanReplacer;
 import io.jsrminer.uml.mapping.replacement.replacers.TernaryExpressionReplacer;

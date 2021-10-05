@@ -7,7 +7,8 @@ import io.jsrminer.sourcetree.TernaryOperatorExpression;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createBaseExpressionWithRMType;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.getTextInSource;
 
 public class ExpressionsVisitor {
 

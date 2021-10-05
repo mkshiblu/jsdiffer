@@ -2,7 +2,10 @@ package io.jsrminer.refactorings;
 
 import io.jsrminer.uml.diff.RenamePattern;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MoveSourceFolderRefactoring extends Refactoring {
     private List<MovedClassToAnotherSourceFolder> movedClassesToAnotherSourceFolder = new ArrayList<>();

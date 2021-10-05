@@ -1,11 +1,12 @@
 package io.jsrminer.parser.js.closurecompiler;
 
 import com.google.javascript.jscomp.parsing.parser.trees.*;
-import io.jsrminer.sourcetree.*;
+import io.jsrminer.sourcetree.BlockStatement;
+import io.jsrminer.sourcetree.SingleStatement;
 import io.rminerx.core.api.IContainer;
-import io.rminerx.core.api.INode;
 
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createBlockStatementPopulateAndAddToParent;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createSingleStatementPopulateAndAddToParent;
 
 public class StatementsVisitor {
 
