@@ -1,7 +1,6 @@
 package io.jsrminer.evaluation.util;
 
 import io.jsrminer.evaluation.Ref;
-import io.jsrminer.evaluation.RmRow;
 import io.jsrminer.evaluation.ValidationType;
 
 import java.util.Comparator;
@@ -10,7 +9,7 @@ import java.util.List;
 
 public class RefactoringFormatterUtil {
 
-    String delimeter = "\t";
+    static final String delimiter = "\t";
 
     private String[] tableHeaders = new String[]{"Project",
             "CommitId",
@@ -43,29 +42,29 @@ public class RefactoringFormatterUtil {
     }
 
     private void writeHeader(StringBuilder builder) {
-        builder.append(String.join(delimeter, tableHeaders));
+        builder.append(String.join(delimiter, tableHeaders));
     }
 
     private void writeRow(Ref ref, StringBuilder builder) {
         boolean isTp = ref.getValidationType() == ValidationType.TruePositive;
         builder.append(ref.getRepository());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getCommit());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getRefType());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getLocalNameBefore());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getLocalNameAfter());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getLocationBefore());
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(ref.getLocationAfter());
-        builder.append(delimeter);
-        builder.append(delimeter);
+        builder.append(delimiter);
+        builder.append(delimiter);
         builder.append(isTp ? "TP" : "");
-        builder.append(delimeter);
+        builder.append(delimiter);
         builder.append(isTp ? "Y" : "");
-        builder.append(delimeter);
+        builder.append(delimiter);
     }
 }

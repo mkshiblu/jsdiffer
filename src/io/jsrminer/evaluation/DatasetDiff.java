@@ -76,19 +76,18 @@ public class DatasetDiff {
             builder.append("\n");
         }
 
-        builder.append("Refactorings at " + commitDiffs.size() + " Commits: ");
-        builder.append("\n");
 
-        //builder.append("commit\tMatchedCount\tUnmatchedCount");
-        for (List<CommitRefactoringsDiff> diffs : commitDiffs.values()) {
-            for (var diff :
-                    diffs) {
+        for (var entry : commitDiffs.entrySet()) {
+            var diffs = entry.getValue();
+            builder.append(entry.getKey() + " Common commits: " + diffs.size() + "\n");
+            for (var diff : diffs) {
                 var printer = new CommitRefactoringsDiffFormatter(diff);
                 builder.append(printer.formatAsTable());
                 builder.append("\n");
             }
         }
 
+        builder.append("\n");
         return builder.toString();
     }
 }

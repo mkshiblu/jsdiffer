@@ -32,7 +32,7 @@ public class Evaluator {
         var diff = differ.diff();
         System.out.println(diff);
         saveValidations(diff);
-        stats(diff);
+      //  stats(diff);
     }
 
     void stats(DatasetDiff diff) {
@@ -144,9 +144,9 @@ public class Evaluator {
     private RdRow processRdRow(String line, int lineNo) {
         var row = new RdRow();
         row.lineNo = lineNo;
-        var tokens = line.split("\t");
+        var tokens = line.split("\t", -1);
 
-        row.repository = tokens[0];
+        row.repository = formatToCommonProjectName(tokens[0]);
         row.commit = tokens[1];
         row.nodeType = tokens[3];
         row.setLocationBefore(tokens[4]);
@@ -163,5 +163,9 @@ public class Evaluator {
         var typeNameUnderscored = typeName.replaceAll(" ", "_");
         var refType = Ref.RefType.fromStringMap.get(typeNameUnderscored);
         return refType;
+    }
+
+    private String formatToCommonProjectName(String project) {
+        return project.replace(".git", "");
     }
 }

@@ -52,6 +52,7 @@ public class AnonymousFunctionReplacementFinder {
             , LinkedHashSet<Replacement> replacements) {
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
+
         for (ListIterator<? extends IAnonymousFunctionDeclaration> listIterator1 = anonymousContainers1.listIterator(); listIterator1.hasNext(); ) {
             var anonymousClassDeclaration1 = listIterator1.next();
 
@@ -73,6 +74,7 @@ public class AnonymousFunctionReplacementFinder {
                             replacements.add(replacement);
                             listIterator1.remove();
                             listIterator2.remove();
+                            break;
                         }
                     }
                 }
