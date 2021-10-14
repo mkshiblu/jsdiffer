@@ -173,7 +173,7 @@ public class BabelNodeUtil {
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
         //function.setIsConstructor(function.);
     }
-
+    
     void loadClassDeclarationInfo(BabelNode node, ClassDeclaration classDeclaration, IContainer container) {
         var nameNode = node.get("id").get("name");
 

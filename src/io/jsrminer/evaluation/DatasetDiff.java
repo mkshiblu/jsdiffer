@@ -76,7 +76,6 @@ public class DatasetDiff {
             builder.append("\n");
         }
 
-
         for (var entry : commitDiffs.entrySet()) {
             var diffs = entry.getValue();
             builder.append(entry.getKey() + " Common commits: " + diffs.size() + "\n");

@@ -58,6 +58,7 @@ public class BabelParserConfig {
      *  e.g. require('./core/core.js')(p1, p2)
      */
     public static boolean treatCallExpressionOperandAsTheFunctionName = true;
+    public static boolean treatAssignedAnonymousAsFunctionDeclaration = true;
 
     public static boolean appendSemicolonToStatementIfNotPresent = true;
     public static boolean addAllClassDeclarationsToModelInsteadOfTheirContainers = true;

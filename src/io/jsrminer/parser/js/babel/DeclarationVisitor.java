@@ -121,9 +121,28 @@ public class DeclarationVisitor {
      */
 
     void visitVariableDeclaration(BabelNode node, ICodeFragment fragment, IContainer container) {
+        var declarations = node.get("declarations");
+        if (BabelParserConfig.treatAssignedAnonymousAsFunctionDeclaration && declarations.size() == 1) {
+            var declarator = declarations.get(0);
+            var idNode = declarator.get("id");
+            boolean isDeclaratorIdentifier = idNode.getType() == BabelNodeType.IDENTIFIER;
+            if (isDeclaratorIdentifier) {
+                var initNode = declarator.get("init");
+                boolean isInitializerFunctionDeclaration = initNode != null
+                        && initNode.isDefined()
+                        && initNode.getType() == BabelNodeType.FUNCTION_EXPRESSION;
+
+                if (isInitializerFunctionDeclaration) {
+                    boolean success = processFunctionDeclarationAssignedToAVariableDeclaration(idNode, initNode, container);
+                    if (success) {
+                        return;
+                    }
+                }
+            }
+        }
+
         String kindStr = node.get("kind").asString();
         var kind = VariableDeclarationKind.fromName(kindStr);
-        var declarations = node.get("declarations");
         var isStatement = fragment instanceof BlockStatement;
 
         ILeafFragment leaf = isStatement
@@ -135,6 +154,19 @@ public class DeclarationVisitor {
             if (variableDeclaration != null)
                 addVariableDeclarationToParent(leaf, variableDeclaration);
         }
+    }
+
+    boolean processFunctionDeclarationAssignedToAVariableDeclaration(BabelNode idNode, BabelNode functionExpressionNode, IContainer container) {
+        String functionName = idNode.get("name").asString();
+        FunctionDeclaration function = new FunctionDeclaration();
+        container.registerFunctionDeclaration(function);
+        visitor.getNodeUtil().populateContainerNamesAndLocation(function, functionName, functionExpressionNode.getSourceLocation(), container);
+        boolean successFullyParsed = processFunctionParamaterAndBody(functionExpressionNode, container, function);
+        if (!successFullyParsed) {
+            container.getFunctionDeclarations().remove(function);
+        }
+
+        return successFullyParsed;
     }
 
     void addVariableDeclarationToParent(ILeafFragment leaf, VariableDeclaration vd) {
@@ -599,7 +631,7 @@ public class DeclarationVisitor {
             var valueNode = property.get("value");  // initialzier
             //var isShortHand = property.get("shorthand").asBoolean();
             String fieldName = getFieldNameFromObjectMemberKeyNode(keyNode);
-            if (fieldName == null){
+            if (fieldName == null) {
                 return;
             }
 
@@ -661,7 +693,7 @@ public class DeclarationVisitor {
             }
         } else {
             this.visitor.getErrorReporter().reportWarning(propertyNode.getSourceLocation(),
-                    "Unsupported object key type : "  + keyNode.getType() + " Text: " + propertyNode.getText());
+                    "Unsupported object key type : " + keyNode.getType() + " Text: " + propertyNode.getText());
         }
         return function;
     }
@@ -678,8 +710,8 @@ public class DeclarationVisitor {
                 break;
             default:
                 this.visitor.getErrorReporter().reportWarning(objectMemberNodeKeyNode.getSourceLocation()
-                        , "Unsupported Object member KeyNode type: " +  objectMemberNodeKeyNode.getType()
-                + " Text: " + objectMemberNodeKeyNode.getText());
+                        , "Unsupported Object member KeyNode type: " + objectMemberNodeKeyNode.getType()
+                                + " Text: " + objectMemberNodeKeyNode.getText());
         }
 
         return fieldName;
