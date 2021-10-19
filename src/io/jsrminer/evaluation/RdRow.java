@@ -11,9 +11,4 @@ public class RdRow extends Ref {
     public void setRefactoring(String refactoring) {
         this.refactoring = refactoring;
     }
-
-//    @Override
-//    public String toString() {
-//        return "(" + getLocationAfter().start + "-" + getLocationAfter().end + ") " + commit;
-//    }
 }

@@ -27,7 +27,7 @@ public class AnonymousFunctionReplacementFinder {
             , FunctionDeclaration function1
             , FunctionDeclaration function2) {
 
-        var replacements = new LinkedHashSet<Replacement>();
+        var replacements = new LinkedHashSet<Replacement>(); // Previous replacements are empty it should be passed
         List<IAnonymousFunctionDeclaration> anonymousContainers1 = new ArrayList<>(statement1.getAnonymousFunctionDeclarations());
         List<IAnonymousFunctionDeclaration> anonymousContainers2 = new ArrayList<>(statement2.getAnonymousFunctionDeclarations());
 
@@ -52,6 +52,7 @@ public class AnonymousFunctionReplacementFinder {
             , LinkedHashSet<Replacement> replacements) {
         final OperationInvocation invocationCoveringTheEntireStatement1 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement1);
         final OperationInvocation invocationCoveringTheEntireStatement2 = InvocationCoverage.INSTANCE.getInvocationCoveringEntireFragment(statement2);
+
         for (ListIterator<? extends IAnonymousFunctionDeclaration> listIterator1 = anonymousContainers1.listIterator(); listIterator1.hasNext(); ) {
             var anonymousClassDeclaration1 = listIterator1.next();
 
@@ -61,17 +62,19 @@ public class AnonymousFunctionReplacementFinder {
                 String statementWithoutAnonymous2 = statementWithoutAnonymous(statement2, anonymousClassDeclaration2, function2);
 
                 if (statementWithoutAnonymous1.equals(statementWithoutAnonymous2) ||
+                        // This pair wont be matched since replacemnt is empty here
                         identicalAfterVariableAndTypeReplacements(statementWithoutAnonymous1, statementWithoutAnonymous2, replacements)
                         || (invocationCoveringTheEntireStatement1 != null && invocationCoveringTheEntireStatement2 != null
                         && (invocationCoveringTheEntireStatement1.identicalWithMergedArguments(invocationCoveringTheEntireStatement2, replacements)
                         || invocationCoveringTheEntireStatement1.identicalWithDifferentNumberOfArguments(invocationCoveringTheEntireStatement2, replacements, parameterToArgumentMap)))
                 ) {
-
                     if (matcher.match(anonymousClassDeclaration1, anonymousClassDeclaration2)) {
                         Replacement replacement = diffAnonymousPair(anonymousClassDeclaration1, anonymousClassDeclaration2);
                         if (replacement != null) {
+                            replacements.add(replacement);
                             listIterator1.remove();
                             listIterator2.remove();
+                            break;
                         }
                     }
                 }
@@ -79,8 +82,9 @@ public class AnonymousFunctionReplacementFinder {
         }
     }
 
-    Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousClassDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
-        ContainerDiffer differ = new ContainerDiffer(anonymousClassDeclaration1, anonymousClassDeclaration2);
+    Replacement diffAnonymousPair(IAnonymousFunctionDeclaration anonymousFunctionDeclaration1, IAnonymousFunctionDeclaration anonymousClassDeclaration2) {
+        ContainerDiffer<IAnonymousFunctionDeclaration, ContainerDiff<IAnonymousFunctionDeclaration>> differ
+                = new ContainerDiffer<>(new ContainerDiff<>(anonymousFunctionDeclaration1, anonymousClassDeclaration2));
         var diff = differ.diff();
 //                    for (IFunctionDeclaration operation1 : anonymousClass1.getFunctionDeclarations()) {
 //                        for (IFunctionDeclaration operation2 : anonymousClass2.getFunctionDeclarations()) {
@@ -97,14 +101,14 @@ public class AnonymousFunctionReplacementFinder {
 
         if (isAnonymousBodyMatched(diff)) {
             copyMappingsAndRefactoringsToParentMapper(diff);
-            Replacement replacement = new Replacement(anonymousClassDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
+            Replacement replacement = new Replacement(anonymousFunctionDeclaration1.toString(), anonymousClassDeclaration2.toString(), ReplacementType.ANONYMOUS_CLASS_DECLARATION);
             return replacement;
         }
         return null;
     }
 
-    boolean isAnonymousBodyMatched(ContainerDiff anonymousDiff) {
-        int matchedOperations = anonymousDiff.getBodyMapperList().size();
+    boolean isAnonymousBodyMatched(ContainerDiff<IAnonymousFunctionDeclaration> anonymousDiff) {
+        int matchedOperations = anonymousDiff.getOperationBodyMapperList().size();
         if (matchedOperations > 0) {
             return true;
         }
@@ -129,8 +133,8 @@ public class AnonymousFunctionReplacementFinder {
         return false;
     }
 
-    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff anonymousClassDiff) {
-        var matchedOperationMappers = anonymousClassDiff.getBodyMapperList();
+    private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff<IAnonymousFunctionDeclaration> anonymousClassDiff) {
+        var matchedOperationMappers = anonymousClassDiff.getOperationBodyMapperList();
         if (matchedOperationMappers.size() > 0) {
 
             // Copy operation mapper mappings ?
@@ -162,7 +166,7 @@ public class AnonymousFunctionReplacementFinder {
 
     private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         boolean isMatched = false;
-        FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getContainerDiff());
+        FunctionBodyMapper mapper = new FunctionBodyMapper(operation1, operation2, parentOperationsMapper.getParentDiff());
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
             int nonMappedElementsT1 = mapper.nonMappedElementsT1();
@@ -308,7 +312,8 @@ public class AnonymousFunctionReplacementFinder {
         String s1AfterReplacements = new String(s1);
 
         for (Replacement replacement : replacements) {
-            if (replacement.getType().equals(ReplacementType.VARIABLE_NAME) || replacement.getType().equals(ReplacementType.TYPE)) {
+            if (replacement.getType().equals(ReplacementType.VARIABLE_NAME)
+                    || replacement.getType().equals(ReplacementType.TYPE)) {
                 s1AfterReplacements = ReplacementUtil.performReplacement(s1AfterReplacements, s2, replacement.getBefore(), replacement.getAfter());
             }
         }

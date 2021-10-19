@@ -1,5 +1,6 @@
 package io.jsrminer;
 
+import com.google.javascript.jscomp.jarjar.com.google.common.base.Stopwatch;
 import io.jsrminer.api.IGitHistoryMiner;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.io.FileUtil;
@@ -7,13 +8,16 @@ import io.jsrminer.io.GitUtil;
 import io.jsrminer.io.SourceFile;
 import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.uml.UMLModel;
-import io.jsrminer.uml.UMLModelFactory;
+import io.jsrminer.uml.UMLModelBuilder;
 import io.jsrminer.uml.diff.SourceDirDiff;
 import io.jsrminer.uml.diff.SourceDirectory;
 import io.jsrminer.uml.diff.UMLModelDiff;
 import io.jsrminer.uml.diff.UMLModelDiffer;
+import io.jsrminer.util.RefactoringDisplayFormatter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.eclipse.jgit.errors.InvalidObjectIdException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -32,11 +36,59 @@ import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JSRefactoringMiner implements IGitHistoryMiner {
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
     private final Set<String> supportedExtensions = new HashSet<>(Arrays.asList(new String[]{JsConfig.JS_FILE_EXTENSION}));
     private final Set<String> ignoredExtensions = new HashSet<>(Arrays.asList(JsConfig.IGNORED_FILE_EXTENSIONS));
+
+    public List<IRefactoring> detectAtCommits(String gitRepositoryPath, List<String> commitIds) {
+        List<IRefactoring> refactorings = null;
+        try {
+            Stopwatch timer = Stopwatch.createStarted();
+            Repository repository = GitUtil.openRepository(gitRepositoryPath);
+            List<RevCommit> commits = GitUtil.getRevCommits(repository, commitIds);
+
+            var project = gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
+                    gitRepositoryPath.length());
+
+            refactorings = detect(repository, commits, new RefactoringHandler() {
+                final StringBuilder builder = new StringBuilder();
+
+                @Override
+                public void handle(String commitId, List<IRefactoring> refactorings) {
+                    String commitStr = RefactoringDisplayFormatter.generateDisplayStringForRefactorings(project, commitId, refactorings, false);
+                    builder.append(commitStr);
+                }
+
+                @Override
+                public void onFinish(int refactoringsCount, int commitsCount, int errorCommitsCount) {
+                    log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
+                }
+
+                @Override
+                public void onException(String commitId, Exception e) {
+                    log.warn(String.format("Ignored revision %s due to error", commitId), e);
+                }
+            });
+
+            log.info("Total Duration for " + commitIds.size() +" commits: " + timer.stop());
+
+        } catch (MissingObjectException ex){
+            ex.printStackTrace();
+            log.error("Could not locate {0} at repository {1}", ex.getObjectId(), gitRepositoryPath);
+        }catch (IOException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+        } catch (InvalidObjectIdException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+        }
+        return refactorings;
+    }
 
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
@@ -46,11 +98,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             Repository repository = GitUtil.openRepository(gitRepositoryPath);
             RevCommit commit = GitUtil.getRevCommit(repository, commitId);
             Iterable<RevCommit> walk = List.of(commit);
-            refactorings = detect(repository, null, walk);
+            refactorings = detect(repository, walk, null);
             log.info("RefCount: " + refactorings.size());
 
             printRefactorings(gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
-                    gitRepositoryPath.length()), commitId, refactorings);
+                    gitRepositoryPath.length()), commitId, refactorings, true);
 
             watch.stop();
             log.info("Time taken: " + watch.toString());
@@ -62,37 +114,9 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         return refactorings;
     }
 
-    private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings) {
-//        System.out.println("project\tcommitId\tRefactoringType\tRefactoring");
-//        refactorings.forEach(r -> {
-//            System.out.print(project);
-//            System.out.print("\t");
-//            System.out.print(commitId);
-//            System.out.print("\t");
-//            System.out.print(r.getName());
-//            System.out.print("\t");
-//            System.out.println(r.toString());
-//        });
-
-
-        final StringBuilder builder = new StringBuilder();
-        builder.append(refactorings.size() + " Refactorings\n");
-        builder.append("project\tcommitId\tRefactoringType\tLocationBefore\tNameBefore\tLocationAfter\tNameAfter");
-        builder.append("\n");
-        refactorings.forEach(r -> {
-            //builder.setLength(0);
-            builder.append(project);
-            builder.append("\t");
-            builder.append(commitId);
-            builder.append("\t");
-            builder.append(r.getName());
-            builder.append("\t");
-            var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(r);
-            builder.append(afterBeforeInfo);
-            builder.append("\n");
-        });
-
-        log.info(builder.toString());
+    private void printRefactorings(String project, String commitId, List<IRefactoring> refactorings, boolean printHeader) {
+        var str = RefactoringDisplayFormatter.generateDisplayStringForRefactorings(project, commitId, refactorings, printHeader);
+        log.info("\n" + str);
     }
 
     @Override
@@ -109,6 +133,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     public List<IRefactoring> detectBetweenDirectories(String previousVersionDirectory, String currentVersionDirectory) {
+        List<IRefactoring> refactorings = new ArrayList<>();
         SourceDirectory src1 = new SourceDirectory(previousVersionDirectory);
         SourceDirectory src2 = new SourceDirectory(currentVersionDirectory);
         SourceDirDiff diff = src1.diff(src2);
@@ -116,6 +141,19 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         try {
             Map<String, String> fileContentsBefore = populateFileContents(src1.getSourceFiles().values().toArray(SourceFile[]::new));
             Map<String, String> fileContentsCurrent = populateFileContents(src2.getSourceFiles().values().toArray(SourceFile[]::new));
+            refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
+            refactorings.forEach(r -> log.info(r.toString()));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return refactorings;
+    }
+
+    public List<IRefactoring> detectBetweenFiles(String filePath1, String filePath2) {
+        try {
+            Map<String, String> fileContentsBefore = populateFileContents(new SourceFile[]{new SourceFile(filePath1)});
+            Map<String, String> fileContentsCurrent = populateFileContents(new SourceFile[]{new SourceFile(filePath2)});
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
             refactorings.forEach(r -> log.info(r.toString()));
             return refactorings;
@@ -126,10 +164,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         return null;
     }
 
-    public List<IRefactoring> detectBetweenFiles(String filePath1, String filePath2) {
+    public List<IRefactoring> detectBetweenCodeSnippets(String snippetName1, String codeSnippet1,
+                                                        String snippetName2, String codeSnippet2) {
         try {
-            Map<String, String> fileContentsBefore = populateFileContents(new SourceFile[]{new SourceFile(filePath1)});
-            Map<String, String> fileContentsCurrent = populateFileContents(new SourceFile[]{new SourceFile(filePath2)});
+            Map<String, String> fileContentsBefore = Map.of(snippetName1, codeSnippet1);
+            Map<String, String> fileContentsCurrent = Map.of(snippetName2, codeSnippet2);
             List<IRefactoring> refactorings = detectRefactorings(fileContentsBefore, fileContentsCurrent);
             refactorings.forEach(r -> log.info(r.toString()));
             return refactorings;
@@ -152,12 +191,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     }
 
     public void detectBetweenCommits(Repository repository, String startCommitId, String endCommitId) throws Exception {
-        RefactoringHandler handler = null;
         Iterable<RevCommit> walk = GitUtil.createRevsWalkBetweenCommits(repository, startCommitId, endCommitId);
-        detect(repository, handler, walk);
+        detect(repository, walk, null);
     }
 
-    private List<IRefactoring> detect(Repository repository, final RefactoringHandler handler, Iterable<RevCommit> commits) {
+    private List<IRefactoring> detect(Repository repository, Iterable<RevCommit> commits, RefactoringHandler handler) {
         int commitsCount = 0;
         int errorCommitsCount = 0;
         int refactoringsCount = 0;
@@ -170,6 +208,11 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         final Iterator<RevCommit> i = commits.iterator();
         List<IRefactoring> allRefactorings = new ArrayList<>();
 
+        if (handler == null) {
+            handler = new RefactoringHandler() {
+            };
+        }
+
         while (i.hasNext()) {
             RevCommit currentCommit = i.next();
             try {
@@ -179,7 +222,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
             } catch (Exception e) {
                 log.warn(String.format("Ignored revision %s due to error", currentCommit.getId().getName()), e);
-                //  handler.handleException(currentCommit.getId().getName(), e);
+                handler.onException(currentCommit.getId().getName(), e);
                 errorCommitsCount++;
             }
 
@@ -191,18 +234,20 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             }
         }
 
-        // handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
+        handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
         log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
         return allRefactorings;
     }
 
     protected List<IRefactoring> detectRefactorings(Repository repository, RevCommit currentCommit, RefactoringHandler handler) throws Exception {
-        List<IRefactoring> refactoringsAtRevision = null;
+
+        Stopwatch commitTimer = Stopwatch.createStarted();
+        List<IRefactoring> refactoringsAtRevision;
         String commitId = currentCommit.getId().getName();
 
         List<String> filePathsBefore = new ArrayList<String>();
         List<String> filePathsCurrent = new ArrayList<String>();
-        Map<String, String> renamedFilesHint = new HashMap<>();
+        Map<String, String> renamedFilesHint = new LinkedHashMap<>();
 
         Set<String> repositoryDirectoriesBefore = new LinkedHashSet<String>();
         Set<String> repositoryDirectoriesCurrent = new LinkedHashSet<String>();
@@ -217,23 +262,17 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // If no java files changed, there is no refactoring. Also, if there are
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
-
-                //Instant startTime = Instant.now();
-                StopWatch stopWatch = new StopWatch();
-                stopWatch.start();
-
-                // TODO Multi thread?
+                Stopwatch timer = Stopwatch.createStarted();
                 log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
-
-                // TODO multi thread?
                 log.info("Parsing and loading files of current commit: " + parentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
-                UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesCurrent*/);
 
-                stopWatch.stop();
-                log.debug("Time taken for parsing and loading models: " + stopWatch.toString());
+                var list = LoadModelsParallel(fileContentsBefore, fileContentsCurrent);
+                var umlModelBefore = list.get(0);
+                var umlModelCurrent = list.get(1);
+
+                log.debug("Time taken for parsing and loading models: " + timer.stop());
 
                 log.info("Detecting refactorings...");
                 UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(renamedFilesHint);
@@ -243,20 +282,56 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
                 log.info(String.format("Ignored revision %s with no changes in js files", commitId));
                 refactoringsAtRevision = Collections.emptyList();
             }
-            //    handler.handle(commitId, refactoringsAtRevision);
+            handler.handle(commitId, refactoringsAtRevision);
 
             walk.dispose();
         }
+        log.info("Duration for commit " + commitId + ": " + commitTimer.stop());
         return refactoringsAtRevision;
+    }
+
+    private List<UMLModel> LoadModels(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
+        var model1 = UMLModelBuilder.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/);
+
+        var model2 = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/);
+
+        return List.of(model1, model2);
+    }
+
+    private List<UMLModel> LoadModelsParallel(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) throws InterruptedException {
+
+        final UMLModel[] model1 = new UMLModel[1];
+        final UMLModel[] model2 = new UMLModel[1];
+        Thread model1Thread = new Thread(() -> model1[0] = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore));
+        Thread model2Thread = new Thread(() -> model2[0] = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent));
+        model1Thread.start();
+        model2Thread.start();
+
+        model1Thread.join();
+        model2Thread.join();
+
+        return List.of(model1[0], model2[0]);
+    }
+
+    private List<UMLModel> LoadModelsParallelAsync(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
+        CompletableFuture<UMLModel> model1Future
+                = CompletableFuture.supplyAsync(() -> io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore/*, repositoryDirectoriesBefore*/));
+
+        CompletableFuture<UMLModel> model2Future
+                = CompletableFuture.supplyAsync(() -> io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent/*, repositoryDirectoriesBefore*/));
+
+        return Stream.of(model1Future, model2Future)
+                .map(CompletableFuture::join)
+                .collect(Collectors.toList());
     }
 
     public List<IRefactoring> detectRefactorings(Map<String, String> fileContentsBefore, Map<String, String> fileContentsCurrent) {
 
         // TODO Multi thread?
-        UMLModel umlModelBefore = UMLModelFactory.createUMLModel(fileContentsBefore);
+        UMLModel umlModelBefore = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsBefore);
 
         // TODO multi thread?
-        UMLModel umlModelCurrent = UMLModelFactory.createUMLModel(fileContentsCurrent);
+        UMLModel umlModelCurrent = io.jsrminer.uml.UMLModelBuilder.createUMLModel(fileContentsCurrent);
 
         log.info("Detecting Refactorings...");
         UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(new LinkedHashMap<>());
@@ -269,7 +344,6 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     private void populateFileContents(Repository repository, RevCommit commit,
                                       List<String> filePaths, Map<String, String> fileContents,
                                       Set<String> repositoryDirectories) throws Exception {
-        //log.info("Processing {} {} ...", repository.getDirectory().getParent(), commit.getName());
         RevTree parentTree = commit.getTree();
         try (TreeWalk treeWalk = new TreeWalk(repository)) {
             treeWalk.addTree(parentTree);

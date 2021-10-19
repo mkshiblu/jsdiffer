@@ -52,6 +52,7 @@ public class FileUtil {
             return k;
         });
     }
+
     public static String getMemberExtension(String filename) {
         int dotIndex = filename.indexOf(".");
 
@@ -60,6 +61,7 @@ public class FileUtil {
         }
         return null;
     }
+
     public static String getExtension(String filename) {
         return FilenameUtils.getExtension(filename);
     }
@@ -117,5 +119,17 @@ public class FileUtil {
             directories.add(dir);
             allDirectoriesInPath(dir, directories);
         }
+    }
+
+    public static String getFolder(String filepath) {
+        String name = FilenameUtils.getName(filepath);
+        String dir = filepath.substring(0, filepath.length() - name.length());
+        if (dir.length() > 0) {
+            dir = dir.substring(0, dir.length() - 1);
+
+            return dir;
+        }
+
+        return "";
     }
 }

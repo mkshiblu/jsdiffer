@@ -8,7 +8,8 @@ import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 import io.rminerx.core.api.INode;
 
-import java.lang.instrument.ClassDefinition;
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
 
@@ -105,9 +106,8 @@ class DeclarationsVisitor {
         public Void visit(VariableDeclarationListTree tree, ILeafFragment leaf, IContainer container) {
             VariableDeclarationKind kind = VariableDeclarationKind.fromName(tree.declarationType.toString());
             for (var declarationTree : tree.declarations) {
-
-                VariableDeclaration vd = processVariableDeclaration(declarationTree, kind, container, leaf.getParent());
-                addVariableDeclarationToParent(leaf, vd);
+                var vds = processVariableDeclaration(declarationTree, kind, container, leaf.getParent());
+                vds.forEach(vd -> addVariableDeclarationToParent(leaf, vd));
             }
             return null;
         }
@@ -125,35 +125,44 @@ class DeclarationsVisitor {
     /**
      * A variable declaration Node
      */
-    protected static VariableDeclaration processVariableDeclaration(VariableDeclarationTree tree
+    protected static List<VariableDeclaration> processVariableDeclaration(VariableDeclarationTree tree
             , VariableDeclarationKind kind
             , IContainer container
             , INode scopeNode) {
-        VariableDeclaration variableDeclaration;
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+        VariableDeclaration variableDeclaration = null;
+
         switch (tree.lvalue.type) {
             case IDENTIFIER_EXPRESSION:
                 variableDeclaration = createVariableDeclarationFromIdentifier(tree.lvalue.asIdentifierExpression()
                         , kind
                         , scopeNode == null ? container : scopeNode);
+                variableDeclarations.add(variableDeclaration);
                 break;
             case OBJECT_PATTERN:
                 variableDeclaration = createVariableDeclarationFromObjectPattern(tree.lvalue.asObjectPattern()
                         , kind
                         , scopeNode == null ? container : scopeNode);
+                variableDeclarations.add(variableDeclaration);
+                break;
+            case ARRAY_PATTERN:
+                var arrayPatternVds = createVariableDeclarationsFromArrayPattern(tree.lvalue.asArrayPattern()
+                        , kind
+                        , scopeNode == null ? container : scopeNode);
+                variableDeclarations.addAll(arrayPatternVds);
                 break;
             default:
                 throw new RuntimeException(tree.location + " Variable declaration type : " + tree.type + " Not handled");
         }
 
-
         // Process initializer
         if (tree.initializer != null) {
             Expression expression = createBaseExpressionWithRMType(tree.initializer, CodeElementType.VARIABLE_DECLARATION_INITIALIZER);
             Visitor.visitExpression(tree.initializer, expression, container);
-            variableDeclaration.setInitializer(expression);
+            variableDeclarations.forEach(vd -> vd.setInitializer(expression));
         }
 
-        return variableDeclaration;
+        return variableDeclarations;
     }
 
     static VariableDeclaration createVariableDeclarationFromIdentifier(IdentifierExpressionTree tree
@@ -183,6 +192,33 @@ class DeclarationsVisitor {
         variableDeclaration.setScope(createVariableScope(location, parentLocation));
 
         return variableDeclaration;
+    }
+
+    // An array pattern such as let [x, y] = [];
+    static List<VariableDeclaration> createVariableDeclarationsFromArrayPattern(ArrayPatternTree tree
+            , VariableDeclarationKind kind
+            , INode scopeNode) {
+
+        List<VariableDeclaration> variableDeclarations = new ArrayList<>();
+
+        tree.elements.forEach(element -> {
+            switch (element.type) {
+                case IDENTIFIER_EXPRESSION:
+                    String variableName = getTextInSource(element, false);
+                    var variableDeclaration = new VariableDeclaration(variableName, kind);
+
+                    variableDeclaration.setSourceLocation(createSourceLocation(tree));
+
+                    // Set Scope (TODO set body source location
+                    variableDeclaration.setScope(createVariableScope(tree, scopeNode));
+                    variableDeclarations.add(variableDeclaration);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        return variableDeclarations;
     }
 
     static VariableDeclaration createVariableDeclarationFromObjectPattern(ObjectPatternTree tree
@@ -232,7 +268,7 @@ class DeclarationsVisitor {
 
         for (var element : tree.elements) {
 
-            switch (element.type){
+            switch (element.type) {
                 case FUNCTION_DECLARATION:
 
                     break;

@@ -51,6 +51,6 @@ public class ClosureDemo {
     }
 
     public static void main(String[] args) {
-        new ClosureDemo().parse("source.js", "__DEV__");
+        new ClosureDemo().parse1("source.js", "var x = 1; function y(){}");
     }
 }

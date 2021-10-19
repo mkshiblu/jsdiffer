@@ -22,11 +22,11 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
      * Holds the body of the function
      */
     private FunctionBody body;
-    
+
     /**
      * Stores whether the body of the function is empty or not
      */
-    private boolean isEmptyBody;
+    private boolean emptyBody;
 
     /**
      * True if the function is also a constructor
@@ -64,7 +64,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
     }
 
     public void setIsEmptyBody(boolean isEmptyBody) {
-        this.isEmptyBody = isEmptyBody;
+        this.emptyBody = isEmptyBody;
     }
     //endregion
 
@@ -117,16 +117,7 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getQualifiedName());
-        sb.append('(');
-        String commaSeparatedParams = this.getParameters()
-                .stream()
-                .map(String::valueOf)
-                .collect(Collectors.joining(" ,"));
-        sb.append(commaSeparatedParams);
-        sb.append(')');
-        return sb.toString();
+        return getSignatureText();
     }
 
     public List<FunctionDeclaration> getOperationsInsideAnonymousFunctionDeclarations(List<IAnonymousFunctionDeclaration> allAddedAnonymousClasses) {
@@ -152,5 +143,42 @@ public class FunctionDeclaration extends DeclarationContainer implements IFuncti
 
     public boolean isStatic() {
         return isStatic;
+    }
+
+    /**
+     * Add paramter
+     *
+     * @return
+     */
+    public void registerParameter(UMLParameter parameter) {
+        this.getParameters().add(parameter);
+    }
+
+    @Override
+    public List<Statement> getStatements() {
+        return body.blockStatement.getStatements();
+    }
+
+    @Override
+    public boolean hasEmptyBody() {
+        return this.emptyBody;
+    }
+
+    public void setEmptyBody(boolean emptyBody) {
+        this.emptyBody = emptyBody;
+    }
+
+    @Override
+    public String getSignatureText() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getQualifiedName());
+        sb.append('(');
+        String commaSeparatedParams = this.getParameters()
+                .stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(" ,"));
+        sb.append(commaSeparatedParams);
+        sb.append(')');
+        return sb.toString();
     }
 }

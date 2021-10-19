@@ -34,7 +34,7 @@ public class RenameOperationRefactoringTest extends BaseTest {
 
     @Test
     void testMapperMappingsCount() {
-        assertEquals(7, renameOperationRefactoring.getBodyMapper().getMappings().size());
+        assertEquals(1, renameOperationRefactoring.getBodyMapper().getMappings().size());
     }
 
     @Test

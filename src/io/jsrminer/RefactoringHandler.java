@@ -37,7 +37,7 @@ public abstract class RefactoringHandler {
      * @param commitId The SHA key that identifies the commit.
      * @param e The exception thrown.
      */
-    public void handleException(String commitId, Exception e) {
+    public void onException(String commitId, Exception e) {
         throw new RuntimeException(e);
     }
 

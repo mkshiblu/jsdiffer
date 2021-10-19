@@ -5,7 +5,6 @@ import io.jsrminer.sourcetree.Statement;
 import io.rminerx.core.api.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class Container implements IContainer {
     protected String name;
@@ -75,6 +74,12 @@ public abstract class Container implements IContainer {
                 case 1:
                     functions = new ArrayList<>(this.getFunctionDeclarations());
                     break;
+                case 2:
+                    functions = new ArrayList<>(getFunctionDeclarationsUpToDepth(1));
+                    for (var ano : this.getAnonymousFunctionDeclarations()) {
+                        functions.addAll(ano.getFunctionDeclarationsUpToDepth(1));
+                    }
+                    break;
                 default:
                     functions = new ArrayList<>(getFunctionDeclarationsUpToDepth(depth - 1));
                     var children = new LinkedList<IFunctionDeclaration>();
@@ -82,10 +87,6 @@ public abstract class Container implements IContainer {
                         children.addAll(function.getFunctionDeclarationsUpToDepth(depth - 1));
                     }
                     functions.addAll(children);
-
-                    for (var ano : this.getAnonymousFunctionDeclarations()) {
-                        functions.addAll(ano.getFunctionDeclarationsUpToDepth(depth - 1));
-                    }
                     break;
             }
 
@@ -126,10 +127,19 @@ public abstract class Container implements IContainer {
     public String getName() {
         return name;
     }
+
     /**
      * The name of the container.
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void registerStatements(List<Statement> statements) {
+        this.statements.addAll(statements);
+    }
+
+    public void registerFunctionDeclaration(IFunctionDeclaration functionDeclaration) {
+        this.functionDeclarations.add(functionDeclaration);
     }
 }

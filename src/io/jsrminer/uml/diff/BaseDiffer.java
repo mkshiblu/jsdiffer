@@ -6,6 +6,7 @@ import io.jsrminer.sourcetree.BlockStatement;
 import io.jsrminer.sourcetree.FunctionDeclaration;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.sourcetree.SingleStatement;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.diff.detection.ConsistentReplacementDetector;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
@@ -16,13 +17,12 @@ import io.rminerx.core.api.IContainer;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public abstract class BaseDiffer {
+public abstract class BaseDiffer<T extends IContainer> {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
     protected void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff sourceDiff) {
+            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff<T> sourceDiff) {
         FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
 
         List<CodeFragmentMapping> totalMappings = new ArrayList<>(operationBodyMapper.getMappings());
@@ -140,7 +140,7 @@ public abstract class BaseDiffer {
         return bestMapper;
     }
 
-    protected boolean exactMappings(FunctionBodyMapper operationBodyMapper, ContainerDiff containerDiff) {
+    protected boolean exactMappings(FunctionBodyMapper operationBodyMapper, ContainerDiff<T> containerDiff) {
         if (allMappingsAreExactMatches(operationBodyMapper)) {
             if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() == 0)
                 return true;
@@ -174,7 +174,8 @@ public abstract class BaseDiffer {
                     }
                 }
                 return (countableStatements == parameterizedVariableDeclarationStatements || countableStatements == nonMappedLeavesExactlyMatchedInTheBodyOfAddedOperation + parameterizedVariableDeclarationStatements) && countableStatements > 0;
-            } else if (operationBodyMapper.nonMappedElementsT1() == 0 && operationBodyMapper.nonMappedElementsT2() > 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
+            } else if (operationBodyMapper.nonMappedElementsT1() == 0
+                    && operationBodyMapper.nonMappedElementsT2() > 0 && operationBodyMapper.getNonMappedInnerNodesT2().size() == 0) {
                 int countableStatements = 0;
                 int parameterizedVariableDeclarationStatements = 0;
                 FunctionDeclaration removedOperation = operationBodyMapper.function1;
@@ -294,7 +295,7 @@ public abstract class BaseDiffer {
 //    }
 
     private boolean singleUnmatchedStatementCallsAddedOperation(FunctionBodyMapper
-                                                                        operationBodyMapper, ContainerDiff sourceDiff) {
+                                                                        operationBodyMapper, ContainerDiff<T> sourceDiff) {
         Set<SingleStatement> nonMappedLeavesT1 = operationBodyMapper.getNonMappedLeavesT1();
         Set<SingleStatement> nonMappedLeavesT2 = operationBodyMapper.getNonMappedLeavesT2();
         if (nonMappedLeavesT1.size() == 1 && nonMappedLeavesT2.size() == 1) {
@@ -317,26 +318,15 @@ public abstract class BaseDiffer {
 
     private boolean compatibleSignatures(FunctionDeclaration removedOperation
             , FunctionDeclaration addedOperation, int absoluteDifferenceInPosition, IContainer container1, IContainer container2) {
-
-        // TODO addedOperation.compatibleSignature
-
-        boolean isCompatibleParameters = false;
-
-        if (removedOperation.getParameters().size() == addedOperation.getParameters().size()) {
-            Set<String> params1 = addedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
-            Set<String> params2 = removedOperation.getParameters().stream().map(p -> p.name).collect(Collectors.toCollection(HashSet::new));
-            isCompatibleParameters = params1.equals(params2);
-        }
-
+        boolean isCompatibleParameters = FunctionUtil.compatibleSignature(removedOperation, addedOperation);
         return isCompatibleParameters ||
-                (
-                        (absoluteDifferenceInPosition == 0 || operationsBeforeAndAfterMatch(removedOperation, addedOperation, container1, container2)) &&
-                                /*!gettersWithDifferentReturnType(removedOperation, addedOperation) &&*/
-                                ( /*addedOperation.getParameterTypeList().equals(removedOperation.getParameterTypeList()*/
-                                        addedOperation.getParameters().size() == removedOperation.getParameters().size())
-                                || normalizedNameDistance(removedOperation, addedOperation) <= MAX_OPERATION_NAME_DISTANCE
+                ((absoluteDifferenceInPosition == 0
+                        || operationsBeforeAndAfterMatch(removedOperation, addedOperation, container1, container2))
+                        && (addedOperation.getParameters().size() == removedOperation.getParameters().size())
+                        || normalizedNameDistance(removedOperation, addedOperation) <= MAX_OPERATION_NAME_DISTANCE
                 );
     }
+
 
     public double normalizedNameDistance(FunctionDeclaration operation1, FunctionDeclaration operation2) {
         String s1 = operation1.getName().toLowerCase();
@@ -425,10 +415,10 @@ public abstract class BaseDiffer {
         return operationsBeforeMatch || operationsAfterMatch;
     }
 
-    protected Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(ContainerDiff sourceDiff) {
+    protected Set<MethodInvocationReplacement> findConsistentMethodInvocationRenames(ContainerDiff<T> sourceDiff) {
         Set<MethodInvocationReplacement> allConsistentMethodInvocationRenames = new LinkedHashSet<>();
         Set<MethodInvocationReplacement> allInconsistentMethodInvocationRenames = new LinkedHashSet<>();
-        for (FunctionBodyMapper bodyMapper : sourceDiff.getBodyMapperList()) {
+        for (FunctionBodyMapper bodyMapper : sourceDiff.getOperationBodyMapperList()) {
             Set<MethodInvocationReplacement> methodInvocationRenames = bodyMapper.getMethodInvocationRenameReplacements();
             ConsistentReplacementDetector.updateRenames(allConsistentMethodInvocationRenames, allInconsistentMethodInvocationRenames,
                     methodInvocationRenames);
@@ -468,12 +458,7 @@ public abstract class BaseDiffer {
         Set<OperationInvocation> removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted = new LinkedHashSet<>(removedOperationInvocations);
         removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeAll(intersection);
         removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeAll(newIntersection);
-        for (Iterator<OperationInvocation> operationInvocationIterator = removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.iterator(); operationInvocationIterator.hasNext(); ) {
-            OperationInvocation invocation = operationInvocationIterator.next();
-            if (invocation.getName().startsWith("get")) {
-                operationInvocationIterator.remove();
-            }
-        }
+        removedOperationInvocationsWithIntersectionsAndGetterInvocationsSubtracted.removeIf(invocation -> invocation.getName().startsWith("get"));
         int numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations = newIntersection.size();
         int numberOfInvocationsMissingFromRemovedOperationWithoutThoseFoundInOtherAddedOperations = numberOfInvocationsMissingFromRemovedOperation - numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations;
         return numberOfInvocationsOriginallyCalledByRemovedOperationFoundInOtherAddedOperations > numberOfInvocationsMissingFromRemovedOperationWithoutThoseFoundInOtherAddedOperations ||
@@ -509,7 +494,7 @@ public abstract class BaseDiffer {
         return numberOfInvocationsCalledByAddedOperationFoundInOtherRemovedOperations > numberOfInvocationsMissingFromAddedOperationWithoutThoseFoundInOtherRemovedOperations;
     }
 
-    protected void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, ContainerDiff sourceDiff) {
+    protected void checkForInconsistentVariableRenames(FunctionBodyMapper mapper, ContainerDiff<T> sourceDiff) {
         if (mapper.getChildMappers().size() > 1) {
             Set<IRefactoring> refactoringsToBeRemoved = new LinkedHashSet<>();
             for (IRefactoring r : sourceDiff.getRefactoringsBeforePostProcessing()) {

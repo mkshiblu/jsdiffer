@@ -132,8 +132,12 @@ public abstract class CodeFragmentMapping {
         return fragment1.getAnonymousFunctionDeclarations().size() > 0
                 && fragment2.getAnonymousFunctionDeclarations().size() > 0;
     }
+    public int absoluteDifferenceInAnonymousCount(){
+        return Math.abs(fragment1.getAnonymousFunctionDeclarations().size() - fragment2.getAnonymousFunctionDeclarations().size());
+    }
 
-    public boolean atLeastOneFragmentContainsAnonymous() {
+
+    public boolean  atLeastOneFragmentContainsAnonymous() {
         return fragment1.getAnonymousFunctionDeclarations().size() > 0
                 || fragment2.getAnonymousFunctionDeclarations().size() > 0;
     }

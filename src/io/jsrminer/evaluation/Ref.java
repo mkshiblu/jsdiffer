@@ -1,9 +1,7 @@
 package io.jsrminer.evaluation;
 
-import io.jsrminer.sourcetree.CodeElementType;
 import io.jsrminer.sourcetree.SourceLocation;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +19,8 @@ public class Ref {
     private String locationBeforeStr;
     private String locationAfterStr;
 
+    private ValidationType validationType = ValidationType.Unknown;
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(200);
@@ -33,10 +33,20 @@ public class Ref {
         builder.append(locationAfterStr);
         builder.append(") ");
         builder.append(localNameAfter);
+        builder.append(" ");
+        builder.append(validationType);
         return builder.toString();
     }
 
-    enum RefType {
+    public ValidationType getValidationType() {
+        return validationType;
+    }
+
+    public void setValidationType(ValidationType validationType) {
+        this.validationType = validationType;
+    }
+
+    public enum RefType {
 
         // SUPPORTED BY RD
         EXTRACT_AND_MOVE_FUNCTION,
@@ -57,7 +67,8 @@ public class Ref {
         REMOVE_PARAMETER,
         RENAME_PARAMETER,
         ADD_PARAMETER,
-        RENAME_VARIABLE;
+        RENAME_VARIABLE,
+        PARAMETERIZE_VARIABLE;
 
         public static Map<String, RefType> fromStringMap = new HashMap<>();
 
@@ -81,17 +92,43 @@ public class Ref {
             fromStringMap.put("ADD_PARAMETER", ADD_PARAMETER);
             fromStringMap.put("RENAME_PARAMETER", RENAME_PARAMETER);
             fromStringMap.put("RENAME_VARIABLE", RENAME_VARIABLE);
+            fromStringMap.put("PARAMETERIZE_VARIABLE", PARAMETERIZE_VARIABLE);
         }
     }
 
-
     private SourceLocation toSourceLocation(String location) {
-        var splitted = location.split(":");
-        String filePath = splitted[0];
-        var startEndSplitted = splitted[1].split("-");
-        var start = Integer.parseInt(startEndSplitted[0]);
-        var end = Integer.parseInt(startEndSplitted[1]);
-        return new SourceLocation(filePath, 0, 0, 0, 0, start, end);
+
+        if (location.contains(":")) {
+            var splitted = location.split(":");
+            String filePath = splitted[0];
+
+            if (splitted[1].contains("|")) {
+                var segments = splitted[1].split("\\|");
+                var startEndSplitted = segments[0].split("-");
+                var start = Integer.parseInt(startEndSplitted[0]);
+                var end = Integer.parseInt(startEndSplitted[1]);
+
+                var lineColSplitted = segments[1].split("-");
+                var startLineColSplitted = lineColSplitted[0].substring(1, lineColSplitted[0].length() - 1).split(",");
+                var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
+
+                var startLine = Integer.parseInt(startLineColSplitted[0]);
+                var startColumn = Integer.parseInt(startLineColSplitted[1]);
+
+                var endLine = Integer.parseInt(endLineColSplitted[0]);
+                var endColumn = Integer.parseInt(endLineColSplitted[1]);
+                return new SourceLocation(filePath, startLine, startColumn, endLine, endColumn, start, end);
+            } else {
+
+                var startEndSplitted = splitted[1].split("-");
+                var start = Integer.parseInt(startEndSplitted[0]);
+                var end = Integer.parseInt(startEndSplitted[1]);
+
+                return new SourceLocation(filePath, 0, 0, 0, 0, start, end);
+            }
+        } else {
+            return new SourceLocation(location, 0, 0, 0, 0, 0, 0);
+        }
     }
 
     public void setLocationBefore(String location) {
@@ -110,5 +147,25 @@ public class Ref {
 
     public SourceLocation getLocationAfter() {
         return locationAfter;
+    }
+
+    public String getRepository() {
+        return repository;
+    }
+
+    public RefType getRefType() {
+        return refType;
+    }
+
+    public String getCommit() {
+        return commit;
+    }
+
+    public String getLocalNameAfter() {
+        return localNameAfter;
+    }
+
+    public String getLocalNameBefore() {
+        return localNameBefore;
     }
 }

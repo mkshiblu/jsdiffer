@@ -7,9 +7,13 @@ import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.*;
 import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.UMLParameter;
-import io.jsrminer.uml.diff.*;
+import io.jsrminer.uml.diff.ContainerDiff;
+import io.jsrminer.uml.diff.ContainerDiffer;
+import io.jsrminer.uml.diff.StringDistance;
+import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.replacement.*;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
@@ -32,7 +36,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private final Set<BlockStatement> nonMappedInnerNodesT2 = new LinkedHashSet<>();
 
     private FunctionDeclaration callerFunction;
-    private ContainerDiff sourceFileDiff;
+    private ContainerDiff<? extends IContainer> parentDiff;
     private final List<FunctionBodyMapper> childMappers = new ArrayList<>();
     private FunctionBodyMapper parentMapper;
     private Set<IRefactoring> refactorings = new LinkedHashSet<>();
@@ -44,31 +48,31 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
     public FunctionBodyMapper(UMLOperationDiff operationDiff
-            , ContainerDiff sourceFileDiff) {
+            , ContainerDiff<? extends IContainer> parentDiff) {
         this.operationDiff = operationDiff;
         this.function1 = operationDiff.function1;
         this.function2 = operationDiff.function2;
-        this.sourceFileDiff = sourceFileDiff;
+        this.parentDiff = parentDiff;
         map();
         mapChildFunctionDeclarations(function1, function2);
     }
 
     public FunctionBodyMapper(FunctionDeclaration function1, FunctionDeclaration function2
-            , ContainerDiff sourceFileDiff) {
-        this(new UMLOperationDiff(function1, function2), sourceFileDiff);
+            , ContainerDiff<? extends IContainer> parentDiff) {
+        this(new UMLOperationDiff(function1, function2), parentDiff);
     }
 
     /**
      * Tries to mapp the function1 of the mapper with the added operation
      */
-    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff sourceFileDiff
+    public FunctionBodyMapper(FunctionBodyMapper mapper, FunctionDeclaration addedOperation, ContainerDiff<? extends IContainer> parentDiff
 
             , Map<String, String> parameterToArgumentMap1
             , Map<String, String> parameterToArgumentMap2) {
         this.function1 = mapper.function1;
         this.function2 = addedOperation;
         this.callerFunction = mapper.function2;
-        this.sourceFileDiff = sourceFileDiff;
+        this.parentDiff = parentDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
         this.parentMapper = mapper;
         this.parameterToArgumentMap1 = parameterToArgumentMap1;
@@ -77,12 +81,12 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     }
 
     public FunctionBodyMapper(FunctionDeclaration removedOperation, FunctionBodyMapper operationBodyMapper
-            , Map<String, String> parameterToArgumentMap, ContainerDiff classDiff) {
+            , Map<String, String> parameterToArgumentMap, ContainerDiff<? extends IContainer> classDiff) {
         this.parentMapper = operationBodyMapper;
         this.function1 = removedOperation;
         this.function2 = operationBodyMapper.function2;
         this.callerFunction = operationBodyMapper.function1;
-        this.sourceFileDiff = classDiff;
+        this.parentDiff = classDiff;
         this.operationDiff = new UMLOperationDiff(this.function1, this.function2);
         mapRemovedOperation(parameterToArgumentMap);
     }
@@ -174,7 +178,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void mapChildFunctionDeclarations(FunctionDeclaration function1, FunctionDeclaration function2) {
         // Maps the functions that are immediately declared into this mapper
         if (function1.getFunctionDeclarations().size() > 0 && function2.getFunctionDeclarations().size() > 0) {
-            var differ = new ContainerDiffer(function1, function2);
+            var differ = new ContainerDiffer<IFunctionDeclaration, ContainerDiff<IFunctionDeclaration>>
+                    (new ContainerDiff<>(function1, function2));
             var diff = differ.diffChildFunctions();
             this.refactorings.addAll(diff.getAllRefactorings());
         }
@@ -608,7 +613,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
     private List<TreeSet<LeafCodeFragmentMapping>> matchLeavesWithVariableRenames(Set<? extends CodeFragment> leaves1, Set<? extends
             CodeFragment> leaves2, Map<String, String> parameterToArgumentMap) {
-        ReplacementFinder replacementFinder = new ReplacementFinder(this, sourceFileDiff);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, parentDiff);
         List<TreeSet<LeafCodeFragmentMapping>> postponedMappingSets = new ArrayList<>();
 
         Iterator<? extends CodeFragment> it1 = leaves1.iterator();
@@ -702,8 +707,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap
             , boolean ignoreNestingDepth) {
 
-        List<FunctionDeclaration> removedOperations = sourceFileDiff != null ? sourceFileDiff.getRemovedOperations() : new ArrayList<>();
-        List<FunctionDeclaration> addedOperations = sourceFileDiff != null ? sourceFileDiff.getAddedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> removedOperations = parentDiff != null ? parentDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = parentDiff != null ? parentDiff.getAddedOperations() : new ArrayList<>();
 
         if (innerNodes1.size() <= innerNodes2.size()) {
             for (ListIterator<BlockStatement> listIterator1 = new ArrayList<>(innerNodes1).listIterator(); listIterator1.hasNext(); ) {
@@ -711,20 +716,22 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 TreeSet<BlockCodeFragmentMapping> sortedMappingSet = new TreeSet<>();
                 for (Iterator<BlockStatement> innerNodeIterator2 = innerNodes2.iterator(); innerNodeIterator2.hasNext(); ) {
                     BlockStatement statement2 = innerNodeIterator2.next();
-                    double score = ChildCountMatcher.computeScore(statement1, statement2
-                            , removedOperations, addedOperations
-                            , this.mappings, this.parentMapper != null);
 
                     String argumentizedString1 = createArgumentizedString(statement1, statement2);
                     String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                     // Check if strings are identical and they are in same depth (or not)
                     if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
-                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
                             && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
-                                , parameterToArgumentMap, score);
-                        sortedMappingSet.add(mapping);
+                        double score = ChildCountMatcher.computeScore(statement1, statement2
+                                , removedOperations, addedOperations
+                                , this.mappings, this.parentMapper != null);
+
+                        if ((score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)) {
+                            BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                    , parameterToArgumentMap, score);
+                            sortedMappingSet.add(mapping);
+                        }
                     }
                 }
                 if (!sortedMappingSet.isEmpty()) {
@@ -743,20 +750,22 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
 
                 for (Iterator<BlockStatement> iterator1 = innerNodes1.iterator(); iterator1.hasNext(); ) {
                     BlockStatement statement1 = iterator1.next();
-                    double score = ChildCountMatcher.computeScore(statement1, statement2
-                            , removedOperations, addedOperations
-                            , this.mappings, this.parentMapper != null);
 
                     String argumentizedString1 = createArgumentizedString(statement1, statement2);
                     String argumentizedString2 = createArgumentizedString(statement2, statement1);
 
                     // Check if strings are identical and they are in same depth (or not)
                     if ((ignoreNestingDepth || statement1.getDepth() == statement2.getDepth())
-                            && (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0)
                             && (statement1.getTextWithExpressions().equals(statement2.getTextWithExpressions()) || argumentizedString1.equals(argumentizedString2))) {
-                        BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
-                                , parameterToArgumentMap, score);
-                        sortedMappingSet.add(mapping);
+                        double score = ChildCountMatcher.computeScore(statement1, statement2
+                                , removedOperations, addedOperations
+                                , this.mappings, this.parentMapper != null);
+
+                        if (score > 0 || Math.max(statement1.getStatements().size(), statement2.getStatements().size()) == 0) {
+                            BlockCodeFragmentMapping mapping = createCompositeMapping(statement1, statement2
+                                    , parameterToArgumentMap, score);
+                            sortedMappingSet.add(mapping);
+                        }
                     }
                 }
                 if (!sortedMappingSet.isEmpty()) {
@@ -773,7 +782,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void matchInnerNodesWithVariableRenames
             (Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2, Map<String, String> parameterToArgumentMap) {
         // exact matching - inner nodes - with variable renames
-        ReplacementFinder replacementFinder = new ReplacementFinder(this, sourceFileDiff);
+        ReplacementFinder replacementFinder = new ReplacementFinder(this, parentDiff);
 
         if (innerNodes1.size() <= innerNodes2.size()) {
             // exact matching - inner nodes - with variable renames
@@ -832,8 +841,8 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
             , Set<BlockStatement> innerNodes1, Set<BlockStatement> innerNodes2
             , Map<String, String> parameterToArgumentMap, ReplacementFinder replacementFinder) {
 
-        List<FunctionDeclaration> removedOperations = sourceFileDiff != null ? sourceFileDiff.getRemovedOperations() : new ArrayList<>();
-        List<FunctionDeclaration> addedOperations = sourceFileDiff != null ? sourceFileDiff.getAddedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> removedOperations = parentDiff != null ? parentDiff.getRemovedOperations() : new ArrayList<>();
+        List<FunctionDeclaration> addedOperations = parentDiff != null ? parentDiff.getAddedOperations() : new ArrayList<>();
 
         Set<Replacement> replacements = replacementFinder.findReplacementsWithExactMatching(statement1
                 , statement2
@@ -876,6 +885,9 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                 , leaves1
                 , leaves2
                 , argumentizer);
+
+        // TODO: Take account the anonymous pair mappings
+
         if (replacements != null) {
             LeafCodeFragmentMapping mapping = createLeafMapping(leaf1, leaf2, parameterToArgumentMap);
             mapping.addReplacements(replacements);
@@ -908,12 +920,12 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return refactorings;
     }
 
-    public ContainerDiff getContainerDiff() {
-        return sourceFileDiff;
+    public ContainerDiff<? extends IContainer> getParentDiff() {
+        return parentDiff;
     }
 
     public Set<IRefactoring> getRefactoringsByVariableAnalysis() {
-        VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, sourceFileDiff);
+        VariableReplacementAnalysis analysis = new VariableReplacementAnalysis(this, refactorings, parentDiff);
         // Local (variables & Paramters)
         refactorings.addAll(analysis.getVariableRenames());
         refactorings.addAll(analysis.getVariableMerges());

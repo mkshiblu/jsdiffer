@@ -1,7 +1,5 @@
 package io.jsrminer.uml.diff;
 
-import io.jsrminer.uml.FunctionUtil;
-
 import java.util.Comparator;
 
 public class FileRenameComparator implements Comparator<SourceFileRenameDiff> {

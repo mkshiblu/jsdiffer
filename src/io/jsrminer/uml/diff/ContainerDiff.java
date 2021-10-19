@@ -5,50 +5,49 @@ import io.jsrminer.refactorings.CandidateAttributeRefactoring;
 import io.jsrminer.refactorings.CandidateMergeVariableRefactoring;
 import io.jsrminer.refactorings.CandidateSplitVariableRefactoring;
 import io.jsrminer.sourcetree.FunctionDeclaration;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.MapperRefactoringProcessor;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.mapping.replacement.*;
+import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
 
-public class ContainerDiff {
-
-    protected final List<IRefactoring> refactorings = new ArrayList<>();
-    protected Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
-
-    protected Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
-    protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>>();
-    protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>>();
-
-    protected final List<FunctionBodyMapper> bodyMapperList = new ArrayList<>();
-    private List<UMLOperationDiff> operationDiffList = new ArrayList<>();
-
-    /**
-     * Name map
-     */
+public class ContainerDiff<T extends IContainer> extends Diff{
     private FunctionBodyMapper bodyStatementMapper;
-    MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
-
-    final IContainer container1;
-    final IContainer container2;
 
     protected final List<FunctionDeclaration> addedOperations = new ArrayList<>();
     protected final List<FunctionDeclaration> removedOperations = new ArrayList<>();
+    protected final List<IClassDeclaration> addedClasses = new ArrayList<>();
+    protected final List<IClassDeclaration> removedClasses = new ArrayList<>();
+    protected final List<UMLOperationDiff> operationDiffList = new ArrayList<>();
+    private final List<ClassDiff> commonClassDiffList = new ArrayList<>();
 
-    public ContainerDiff(IContainer container1, IContainer container2) {
+    protected final List<IRefactoring> refactorings = new ArrayList<>();
+    protected Set<MethodInvocationReplacement> consistentMethodInvocationRenames;
+    protected Map<Replacement, Set<CandidateAttributeRefactoring>> renameMap = new LinkedHashMap<>();
+    protected Map<MergeVariableReplacement, Set<CandidateMergeVariableRefactoring>> mergeMap = new LinkedHashMap<>();
+    protected Map<SplitVariableReplacement, Set<CandidateSplitVariableRefactoring>> splitMap = new LinkedHashMap<>();
+    protected final List<FunctionBodyMapper> operationBodyMapperList = new ArrayList<>();
+
+    MapperRefactoringProcessor mapperRefactoringProcessor = new MapperRefactoringProcessor();
+
+    final T container1;
+    final T container2;
+
+    public ContainerDiff(T container1, T container2) {
         this.container1 = container1;
         this.container2 = container2;
     }
 
-    public IContainer getContainer1() {
+    public T getContainer1() {
         return container1;
     }
 
-    public IContainer getContainer2() {
+    public T getContainer2() {
         return container2;
     }
 
@@ -81,8 +80,8 @@ public class ContainerDiff {
         return null;
     }
 
-    public List<FunctionBodyMapper> getBodyMapperList() {
-        return bodyMapperList;
+    public List<FunctionBodyMapper> getOperationBodyMapperList() {
+        return operationBodyMapperList;
     }
 
     public List<IRefactoring> getRefactoringsBeforePostProcessing() {
@@ -133,7 +132,7 @@ public class ContainerDiff {
     }
 
     public FunctionBodyMapper findMapperWithMatchingSignature2(IFunctionDeclaration operation2) {
-        for (var mapper : this.bodyMapperList) {
+        for (var mapper : this.operationBodyMapperList) {
             if (FunctionUtil.equalNameAndParameterCount(mapper.function1, operation2)) {
                 return mapper;
             }
@@ -143,14 +142,12 @@ public class ContainerDiff {
 
 
     /**
-     * Similar to Rminer UMLBaseClass.getRefactoring()
-     *
-     * @return
+     * Similar to Rminer UMLBaseClass.getRefactorings()
      */
     public List<IRefactoring> getAllRefactorings() {
         List<IRefactoring> refactorings = new ArrayList<>(this.refactorings);
 
-        for (FunctionBodyMapper mapper : this.bodyMapperList) {
+        for (FunctionBodyMapper mapper : this.operationBodyMapperList) {
             UMLOperationDiff operationSignatureDiff = new UMLOperationDiff(mapper.getOperation1(), mapper.getOperation2(), mapper.getMappings());
             refactorings.addAll(operationSignatureDiff.getRefactorings());
             processMapperRefactorings(mapper, refactorings);
@@ -272,8 +269,33 @@ public class ContainerDiff {
         return refactorings;
     }
 
-//    @Override
-//    public int compareTo(ContainerDiff o) {
-//        return this.container1.getQualifiedName().compareTo(o.container1.getQualifiedName());
-//    }
+
+    void reportAddedClass(IClassDeclaration classDeclaration) {
+        this.addedClasses.add(classDeclaration);
+    }
+
+    void reportRemovedClass(IClassDeclaration classDeclaration) {
+        this.removedClasses.add(classDeclaration);
+    }
+
+    public List<IClassDeclaration> getRemovedClasses() {
+        return this.removedClasses;
+    }
+
+    public List<IClassDeclaration> getAddedClasses() {
+        return this.addedClasses;
+    }
+
+    public void reportCommonClassDiffList(ClassDiff diff) {
+        this.commonClassDiffList.add(diff);
+    }
+
+    public List<ClassDiff> getCommonClassDiffList() {
+        return commonClassDiffList;
+    }
+
+    @Override
+    public String toString() {
+        return container1 + System.lineSeparator() + container2;
+    }
 }

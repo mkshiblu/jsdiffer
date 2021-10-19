@@ -1,6 +1,38 @@
 package io.rminerx.core.entities;
 
-public class ContainerBody {
+import io.jsrminer.sourcetree.Statement;
+import io.rminerx.core.api.IAnonymousClassDeclaration;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IClassDeclaration;
+import io.rminerx.core.api.IFunctionDeclaration;
 
-    //public List<State> getLeaves();
+import java.util.ArrayList;
+import java.util.List;
+
+public class ContainerBody {
+    private final List<Statement> statements = new ArrayList<>();
+    private final List<IFunctionDeclaration> functionDeclarations = new ArrayList<>();
+    private final List<IClassDeclaration> classDeclarations = new ArrayList<>();
+    private final List<IAnonymousClassDeclaration> anonymousClassDeclarations = new ArrayList<>();
+    private final List<IAnonymousFunctionDeclaration> anonymousFunctionDeclarations = new ArrayList<>();
+
+    public List<Statement> getStatements() {
+        return statements;
+    }
+
+    public List<IFunctionDeclaration> getFunctionDeclarations() {
+        return functionDeclarations;
+    }
+
+    public List<IClassDeclaration> getClassDeclarations() {
+        return classDeclarations;
+    }
+
+    public List<IAnonymousClassDeclaration> getAnonymousClassDeclarations() {
+        return anonymousClassDeclarations;
+    }
+
+    public List<IAnonymousFunctionDeclaration> getAnonymousFunctionDeclarations() {
+        return anonymousFunctionDeclarations;
+    }
 }

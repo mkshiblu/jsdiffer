@@ -14,7 +14,6 @@ public class BlockCodeFragmentMapping extends CodeFragmentMapping implements Com
         this.compositeChildMatchingScore = childMatchScore;
     }
 
-
     @Override
     public int compareTo(BlockCodeFragmentMapping o) {
         if (this.atLeastOneFragmentContainsAnonymous() || o.atLeastOneFragmentContainsAnonymous())

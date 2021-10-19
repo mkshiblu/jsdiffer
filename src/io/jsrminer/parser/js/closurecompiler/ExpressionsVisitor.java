@@ -7,7 +7,8 @@ import io.jsrminer.sourcetree.TernaryOperatorExpression;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
 
-import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.*;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.createBaseExpressionWithRMType;
+import static io.jsrminer.parser.js.closurecompiler.AstInfoExtractor.getTextInSource;
 
 public class ExpressionsVisitor {
 
@@ -113,7 +114,7 @@ public class ExpressionsVisitor {
             var operator = tree.operator.toString();
 
             // TODO should treated as infix if =?
-            if (operator != "=") {
+            if (!"=".equals(operator)) {
                 leaf.getInfixOperators().add(operator);
                 leaf.getInfixExpressions().add(text);
             }
@@ -169,7 +170,7 @@ public class ExpressionsVisitor {
             = new NodeVisitor<>() {
         @Override
         public Void visit(ArrayPatternTree tree, ILeafFragment leaf, IContainer container) {
-            var text =  getTextInSource(tree, false);
+            var text = getTextInSource(tree, false);
             leaf.getArrayAccesses().add(text);
             for (var element : tree.elements) {
                 Visitor.visitExpression(element, leaf, container);
@@ -205,6 +206,18 @@ public class ExpressionsVisitor {
                 Visitor.visitExpression(expressionTree, leaf, container);
             });
             return getTextInSource(tree, false);
+        }
+    };
+
+    /**
+     * An await expression such as await fetch()
+     */
+    public static final NodeVisitor<Void, AwaitExpressionTree, ILeafFragment> awaitExpressionProcessor
+            = new NodeVisitor<>() {
+        @Override
+        public Void visit(AwaitExpressionTree tree, ILeafFragment leaf, IContainer container) {
+            Visitor.visitExpression(tree.expression, leaf, container);
+            return null;
         }
     };
 }
