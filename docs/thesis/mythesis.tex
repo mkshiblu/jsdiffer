@@ -1,197 +1,163 @@
-\documentclass[letterpaper,12pt,onecolumn,final]{report}
-
-\pdftrailerid{}
-\pdfsuppressptexinfo15
-\pdfminorversion=4
-
-%% MANDATORY PACKAGES
-\usepackage{cuthesis}         % Concordia's thesis style
-\usepackage[english]{babel}   % load english localization
-\usepackage{type1ec}          % type 1 font
-\usepackage[T1]{fontenc}      % correct some font representation, needs cm-super fonts
-\usepackage{times}            % use Times New Roman font
-\usepackage[titletoc,title]{appendix}     % include Appendix command, add to ToC
-\usepackage{setspace}         % control double/single line spacing
-
-%% OPTIONAL PACKAGES
-%\counterwithout{footnote}{chapter}        % do no reset footnote # between chapters
-\usepackage[hyphens]{url}     % print links
-\usepackage{hyperref}         % provides hyperlinks (text different than link)
-%\usepackage[hyphenbreaks]{breakurl}       % break long URL after hyphens
-\hypersetup{
-	colorlinks=true,
-	breaklinks=true,
-	linkcolor=black,
-	citecolor=black,
-	urlcolor=black,
-	filecolor=black,
-	linktoc=all,
+% Encoding: UTF-8
+@Book{thinkingforth,
+author = "Leo Brodie",
+title = "Thinking Forth",
+publisher = "Punchy Publishing",
+year = 2004,
 }
-\usepackage{graphicx}
-%\graphicspath{{img/}}
 
-\usepackage{blindtext}
-
-%% CUSTOM MACROS
-%\newcommand{\tickyes}{{\small\checkmark}}
-%\newcommand{\tickno}{{\small$\times$}}
-
-%% CUSTOM COMMANDS
-%\newcommand{\subhead}[1]{\noindent{\textbf{#1.}}}
-
-%% THESIS SETTINGS
-\author{John Doe}
-\title{My Super Thesis}
-
-% As of 2019, title is no longer used...
-%\titleOfPhDAuthor{Mr.}         % or Ms., Mrs., Miss, etc. (only for PhD's)
-
-% if PhD, uncomment:
-\PhD
-% else if Master's, uncomment:
-%\mastersDegree{Master of Applied Science}
-
-\program{Information and Systems Engineering}
-%\program{Computer Science}
-\dept{The Concordia Institute\\for\\Information Systems Engineering}
-%\dept{The Department\\of\\Computer Science and Software Engineering}
-
-%% See current GPD at https://www.concordia.ca/admissions/graduate/programs/contacts.html
-\GpdOrChairOfDept{Dr.\ GPD}
-\isGpd % Chair by default
-%% See current Dean at  https://www.concordia.ca/ginacody/about/leadership/office-dean/dean-of-engineering-and-computer-science.html
-\deanOfENCS{Dr.\ Amir Asif} 
-\chairOfCommittee{Dr.\ Chair}
-\examinerExternal{Dr.\ External}
-\examinerFirst{Dr.\ Examiner1}
-\examinerSecond{Dr.\ Examiner2}
-\examinerExternalToProgram{Dr.\ ExternalToProgram}
-\supervisor{Dr.\ Supervisor}
-%% Following two lines are required if you have a co-supervisor
-%\hasCosupervisor
-%\coSupervisor{Dr.\ Co-supervisor}
-
-%% Comment to use current month, needs to match initial submission
-\submitmonth{May}
-\submityear{2019}
-%% Comment if date of defence is unknown yet, fill for final submission
-\defencedate{July 1, 2019}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\doublespacing
-\begin{document}
-
-\begin{abstract}
-{%trick to force double spacing in the abstract, otherwise some paragraphs may show single spaced
-\setstretch{1.6667}
-\blindtext[1]
-
-\blindtext[1]
-
-\blindtext[1]
-
-\blindtext[1]
+@Conference{MurphyHill2009,
+  author    = {Emerson Murphy-Hill and Chris Parnin and Andrew P. Black},
+  booktitle = {Proceedings of the 31st International Conference on Software Engineering},
+  title     = {How we refactor, and how we know it},
+  year      = {2009},
+  address   = {New York, NY, USA},
+  month     = {5},
+  pages     = {287–297},
+  publisher = {Association for Computing Machinery},
+  series    = {ICSE '09},
+  abstract  = {Much of what we know about how programmers refactor in the wild is based on studies
+that examine just a few software projects. Researchers have rarely taken the time
+to replicate these studies in other contexts or to examine the assumptions on which
+they are based. To help put refactoring research on a sound scientific basis, we draw
+conclusions using four data sets spanning more than 13 000 developers, 240 000 tool-assisted
+refactorings, 2500 developer hours, and 3400 version control commits. Using these
+data, we cast doubt on several previously stated assumptions about how programmers
+refactor, while validating others. For example, we find that programmers frequently
+do not indicate refactoring activity in commit logs, which contradicts assumptions
+made by several previous researchers. In contrast, we were able to confirm the assumption
+that programmers do frequently intersperse refactoring with other program changes.
+By confirming assumptions and replicating studies made by other researchers, we can
+have greater confidence that those researchers' conclusions are generalizable.},
+  day       = {16},
+  doi       = {10.1109/ICSE.2009.5070529},
+  isbn      = {9781424434534},
+  pagetotal = {11},
+  url       = {https://doi.org/10.1109/ICSE.2009.5070529},
 }
-\end{abstract}
 
-%\doublespacing
-\begin{acknowledgments}
-	% keep this section even if empty
-	\blindtext[2]
-\end{acknowledgments}
+@inproceedings{Negara2013,
+author = {Negara, Stas and Chen, Nicholas and Vakilian, Mohsen and Johnson, Ralph and Dig, Danny},
+year = {2013},
+month = {07},
+pages = {552-576},
+title = {A Comparative Study of Manual and Automated Refactorings},
+volume = {7920},
+doi = {10.1007/978-3-642-39038-8_23}
+}
 
+@article{Ge2012,
+author = {Ge, Xi and DuBose, Quinton and Murphy-Hill, Emerson},
+year = {2012},
+month = {06},
+pages = {211-221},
+title = {Reconciling manual and automatic refactoring},
+journal = {Proceedings - International Conference on Software Engineering},
+doi = {10.1109/ICSE.2012.6227192}
+}
 
-%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Introduction}
-% suggestion of intro
+@Conference{Foster2012,
+  author    = {Stephen R. Foster and William G. Griswold and Sorin Lerner},
+  booktitle = {Proceedings of the 34th International Conference on Software Engineering},
+  title     = {WitchDoctor: IDE support for real-time auto-completion of refactorings},
+  year      = {2012},
+  address   = {Zurich, Switzerland},
+  month     = {6},
+  pages     = {222–232},
+  publisher = {IEEE Press},
+  series    = {ICSE '12},
+  abstract  = {Integrated Development Environments (IDEs) have come to perform a wide variety of
+tasks on behalf of the programmer, refactoring being a classic example. These operations
+have undeniable benefits, yet their large (and growing) number poses a cognitive scalability
+problem. Our main contribution is WitchDoctor -- a system that can detect, on the
+fly, when a programmer is hand-coding a refactoring. The system can then complete
+the refactoring in the background and propose it to the user long before the user
+can complete it. This implies a number of technical challenges. The algorithm must
+be 1) highly efficient, 2) handle unparseable programs, 3) tolerate the variety of
+ways programmers may perform a given refactoring, 4) use the IDE's proven and familiar
+refactoring engine to perform the refactoring, even though the the refactoring has
+already begun, and 5) support the wide range of refactorings present in modern IDEs.
+Our techniques for overcoming these challenges are the technical contributions of
+this paper. We evaluate WitchDoctor's design and implementation by simulating over
+5,000 refactoring operations across three open-source projects. The simulated user
+is faster and more efficient than an average human user, yet WitchDoctor can detect
+more than 90% of refactoring operations as they are being performed -- and can complete
+over a third of refactorings before the simulated user does. All the while, WitchDoctor
+remains robust in the face of non-parseable programs and unpredictable refactoring
+scenarios. We also show that WitchDoctor is efficient enough to perform computation
+on a keystroke-by-keystroke basis, adding an average overhead of only 15 milliseconds
+per keystroke.},
+  day       = {2},
+  isbn      = {9781467310673},
+  pagetotal = {11},
+}
 
-Hello~\cite{cold-boot-attack}.
+@Conference{Ge2014,
+  author    = {Xi Ge and Emerson Murphy-Hill},
+  booktitle = {Proceedings of the 36th International Conference on Software Engineering},
+  title     = {Manual refactoring changes with automated refactoring validation},
+  year      = {2014},
+  address   = {New York, NY, USA},
+  month     = {5},
+  pages     = {1095–1105},
+  publisher = {Association for Computing Machinery},
+  series    = {ICSE 2014},
+  abstract  = {Refactoring, the practice of applying behavior-preserving changes to existing code,
+can enhance the quality of software systems. Refactoring tools can automatically perform
+and check the correctness of refactorings. However, even when developers have these
+tools, they still perform about 90% of refactorings manually, which is error-prone.
+To address this problem, we propose a technique called GhostFactor separating transformation
+and correctness checking: we allow the developer to transform code manually, but check
+the correctness of her transformation automatically. We implemented our technique
+as a Visual Studio plugin, then evaluated it with a human study of eight software
+developers; GhostFactor improved the correctness of manual refactorings by 67%.},
+  day       = {31},
+  doi       = {10.1145/2568225.2568280},
+  isbn      = {9781450327565},
+  keywords  = {IDE, Refactoring, Restructuring, Tool},
+  location  = {Hyderabad, India},
+  pagetotal = {11},
+  url       = {https://doi.org/10.1145/2568225.2568280},
+}
 
-\section{Motivation}
-\blindtext[5]
+@inproceedings{Ge2017,
+author = {Ge, Xi and Sarkar, Saurabh and Witschey, Jim and Murphy-Hill, Emerson},
+year = {2017},
+month = {10},
+pages = {71-79},
+title = {Refactoring-aware code review},
+doi = {10.1109/VLHCC.2017.8103453}
+}
 
-\section{Thesis Statement}
-\blindtext[2]
+@Conference{Demeyer2000,
+  author    = {Serge Demeyer and Stéphane Ducasse and Oscar Nierstrasz},
+  booktitle = {Proceedings of the 15th ACM SIGPLAN conference on Object-oriented programming, systems, languages, and applications},
+  title     = {Finding refactorings via change metrics},
+  year      = {2000},
+  address   = {New York, NY, USA},
+  month     = {10},
+  pages     = {166–177},
+  publisher = {Association for Computing Machinery},
+  series    = {OOPSLA '00},
+  abstract  = {Reverse engineering is the process of uncovering the design and the design rationale
+from a functioning software system. Reverse engineering is an integral part of any
+successful software system, because changing requirements lead to implementations
+that drift from their original design. In contrast to traditional reverse engineering
+techniques ---which analyse a single snapshot of a system--- we focus the reverse
+engineering effort by determining where the implementation has changed. Since changes
+of object-oriented software are often phrased in terms of refactorings, we propose
+a set of heuristics for detecting refactorings by applying lightweight, object-oriented
+metrics to successive versions of a software system. We validate our approach with
+three separate case studies of mature object-oriented software systems for which multiple
+versions are available. The case studies suggest that the heuristics support the reverse
+engineering process by focusing attention on the relevant parts of a software system.},
+  day       = {1},
+  doi       = {10.1145/353171.353183},
+  isbn      = {158113200X},
+  keywords  = {metrics, object-oriented frameworks, refactoring, reverse engineering, software evolution},
+  location  = {Minneapolis, Minnesota, USA},
+  pagetotal = {12},
+  url       = {https://doi.org/10.1145/353171.353183},
+}
 
-\section{Objectives and Contributions}
-\blindtext[3]
-
-\section{Related Publications}
-\blindtext[1]
-
-\section{Outline}
-The rest of the thesis is organized as follows...
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Background}
-\label{chap:background}
-\blindtext[10]
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Then}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Conclusion and future work}
-\label{chap:conclusion}
-
-\blindtext[5]
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Bibliography
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\clearpage
-\phantomsection
-\addcontentsline{toc}{chapter}{Bibliography}  %  Add Bibliography to TOC
-\singlespacing % save space in the bibliography
-\bibliographystyle{abbrv}
-\bibliography{references}
-
-
-
-%%%%%%%%%% Appendices %%%%%%%%%%%%%%%%
-% ---- Appendix settings. Please Do NOT change them. -----
-\appendix
-\setcounter{table}{0}		% reset the table counter
-\setcounter{figure}{0}		% reset the figure counter
-\renewcommand{\thefigure}{\Alph{chapter}.\arabic{figure}} 	% numbering the a figure in Appendix as Figure A.2, Figure B.1, etc.
-\renewcommand{\thetable}{\Alph{chapter}.\arabic{table}}		% numbering the a table in Appendix as Table A.2, Table B.1, etc.
-
-%%%%%%%%%% Body of Appendix %%%%%%%%%%%%%%%%
-\begin{appendices}
-\doublespacing
-
-\chapter{First Appendix}
-\label{chap:apdx1}
-
-\blindmathpaper
-
-\chapter{Concordia Logos}
-\label{chap:logos}
-\begin{figure}[h!]
-	\centering
-	\includegraphics{logos/Concordia_University_logo}
-	\caption{Concordia University}
-\end{figure}
-\vspace{2em}
-\begin{figure}[h!]
-	\centering
-	\includegraphics{logos/Concordia_GinaCody_vertical}
-	\caption{Gina Cody School of Engineering and Computer Science (vertical)}
-\end{figure}
-\vspace{2em}
-\begin{figure}[h!]
-	\centering
-	\includegraphics{logos/Concordia_GinaCody_horizontal}
-	\caption{Gina Cody School of Engineering and Computer Science (horizontal)}
-\end{figure}
-
-\end{appendices}
-
-\end{document}
+@Comment{jabref-meta: databaseType:bibtex;}

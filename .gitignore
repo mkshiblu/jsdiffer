@@ -65,3 +65,5 @@ bin/
 .settings/
 .classpath
 .project
+docs/thesis/references.bib.bak
+docs/thesis/references.bib.sav
