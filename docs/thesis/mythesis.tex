@@ -40,42 +40,39 @@
 %\newcommand{\subhead}[1]{\noindent{\textbf{#1.}}}
 
 %% THESIS SETTINGS
-\author{John Doe}
-\title{My Super Thesis}
+\author{Mosabbir Khan Shiblu}
+\title{Refactoring Detection in JavaScript}
 
 % As of 2019, title is no longer used...
 %\titleOfPhDAuthor{Mr.}         % or Ms., Mrs., Miss, etc. (only for PhD's)
 
 % if PhD, uncomment:
-\PhD
+%\PhD
 % else if Master's, uncomment:
-%\mastersDegree{Master of Applied Science}
-
-\program{Information and Systems Engineering}
-%\program{Computer Science}
-\dept{The Concordia Institute\\for\\Information Systems Engineering}
-%\dept{The Department\\of\\Computer Science and Software Engineering}
+\mastersDegree{Master of Computer Science}
+\program{Computer Science}
+\dept{The Department\\of\\Computer Science and Software Engineering}
 
 %% See current GPD at https://www.concordia.ca/admissions/graduate/programs/contacts.html
-\GpdOrChairOfDept{Dr.\ GPD}
+\GpdOrChairOfDept{Dr.\ 	LEILA KOSSEIM}
 \isGpd % Chair by default
 %% See current Dean at  https://www.concordia.ca/ginacody/about/leadership/office-dean/dean-of-engineering-and-computer-science.html
-\deanOfENCS{Dr.\ Amir Asif} 
+\deanOfENCS{Dr.\ Mourad Debbabi } 
 \chairOfCommittee{Dr.\ Chair}
 \examinerExternal{Dr.\ External}
 \examinerFirst{Dr.\ Examiner1}
 \examinerSecond{Dr.\ Examiner2}
 \examinerExternalToProgram{Dr.\ ExternalToProgram}
-\supervisor{Dr.\ Supervisor}
+\supervisor{Dr.\ Nikolaos Tsantalis}
 %% Following two lines are required if you have a co-supervisor
 %\hasCosupervisor
 %\coSupervisor{Dr.\ Co-supervisor}
 
 %% Comment to use current month, needs to match initial submission
-\submitmonth{May}
-\submityear{2019}
+\submitmonth{November}
+\submityear{2021}
 %% Comment if date of defence is unknown yet, fill for final submission
-\defencedate{July 1, 2019}
+\defencedate{December 7, 2021}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -86,20 +83,35 @@
 \begin{abstract}
 {%trick to force double spacing in the abstract, otherwise some paragraphs may show single spaced
 \setstretch{1.6667}
-\blindtext[1]
+%\blindtext[1]
+TODO Para1
 
-\blindtext[1]
+%\blindtext[1]
+TODO Para2
 
-\blindtext[1]
+%\blindtext[1]
 
-\blindtext[1]
+TODO Para3
+
+%\blindtext[1] 
+TODO Para4
 }
 \end{abstract}
 
 %\doublespacing
 \begin{acknowledgments}
-	% keep this section even if empty
-	\blindtext[2]
+
+% keep this section even if empty
+	%\blindtext[2]
+I would like to express my gratitude and thanks to my supervisor, Dr. Nikolaos Tsantalis. His invaluable guidance
+and continuous opened a new horizon of knowledge to me.
+
+I would also like to thank my colleagues, Mohammad Sadegh Aalizadeh, Mehran Jodavi, and Ameya Ketkar who shared their best experiences and were amazing in teamwork and helped me to learn a lot in my journey at Concordia.
+
+Thank you.
+
+Mosabbir Khan Shiblu
+	
 \end{acknowledgments}
 
 
@@ -107,16 +119,19 @@
 \chapter{Introduction}
 % suggestion of intro
 
-Hello~\cite{cold-boot-attack}.
+TODO %~\cite{cold-boot-attack}.
 
 \section{Motivation}
-\blindtext[5]
+%\blindtext[5]
+TODO
 
 \section{Thesis Statement}
-\blindtext[2]
+%\blindtext[2]
+TODO
 
 \section{Objectives and Contributions}
-\blindtext[3]
+%\blindtext[3]
+TODO
 
 \section{Outline}
 The rest of the thesis is organized as follows...
@@ -133,10 +148,16 @@ Over the past few decades, various techniques for detecting refactoring activiti
 \section{Refactoring Detection Approach}
 \subsection{Detection Using Meta Data}
 \subsection{Detection by Static Source Code Analysis}
+Demeyer et al. \cite{Demeyer2000} introduced the first strategy for identifying the refactored elements between two system snapshots. They defined four heuristics based on the changes of object-oriented source code metrics such as method size, class size, number of inherited or overwritten methods to identify refactorings of three general categories (Split/Merge Class, Move Method, and Split Method). To validate their technique, they applied it on different versions of three software systems. However, the precision of their evaluation was seemingly on the lower side, for example, for Move Method refactorings (limited to super, sub, and sibling classes) the reported average precision was 23\%. On the other hand, the paper concluded that from the perspective of reverse engineering, the proposed heuristics were extremely useful to uncover where, how, and maybe why implementation had drifted from its original design.
+
+Antoniol et al. \cite{Antoniol2004} used an automatic technique based on Vector Space cosine similarity to compare identifiers in different classes in order to detect the renaming and splitting of classes. Since it's based on a similarity threshold, it does not perform very well for classes with many changes and may require threshold adjustment on a case basis.
+
+Weißgerber and Diehl \cite{Weissgerber2006} developed the first technique for identifying class-level/locally-scoped refactorings i.e refactorings that occur within one class, and thus, within the same file (e.g. Rename Method). Their approach first extracts and identifies added and deleted refactoring candidates (fields, methods, and classes) by parsing deltas and then comparing each pair's name similarity from a version control system. For ambiguous candidate pairs, it uses a clone detection tool CCFINDER \cite{Kamiya2002} to compare their bodies and then rank them. CCFINDER is also configured to ignore whitespaces/comments and to match consistently renamed variables, method names, and references to members. Finally, they used random sampling to estimate the precision whereas commit messages were inspected manually to find documented refactorings in order to compute the recall.
+
 \subsection{Real-time Detection}
 Murphy-Hill et al. \cite{MurphyHill2009} tracked the usage history of refactoring commands available in Eclipse IDE using a plugin and found that developers had performed about 90\% of their refactorings manually instead of opting for the refactoring tool. Additionally, they often interleave refactorings with other behavior-modifying programming activities. Furthermore, developers rarely explicitly report their refactoring activities in commit messages.
 
-Negara et al. \cite{Negara2013} developed CODINGTRACKER which infers refactorings from continuous code changes with the help of a refactoring inference plugin. Using their tool, they constructed a large corpus of 5,371 refactoring instances performed by 23 developers working on their IDEs. Their approach reported a precision and recall of 93% and 100% respectively for a sample of both manually and automatically performed refactorings.
+Negara et al. \cite{Negara2013} developed CODINGTRACKER which infers refactorings from continuous code changes with the help of a refactoring inference plugin. Using their tool, they constructed a large corpus of 5,371 refactoring instances performed by 23 developers working on their IDEs. Their approach reported a precision and recall of 93\% and 100\% respectively for a sample of both manually and automatically performed refactorings.
 
 Similar to CODINGTRACKER \cite{Negara2013}, GHOSTFACTOR \cite{Ge2014} and REVIEWFACTOR \cite{Ge2017} infer fully completed refactorings by monitoring the fine-grained code changes in real-time inside the IDE. On the other hand BENEFACTOR \cite{Ge2012} and WITCHDOCTOR \cite{Foster2012} offer code completion by detecting ongoing manual refactorings.
 
@@ -149,9 +170,10 @@ Similar to CODINGTRACKER \cite{Negara2013}, GHOSTFACTOR \cite{Ge2014} and REVIEW
 \chapter{Conclusion and future work}
 \label{chap:conclusion}
 
-\blindtext[5]
+TODO
+%\blindtext[5]
 
-This text requires a citation \cite{thinkingforth} \cite{MurphyHill2009} to embed the citation in the required position in the text.
+%This text requires a citation \cite{thinkingforth} \cite{MurphyHill2009} to embed the citation in the required position in the text.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Bibliography
