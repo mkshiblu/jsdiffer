@@ -6,36 +6,6 @@ publisher = "Punchy Publishing",
 year = 2004,
 }
 
-@Conference{MurphyHill2009,
-  author    = {Emerson Murphy-Hill and Chris Parnin and Andrew P. Black},
-  booktitle = {Proceedings of the 31st International Conference on Software Engineering},
-  title     = {How we refactor, and how we know it},
-  year      = {2009},
-  address   = {New York, NY, USA},
-  month     = {5},
-  pages     = {287–297},
-  publisher = {Association for Computing Machinery},
-  series    = {ICSE '09},
-  abstract  = {Much of what we know about how programmers refactor in the wild is based on studies
-that examine just a few software projects. Researchers have rarely taken the time
-to replicate these studies in other contexts or to examine the assumptions on which
-they are based. To help put refactoring research on a sound scientific basis, we draw
-conclusions using four data sets spanning more than 13 000 developers, 240 000 tool-assisted
-refactorings, 2500 developer hours, and 3400 version control commits. Using these
-data, we cast doubt on several previously stated assumptions about how programmers
-refactor, while validating others. For example, we find that programmers frequently
-do not indicate refactoring activity in commit logs, which contradicts assumptions
-made by several previous researchers. In contrast, we were able to confirm the assumption
-that programmers do frequently intersperse refactoring with other program changes.
-By confirming assumptions and replicating studies made by other researchers, we can
-have greater confidence that those researchers' conclusions are generalizable.},
-  day       = {16},
-  doi       = {10.1109/ICSE.2009.5070529},
-  isbn      = {9781424434534},
-  pagetotal = {11},
-  url       = {https://doi.org/10.1109/ICSE.2009.5070529},
-}
-
 @inproceedings{Negara2013,
 author = {Negara, Stas and Chen, Nicholas and Vakilian, Mohsen and Johnson, Ralph and Dig, Danny},
 year = {2013},
@@ -81,7 +51,7 @@ Our techniques for overcoming these challenges are the technical contributions o
 this paper. We evaluate WitchDoctor's design and implementation by simulating over
 5,000 refactoring operations across three open-source projects. The simulated user
 is faster and more efficient than an average human user, yet WitchDoctor can detect
-more than 90% of refactoring operations as they are being performed -- and can complete
+more than 90\% of refactoring operations as they are being performed -- and can complete
 over a third of refactorings before the simulated user does. All the while, WitchDoctor
 remains robust in the face of non-parseable programs and unpredictable refactoring
 scenarios. We also show that WitchDoctor is efficient enough to perform computation
@@ -105,7 +75,7 @@ per keystroke.},
   abstract  = {Refactoring, the practice of applying behavior-preserving changes to existing code,
 can enhance the quality of software systems. Refactoring tools can automatically perform
 and check the correctness of refactorings. However, even when developers have these
-tools, they still perform about 90% of refactorings manually, which is error-prone.
+tools, they still perform about 90\% of refactorings manually, which is error-prone.
 To address this problem, we propose a technique called GhostFactor separating transformation
 and correctness checking: we allow the developer to transform code manually, but check
 the correctness of her transformation automatically. We implemented our technique
@@ -188,3 +158,59 @@ numpages = {17},
 keywords = {code clone, duplicated code, CASE tool, maintenance, metrics}
 }
 @Comment{jabref-meta: databaseType:bibtex;}
+
+@inproceedings{Krasniqi2020,
+author = {Krasniqi, Rrezarta and Cleland-Huang, Jane},
+year = {2020},
+month = {02},
+pages = {512-516},
+title = {Enhancing Source Code Refactoring Detection with Explanations from Commit Messages},
+doi = {10.1109/SANER48275.2020.9054816}
+}
+
+@ARTICLE{MurphyHill2012,  author={Murphy-Hill, Emerson and Parnin, Chris and Black, Andrew P.},  journal={IEEE Transactions on Software Engineering},   title={How We Refactor, and How We Know It},   year={2012},  volume={38},  number={1},  pages={5-18},  doi={10.1109/TSE.2011.41}}
+
+@inproceedings{Dig2006,
+author = {Dig, Danny and Comertoglu, Can and Marinov, Darko and Johnson, Ralph},
+year = {2006},
+month = {07},
+pages = {},
+title = {Automated Detection of Refactorings in Evolving Components},
+isbn = {978-3-540-35726-1},
+doi = {10.1007/11785477_24}
+}
+
+
+@inproceedings{Biegel2011,
+author = {Biegel, Benjamin and Soetens, Quinten David and Hornig, Willi and Diehl, Stephan and Demeyer, Serge},
+title = {Comparison of Similarity Metrics for Refactoring Detection},
+year = {2011},
+isbn = {9781450305747},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1985441.1985452},
+doi = {10.1145/1985441.1985452},
+abstract = {Identifying refactorings in software archives has been an active research topic in
+the last decade, mainly because it is a prerequisite for various software evolution
+analyses (e.g., error detection, capturing intent of change, capturing and replaying
+changes, and relating refactorings and software metrics). Many of these techniques
+rely on similarity measures to identify structurally equivalent code, however, up
+until now the effect of this similarity measure on the performance of the refactoring
+identification algorithm is largely unexplored. In this paper we replicate a well-known
+experiment from Wei\ss{}gerber and Diehl, plugging in three different similarity measures
+(text-based, AST-based, token-based). We look at the overlap of the results obtained
+by the different metrics, and we compare the results using recall and the computation
+time. We conclude that the different result sets have a large overlap and that the
+three metrics perform with a comparable quality.},
+booktitle = {Proceedings of the 8th Working Conference on Mining Software Repositories},
+pages = {53–62},
+numpages = {10},
+keywords = {replication experiment, similarity metrics, software evolution, code clones, mining software repositories, refactoring},
+location = {Waikiki, Honolulu, HI, USA},
+series = {MSR '11}
+}
+
+@INPROCEEDINGS{Biegel2010,  author={Biegel, Benjamin and Diehl, Stephan},  booktitle={2010 17th Working Conference on Reverse Engineering},   title={Highly Configurable and Extensible Code Clone Detection},   year={2010},  volume={},  number={},  pages={237-241},  doi={10.1109/WCRE.2010.34}}
+
+
+@INPROCEEDINGS{Broder1997,  author={Broder, A.Z.},  booktitle={Proceedings. Compression and Complexity of SEQUENCES 1997 (Cat. No.97TB100171)},   title={On the resemblance and containment of documents},   year={1997},  volume={},  number={},  pages={21-29},  doi={10.1109/SEQUEN.1997.666900}}
