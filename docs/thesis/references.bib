@@ -274,3 +274,100 @@ keywords = {asynchronous api evolution, refactoring detection, model differencin
 location = {Leipzig, Germany},
 series = {ICSE Companion '08}
 }
+
+@inproceedings{Kim2010,
+author = {Kim, Miryung and Gee, Matthew and Loh, Alex and Rachatasumrit, Napol},
+title = {Ref-Finder: A Refactoring Reconstruction Tool Based on Logic Query Templates},
+year = {2010},
+isbn = {9781605587912},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1882291.1882353},
+doi = {10.1145/1882291.1882353},
+abstract = {Knowing which parts of a system underwent which types of refactoring between two program
+versions can help programmers better understand code changes. Though there are a number
+of techniques that automatically find refactorings from two input program versions,
+these techniques are inadequate in terms of coverage by handling only a subset of
+refactoring types---mostly simple rename and move refactorings at the level of classes,
+methods, and fields. This paper presents a Ref-Finder Eclipse plug-in that automatically
+identifies both atomic and composite refactorings using a template-based refactoring
+reconstruction approach---it expresses each refactoring type in terms of template
+logic queries and uses a logic programming engine to infer concrete refactoring instances.
+Ref-Finder currently supports sixty three types in the Fowler's catalog, showing the
+most comprehensive coverage among existing techniques.},
+booktitle = {Proceedings of the Eighteenth ACM SIGSOFT International Symposium on Foundations of Software Engineering},
+pages = {371–372},
+numpages = {2},
+keywords = {software evolution, logic-based program representation, refactoring, program differencing},
+location = {Santa Fe, New Mexico, USA},
+series = {FSE '10}
+}
+
+@INPROCEEDINGS{Prete2010,  author={Prete, Kyle and Rachatasumrit, Napol and Sudan, Nikita and Kim, Miryung},  booktitle={2010 IEEE International Conference on Software Maintenance},   title={Template-based reconstruction of complex refactorings},   year={2010},  volume={},  number={},  pages={1-10},  doi={10.1109/ICSM.2010.5609577}}
+
+@book{Fowler1999,
+  added-at = {2007-09-26T23:42:13.000+0200},
+  address = {Boston, MA, USA},
+  author = {Fowler, Martin},
+  biburl = {https://www.bibsonomy.org/bibtex/27151885e8b8528651e048242f3527132/kimmens},
+  description = {AOEvolutionchapter short paper},
+  interhash = {955b704413985c65e6a0ba497d70b00e},
+  intrahash = {7151885e8b8528651e048242f3527132},
+  isbn = {0-201-48567-2},
+  keywords = {evolution refactoring software},
+  publisher = {Addison-Wesley},
+  timestamp = {2007-09-26T23:42:13.000+0200},
+  title = {Refactoring: Improving the Design of Existing Code},
+  year = 1999
+}
+
+
+@INPROCEEDINGS{Silva2017,  author={Silva, Danilo and Valente, Marco Tulio},  booktitle={2017 IEEE/ACM 14th International Conference on Mining Software Repositories (MSR)},   title={RefDiff: Detecting Refactorings in Version Histories},   year={2017},  volume={},  number={},  pages={269-279},  doi={10.1109/MSR.2017.14}}
+
+@inproceedings{Tan2019,
+  title={A Survey of Refactoring Detection Tools},
+  author={Liang Tan and Christoph Bockisch},
+  booktitle={Software Engineering},
+  year={2019}
+}
+
+@article{Soares2013,
+author = {Soares, Gustavo and Gheyi, Rohit and Murphy-Hill, Emerson and Johnson, Brittany},
+title = {Comparing Approaches to Analyze Refactoring Activity on Software Repositories},
+year = {2013},
+issue_date = {April, 2013},
+publisher = {Elsevier Science Inc.},
+address = {USA},
+volume = {86},
+number = {4},
+issn = {0164-1212},
+url = {https://doi.org/10.1016/j.jss.2012.10.040},
+doi = {10.1016/j.jss.2012.10.040},
+abstract = {Some approaches have been used to investigate evidence on how developers refactor
+their code, whether refactorings activities may decrease the number of bugs, or improve
+developers' productivity. However, there are some contradicting evidence in previous
+studies. For instance, some investigations found evidence that if the number of refactoring
+changes increases in the preceding time period the number of defects decreases, different
+from other studies. They have used different approaches to evaluate refactoring activities.
+Some of them identify committed behavior-preserving transformations in software repositories
+by using manual analysis, commit messages, or dynamic analysis. Others focus on identifying
+which refactorings are applied between two programs by using manual inspection or
+static analysis. In this work, we compare three different approaches based on manual
+analysis, commit message (Ratzinger's approach) and dynamic analysis (SafeRefactor's
+approach) to detect whether a pair of versions determines a refactoring, in terms
+of behavioral preservation. Additionally, we compare two approaches (manual analysis
+and Ref-Finder) to identify which refactorings are performed in each pair of versions.
+We perform both comparisons by evaluating their accuracy, precision, and recall in
+a randomly selected sample of 40 pairs of versions of JHotDraw, and 20 pairs of versions
+of Apache Common Collections. While the manual analysis presents the best results
+in both comparisons, it is not as scalable as the automated approaches. Ratzinger's
+approach is simple and fast, but presents a low recall; differently, SafeRefactor
+is able to detect most applied refactorings, although limitations in its test generation
+backend results for some kinds of subjects in low precision values. Ref-Finder presented
+a low precision and recall in our evaluation.},
+journal = {J. Syst. Softw.},
+month = apr,
+pages = {1006–1022},
+numpages = {17},
+keywords = {Repository, Refactoring, Manual analysis, Automated analysis}
+}
