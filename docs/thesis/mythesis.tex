@@ -164,6 +164,26 @@ Xing and Stroulia \cite{Xing2006} used both textual and structural similarity to
 
 REF-FINDER \cite{Kim2010} by Pete et al. \cite{Prete2010} is capable of detecting 63 of Fowlers' catalog \cite{Fowler1999} of 72 refactoring types which contains the most comprehensive list of refactoring types to date. It first describes classes, methods, and fields as a set of logic predicates along with their content (e.g. method body) and structural dependencies (i.e. field access, method calls, subtyping, and overriding) to represent the versions of a program as a database of logic facts. Additionally, supported refactorings are encoded as logic rules where the antecedent defines the constraints (i.e. changefacts) and the consequent holds the refactoring type to be inferred. Next, it converts the antecedent of these logic rules as logic queries and then invokes them against the database of logic facts to identify program differences that match the constraints of each refactoring type under focus. Besides, by tracking the dependencies among refactoring types, lower-level refactorings were queried to identify higher-level, composite refactorings making Ref-Finder the first tool capable of detecting composite refactorings where each refactoring consists of a set of atomic refactorings. For example,  Extract Superclass refactoring is inferred by checking if a new superclass is created and a number of PullUp Method/Field refactorings were identified that had moved fields and methods to the newly created class. For the detection of some types of refactoring, their rules require a special logic predicate that indicates if the word-level similarity between two candidate methods is above a threshold. This was implemented as a block-level clone detection technique that trims parenthesis and removes escape characters, returns keywords, and computes the world-level similarity between the two code fragments using the longest common subsequence algorithm. The tool was tested on three open-source Java programs and precision of 95\% and recall of 79\% were reported. However, later studies reported lower precision and recall for Ref-Finder \cite{Soares2013} \cite{Silva2017} \cite{Tan2019}. Considering refactorings applied on isolation (root canal refactorings \cite{MurphyHill2012})  and ignoring refactorings with overlapping changes (i.e. floss refactorings \cite{MurphyHill2012}) was the reason behind higher precision and recall in the evaluation conducted by the authors.
 
+ detects 13
+refactoring types through static analysis and code similarity
+comparison
+
+Silva and Valente\cite{Silva2017}-in their tool REFDIFF introduced the concept of analyzing only the changed, added or deleted files between two versions of a program to detect refactorings. It is capable of detecting 13 high level refactoring types through static analysis and code similarity comparison.  As a first step, Ref Diff represents body of classes and methods as a multiset (or bag) of tokens whereas each field it considers all the statements that use the field. Next, to find similarity between code entities, a variation of the TF-IDF weighting scheme [24] is used  to assign more weight to tokens that are less frequent, and thus have more discriminative power than other tokens. Additionally, the similarity threshold for different kinds of code element is calibrated by using  a set of ten commits from ten different open-source projects.
+
+The tool was evaluated
+with an oracle of refactorings applied by qualified students.
+Silva et al. [5] extended the tool to other two languages (i.e.,
+C and JavaScript) with the same core approach. The precision
+of the tool for C and JavaScript projects was evaluated by
+manually validating the detected refactorings, while the recall
+was calculated based on refactorings documented in commit
+messagesThe accuracy and efficiency
+of RefDiff was found to be better than that of RMiner [25],
+RefactoringCrawler [6] and Ref-Finder [8]. However, similar
+to the evaluation performed by Perte et al. [8], the evaluation
+was solely based on root canal refactorings.
+
+
 \subsection{Real-time Detection}
 Murphy-Hill et al. \cite{MurphyHill2012} tracked the usage history of refactoring commands available in Eclipse IDE using a plugin and found that developers had performed about 90\% of their refactorings manually instead of opting for the refactoring tool. Additionally, they often interleave refactorings with other behavior-modifying programming activities. Furthermore, developers rarely explicitly report their refactoring activities in commit messages.
 
