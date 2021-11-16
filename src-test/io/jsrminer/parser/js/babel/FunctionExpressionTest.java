@@ -15,7 +15,7 @@ public class FunctionExpressionTest {
     @BeforeAll
     public static void setup() {
         var parser = new BabelParser();
-        sourceFile = parser.parseSource(" function a() { var m = function (p1, p2) {  function f2(){}  \n" +
+        sourceFile = parser.parseSource(" function a() { var m; m.c = function (p1, p2) {  function f2(){}  \n" +
                 "  var t, z = function () { };\n" +
                 "};}", "file.js");
         anonymous = sourceFile.getFunctionDeclarations().get(0).getAnonymousFunctionDeclarations().get(0);

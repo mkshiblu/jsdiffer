@@ -15,16 +15,15 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-            //angular();
-            atom();
-           axios();
+        angular();
+//            atom();
+//           axios();
             //webpackExample();
 //            threeJsExample();
             //commitsExample();
 //            vueExample();
 //     reactNativeExample();
 //            socketIoExample();
-//            commitExample();
 //            directoryExample();
 //            fileExample();
 //              chartJsExample();
@@ -83,9 +82,11 @@ public class Main {
     private static void angular() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\angular.js";
         String[] commitIds = new String[]{
-                "03043839d5a540b02208001fe12e812dfde00a8e", "05fdf918d97a379634c8b0e15da8615edfc6fb8d", "0cbc50512126fa22546dbe9b79a14939d9dc4459", "0ce9348bc01811a88e0e19f85e5bf74536ad4dd4", "189461f9bf6fda18ddbd16c42f2e959cf939c3da", "1e90d030771b68d55dffd56898a380f903712b66", "1e9eadcd72dbbd5c67dae8328a63e535cfa91ff9", "223de59e988dc0cc8b4ec3a045b7c0735eba1c77", "2ee5033967d5f87a516bad137686b0592e25d26b", "38f8c97af74649ce224b6dd45f433cc665acfbfb", "42e622b751d1ad1520b824473f9ad31e7efb75b3", "4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9", "538f4606ff32e776b093243fed4af3460df74f2a", "5878f07474755cb3df1e727cef4e7e4716f44783", "60069e67aeb0352a7849ebfef15a6183bc3b7235", "667d4734fcf7a58a58d29bd87fac32a7831df184", "7e2e235cf25389a59ea957631ff07c6cc8a3ad32", "817ac56719505680ac4c9997972e8f39eb40a6d0", "837acd14e005c79d8e79f59a0075075f125da50c", "840b5f0a7634efdf4d6ed81a52e66fc0e0620127", "8d6ac5f3178cb6ead6b3b7526c50cd1c07112097", "8e104ee508418bc2ebb65e5b4ac73d22285cc224", "9d74f0fdcb44aa597b81a2bde967d4c37b60dce2", "b0f6afcdacc53fd91b37ad0c5d70544f7e37ebde", "b7bb797e5c7bdc93f2ffca39baf6e112e6dddbe2", "b7d396b8b6e8f27a1f4556d58fc903321e8d532a", "bf5c2eef34a314d5d2298fdcb6deaa7282cc563f", "cdaa6a951b8fce67673bec224a7ad1f24f0a05bf", "de74034ddf6f92505ccdb61be413a6df2c723f87", "e3ece2fad9e1e6d47b5f06815ff186d7e6f44948", "fd4f0111188b62773b99ab6eab38b4d2b5d8d727", "ff0e61166d3dca59351e3913e0360c24d1bce99c",
+//                "03043839d5a540b02208001fe12e812dfde00a8e", "05fdf918d97a379634c8b0e15da8615edfc6fb8d", "0cbc50512126fa22546dbe9b79a14939d9dc4459", "0ce9348bc01811a88e0e19f85e5bf74536ad4dd4", "189461f9bf6fda18ddbd16c42f2e959cf939c3da", "1e90d030771b68d55dffd56898a380f903712b66", "1e9eadcd72dbbd5c67dae8328a63e535cfa91ff9", "223de59e988dc0cc8b4ec3a045b7c0735eba1c77", "2ee5033967d5f87a516bad137686b0592e25d26b", "38f8c97af74649ce224b6dd45f433cc665acfbfb", "42e622b751d1ad1520b824473f9ad31e7efb75b3", "4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9", "538f4606ff32e776b093243fed4af3460df74f2a", "5878f07474755cb3df1e727cef4e7e4716f44783", "60069e67aeb0352a7849ebfef15a6183bc3b7235", "667d4734fcf7a58a58d29bd87fac32a7831df184", "7e2e235cf25389a59ea957631ff07c6cc8a3ad32", "817ac56719505680ac4c9997972e8f39eb40a6d0", "837acd14e005c79d8e79f59a0075075f125da50c", "840b5f0a7634efdf4d6ed81a52e66fc0e0620127", "8d6ac5f3178cb6ead6b3b7526c50cd1c07112097",
+                "8e104ee508418bc2ebb65e5b4ac73d22285cc224"
+//                , "9d74f0fdcb44aa597b81a2bde967d4c37b60dce2", "b0f6afcdacc53fd91b37ad0c5d70544f7e37ebde", "b7bb797e5c7bdc93f2ffca39baf6e112e6dddbe2", "b7d396b8b6e8f27a1f4556d58fc903321e8d532a", "bf5c2eef34a314d5d2298fdcb6deaa7282cc563f", "cdaa6a951b8fce67673bec224a7ad1f24f0a05bf", "de74034ddf6f92505ccdb61be413a6df2c723f87", "e3ece2fad9e1e6d47b5f06815ff186d7e6f44948", "fd4f0111188b62773b99ab6eab38b4d2b5d8d727", "ff0e61166d3dca59351e3913e0360c24d1bce99c",
                 // Recalls
-                "097947fd3bd280fcf621e36154a9d4f82896ff01", "2636105c5e363f14cda890f19ac9c3bc57556dd2", "4adc9a9117e7f7501d94c22c8cbbfeb77ad5d596", "560951e9881b5f772262804384b4da9f673b925e", "af0ad6561c0d75c4f155b07e9cfc36a983af55bd", "c39936ee26f00d8256c79df07096f03196811df5", "d9ca2459172a3ad62f0a19b8b1306d739c4b75b7", "e9bf93d510a6a0c105d8f5d036ec35c7ce08a588"
+//                "097947fd3bd280fcf621e36154a9d4f82896ff01", "2636105c5e363f14cda890f19ac9c3bc57556dd2", "4adc9a9117e7f7501d94c22c8cbbfeb77ad5d596", "560951e9881b5f772262804384b4da9f673b925e", "af0ad6561c0d75c4f155b07e9cfc36a983af55bd", "c39936ee26f00d8256c79df07096f03196811df5", "d9ca2459172a3ad62f0a19b8b1306d739c4b75b7", "e9bf93d510a6a0c105d8f5d036ec35c7ce08a588"
         };
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
