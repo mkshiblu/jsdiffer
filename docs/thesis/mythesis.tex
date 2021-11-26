@@ -32,6 +32,7 @@
 
 \usepackage{blindtext}
 
+
 %% CUSTOM MACROS
 %\newcommand{\tickyes}{{\small\checkmark}}
 %\newcommand{\tickno}{{\small$\times$}}
@@ -117,66 +118,14 @@ Refactoring activities plays an important role in the modern software developmen
 
 A recent survey paper \cite{abid202030} reported over 3,000 papers on refactoring topics which asserts its popularity in modern research. Many researchers empirically investigated the benefits of refactorings by studying how the renaming of identifiers affects code readability \cite{fakhoury2019improving}, how and why developers rename identifiers \cite{peruma2018empirical}, the impact of refactoring on code naturalness \cite{lin2019impact}, the impact of refactoring on code smells \cite{cedrim2017understanding}, the co-occurrence of refactoring and self-admitted technical debt removal \cite{iammarino2019self}, and how the introduction of Lambda expressions affects program comprehension \cite{lucas2019does}.
 
-Therefore, by detecting refactoring activity in software projects, researchers can better understand software evolution. Earlier studies used such information to reveal the usage of refactoring tools  \cite{MurphyHill2012}, \cite{Negara2013}, the motivations behind refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{Silva2016}, the risks associated with refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{kim2011empirical}, \cite{weissgerber2006refactorings}, \cite{bavota2012does}, and the effect of refactoring on code quality metrics \cite{kim2012field}, \cite{kim2014empirical}. Additionally, the accuracy of source code evolution analysis can be improved by keeping track of recordings because files, classes, or functions may have their histories split by refactorings such as Move or Rename \cite{hora2018assessing}.
+Therefore, by detecting refactorings in software projects, researchers can better understand software evolution. Earlier studies used such information to reveal the usage of refactoring tools  \cite{MurphyHill2012}, \cite{Negara2013}, the motivations behind refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{Silva2016}, the risks associated with refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{kim2011empirical}, \cite{weissgerber2006refactorings}, \cite{bavota2012does}, and the effect of refactoring on code quality metrics \cite{kim2012field}, \cite{kim2014empirical}. Additionally, the accuracy of source code evolution analysis can be improved by keeping track of recordings because files, classes, or functions may have their histories split by refactorings such as Move or Rename \cite{hora2018assessing}. Lastly, according to a survey spanning 86 articles \cite{soetens2017changes}, most desirable future application for detecting changes that occurred between two program versions are detecting patterns of change and re-performing changes in different contexts.
 
+Knowing the applied refactoring operations in the version history of a system (i.e. commit) not only can help advancing software evaluation research but also can be help developers in their practice.  First, such information can be used to help resolving merge conflicts and improve code review time as many developers face difficulties when reviewing or integrating code changes with large refactoring operations \cite{kim2012field}. Ironically it has been reported that refactoring activities can cause merge conflicts when merging development branches \cite{mahmoudi2019refactorings}. Therefore, if a tool can identify applied refactoring on commit level, it can possibly be used to resolve merge conflicts automatically. Second, identified refactoring instances can be automatically append in the commit message to let code/reviewers know about the refactored components upfront. Third, if an API is refactored, corresponding refacotirngs could be applied on the consumer code automatically \cite{henkel2005catchup} \cite{Xing2008}. Forth, detected refactorings can be used to separate  new lines of codes representing a feature in a software development sprint which can potentially help a project manager to monitor the progress of the current milestone. Last but no the least, refactoring detection tools can also be used to efficiently compare projects for testing copy-rights.
 
-\textbf{review}
+Detecting refactoring is a challenging task due to the fact that developers rarely documents such activities \cite{alomar2021refactoring} and refactorings are often bundled with other code changes making them even harder to isolate from source code. However, given the practical importance of refactoring in software development as well as its research potential, it is unsurprising that we have seen many automatic refactoring detection tools over the past few decades. RefactoringMiner 2.0 by Tsantalis et. al \cite{Tsantalis2020} currently represents the state of the art and is capable of detecting 40 refactorings types with a precision and recall of 99.6\% and 94\% respectively.  Unfortunately like majority of the detection tools it supports only Java programming language. On the other hand, REFDIFF 2.0 by Silva et. al  \cite{Silva2020} is the only tool capable of detecting refactorings in JavaScript project. RefactoringMiner structurally match statements of code thus capable of detecting lower level refactorings (such as rename /merge variable). On the other hand body of a function is represented as bag of token by RefDiff and thus such lower level data is lost after the tokenization.
 
-However, detecting refactoring is not a trivial task due to the fact
-that developers rarely document the refactoring operations
-they perform [2]. Besides, refactoring operations are often
-performed together with –or as a consequence of– other
-changes [3], which makes it even harder to distill them out
-of tangled code changes.
+Given the fact that JavaScript is currently the most popular programming language, a refactoring detection tool which can detect lower-level refactorings in JavaScript may provide more insight of the projects written in JavaScript as developers tend to apply such refactorings more frequently than high-level refactorings \cite{MurphyHill2012}. Besides, there are significant of differences between Java and JavaScript beside language grammar, For example, in JavaScript,  functions are the first class citizen and can be stored and used like a variable. JavaScript code can reside outside of the body of a function. Moreover, unlike Java which is object pretend and class based, JavaScript projects can follow styles of OOP, functional programming or a mix of both. Lastly, there are many  super set and extensions of JavaScript language (e.g. Typescript JSX) which are often inter-mixed with vanilla JavaScript code.
 
-
-Several refactoring detection tools such as REFACTORINGMINER
-[4] and REFDIFF [5] have been proposed to mine
-refactoring operations from software projects. 
-
-Most of these tools mainly focus on the Java programming language [4], [6],
-[7], while REFDIFF [5] also detects refactoring for projects
-written in JavaScript and C. 
-
-None of these tools can be used to extract refactorings performed in Python. Given the fact
-that Python is currently one of the most popular programming
-languages1, a refactoring detection tool specifically designed
-for Python might unlock many new research opportunities. For example, Python is the dominant language in the fields of
-scientific computing, data science, and machine learning [8].
-1https://www.tiobe.com/tiobe-index/
-Therefore, detecting refactoring in Python can allow to gain
-specific insights in these domains. Dilhara and Dig [9] have taken the first step to address
-this issue and developed PYTHON-ADAPTED REFACTORINGMINER2,
-which converts Python programs into Java and uses
-REFACTORINGMINER [4] to detect refactorings. 
-
-However,
-there are considerable differences between these two languages,
-let alone the language grammar. For example, Python
-checks types at runtime while Java is a statically typed
-language. Moreover, Java is class-based and object-oriented,
-while Python projects can also follow other programming
-styles such as functional and imperative programming.
-Inspired by REFACTORINGMINER [4], we present PYREF,
-a tool that automatically detects mainly method-level refactoring
-operations from Python projects. To evaluate the performance
-of PYREF, we ran it on three real-world Python
-projects, and manually validated the refactoring detection. We
-also compared PYREF with the only publicly available refactoring
-detection tool for Python, namely PYTHON-ADAPTED
-REFACTORING MINER. On average, PYREF achieves a precision
-of 89.6% and a recall of 76.1%, which are both higher
-than the current state-of-the-art. This results show the potential
-of PYREF for refactoring detection in Python projects.
-The remainder of the paper is structured as follows. Section
-II introduces current refactoring detection tools. The
-detailed techniques behind PYREF are described in Section III.
-Section IV reports the design and results of the study we performed
-to assess the performance of PYREF. The limitations
-of our tool are discussed in Section V. Finally, Section VI
-concludes the paper.
-
-TODO
 
 \section{Thesis Statement}
 %\blindtext[2]
@@ -287,7 +236,7 @@ TODO
 \phantomsection
 \addcontentsline{toc}{chapter}{Bibliography}  %  Add Bibliography to TOC
 \singlespacing % save space in the bibliography
-\bibliographystyle{abbrv}
+\bibliographystyle{unsrt}
 \bibliography{references}
 
 
