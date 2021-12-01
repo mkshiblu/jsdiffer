@@ -11,7 +11,7 @@
 \usepackage[T1]{fontenc}      % correct some font representation, needs cm-super fonts
 \usepackage{times}            % use Times New Roman font
 \usepackage[titletoc,title]{appendix}     % include Appendix command, add to ToC
-\usepackage{setspace}         % control double/single line spacing
+\usepackage{setspace}        
 
 %% OPTIONAL PACKAGES
 %\counterwithout{footnote}{chapter}        % do no reset footnote # between chapters
@@ -120,28 +120,42 @@ A recent survey paper \cite{abid202030} reported over 3,000 papers on refactorin
 
 Therefore, by detecting refactorings in software projects, researchers can better understand software evolution. Earlier studies used such information to reveal the usage of refactoring tools  \cite{MurphyHill2012}, \cite{Negara2013}, the motivations behind refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{Silva2016}, the risks associated with refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{kim2011empirical}, \cite{weissgerber2006refactorings}, \cite{bavota2012does}, and the effect of refactoring on code quality metrics \cite{kim2012field}, \cite{kim2014empirical}. Additionally, the accuracy of source code evolution analysis can be improved by keeping track of recordings because files, classes, or functions may have their histories split by refactorings such as Move or Rename \cite{hora2018assessing}. Lastly, according to a survey spanning 86 articles \cite{soetens2017changes}, most desirable future application for detecting changes that occurred between two program versions are detecting patterns of change and re-performing changes in different contexts.
 
-Knowing the applied refactoring operations in the version history of a system (i.e. commit) not only can help advancing software evaluation research but also can be help developers in their practice.  First, such information can be used to help resolving merge conflicts and improve code review time as many developers face difficulties when reviewing or integrating code changes with large refactoring operations \cite{kim2012field}. Ironically it has been reported that refactoring activities can cause merge conflicts when merging development branches \cite{mahmoudi2019refactorings}. Therefore, if a tool can identify applied refactoring on commit level, it can possibly be used to resolve merge conflicts automatically. Second, identified refactoring instances can be automatically append in the commit message to let code/reviewers know about the refactored components upfront. Third, if an API is refactored, corresponding refacotirngs could be applied on the consumer code automatically \cite{henkel2005catchup} \cite{Xing2008}. Forth, detected refactorings can be used to separate  new lines of codes representing a feature in a software development sprint which can potentially help a project manager to monitor the progress of the current milestone. Last but no the least, refactoring detection tools can also be used to efficiently compare projects for testing copy-rights.
+Knowing the applied refactoring operations in the version history of a system (i.e. commit) not only can help advancing software evaluation research but also can be help developers in their practice.  First, such information can be used to help resolving merge conflicts and improve code review time as many developers face difficulties when reviewing or integrating code changes with large refactoring operations \cite{kim2012field}. Ironically it has been reported that refactoring activities can cause merge conflicts when merging development branches \cite{mahmoudi2019refactorings}. Therefore, if a tool can identify applied refactoring on commit level, it can possibly be used to resolve merge conflicts automatically. Second, identified refactoring instances can be automatically append in the commit message to let code/reviewers know about the refactored components upfront. Third, if an API is refactored, corresponding refacotirngs could be applied on the consumer code automatically \cite{henkel2005catchup} \cite{Xing2008}. Forth, detected refactorings can be used to separate  new lines of codes representing a feature in a software development sprint which can potentially help a project manager to monitor the progress of the current milestone. Last but no the least, refactoring detection tools can potentially be be used to increase the accuracy of copy-right violation detection tools.
 
-Detecting refactoring is a challenging task due to the fact that developers rarely documents such activities \cite{alomar2021refactoring} and refactorings are often bundled with other code changes making them even harder to isolate from source code. However, given the practical importance of refactoring in software development as well as its research potential, it is unsurprising that we have seen many automatic refactoring detection tools over the past few decades. RefactoringMiner 2.0 by Tsantalis et. al \cite{Tsantalis2020} currently represents the state of the art and is capable of detecting 40 refactorings types with a precision and recall of 99.6\% and 94\% respectively.  Unfortunately like majority of the detection tools it supports only Java programming language. On the other hand, REFDIFF 2.0 by Silva et. al  \cite{Silva2020} is the only tool capable of detecting refactorings in JavaScript project. RefactoringMiner structurally match statements of code thus capable of detecting lower level refactorings (such as rename /merge variable). On the other hand body of a function is represented as bag of token by RefDiff and thus such lower level data is lost after the tokenization.
+Detecting refactoring is a challenging task due to the fact that developers rarely documents such activities \cite{alomar2021refactoring} and refactorings are often bundled with other code changes making them even harder to isolate from source code. However, given the practical importance of refactoring in software development as well as its research potential, it is unsurprising that we have seen many automatic refactoring detection tools over the past few decades. RefactoringMiner 2.0 by Tsantalis et. al \cite{Tsantalis2020} currently represents the state of the art and is capable of detecting 40 refactorings types with a precision and recall of 99.6\% and 94\% respectively.  Unfortunately like majority of the detection tools it supports only Java programming language. On the other hand, REFDIFF 2.0 by Silva et. al  \cite{Silva2020} is the only tool capable of detecting refactorings in JavaScript project. RefactoringMiner structurally match statements of code thus capable of detecting lower level refactorings (such as rename /merge variable). On the other hand, the body of a function is represented as bag of token by RefDiff and thus such lower level structural information is lost after the tokenization.
 
-Given the fact that JavaScript is currently the most popular programming language, a refactoring detection tool which can detect lower-level refactorings in JavaScript may provide more insight of the projects written in JavaScript as developers tend to apply such refactorings more frequently than high-level refactorings \cite{MurphyHill2012}. Besides, there are significant of differences between Java and JavaScript beside language grammar, For example, in JavaScript,  functions are the first class citizen and can be stored and used like a variable. JavaScript code can reside outside of the body of a function. Moreover, unlike Java which is object pretend and class based, JavaScript projects can follow styles of OOP, functional programming or a mix of both. Lastly, there are many  super set and extensions of JavaScript language (e.g. Typescript JSX) which are often inter-mixed with vanilla JavaScript code.
+Given the fact that JavaScript is currently the most popular programming language, a refactoring detection tool which can detect lower-level refactorings in JavaScript may provide more insight of its ecosystem. as developers tend to apply such refactorings more frequently than high-level refactorings \cite{MurphyHill2012}. Besides, there are significant differences between Java and JavaScript beside language grammar, For example, in JavaScript,  functions are the first class citizen and can be stored and used like a variable. JavaScript code can reside outside of the body of a function. Moreover, unlike Java which is object pretend and class based, JavaScript projects can follow styles of OOP, functional programming or a mix of both. Lastly, there are many  super set and extensions of JavaScript language (e.g. Typescript JSX) which are often inter-mixed with vanilla JavaScript code further complicating the task of parsing and modeling the source code.
 
+In this thesis, we present JsrMiner - the first tool to detect method level refactorings in JavaScript projects. Although this tool is heavily inspired by RefactoringMiner 2.0 it does not represent or reflect the accuracy and efficiency of Refactoring Miner 2.0 anyway. To evaluate the performance of JsrMiner, we ran it on 10 open source JavaScript projects, and manually validated the refactoring detection. We also compared JsrMiner with the only publicly available refactoring detection tool for JavaScript, namely RefDiff 2.0. On average, JsrMiner achieves a precision of \_\% and a recall of \_\%. Although the precision is higher than the current state-of-the-art, JsrMiner has performed poorly on recall.  This result showed the potential of JsrMiner for some specific refactoring detection in JavaScript projects.
 
 \section{Thesis Statement}
-%\blindtext[2]
+
 TODO
+
+\_ RQs
+\_Description of RQs
 
 \section{Objectives and Contributions}
-%\blindtext[3]
-TODO
+In this thesis, we set out to finding method level refactorings in JavaScript project using a approach inspired by RefactoringMiner 2.0. This approach was embodied in our tool JsrMiner and compared against the current state of the art Refdiff 2.0. In contrast to RefDiff 2.0, our approach does not rely on any similarity threshold which makes it suitable for detecting refactorings between any two source code that could has significant textual difference. Moreover, our tool is the only tool that can detect method-level refactorings. 
+
+
+This thesis makes the following contributions:
+
+(1) We presented the first tool to detect method-level refactorings applied between two version of JavaScript programs. 
+(2) Our tool JsrMiner can detect a total of 19 refactorings
+(3) We compare JsrMiner with the current state-of-the-art refactoring detection tool: RefDiff 2.0, where an empirical study on 100 commits from 10 open source JavaScript repositories including 3000 true refactorings are performed.
+(4) \_Efficiency, precision, recall
+
 
 \section{Outline}
-The rest of the thesis is organized as follows...
+\label{sec:outline}
+The rest of the thesis is structured as follows. \hyperref[chap:relatedWork]{Chapter 2}  provides an overview and discussion of related works. Our approach to automatic detection of the refactorings that occurred between two program versions is presented in Chapter 3. The correctness and completeness of our approach is evaluated in Chapter 4, while the limitations of the proposed approach and threats to the validity of our study are discussed in Chapter 4 respectively. Finally, in Chapter 5, we provide our conclusions and discuss possible related future research.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Related Wok}
-\label{chap:background}
+\chapter{Related Work}
+\label{chap:relatedwork}
 
 In this section, we start by briefly talking about the the spectrum of research exploring the practice of refactoring and later go into details about modern refactoring detection tools.
 
