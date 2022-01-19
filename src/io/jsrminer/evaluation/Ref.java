@@ -84,6 +84,7 @@ public class Ref {
             fromStringMap.put("INTERNAL_MOVE_FUNCTION", MOVE_FUNCTION);
             fromStringMap.put("MOVE_RENAME_FUNCTION", MOVE_AND_RENAME_FUNCTION);
             fromStringMap.put("MOVE_RENAME_FILE", MOVE_AND_RENAME_FILE);
+            fromStringMap.put("MOVE_AND_RENAME_FILE", MOVE_AND_RENAME_FILE);
             fromStringMap.put("RENAME_CLASS", RENAME_CLASS);
             fromStringMap.put("CONVERT_TYPE_FUNCTION", CONVERT_TYPE_FUNCTION);
             fromStringMap.put("CONVERT_TYPE_CLASS", CONVERT_TYPE_CLASS);

@@ -680,8 +680,10 @@ public class DeclarationVisitor {
         anonymousFunctionDeclaration.registerFunctionDeclaration(function);
 
         var keyNode = propertyNode.get("key");
-        if (keyNode.getType() == BabelNodeType.IDENTIFIER) {
-            String name = keyNode.get("name").asString();
+        if (keyNode.getType() == BabelNodeType.IDENTIFIER || keyNode.getType() == BabelNodeType.STRING_LITERAL) {
+            String name = keyNode.getType() == BabelNodeType.IDENTIFIER ?
+                    keyNode.get("name").asString() : keyNode.get("value").asString();
+
             visitor.getNodeUtil()
                     .populateContainerNamesAndLocation(function, name
                             , propertyNode.getSourceLocation(), anonymousFunctionDeclaration);
@@ -692,6 +694,7 @@ public class DeclarationVisitor {
                 anonymousFunctionDeclaration.getFunctionDeclarations().remove(function);
             }
         } else {
+            anonymousFunctionDeclaration.getFunctionDeclarations().remove(function);
             this.visitor.getErrorReporter().reportWarning(propertyNode.getSourceLocation(),
                     "Unsupported object key type : " + keyNode.getType() + " Text: " + propertyNode.getText());
         }
