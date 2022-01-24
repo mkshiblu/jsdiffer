@@ -206,7 +206,7 @@ public class RefactoringDisplayFormatter {
         return afterBeforeInfo;
     }
 
-    static String getLocationString(SourceLocation location) {
+    public static String getLocationString(SourceLocation location) {
         return location.getFilePath() + ":" + getLocationStartAndEndString(location);
     }
 

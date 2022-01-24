@@ -2,6 +2,7 @@ package io.jsrminer.evaluation.util;
 
 import io.jsrminer.evaluation.Ref;
 import io.jsrminer.evaluation.ValidationType;
+import io.jsrminer.util.RefactoringDisplayFormatter;
 
 import java.util.Comparator;
 import java.util.List;
@@ -57,9 +58,9 @@ public class RefactoringFormatterUtil {
         builder.append(delimiter);
         builder.append(ref.getLocalNameAfter());
         builder.append(delimiter);
-        builder.append(ref.getLocationBefore());
+        builder.append(RefactoringDisplayFormatter.getLocationString(ref.getLocationBefore()));
         builder.append(delimiter);
-        builder.append(ref.getLocationAfter());
+        builder.append(RefactoringDisplayFormatter.getLocationString(ref.getLocationAfter()));
         builder.append(delimiter);
         builder.append(delimiter);
         builder.append(isTp ? "TP" : "");

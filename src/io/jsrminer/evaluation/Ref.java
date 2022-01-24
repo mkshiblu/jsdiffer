@@ -68,7 +68,8 @@ public class Ref {
         RENAME_PARAMETER,
         ADD_PARAMETER,
         RENAME_VARIABLE,
-        PARAMETERIZE_VARIABLE;
+        PARAMETERIZE_VARIABLE,
+        MOVE_RENAME_CLASS;
 
         public static Map<String, RefType> fromStringMap = new HashMap<>();
 
@@ -83,6 +84,7 @@ public class Ref {
             fromStringMap.put("EXTRACT_MOVE_FUNCTION", EXTRACT_AND_MOVE_FUNCTION);
             fromStringMap.put("INTERNAL_MOVE_FUNCTION", MOVE_FUNCTION);
             fromStringMap.put("MOVE_RENAME_FUNCTION", MOVE_AND_RENAME_FUNCTION);
+            fromStringMap.put("MOVE_RENAME_CLASS", MOVE_RENAME_CLASS);
             fromStringMap.put("MOVE_RENAME_FILE", MOVE_AND_RENAME_FILE);
             fromStringMap.put("MOVE_AND_RENAME_FILE", MOVE_AND_RENAME_FILE);
             fromStringMap.put("RENAME_CLASS", RENAME_CLASS);

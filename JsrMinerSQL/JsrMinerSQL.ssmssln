@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# SQL Server Management Studio Solution File, Format Version 18.00
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "JsrMinerSQL", "JsrMinerSQL\JsrMinerSQL.ssmssqlproj", "{C5E80C36-7E3F-4858-A0DD-98D8B1030CB8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C5E80C36-7E3F-4858-A0DD-98D8B1030CB8}.Default|Default.ActiveCfg = Default
+		{B24070EA-484B-4538-845D-9250C91D2737}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B634C858-4312-456F-9D97-165DA8C1C7F5}
+	EndGlobalSection
+EndGlobal
