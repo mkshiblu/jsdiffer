@@ -191,6 +191,15 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(moveAndRenameFileRefactoring.getMovedFile().getSourceLocation())
                 );
                 break;
+            case MOVE_RENAME_CLASS:
+                var moveAndRenameClassRefactoring = (MoveAndRenameClassRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        moveAndRenameClassRefactoring.getOriginalClassName()
+                        , moveAndRenameClassRefactoring.getRenamedClassName()
+                        , getLocationString(moveAndRenameClassRefactoring.getOriginalClass().getSourceLocation())
+                        , getLocationString(moveAndRenameClassRefactoring.getRenamedClass().getSourceLocation())
+                );
+                break;
             default:
                 throw new UnsupportedOperationException(refactoring.getRefactoringType().toString());
         }

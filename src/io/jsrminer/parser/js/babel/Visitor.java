@@ -132,7 +132,7 @@ public class Visitor {
         if (node.getType() == null) {
             errorReporter.reportError(node.getSourceLocation(),
                     "Unsupported BabelNodeType "
-                    + node.getString("type"));
+                            + node.getString("type"));
         }
 
         var visitor = visitMethodsMap.get(node.getType());
@@ -144,6 +144,7 @@ public class Visitor {
         } else {
             Object result = visitor.visit(node, parent, container);
             return result;
+
         }
         return null;
     }

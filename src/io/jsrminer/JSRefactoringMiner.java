@@ -263,9 +263,10 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
             // only ADD's or only REMOVE's there is no refactoring
             if (!filePathsBefore.isEmpty() && !filePathsCurrent.isEmpty() && currentCommit.getParentCount() > 0) {
                 Stopwatch timer = Stopwatch.createStarted();
-                log.info("Parsing and loading files of parent commit: " + parentCommit + "...");
+                log.info("Processing Commit: " + commitId);
+                log.debug("Parsing and loading files of parent commit: " + parentCommit + "...");
                 populateFileContents(repository, parentCommit, filePathsBefore, fileContentsBefore, repositoryDirectoriesBefore);
-                log.info("Parsing and loading files of current commit: " + parentCommit + "...");
+                log.debug("Parsing and loading files of current commit: " + currentCommit + "...");
                 populateFileContents(repository, currentCommit, filePathsCurrent, fileContentsCurrent, repositoryDirectoriesCurrent);
 
                 var list = LoadModelsParallel(fileContentsBefore, fileContentsCurrent);

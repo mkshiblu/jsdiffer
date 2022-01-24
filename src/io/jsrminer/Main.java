@@ -16,9 +16,10 @@ public class Main {
         log.info("Program Starts");
         try {
       //  angular();
-              chartJsExample();
 //            atom();
 //           axios();
+          //  chartJsExample();
+            createReactApp();
             //webpackExample();
 //            threeJsExample();
             //commitsExample();
@@ -114,6 +115,17 @@ public class Main {
                 "03735563f44e1ae108f83b9c7ee946f8818c92c3", "16bcd6adc579cb3deae16ea915680bc219924cdc", "182270ef9b1bc9fab1cefc89ce1e94a41f4d754f", "1833614e1d8a82c6c111ce8d1d31eba6df22e7ee", "1cbba830fdef5ac25f997deb5ae0683db9321a79", "1eeffa3d584cdd8d1f54b7455487ae9b13478ebe", "2409908027a3762f142a04e7583bd2e88681a867", "26c1936dee7dcc2f00b63af9bb04e9af1703e461", "2922dc96cfd3c3448538c19c02b349fe939f16eb", "2e5df0ff42c9ec542bd7c88de8f88f50a8ad5864", "312773ba7b7e2acf6cd1273c92017d3c197a992b", "3187a788e17f79ad69da509748aeb64cdbac48f0", "326991ce50c36fd714aefc5bafd4cbe53806051f", "333f2eba99e29ae643671edbef08a245cae9743c", "35dcfe00b1ae7199f8ed6c3748a72f4700c9876d", "447ca40a7f8baa2ec55f3388e02cabcfe8cbfadc", "4741c6f09da431e75fa860b4e08417a4d961fadf", "4a5b5a0e7eba85ca44f658375cb0c78e6af93e5c", "4b421a50bfa17f73ac7aa8db7d077e674dbc148d", "5196e0506257c3242483c511bb558f3f96023f51", "548edc65ea96ac51ab17bde2942fd6f319f63e8c", "56050dc9b7a17130efdbdcd3b8de46b728f25b84", "586b8c12fc546aabcac341b3a949b3891019bd36", "5ad1b4ade7d78eced9c98c4beb678861a41039b7", "5d95280d7b9c910f944ed7e219193a904bb4425b", "6269e2c437a8beccc2516a1635491ab60371950f", "65a06e473560a4d923ed52d4437c3666662d44a6", "6bea15e7cf89003e3a5945a20cf1d2cc5096728e", "6e57405a0a7885ec5099e8b8bd7b26822effa628", "6ec6a929f06c01c053d75378030724749f50bcc9", "717e8d950ac5e0473bc11c1890cde3b53651a8cb", "7205ff5e2aa4515bae0c62bb9d8355745837270e", "73b8ceeb3548bbe8863486a8e254b52a95ac8066", "7756bedec6937eb7a65b7bc530dd2010d0901efe", "7e5e29e3ee15100de599124b4951d50f3aad5f57", "80bd08bef9f3447738c8fde4c0d0b436312a2cb9", "889ecd560bba46a81a29ca29d02f0691aaadc8d2", "8ac0257f8da13afffc3e5d32c9b6debea8f6f6a0", "9015e72ae1ddebe38ba90a538ee2556a46ee3daa", "979341ecb094d9c6a95de8a47e7836f01587e7d2", "9f3b51a80ce96578718267711e8b65c1ec8c25c1", "a0077d41178e576aa473490b13adf2c695bf2faa", "a0a195f353467a71cbf73aef086249902c53c5a4", "a86c47cf480e8d86ea03a121e9b6552a17aae41d", "b39c0e1f93518f2dcb1d1cc49ff04cff36d34a46", "b64cab004669a010025e4641eb7f359c4035f6b9", "b92b256872e9d01ef56c9b8d4440cda784662fe0", "bee8e3cd9bbe943c531a24c808c36870da51a75f", "c216c0af769c9b12bad39b5b889867d7294dee07", "ce27fe5ea6040523a61cef198ccc1e866d07ad82", "d09a17a2b163df7280491ad6c5999d81e892f537", "d21a853f30a87a4cb0fe6c6f2bb39320c0404c19", "d2846864527898225bb8061cf24793101ef98dbf", "d81afc8b5a0f4f27d9d81f1dd748a7a01e7365c0", "ecc35c527b8d91c2bdbc2cdc97ef667adfe7e3a3", "f0bf3954fe363eda86a3db170063aba34f1be08e", "f3816b560c0cec6736b47c456c473e46bdc56498", "f97cab12b1c4db4d5782d92f95e362093ad31860", "fb3ea03440769a267880ba8721d14a3939792718",
                 // Recalls
                 "b64cab004669a010025e4641eb7f359c4035f6b9", "ec7b87d69c6168d25166784796f8026b2cb5715e",
+        };
+        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
+    }
+
+    private static void createReactApp() throws Exception {
+        String repoPath = "E:\\PROJECTS_REPO\\create-react-app";
+        String[] commitIds = new String[]{
+                // All
+                "00ed100b26adc519fd90e09ebffd83c8d7dc4343", "0e51eef6d7694fbfc4a8fe952bd73b65af2220dd", "2c34d5b66eab7d1c96e573bc48b8e82b6d8e82b0", "3a0b836be376575b5227a0237e8b2334a9f9ab24", "51d0df490295b70808b61d780a54ebcf296a8db2", "72b6eb8c3c65e6ed0f2413708069287311a386c2", "78dbf7bf2b50a35c426e5dbbfdf20ef1afcd8789", "9559ba486e085b6956580ebbc6dad1d7ef4c26e2", "9c167a42490d134832e6e1b721292ea99eaf8ca5", "b3527d7783b290d37275925a1d6a7ff9e40e7a86", "cd3d04b71e91f533bdbdc3856775e1da81d445cf", "d49ffde4e627eea1f935ebc4f8fb2ea61010577d", "d72678fb0c02145d24b7684802a3f5cfc94bd746", "ecd1f0544b6f8a05a4061712932cd0055d6e34c9", "eed708a822d6cf3ff17b665b093a2c23a50f6b15",
+                // Recalls
+                "fbdff9d722d6ce669a090138022c4d3536ae95bb",
         };
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
