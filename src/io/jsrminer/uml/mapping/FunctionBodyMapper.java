@@ -47,6 +47,10 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateMergeVariableRefactoring> candidateAttributeMerges = new LinkedHashSet<>();
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
+    private final Set<FunctionBodyMapper> mappedNestedFunctionDeclrations = new LinkedHashSet<>();
+    private final Set<IFunctionDeclaration> nonMappedNestedFunctionDeclrationsT1 = new LinkedHashSet<>();
+    private final Set<IFunctionDeclaration> nonMappedNestedFunctionDeclrationsT2 = new LinkedHashSet<>();
+
     public FunctionBodyMapper(UMLOperationDiff operationDiff
             , ContainerDiff<? extends IContainer> parentDiff) {
         this.operationDiff = operationDiff;
@@ -182,7 +186,14 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
                     (new ContainerDiff<>(function1, function2));
             var diff = differ.diffChildFunctions();
             this.refactorings.addAll(diff.getAllRefactorings());
+            UpdateNestedFunctionDeclarationMaps(diff);
         }
+    }
+
+    private void UpdateNestedFunctionDeclarationMaps(ContainerDiff<IFunctionDeclaration> diff){
+        this.nonMappedNestedFunctionDeclrationsT1.addAll(new LinkedHashSet<IFunctionDeclaration>(diff.getRemovedOperations()));
+        this.nonMappedNestedFunctionDeclrationsT2.addAll(new LinkedHashSet<IFunctionDeclaration>(diff.getAddedOperations()));
+        this.mappedNestedFunctionDeclrations.addAll(new LinkedHashSet<>(diff.getOperationBodyMapperList()));
     }
 
     /**
@@ -1595,4 +1606,15 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return editDistance / maxLength;
     }
 
+    public Set<IFunctionDeclaration> getNonMappedNestedFunctionDeclrationsT1() {
+        return nonMappedNestedFunctionDeclrationsT1;
+    }
+
+    public Set<IFunctionDeclaration> getNonMappedNestedFunctionDeclrationsT2() {
+        return nonMappedNestedFunctionDeclrationsT2;
+    }
+
+    public Set<FunctionBodyMapper> getMappedNestedFunctionDeclrations() {
+        return mappedNestedFunctionDeclrations;
+    }
 }

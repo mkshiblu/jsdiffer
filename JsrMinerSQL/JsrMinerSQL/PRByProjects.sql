@@ -6,16 +6,24 @@ SELECT *
 INTO dbo.DataSet
 FROM 
 (
-SELECT *
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
 FROM dbo.Angular
 
-UNION ALL 
+UNION  
 
-SELECT * FROM dbo.ChartJS
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
+FROM dbo.ChartJS
 
-UNION ALL 
+UNION  
 
-SELECT * FROM dbo.CreateReactApp
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
+FROM dbo.CreateReactApp
+UNION  
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
+FROM dbo.Axios
+UNION  
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
+FROM dbo.Atom
 ) AS b
 ORDER BY Validation DESC
 

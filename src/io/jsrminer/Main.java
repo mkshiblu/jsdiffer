@@ -123,9 +123,12 @@ public class Main {
         String repoPath = "E:\\PROJECTS_REPO\\create-react-app";
         String[] commitIds = new String[]{
                 // All
-                "00ed100b26adc519fd90e09ebffd83c8d7dc4343", "0e51eef6d7694fbfc4a8fe952bd73b65af2220dd", "2c34d5b66eab7d1c96e573bc48b8e82b6d8e82b0", "3a0b836be376575b5227a0237e8b2334a9f9ab24", "51d0df490295b70808b61d780a54ebcf296a8db2", "72b6eb8c3c65e6ed0f2413708069287311a386c2", "78dbf7bf2b50a35c426e5dbbfdf20ef1afcd8789", "9559ba486e085b6956580ebbc6dad1d7ef4c26e2", "9c167a42490d134832e6e1b721292ea99eaf8ca5", "b3527d7783b290d37275925a1d6a7ff9e40e7a86", "cd3d04b71e91f533bdbdc3856775e1da81d445cf", "d49ffde4e627eea1f935ebc4f8fb2ea61010577d", "d72678fb0c02145d24b7684802a3f5cfc94bd746", "ecd1f0544b6f8a05a4061712932cd0055d6e34c9", "eed708a822d6cf3ff17b665b093a2c23a50f6b15",
+                //"00ed100b26adc519fd90e09ebffd83c8d7dc4343", "0e51eef6d7694fbfc4a8fe952bd73b65af2220dd", "2c34d5b66eab7d1c96e573bc48b8e82b6d8e82b0", "3a0b836be376575b5227a0237e8b2334a9f9ab24", "51d0df490295b70808b61d780a54ebcf296a8db2", "72b6eb8c3c65e6ed0f2413708069287311a386c2", "78dbf7bf2b50a35c426e5dbbfdf20ef1afcd8789", "9559ba486e085b6956580ebbc6dad1d7ef4c26e2", "9c167a42490d134832e6e1b721292ea99eaf8ca5", "b3527d7783b290d37275925a1d6a7ff9e40e7a86", "cd3d04b71e91f533bdbdc3856775e1da81d445cf", "d49ffde4e627eea1f935ebc4f8fb2ea61010577d", "d72678fb0c02145d24b7684802a3f5cfc94bd746"
+                //,
+                "ecd1f0544b6f8a05a4061712932cd0055d6e34c9"
+                //, "eed708a822d6cf3ff17b665b093a2c23a50f6b15",
                 // Recalls
-                "fbdff9d722d6ce669a090138022c4d3536ae95bb",
+                //"fbdff9d722d6ce669a090138022c4d3536ae95bb",
         };
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }

@@ -1,0 +1,4 @@
+Project	Total	Validated	UnValidated	RmTPs	RmFps	RmTNs	RmFNs	RdTPs	RdFps	RdTNs	RdFNs	RmPrecision	RmRecall	RdPrecision	RdRecall
+angular.js	81	79	2	21	2	9	47	63	9	2	0	0.91	0.31	0.88	1
+atom	36	33	3	3	1	11	18	21	11	1	0	0.75	0.14	0.66	1
+axios	64	61	3	10	1	26	24	34	26	1	0	0.91	0.29	0.57	1

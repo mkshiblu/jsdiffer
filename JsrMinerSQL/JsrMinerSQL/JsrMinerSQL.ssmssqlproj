@@ -25,11 +25,53 @@
           <AssociatedConnUserName />
           <FullPath>AddValidation.sql</FullPath>
         </FileNode>
+        <FileNode Name="AngularUpdateRdIdCommon.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>AngularUpdateRdIdCommon.sql</FullPath>
+        </FileNode>
+        <FileNode Name="DropCreateAngularOracle.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>DropCreateAngularOracle.sql</FullPath>
+        </FileNode>
+        <FileNode Name="FoundByRDTPFP.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>FoundByRDTPFP.sql</FullPath>
+        </FileNode>
         <FileNode Name="InsertInspectedRefactoringsql.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>InsertInspectedRefactoringsql.sql</FullPath>
+        </FileNode>
+        <FileNode Name="InsertIntoFinalTableFromValidated.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>InsertIntoFinalTableFromValidated.sql</FullPath>
+        </FileNode>
+        <FileNode Name="MergeRawWithAutoValidated.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>MergeRawWithAutoValidated.sql</FullPath>
+        </FileNode>
+        <FileNode Name="PRByProjects.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>PRByProjects.sql</FullPath>
+        </FileNode>
+        <FileNode Name="ReplaceOperationWithFunction.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>ReplaceOperationWithFunction.sql</FullPath>
         </FileNode>
       </Items>
     </LogicalFolder>
