@@ -115,7 +115,7 @@ public abstract class ContainerMatcher {
         };
 
         var functionNameMap1 = nameMapperFunction.apply(functions1);
-        var functionNameMap2 = nameMapperFunction.apply(functions1);
+        var functionNameMap2 = nameMapperFunction.apply(functions2);
         var unmatchedOperations = new LinkedHashSet<IFunctionDeclaration>();
 
         for (var operation : functions1) {

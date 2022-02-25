@@ -254,12 +254,12 @@ public class UMLModelDiffer {
     public void checkForRenamedFiles(Map<String, String> renamedFileHints
             , UMLSourceFileMatcher matcher
             , UMLModelDiff modelDiff) {
-        for (var removedClassIterator = modelDiff.getRemovedFiles().iterator(); removedClassIterator.hasNext(); ) {
-            var removedFile = removedClassIterator.next();
+        for (var removedIterator = modelDiff.getRemovedFiles().iterator(); removedIterator.hasNext(); ) {
+            var removedFile = removedIterator.next();
             var diffSet = new TreeSet<>(new FileRenameComparator());
 
-            for (var addedClassIterator = modelDiff.getAddedFiles().iterator(); addedClassIterator.hasNext(); ) {
-                var addedFile = addedClassIterator.next();
+            for (var addedIterator = modelDiff.getAddedFiles().iterator(); addedIterator.hasNext(); ) {
+                var addedFile = addedIterator.next();
                 String renamedFile = renamedFileHints.get(removedFile.getFilepath());
                 if (matcher.match(removedFile, addedFile, renamedFile)) {
 //                    if (!conflictingMoveOfTopLevelClass(removedFile, addedFile)
@@ -278,7 +278,7 @@ public class UMLModelDiffer {
 
                 modelDiff.getFileRenameDiffList().add(minFileRenameDiff);
                 modelDiff.getAddedFiles().remove(minFileRenameDiff.getRenamedFile());
-                removedClassIterator.remove();
+                removedIterator.remove();
             }
         }
     }
