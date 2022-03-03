@@ -3,25 +3,25 @@ SELECT
 
 cr.*
 , ca.[Validation]
-      ,ca.[FoundByRd]
+      ,ca.rd_validation
       ,ca.[Comment]
 
 	  
-INTO dbo.CreateReactApp
-  FROM [dbo].[CreateReactApp_Raw] AS cr
+INTO dbo.ChartJS
+  FROM [dbo].ChartJs_Raw AS cr
 
 
 
-  LEFT JOIN [dbo].[CreateReactApp_AutoValidated] AS ca ON (ca.project = cr.Project AND ca.commitId = cr.commitId 
- AND cr.[RefactoringType] = ca. [RefactoringType]
+  LEFT JOIN [dbo].ChartJs_AutoValidated AS ca ON (ca.project = cr.project AND ca.commit_Id = cr.commit_Id 
+ AND cr.[Refactoring_Type] = ca. [Refactoring_Type]
 
-  AND ca.[NameBefore] = cr.[NameBefore] 
+  AND ca.[Name_Before] = cr.[Name_Before] 
   
-  AND ca.NameAfter = cr.NameAfter 
+  AND ca.Name_After = cr.Name_After 
   
-  AND ca.[LocationBefore] = cr.[LocationBefore]
+  AND ca.[Location_Before] = cr.[Location_Before]
 
-    AND ca.[LocationAfter] = cr.[LocationAfter]
+    AND ca.[Location_After] = cr.[Location_After]
   )  
 
-    ORDER BY cr.project, cr.commitid, cr.[RefactoringType], cr.[NameBefore], cr.[NameAfter], cr.[LocationBefore], cr.[LocationAfter], [Validation], FoundByRd
+    ORDER BY cr.project, cr.commit_id, cr.[Refactoring_Type], cr.[Name_Before], cr.Name_After, cr.[Location_Before], cr.[Location_After], [Validation], rd_validation

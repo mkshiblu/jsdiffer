@@ -19,12 +19,6 @@
     </LogicalFolder>
     <LogicalFolder Name="Queries" Type="0" Sorted="true">
       <Items>
-        <FileNode Name="AddValidation.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
-          <AssociatedConnUserName />
-          <FullPath>AddValidation.sql</FullPath>
-        </FileNode>
         <FileNode Name="AngularUpdateRdIdCommon.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
@@ -43,12 +37,6 @@
           <AssociatedConnUserName />
           <FullPath>FoundByRDTPFP.sql</FullPath>
         </FileNode>
-        <FileNode Name="InsertInspectedRefactoringsql.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
-          <AssociatedConnUserName />
-          <FullPath>InsertInspectedRefactoringsql.sql</FullPath>
-        </FileNode>
         <FileNode Name="InsertIntoFinalTableFromValidated.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
@@ -61,11 +49,35 @@
           <AssociatedConnUserName />
           <FullPath>MergeRawWithAutoValidated.sql</FullPath>
         </FileNode>
+        <FileNode Name="OraclePreceisionRecall.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>OraclePreceisionRecall.sql</FullPath>
+        </FileNode>
+        <FileNode Name="OracleStaging.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>OracleStaging.sql</FullPath>
+        </FileNode>
         <FileNode Name="PRByProjects.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
           <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
           <AssociatedConnUserName />
           <FullPath>PRByProjects.sql</FullPath>
+        </FileNode>
+        <FileNode Name="PRByRefactoringType.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>PRByRefactoringType.sql</FullPath>
+        </FileNode>
+        <FileNode Name="RDStaging.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>RDStaging.sql</FullPath>
         </FileNode>
         <FileNode Name="ReplaceOperationWithFunction.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
@@ -76,7 +88,14 @@
       </Items>
     </LogicalFolder>
     <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
-      <Items />
+      <Items>
+        <FileNode Name="Oracle">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>Oracle</FullPath>
+        </FileNode>
+      </Items>
     </LogicalFolder>
   </Items>
 </SqlWorkbenchSqlProject>

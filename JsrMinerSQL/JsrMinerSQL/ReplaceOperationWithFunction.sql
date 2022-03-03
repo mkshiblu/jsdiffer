@@ -1,4 +1,4 @@
-UPDATE Axios
-SET RefactoringType  = REPLACE(REPLACE(RefactoringType, 'OPERATION', 'FUNCTION'), 'METHOD', 'FUNCTION')
+UPDATE ChartJS
+SET Refactoring_Type  = REPLACE(REPLACE(Refactoring_Type, 'OPERATION', 'FUNCTION'), 'METHOD', 'FUNCTION')
 
 

@@ -12,16 +12,16 @@ public class RefactoringFormatterUtil {
 
     static final String delimiter = "\t";
 
-    private String[] tableHeaders = new String[]{"Project",
-            "CommitId",
-            "RefactoringType",
-            "NameBefore",
-            "NameAfter",
-            "LocationBefore",
-            "LocationAfter",
-            "Refactoring",
-            "Validation",
-            "FoundByRd",
+    private String[] tableHeaders = new String[]{"project",
+            "commit_id",
+            "refactoring_type",
+            "name_before",
+            "name_after",
+            "location_before",
+            "location_after",
+            "refactoring",
+            "validation",
+            "rd_validation",
             "Comment",
     };
 

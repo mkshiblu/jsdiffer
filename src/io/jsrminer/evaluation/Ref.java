@@ -110,16 +110,21 @@ public class Ref {
                 var startEndSplitted = segments[0].split("-");
                 var start = Integer.parseInt(startEndSplitted[0]);
                 var end = Integer.parseInt(startEndSplitted[1]);
+                var endLine = 0;
+                var endColumn = 0;
+                var startLine = 0;
+                var startColumn = 0;
 
                 var lineColSplitted = segments[1].split("-");
-                var startLineColSplitted = lineColSplitted[0].substring(1, lineColSplitted[0].length() - 1).split(",");
-                var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
+                if (lineColSplitted.length > 1) {
+                    var startLineColSplitted = lineColSplitted[0].substring(1, lineColSplitted[0].length() - 1).split(",");
+                    startLine = Integer.parseInt(startLineColSplitted[0]);
+                    startColumn = Integer.parseInt(startLineColSplitted[1]);
 
-                var startLine = Integer.parseInt(startLineColSplitted[0]);
-                var startColumn = Integer.parseInt(startLineColSplitted[1]);
-
-                var endLine = Integer.parseInt(endLineColSplitted[0]);
-                var endColumn = Integer.parseInt(endLineColSplitted[1]);
+                    var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
+                    endLine = Integer.parseInt(endLineColSplitted[0]);
+                    endColumn = Integer.parseInt(endLineColSplitted[1]);
+                }
                 return new SourceLocation(filePath, startLine, startColumn, endLine, endColumn, start, end);
             } else {
 

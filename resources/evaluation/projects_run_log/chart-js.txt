@@ -47,12 +47,11 @@ chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	MOVE_FILE	core.legend.tests.js
 chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	MOVE_FILE	core.plugin.tests.js	core.plugin.tests.js	test/core.plugin.tests.js:0-8862|(1,0)-(345,0)	test/specs/core.plugin.tests.js:0-8862|(1,0)-(345,0)	Move File test/core.plugin.tests.js to test/specs/core.plugin.tests.js
 chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	MOVE_FILE	controller.doughnut.tests.js	controller.doughnut.tests.js	test/controller.doughnut.tests.js:0-10238|(1,0)-(353,0)	test/specs/controller.doughnut.tests.js:0-10238|(1,0)-(353,0)	Move File test/controller.doughnut.tests.js to test/specs/controller.doughnut.tests.js
 chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	MOVE_AND_RENAME_FILE	defaultConfig.tests.js	global.defaults.tests.js	test/defaultConfig.tests.js:0-7485|(1,0)-(297,0)	test/specs/global.defaults.tests.js:0-7485|(1,0)-(297,0)	Move And Rename File test/defaultConfig.tests.js moved and renamed to test/specs/global.defaults.tests.js
-chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	RENAME_FILE	mockContext.js	jasmine.context.js	test/mockContext.js:0-9426|(1,0)-(349,0)	test/jasmine.context.js:0-2832|(1,0)-(126,0)	Rename File test/mockContext.js renamed to test/jasmine.context.js
+chart-js	c216c0af769c9b12bad39b5b889867d7294dee07	RENAME_FILE	mockContext.js	jasmine.matchers.js	test/mockContext.js:0-9426|(1,0)-(349,0)	test/jasmine.matchers.js:0-3204|(1,0)-(114,0)	Rename File test/mockContext.js renamed to test/jasmine.matchers.js
 chart-js	ce27fe5ea6040523a61cef198ccc1e866d07ad82	RENAME_FILE	core.layoutService.js	core.layout.js	src/core/core.layoutService.js:0-15063|(1,0)-(423,0)	src/core/core.layout.js:0-14667|(1,0)-(420,0)	Rename File src/core/core.layoutService.js renamed to src/core/core.layout.js
 chart-js	d81afc8b5a0f4f27d9d81f1dd748a7a01e7365c0	RENAME_METHOD	determineUnit	determineUnitForAutoTicks	src/scales/scale.time.js:6407-6833|(256,0)-(270,1)	src/scales/scale.time.js:6497-6935|(259,0)-(273,1)	Rename Method determineUnit(minUnit ,min ,max ,capacity) renamed to determineUnitForAutoTicks(minUnit ,min ,max ,capacity) at src/scales/scale.time.js|determineUnit
 chart-js	d81afc8b5a0f4f27d9d81f1dd748a7a01e7365c0	REMOVE_PARAMETER					Remove Parameter minor in method generate(min ,max ,minor ,major ,capacity ,options) from src/scales/scale.time.js|generate
 chart-js	d81afc8b5a0f4f27d9d81f1dd748a7a01e7365c0	REMOVE_PARAMETER					Remove Parameter major in method generate(min ,max ,minor ,major ,capacity ,options) from src/scales/scale.time.js|generate
-chart-js	ecc35c527b8d91c2bdbc2cdc97ef667adfe7e3a3	RENAME_VARIABLE	e	chartEvent	src/core/core.controller.js:21764-21765|(743,25)-(743,26)	src/core/core.controller.js:17424-17476|(619,7)-(619,59)	Rename Variable e to chartEvent in 1.2.eventHandler(e) at src/core/core.controller.js|1.2.eventHandler
 chart-js	f3816b560c0cec6736b47c456c473e46bdc56498	RENAME_FILE	core.title.tests.js	plugin.title.tests.js	test/specs/core.title.tests.js:0-5564|(1,0)-(273,0)	test/specs/plugin.title.tests.js:0-5564|(1,0)-(273,0)	Rename File test/specs/core.title.tests.js renamed to test/specs/plugin.title.tests.js
 chart-js	f3816b560c0cec6736b47c456c473e46bdc56498	RENAME_FILE	core.legend.tests.js	plugin.legend.tests.js	test/specs/core.legend.tests.js:0-9038|(1,0)-(433,0)	test/specs/plugin.legend.tests.js:0-9038|(1,0)-(433,0)	Rename File test/specs/core.legend.tests.js renamed to test/specs/plugin.legend.tests.js
 chart-js	f3816b560c0cec6736b47c456c473e46bdc56498	MOVE_AND_RENAME_FILE	core.legend.js	plugin.legend.js	src/core/core.legend.js:0-15144|(1,0)-(546,0)	src/plugins/plugin.legend.js:0-15096|(1,0)-(545,0)	Move And Rename File src/core/core.legend.js moved and renamed to src/plugins/plugin.legend.js
@@ -60,10 +59,6 @@ chart-js	f3816b560c0cec6736b47c456c473e46bdc56498	MOVE_AND_RENAME_FILE	core.titl
 chart-js	f97cab12b1c4db4d5782d92f95e362093ad31860	RENAME_METHOD	drawCaret	getCaretPosition	src/core/core.tooltip.js:16355-17940|(559,2)-(628,3)	src/core/core.tooltip.js:16682-18024|(568,2)-(627,3)	Rename Method 1.1.drawCaret(tooltipPoint ,size ,opacity) renamed to 1.1.getCaretPosition(tooltipPoint ,size ,vm) at src/core/core.tooltip.js|1.1.drawCaret
 chart-js	b64cab004669a010025e4641eb7f359c4035f6b9	EXTRACT_OPERATION	draw	drawBackground	src/core/core.tooltip.js:19539-20513|(673,2)-(713,3)	src/core/core.tooltip.js:19539-19850|(673,2)-(678,3)	Extract Method 1.1.drawBackground(pt ,vm ,ctx ,tooltipSize ,opacity) extracted from 1.1.draw() in  1.1 in file src/core/core.tooltip.js
 
-16:35:07.312 [main] INFO  io.jsrminer.JSRefactoringMiner - Analyzed chart-js [Commits: 61, Errors: 0, Refactorings: 60]
-16:35:07.314 [main] INFO  io.jsrminer.JSRefactoringMiner - Total Duration for 61 commits: 1.998 min
-16:35:07.314 [main] INFO  io.jsrminer.Main - -----------------Program Ends--------------------
-
-BUILD SUCCESSFUL in 2m 2s
-3 actionable tasks: 2 executed, 1 up-to-date
-4:35:08 PM: Task execution finished ':Main.main()'.
+16:55:02.260 [main] INFO  io.jsrminer.JSRefactoringMiner - Analyzed chart-js [Commits: 61, Errors: 0, Refactorings: 59]
+16:55:02.263 [main] INFO  io.jsrminer.JSRefactoringMiner - Total Duration for 61 commits: 2.150 min
+16:55:02.263 [main] INFO  io.jsrminer.Main - -----------------Program Ends--------------------
