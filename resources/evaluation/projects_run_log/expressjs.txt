@@ -1,0 +1,8 @@
+project	commitId	RefactoringType	NameBefore	NameAfter	LocationBefore	LocationAfter	Refactoring
+expressjs	12bc16e72fe34ce7e3658679b694e47dce56ae7a	MOVE_OPERATION	shouldNotHaveHeader	shouldNotHaveHeader	test/res.send.js:13314-13474|(569,0)-(573,1)	test/support/utils.js:309-471|(20,0)-(24,1)	Move Method    shouldNotHaveHeader(header) from res.send.js to shouldNotHaveHeader(header) at utils.js
+expressjs	12bc16e72fe34ce7e3658679b694e47dce56ae7a	MOVE_OPERATION	shouldNotHaveHeader	shouldNotHaveHeader	test/res.vary.js:1984-2146|(92,0)-(96,1)	test/support/utils.js:309-471|(20,0)-(24,1)	Move Method    shouldNotHaveHeader(header) from res.vary.js to shouldNotHaveHeader(header) at utils.js
+expressjs	4012846d2534addd8de0b0c237cd63ada104109a	MOVE_FILE	client.js	client.js	examples/search/client.js:0-374|(1,0)-(13,10)	examples/search/public/client.js:0-374|(1,0)-(13,10)	Move File examples/search/client.js to examples/search/public/client.js
+
+17:16:04.965 [main] INFO  io.jsrminer.JSRefactoringMiner - Analyzed expressjs [Commits: 7, Errors: 0, Refactorings: 3]
+17:16:04.967 [main] INFO  io.jsrminer.JSRefactoringMiner - Total Duration for 7 commits: 6.393 s
+17:16:04.968 [main] INFO  io.jsrminer.Main - -----------------Program Ends--------------------
