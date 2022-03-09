@@ -21,7 +21,8 @@ public class Main {
            // chartJsExample();
           //  createReactApp();
                        //d3();
-                       expressJs();
+                      // expressJs();
+                       JQuery();
             //webpackExample();
 //            threeJsExample();
             //commitsExample();
@@ -30,7 +31,6 @@ public class Main {
 //            socketIoExample();
 //            directoryExample();
 //            fileExample();
-//            jqueryExample();
 
             //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
@@ -149,6 +149,15 @@ public class Main {
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
 
+    private static void JQuery() throws Exception {
+        String repoPath = "E:\\PROJECTS_REPO\\jquery";
+        String[] commitIds = new String[]{
+                "022b69a44e42684bdd0029dd456bedb3b495cc24", "1ea092a54b00aa4d902f4e22ada3854d195d4a18", "1f4375a34227f42570d2b72e190e51bcfb1e8597", "224271982eb9cd351d7db1b38c740b4e927e6f97", "2b5f5d5e90b37f4a735738a6d0b6f22affbea340", "356a3bccb0e7468a2c8ce7d8c9c6cd0c5d436b8b", "39cdb8c9aa0fde68f733553ba050a2ba9d86474c", "3a8e44745c014871bc56e94d91e57c45ae4be208", "3d732cca6b5076a9d13eee98e2b075b37384cd91", "4d6b4536b2e0148d4b228884a0b356e73dd8beec", "59ec78e6020cc963c1f95cb96a28eaaf20e37b3e", "5cbb234dd3273d8e0bbd454fb431ad639c7242c1", "619bf98d5b479f9582dbc40259b666f1c5a83146", "64a289286a743516bce82462200062a647ef3ac0", "67c96a59f5af9e8404b3f904028e1c730d647498", "67d7a2eefee768b59eb3d51cb1fb2c671873e58a", "6d43dc42337089f5fb52b715981c12993f490920", "80f57f8a13debaab87b99f73631669699da3e1a5", "93a8fa6bfc1c8a469e188630b61e736dfb69e128", "9e121482a532d61aa36d7b314ee46dd1ac40f29e", "a4474c9a0025095f82d734a9d7230eace2f08ef8", "a6fc0b16511c70472ebb3dd9469d08566969ac88", "ac9e3016645078e1e42120822cfb2076151c8cbe", "b078a62013782c7424a4a61a240c23c4c0b42614", "b442abacbb8464f0165059e8da734e3143d0721f", "b5f7c9e2d526b17b9962976bb704dce8779d7362", "b930d14ce64937e9478405eee2828d4da091d2cb", "b97c8d30c5aedace75dc17056d429f28e41b20c1", "bd984f0ee2cf40107a669d80d92566b8625b1e6b", "bf3a43eff8682b59cec785be6003753fa4b93706", "bf48c21d225c31f0f9b5441d95f73615ca3dcfdb", "bf591fb597a056bf2fc9bc474010374695b18d1a", "c18d608537d8945de6c5855a9475657177fa74ac", "c4494d4abc84d368d6597889ab45fc07466f8f26", "c9935b6d2db9e1be4bed12f7419e98cdca45763e", "cdaed15c7ea1bbfdde5a5bea691c583ce7961526", "e4fd41f8fa4190fbbb6cb98cf7ace64f6e00685d", "e5ffcb0838c894e26f4ff32dfec162cf624d8d7d", "ecd8ddea33dc40ae2a57e4340be03faf2ba2f99b", "ee0854f85bd686b55757e8854a10480f23c928da"
+                ,
+        };
+        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
+    }
+
     private static void reactNativeExample() throws Exception {
         String repoPath = "E:\\PROJECTS_REPO\\react-native";
         String[] commitIds = new String[]{"0125813f213662ec1d9bb4a456f5671adcff9d83", "0125813f213662ec1d9bb4a456f5671adcff9d83", "06c05e744d8af9582bde348210f254d76dae48b9", "2f4ca831bfd936be9ae71a8a5700003abb65a0f5", "4435f087713e1d0ac3639e3b3196d71c6402898e", "488a4c7e1c86ac5900ff9194106511fbf5a8e3cb", "5259450c143f71c65e157d6b7d3f0e1655eb7aa1", "7014a30baae0b01378740113d15e4a7d721d916a", "83169c95a3525fcb74e34853022475093b9a1a77", "95e8592dcb9b50772336d2801f46305fdc95250d", "970caa4552d4ba87c1a954391535ff42b00832e7", "9fbff62b5ff9b3effb18f135e1cd9bd34a83c985", "a90d0e3614c467c33cf85bcbe65be71903d5aecc", "ad67f556fb145d38fe547e1e8baa73ccc7a431b0", "b549e364e0025e0e1b4005f04a9de2d767006da1", "c749d951ada829c6f6fb76f35e68142e61054433", "d1336ab16efc26449509b938dd46cf606d3caf34", "e708010d18f938e2d6b6424cfc9485d8e5dd2800", "f59e5a8d28491c64e4d0c08fec3a2b0b3fabb38b", "f6da9e1a9a932d2775cc998469d2f9b4ebd858c5", "f80000b9e72596392567a3deda59441e43f6327d", "f8c8231706492b588331354d45b833aa21434e13", "fbd1beaf666be9c09a380784f8c0cd34ba083a6b"};
@@ -168,11 +177,6 @@ public class Main {
 
     static void directoryExample() {
         new JSRefactoringMiner().detectBetweenDirectories("tmp\\s1", "tmp\\s2");
-    }
-
-    static void jqueryExample() {
-        String root = "resources\\real-projects\\jquery";
-        new JSRefactoringMiner().detectBetweenDirectories(root, root);
     }
 
     static void vueExample() throws IOException {
