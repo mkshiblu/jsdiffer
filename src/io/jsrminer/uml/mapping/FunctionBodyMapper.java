@@ -47,7 +47,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private Set<CandidateMergeVariableRefactoring> candidateAttributeMerges = new LinkedHashSet<>();
     private Set<CandidateSplitVariableRefactoring> candidateAttributeSplits = new LinkedHashSet<>();
 
-    private final Set<FunctionBodyMapper> mappedNestedFunctionDeclrations = new LinkedHashSet<>();
+    private final Set<FunctionBodyMapper> nestedFunctionDeclrationMappings = new LinkedHashSet<>();
     private final Set<IFunctionDeclaration> nonMappedNestedFunctionDeclrationsT1 = new LinkedHashSet<>();
     private final Set<IFunctionDeclaration> nonMappedNestedFunctionDeclrationsT2 = new LinkedHashSet<>();
 
@@ -193,7 +193,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
     private void UpdateNestedFunctionDeclarationMaps(ContainerDiff<IFunctionDeclaration> diff){
         this.nonMappedNestedFunctionDeclrationsT1.addAll(new LinkedHashSet<IFunctionDeclaration>(diff.getRemovedOperations()));
         this.nonMappedNestedFunctionDeclrationsT2.addAll(new LinkedHashSet<IFunctionDeclaration>(diff.getAddedOperations()));
-        this.mappedNestedFunctionDeclrations.addAll(new LinkedHashSet<>(diff.getOperationBodyMapperList()));
+        this.nestedFunctionDeclrationMappings.addAll(new LinkedHashSet<>(diff.getOperationBodyMapperList()));
     }
 
     /**
@@ -1614,7 +1614,7 @@ public class FunctionBodyMapper implements Comparable<FunctionBodyMapper> {
         return nonMappedNestedFunctionDeclrationsT2;
     }
 
-    public Set<FunctionBodyMapper> getMappedNestedFunctionDeclrations() {
-        return mappedNestedFunctionDeclrations;
+    public Set<FunctionBodyMapper> getNestedFunctionDeclrationMappings() {
+        return nestedFunctionDeclrationMappings;
     }
 }
