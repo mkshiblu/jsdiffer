@@ -79,21 +79,31 @@ public abstract class BaseDiffer<T extends IContainer> {
         }
     }
 
+
     private boolean isNestedFunctionMappersMatched(FunctionBodyMapper bodyMapper) {
         boolean isMatched = false;
         List<FunctionBodyMapper> nestedBodyMappers = new ArrayList<>(bodyMapper.getNestedFunctionDeclrationMappings());
-        int mappings = nestedBodyMappers.size();
+        int functionMappings = nestedBodyMappers.size();
         var nonMappedNestedFunctionsT1 = bodyMapper.getNonMappedNestedFunctionDeclrationsT1().size();
         var nonMappedNestedFunctionsT2 = bodyMapper.getNonMappedNestedFunctionDeclrationsT2().size();
 
-        if (mappings > 0) {
-            boolean mappedNestedFunctionsMoreThanNonMappedT1AndT2 =
-                    (mappings > nonMappedNestedFunctionsT1 && mappings > nonMappedNestedFunctionsT2) ||
-                            (nonMappedNestedFunctionsT1 == 0 && mappings > Math.floor(nonMappedNestedFunctionsT2 / 2.0)) ||
-                            (mappings == 1 && nonMappedNestedFunctionsT1 + nonMappedNestedFunctionsT2 == 1 && bodyMapper
-                                    .function1.getName().equals(bodyMapper.function2.getName()));
+        if (functionMappings > 0) {
+            int nonMappedFunctionsAndLeavesT1 = nonMappedNestedFunctionsT1 + bodyMapper.getNonMappedLeavesT1().size();
+            int nonMappedFunctionsAndLeavesT2 = nonMappedNestedFunctionsT2 + bodyMapper.getNonMappedLeavesT2().size();
 
-            isMatched = mappedNestedFunctionsMoreThanNonMappedT1AndT2;
+            boolean mappedFunctionsAndLeavesGreaterThanNonMappedFunctionsAndleaves =
+                    (bodyMapper.mappingsWithoutBlocks() + functionMappings) >= nonMappedFunctionsAndLeavesT1
+                    || (bodyMapper.mappingsWithoutBlocks() + functionMappings) >= nonMappedFunctionsAndLeavesT2;
+
+            if (mappedFunctionsAndLeavesGreaterThanNonMappedFunctionsAndleaves) {
+                boolean mappedNestedFunctionsMoreThanNonMappedT1AndT2 =
+                        (functionMappings > nonMappedNestedFunctionsT1 && functionMappings > nonMappedNestedFunctionsT2) ||
+                                (nonMappedNestedFunctionsT1 == 0 && functionMappings > Math.floor(nonMappedNestedFunctionsT2 / 2.0)) ||
+                                (functionMappings == 1 && nonMappedNestedFunctionsT1 + nonMappedNestedFunctionsT2 == 1 && bodyMapper
+                                        .function1.getName().equals(bodyMapper.function2.getName()));
+
+                isMatched = mappedNestedFunctionsMoreThanNonMappedT1AndT2;
+            }
         }
 
         return isMatched;
