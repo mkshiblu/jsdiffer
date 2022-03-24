@@ -33,32 +33,30 @@ INTO dbo.OracleTemp
 FROM dbo.Oracle;
 
 
---SELECT *
---FROM dbo.OracleTemp AS ot
---LEFT JOIN dbo.RdRawTemp AS rt ON (rt.project = ot.project
---AND rt.commit_id = ot.commit_id
---AND rt.refactoring_type = ot.refactoring_type
---AND rt.location_before = ot.location_before
---AND rt.[name_before] = ot.[name_before]
---AND rt.location_after = ot.location_after
---AND rt.[name_after] = ot.[name_after])
---WHERE rt.project is NULL AND  rd_validation IS NOT NULL AND rd_validation NOT IN ('TN', 'FN')
---ORDER BY ot.project, ot.commit_id, ot.refactoring_type, ot.location_before, ot.location_after;
+SELECT *
+FROM dbo.OracleTemp AS ot
+LEFT JOIN dbo.RdRawTemp AS rt ON (rt.project = ot.project
+AND rt.commit_id = ot.commit_id
+AND rt.refactoring_type = ot.refactoring_type
+AND rt.location_before = ot.location_before
+AND rt.[name_before] = ot.[name_before]
+AND rt.location_after = ot.location_after
+AND rt.[name_after] = ot.[name_after])
+WHERE rt.project is NULL AND  rd_validation IS NOT NULL AND rd_validation NOT IN ('TN', 'FN')
+ORDER BY ot.project, ot.commit_id, ot.refactoring_type, ot.location_before, ot.location_after;
 
 
-SELECT r.*
-INTO dbo.RDStaging
-FROM dbo.RdRawTemp AS r
-LEFT JOIN dbo.Oracletemp AS o ON (o.project = r.project
-AND o.commit_id = r.commit_id
-AND o.refactoring_type = r.refactoring_type
-AND o.location_before = r.location_before
-AND o.[name_before] = r.[name_before]
-AND o.location_after = r.location_after
-AND o.[name_after] = r.[name_after])
-WHERE o.project is NULL-- AND  rd_validation IS NOT NULL AND rd_validation NOT IN ('TN', 'FN')
-ORDER BY r.project, r.commit_id, r.refactoring_type, r.location_before, r.location_after;
-
+SELECT *
+FROM dbo.OracleTemp AS ot
+LEFT JOIN dbo.RdRawTemp AS rt ON (rt.project = ot.project
+AND rt.commit_id = ot.commit_id
+AND rt.refactoring_type = ot.refactoring_type
+AND rt.location_before = ot.location_before
+AND rt.[name_before] = ot.[name_before]
+AND rt.location_after = ot.location_after
+AND rt.[name_after] = ot.[name_after])
+WHERE rt.project is NULL AND  rd_validation IS NOT NULL AND rd_validation NOT IN ('TN', 'FN')
+ORDER BY ot.project, ot.commit_id, ot.refactoring_type, ot.location_before, ot.location_after;
 
 --SELECT project, commit_id, refactoring_type, name_before, name_after, location_before, location_after
 --FROM RdRawTemp WHERE commit_id= '38f8c97af74649ce224b6dd45f433cc665acfbfb' ORDER BY project, commit_id, refactoring_type, name_before, name_after, location_before, location_after;
@@ -67,6 +65,5 @@ ORDER BY r.project, r.commit_id, r.refactoring_type, r.location_before, r.locati
 
 
 --SELECT * FROM RdRawTemp WHERE commit_id ='0ce9348bc01811a88e0e19f85e5bf74536ad4dd4' ORDER BY project, commit_id, refactoring_type, name_before, name_after, location_before, location_after;
-DROP TABLE IF EXISTS dbo.RdRawTemp;
-DROP TABLE IF EXISTS dbo.OracleTemp;
---DROP TABLE IF EXISTS dbo.RDStaging;
+--DROP TABLE IF EXISTS dbo.RdRawTemp;
+--DROP TABLE IF EXISTS dbo.OracleTemp;

@@ -39,7 +39,7 @@ public class RefactoringDisplayFormatter {
     }
 
     public static String getHeader() {
-        return "project\tcommitId\tRefactoringType\tNameBefore\tNameAfter\tLocationBefore\tLocationAfter\tRefactoring";
+        return "project\tcommit_id\trefactoring_type\tname_before\tname_after\tlocation_before\tlocation_after\tdescription";
     }
 
     public static String generateDisplayStringForRefactorings(String project, String commitId, List<IRefactoring> refactorings, boolean printHeader) {
@@ -134,10 +134,10 @@ public class RefactoringDisplayFormatter {
             case INLINE_OPERATION:
                 var inlineOperationRefactoring = (InlineOperationRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
-                        inlineOperationRefactoring.getTargetOperationBeforeInline().getName()
-                        , inlineOperationRefactoring.getInlinedOperation().getName()
-                        , getLocationString(inlineOperationRefactoring.getTargetOperationBeforeInline().getSourceLocation())
+                        inlineOperationRefactoring.getInlinedOperation().getName()
+                        , inlineOperationRefactoring.getTargetOperationAfterInline().getName()
                         , getLocationString(inlineOperationRefactoring.getInlinedOperation().getSourceLocation())
+                        , getLocationString(inlineOperationRefactoring.getTargetOperationAfterInline().getSourceLocation())
                 );
 
                 break;

@@ -1,0 +1,204 @@
+id	project	commit_id	refactoring_type	name_before	name_after	location_before	location_after	rm_validation	rd_validation	comment	description	tags
+1	angular.js	03043839d5a540b02208001fe12e812dfde00a8e	MOVE_FILE	script.js	script.js	test/e2e/fixtures/angular-already-loaded/script.js:0-137|(1,0)-(8,0)	test/e2e/fixtures/angularjs-already-loaded/script.js:0-137|(1,0)-(8,0)	TP	TP			
+2	angular.js	03043839d5a540b02208001fe12e812dfde00a8e	RENAME_FILE	angular-already-loaded.spec.js	angularjs-already-loaded.spec.js	test/e2e/tests/angular-already-loaded.spec.js:0-297|(1,0)-(12,0)	test/e2e/tests/angularjs-already-loaded.spec.js:0-301|(1,0)-(12,0)	TP	TP			
+3	angular.js	05fdf918d97a379634c8b0e15da8615edfc6fb8d	EXTRACT_FUNCTION	setupModelWatcher	$$setModelValue	src/ng/directive/ngModel.js:34839-36405	src/ng/directive/ngModel.js:39763-39914	FN	TP	Complex EM 		
+4	angular.js	097947fd3bd280fcf621e36154a9d4f82896ff01	RENAME_FUNCTION	resumeBootstrapInternal	doBootstrap	src/Angular.js:27128-27734	src/Angular.js:27116-27722	TP	TP			
+5	angular.js	0cbc50512126fa22546dbe9b79a14939d9dc4459	ADD_PARAMETER					TP		Need Further Confirmation	Add Parameter html5Mode in method parseAppUrl(url ,locationObj ,html5Mode) atsrc/ng/location.js|parseAppUrl	
+6	angular.js	0cbc50512126fa22546dbe9b79a14939d9dc4459	EXTRACT_FUNCTION	parseAppUrl	decodePath	src/ng/location.js:821-1500	src/ng/location.js:590-963	FN	FN	Large Megeed Arugments not possible to handle by  RM		
+7	angular.js	0ce9348bc01811a88e0e19f85e5bf74536ad4dd4	INTERNAL_MOVE_FUNCTION	createCallback	createCallback	src/ng/jsonpCallbacks.js:1224-1528	src/ng/jsonpCallbacks.js:1197-1501	FN	TP	debatable		
+8	angular.js	0ce9348bc01811a88e0e19f85e5bf74536ad4dd4	INTERNAL_MOVE_FUNCTION	createCallback	createCallback	src/ng/jsonpCallbacks.js:493-700	src/ng/jsonpCallbacks.js:466-673	FN	TP	debatable		
+9	angular.js	0ce9348bc01811a88e0e19f85e5bf74536ad4dd4	INTERNAL_MOVE_FUNCTION	getResponse	getResponse	src/ng/jsonpCallbacks.js:2540-2619	src/ng/jsonpCallbacks.js:2513-2592	FN	TP	debatable		
+10	angular.js	0ce9348bc01811a88e0e19f85e5bf74536ad4dd4	INTERNAL_MOVE_FUNCTION	removeCallback	removeCallback	src/ng/jsonpCallbacks.js:2984-3147	src/ng/jsonpCallbacks.js:2957-3120	FN	TP	debatable		
+11	angular.js	0ce9348bc01811a88e0e19f85e5bf74536ad4dd4	INTERNAL_MOVE_FUNCTION	wasCalled	wasCalled	src/ng/jsonpCallbacks.js:2008-2089	src/ng/jsonpCallbacks.js:1981-2062	FN	TP	debatable		
+12	angular.js	189461f9bf6fda18ddbd16c42f2e959cf939c3da	INTERNAL_MOVE_FUNCTION	isAllDefined	isAllDefined	src/ng/parse.js:61846-62044	src/ng/parse.js:61288-61474	FN	TP	INTERNAL_MOVE		
+13	angular.js	1e90d030771b68d55dffd56898a380f903712b66	RENAME_FUNCTION	checkXSRF	checkXsrf	test/ng/httpSpec.js:27462-27623	test/ng/httpSpec.js:82991-83157	FN	TP			
+14	angular.js	1e9eadcd72dbbd5c67dae8328a63e535cfa91ff9	INLINE_FUNCTION	getValue	parseStringifyInterceptor	src/ng/interpolate.js:13045-13192	src/ng/interpolate.js:15828-16568	TP	TP	Expression based Inline		
+15	angular.js	223de59e988dc0cc8b4ec3a045b7c0735eba1c77	EXTRACT_FUNCTION	$setSubmitted	$$setSubmitted	src/ng/directive/form.js:9150-9310|(279,2)-(283,3)	src/ng/directive/form.js:9475-9732|(289,2)-(297,3)	TP	FN	8e104ee508418bc2ebb65e5b4ac73d22285cc224		
+16	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	cssMatcher	cssMatcher	test/testabilityPatch.js:1857-2555	test/matchers.js:27-750	FN	TP	Fixable		
+17	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	toBeOneOf	toBeOneOf	test/testabilityPatch.js:4911-4995	test/matchers.js:2833-2918	FN	TP			
+18	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	toEqualData	toEqualData	test/testabilityPatch.js:2815-2885	test/matchers.js:1010-1088	FN	TP			
+19	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	toEqualError	toEqualError	test/testabilityPatch.js:3215-3657	test/matchers.js:1109-1551	FN	TP			
+20	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	toHaveBeenCalledOnce	toHaveBeenCalledOnce	test/testabilityPatch.js:4173-4892	test/matchers.js:2091-2814	FN	TP	Fixable		
+21	angular.js	2636105c5e363f14cda890f19ac9c3bc57556dd2	MOVE_FUNCTION	toMatchError	toMatchError	test/testabilityPatch.js:3678-4144	test/matchers.js:1572-2062	FN	TP	Fixable		MC
+22	angular.js	2ee5033967d5f87a516bad137686b0592e25d26b	RENAME_FUNCTION	regularInterceptedExpression	fn	src/ng/parse.js:63364-63582	src/ng/parse.js:64284-64495	FN	TP			
+23	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INLINE_FUNCTION	check	controller	test/ng/compileSpec.js:249453-249940	test/ng/compileSpec.js:243014-243386			Too complex to verify		
+24	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INLINE_FUNCTION	check	controller	test/ng/compileSpec.js:249453-249940	test/ng/compileSpec.js:245460-245832			Too complex to verify		
+25	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_FUNCTION	getProp	getProp	test/ng/compileSpec.js:273209-273279	test/ng/compileSpec.js:257642-257704	FN	TP	debatable		
+26	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:252151-252452	test/ng/compileSpec.js:232931-233308	FN	TP			
+27	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:253050-253373	test/ng/compileSpec.js:241267-241570	FN	TP			
+28	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:255191-255492	test/ng/compileSpec.js:243054-243335	FN	TP			
+29	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:256090-256413	test/ng/compileSpec.js:246184-246487	FN	TP			
+30	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:258229-258530	test/ng/compileSpec.js:245500-245781	FN	TP			
+31	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	INTERNAL_MOVE_RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:259155-259478	test/ng/compileSpec.js:243715-244018	FN	TP			
+32	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	REMOVE_PARAMETER					TP		Need Further Confirmation	Remove Parameter compileProvider in method createControllerDecorator(compileProvider) from src/ngMock/angular-mocks.js|createControllerDecorator	
+33	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:234544-234965	test/ng/compileSpec.js:226909-227286	FN	TP			
+34	angular.js	38f8c97af74649ce224b6dd45f433cc665acfbfb	RENAME_FUNCTION	check	$onInit	test/ng/compileSpec.js:243366-243787	test/ng/compileSpec.js:240606-240887	FN	TP			
+35	angular.js	42e622b751d1ad1520b824473f9ad31e7efb75b3	EXTRACT_FUNCTION	extractArgs	stringifyFn	src/auto/injector.js:2394-2581	src/auto/injector.js:2394-2469	FN	TP			
+36	angular.js	42e622b751d1ad1520b824473f9ad31e7efb75b3	EXTRACT_MOVE_FUNCTION	nodeLinkFn	setupControllers	src/ng/compile.js:124567-132721	src/ng/compile.js:133977-135217	FN	FN			
+37	angular.js	42e622b751d1ad1520b824473f9ad31e7efb75b3	RENAME_VARIABLE	directive	controllerDirective	src/ng/compile.js:126762-126800|(2811,16)-(2811,54)	src/ng/compile.js:126920-126968|(2814,14)-(2814,62)	FP	TN			
+38	angular.js	4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9	MOVE_FUNCTION	errorHandlingConfig	errorHandlingConfig	src/Angular.js:3161-3429|(157,0)-(165,1)	src/minErr.js:955-1223|(34,0)-(42,1)	TP	TP			
+39	angular.js	4a12ae7b3617e7c5389cf67ce3e3c7b309fcd9b9	MOVE_FUNCTION	isValidObjectMaxDepth	isValidObjectMaxDepth	src/Angular.js:3500-3589|(172,0)-(174,1)	src/minErr.js:1294-1383|(49,0)-(51,1)	TP	TP			
+40	angular.js	4adc9a9117e7f7501d94c22c8cbbfeb77ad5d596	EXTRACT_FUNCTION	commitRoute	getTemplateFor	src/ngRoute/route.js:22178-24851	src/ngRoute/route.js:24271-24880	FN	TP	Fixable		MC
+41	angular.js	538f4606ff32e776b093243fed4af3460df74f2a	RENAME_FUNCTION	setOptionAsSelected	setOptionSelectedStatus	src/ng/directive/select.js:10057-10192	src/ng/directive/select.js:133-622	FN	TP			
+42	angular.js	560951e9881b5f772262804384b4da9f673b925e	INTERNAL_MOVE_FUNCTION	stringify	stringify	src/ng/interpolate.js:10146-10519	src/ng/interpolate.js:2709-3036					
+43	angular.js	560951e9881b5f772262804384b4da9f673b925e	INTERNAL_MOVE_FUNCTION	unescapeText	unescapeText	src/ng/interpolate.js:11766-11913	src/ng/interpolate.js:2562-2703					
+44	angular.js	5878f07474755cb3df1e727cef4e7e4716f44783	MOVE_FUNCTION	toEqualSelect	toEqualSelect	test/ng/directive/selectSpec.js:2600-3250	test/helpers/matchers.js:12377-12993	FN	TP			
+45	angular.js	60069e67aeb0352a7849ebfef15a6183bc3b7235	EXTRACT_FUNCTION	prepareRoute	isNavigationUpdateOnly	src/ngRoute/route.js:25923-26568|(652,4)-(667,5)	src/ngRoute/route.js:33138-33809|(857,4)-(872,5)	TP	TP			
+46	angular.js	60069e67aeb0352a7849ebfef15a6183bc3b7235	PARAMETERIZE_VARIABLE					TP			Parameterize Variable lastRoute to oldRoute in $RouteProvider.4.isNavigationUpdateOnly(newRoute ,oldRoute) at src/ngRoute/route.js|$RouteProvider.4.isNavigationUpdateOnly	
+47	angular.js	641e13acc180000a8b1293a1bf9dfef29673e2ea	INLINE_FUNCTION	remove	clearElementAnimationState	src/apis.js:1553-1668	src/ngAnimate/animateQueue.js:23733-23875	TN	TN			
+48	angular.js	641e13acc180000a8b1293a1bf9dfef29673e2ea	INLINE_FUNCTION	remove	closeChildAnimations	src/apis.js:1553-1668	src/ngAnimate/animateQueue.js:23112-23727	TN	TN			
+49	angular.js	641e13acc180000a8b1293a1bf9dfef29673e2ea	INLINE_FUNCTION	remove	handleCSSClassChanges	src/apis.js:1553-1668	src/ng/animate.js:3121-4102	TN	TN			
+50	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	debug	debug	test/ng/logSpec.js:3262-3331	test/ng/logSpec.js:3603-3672	FN	TP	debatable		
+51	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	error	error	test/ng/logSpec.js:3173-3242	test/ng/logSpec.js:3512-3581	FN	TP	debatable		
+52	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	info	info	test/ng/logSpec.js:3085-3153	test/ng/logSpec.js:3422-3490	FN	TP	debatable		
+53	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	log	log	test/ng/logSpec.js:2912-2979	test/ng/logSpec.js:3245-3312	FN	TP	debatable		
+54	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	TestError	TestError	test/ng/logSpec.js:4256-4467	test/ng/logSpec.js:4709-4944	FN	TP	debatable		
+55	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_FUNCTION	warn	warn	test/ng/logSpec.js:2998-3066	test/ng/logSpec.js:3333-3401	FN	TP	debatable		
+56	angular.js	667d4734fcf7a58a58d29bd87fac32a7831df184	INTERNAL_MOVE_RENAME_FUNCTION	removeApplyFunctionForIE	attachMockConsoleTo$window	test/ng/logSpec.js:1811-2146	test/ng/logSpec.js:1743-2215	FN	TP			
+57	angular.js	7e2e235cf25389a59ea957631ff07c6cc8a3ad32	ADD_PARAMETER					TP			Add Parameter reason in method createHttpBackend.1.timeoutRequest(reason) atsrc/ng/httpBackend.js|createHttpBackend.1.timeoutRequest	
+58	angular.js	7e2e235cf25389a59ea957631ff07c6cc8a3ad32	ADD_PARAMETER					TP			Add Parameter reason in method createHttpBackendMock.$httpBackend.wrapResponse.handlePrematureEnd(reason) atsrc/ngMock/angular-mocks.js|createHttpBackendMock.$httpBackend.wrapResponse.handlePrematureEnd	
+59	angular.js	7e2e235cf25389a59ea957631ff07c6cc8a3ad32	RENAME_FUNCTION	handleTimeout	handlePrematureEnd	src/ngMock/angular-mocks.js:43688-43973|(1397,6)-(1405,7)	src/ngMock/angular-mocks.js:43847-44140|(1401,6)-(1409,7)	TP	TP			
+60	angular.js	817ac56719505680ac4c9997972e8f39eb40a6d0	EXTRACT_FUNCTION	$broadcast	invokeListeners	src/ng/rootScope.js:51676-53527	src/ng/rootScope.js:52942-53723	FN	FN			
+61	angular.js	837acd14e005c79d8e79f59a0075075f125da50c	EXTRACT_MOVE_FUNCTION	_argToString	isError	test/ng/qSpec.js:1777-1899	src/Angular.js:16609-16866	FN	FN			
+62	angular.js	837acd14e005c79d8e79f59a0075075f125da50c	EXTRACT_MOVE_FUNCTION	compileTemplateUrl	isError	src/ng/compile.js:134742-139884	src/Angular.js:16609-16866	FN	FN	Mentioned in commit message		
+63	angular.js	837acd14e005c79d8e79f59a0075075f125da50c	EXTRACT_MOVE_FUNCTION	formatError	isError	src/ng/log.js:3628-4038	src/Angular.js:16609-16866	FN	FN			
+64	angular.js	837acd14e005c79d8e79f59a0075075f125da50c	EXTRACT_MOVE_FUNCTION	processChecks	isError	src/ng/q.js:14036-14545	src/Angular.js:16609-16866	FN	FN			
+65	angular.js	840b5f0a7634efdf4d6ed81a52e66fc0e0620127	MOVE_RENAME_FUNCTION	pathRegExp	routeToRegExp	src/ngRoute/route.js:11745-12656	src/routeToRegExp.js:309-1134	FN	TP			
+66	angular.js	8d6ac5f3178cb6ead6b3b7526c50cd1c07112097	RENAME_FUNCTION	toMap	arrayToMap	src/ngSanitize/sanitize.js:12678-12892|(302,2)-(308,3)	src/ngSanitize/sanitize.js:17105-17302|(409,2)-(415,3)	TP	TP			
+67	angular.js	8e104ee508418bc2ebb65e5b4ac73d22285cc224	INLINE_FUNCTION	setupControllers	nodeLinkFn	src/ng/compile.js:133977-135217	src/ng/compile.js:124567-132721	FN	FN			
+68	angular.js	8e104ee508418bc2ebb65e5b4ac73d22285cc224	INLINE_FUNCTION	stringifyFn	extractArgs	src/auto/injector.js:2394-2469	src/auto/injector.js:2394-2581	FN	TP			
+69	angular.js	8e104ee508418bc2ebb65e5b4ac73d22285cc224	RENAME_VARIABLE	controllerDirective	directive	src/ng/compile.js:126920-126968|(2814,14)-(2814,62)	src/ng/compile.js:126762-126800|(2811,16)-(2811,54)	FP	TN	42e622b751d1ad1520b824473f9ad31e7efb75b3		
+70	angular.js	9d74f0fdcb44aa597b81a2bde967d4c37b60dce2	MOVE_RENAME_FUNCTION	compare	simpleCompare	src/ng/compile.js:152914-152986	src/Angular.js:27662-27734	FN	TP			
+71	angular.js	af0ad6561c0d75c4f155b07e9cfc36a983af55bd	MOVE_FUNCTION	fromJson	fromJson	src/JSON.js:1030-1120|(45,0)-(49,1)	src/Angular.js:20414-20504|(776,0)-(780,1)	TP	TP			
+72	angular.js	af0ad6561c0d75c4f155b07e9cfc36a983af55bd	MOVE_FUNCTION	toJson	toJson	src/JSON.js:692-790|(30,0)-(32,1)	src/Angular.js:20073-20173|(760,0)-(762,1)	TP	TP			
+73	angular.js	af0ad6561c0d75c4f155b07e9cfc36a983af55bd	MOVE_RENAME_FUNCTION	jsonReplacer	toJsonReplacer	src/JSON.js:34-315	src/Angular.js:19398-19695	FN	TP			MC
+74	angular.js	b0f6afcdacc53fd91b37ad0c5d70544f7e37ebde	INTERNAL_MOVE_FUNCTION	cloneAttach	cloneAttach	test/ng/compileSpec.js:264727-264802	test/ng/compileSpec.js:335788-335867	TN	FP			
+75	angular.js	b0f6afcdacc53fd91b37ad0c5d70544f7e37ebde	INTERNAL_MOVE_FUNCTION	cloneAttach	cloneAttach	test/ng/compileSpec.js:335008-335087	test/ng/compileSpec.js:265507-265582	TN	FP			
+76	angular.js	b0f6afcdacc53fd91b37ad0c5d70544f7e37ebde	INTERNAL_MOVE_FUNCTION	cloneAttach	cloneAttach	test/ng/compileSpec.js:364280-364358	test/ng/compileSpec.js:365060-365138	TN	FP			
+77	angular.js	b7bb797e5c7bdc93f2ffca39baf6e112e6dddbe2	EXTRACT_FUNCTION	parseObservedDateValue	parseDateAndConvertTimeZoneToLocal	src/ng/directive/input.js:71273-71398	src/ng/directive/input.js:71314-71585	FN	FN			
+78	angular.js	b7bb797e5c7bdc93f2ffca39baf6e112e6dddbe2	EXTRACT_MOVE_FUNCTION	createDateInputType	parseDateAndConvertTimeZoneToLocal	src/ng/directive/input.js:68982-71405	src/ng/directive/input.js:71314-71585	FN	FN	Contents move to extracted function		
+79	angular.js	b7d396b8b6e8f27a1f4556d58fc903321e8d532a	EXTRACT_FUNCTION	jqLiteRemoveData	removeIfEmptyData	src/jqLite.js:13285-13796|(352,0)-(371,1)	src/jqLite.js:12332-12762|(323,0)-(334,1)	TP	FN			
+80	angular.js	bf5c2eef34a314d5d2298fdcb6deaa7282cc563f	RENAME_FUNCTION	jqLiteCleanData	cleanData	src/jqLite.js:9336-9459	src/jqLite.js:20541-20672	TN	FP	complex FP, inline var		
+81	angular.js	c39936ee26f00d8256c79df07096f03196811df5	EXTRACT_FUNCTION	commitRoute	resolveLocalsFor	src/ngRoute/route.js:22178-24264	src/ngRoute/route.js:24001-24316	FN	TP	Fixable		
+82	angular.js	cdaa6a951b8fce67673bec224a7ad1f24f0a05bf	EXTRACT_MOVE_FUNCTION	processChecks	markQStateExceptionHandled	src/ng/q.js:14036-14537	src/ng/q.js:22824-22890	FN	TP			
+83	angular.js	cdaa6a951b8fce67673bec224a7ad1f24f0a05bf	EXTRACT_MOVE_FUNCTION	processQueue	markQStateExceptionHandled	src/ng/q.js:13214-14032	src/ng/q.js:22824-22890	FN	TP			
+84	angular.js	cdaa6a951b8fce67673bec224a7ad1f24f0a05bf	EXTRACT_MOVE_FUNCTION	scheduleProcessQueue	isStateExceptionHandled	src/ng/q.js:14541-14969	src/ng/q.js:22758-22823	FN	FN			
+85	angular.js	d9ca2459172a3ad62f0a19b8b1306d739c4b75b7	EXTRACT_FUNCTION	annotate	extractArgs	src/auto/injector.js:2677-3672	src/auto/injector.js:2344-2481	FN	TP	Fixable		MC
+86	angular.js	d9ca2459172a3ad62f0a19b8b1306d739c4b75b7	EXTRACT_FUNCTION	anonFn	extractArgs	src/auto/injector.js:2344-2675|(71,0)-(80,1)	src/auto/injector.js:2344-2481|(71,0)-(75,1)	TP	TP			
+87	angular.js	de74034ddf6f92505ccdb61be413a6df2c723f87	EXTRACT_FUNCTION	$parse	addWatchDelegate	src/ng/parse.js:57500-58783|(1783,4)-(1819,5)	src/ng/parse.js:62724-63138|(1928,4)-(1938,5)	TP	TP			
+88	angular.js	de74034ddf6f92505ccdb61be413a6df2c723f87	EXTRACT_FUNCTION	addInterceptor	addWatchDelegate	src/ng/parse.js:63058-65129|(1934,4)-(1979,5)	src/ng/parse.js:62724-63138|(1928,4)-(1938,5)	TP	TP			
+89	angular.js	de74034ddf6f92505ccdb61be413a6df2c723f87	PARAMETERIZE_VARIABLE					TP				
+90	angular.js	e3ece2fad9e1e6d47b5f06815ff186d7e6f44948	EXTRACT_FUNCTION	isArrayLike	isArray	src/Angular.js:4575-5510	src/Angular.js:16933-17011	TN	FP	No new call, just one expression removal from source, mentioned in Commit message		
+91	angular.js	e5fb92978f310d690e394bac2c09beeae4a56e03	INLINE_FUNCTION	invokeListeners	$broadcast	src/ng/rootScope.js:57368-58149	src/ng/rootScope.js:56058-57953	FN	FN			
+92	angular.js	e9bf93d510a6a0c105d8f5d036ec35c7ce08a588	RENAME_FUNCTION	int	toInt	src/Angular.js:9745-9794|(360,0)-(362,1)	src/Angular.js:9747-9798|(360,0)-(362,1)	TP	TP			
+93	angular.js	e9bf93d510a6a0c105d8f5d036ec35c7ce08a588	RENAME_FUNCTION	int	toInt	src/ngMock/angular-mocks.js:15906-15955|(590,0)-(592,1)	src/ngMock/angular-mocks.js:15924-15975|(590,0)-(592,1)	TP	TP			
+94	angular.js	fd4f0111188b62773b99ab6eab38b4d2b5d8d727	INTERNAL_MOVE_FUNCTION	$onChanges	$onChanges	test/ng/compileSpec.js:167421-167459	test/ng/compileSpec.js:170400-170438	TN	FP	Added same named code, no code was removed		
+95	angular.js	fd4f0111188b62773b99ab6eab38b4d2b5d8d727	RENAME_VARIABLE	deepWatch	isLiteral	src/ng/compile.js:156747-156776	src/ng/compile.js:156747-156776	TP			Rename Variable deepWatch to isLiteral in $CompileProvider.10.initializeDirectiveBindings.1(definition ,scopeName) at src/ng/compile.js|$CompileProvider.10.initializeDirectiveBindings.1	
+96	angular.js	ff0e61166d3dca59351e3913e0360c24d1bce99c	EXTRACT_FUNCTION	writeValue	selectUnknownOrEmptyOption	src/ng/directive/select.js:4295-5348	src/ng/directive/select.js:6463-6745	FN	TP			
+97	atom	0148ee7d9bc731e98365fbaec53e4b8a5fbfa5c9	MOVE_FUNCTION	checkScrollContainerLeft	checkScrollContainerLeft	spec/text-editor-component-spec.js:36486-36740	spec/text-editor-component-spec.js:32351-32605			Too hard to inspect		
+98	atom	062dfdea80861f9c918c99a3f86895f908635862	EXTRACT_FUNCTION	resetUserSettings	_resetSettings	src/config.js:30005-31170	src/config.js:30106-30972	TP	TP			
+99	atom	062dfdea80861f9c918c99a3f86895f908635862	RENAME_FUNCTION	readProjectSettingsSync	readProjectSpecificationSync	src/main-process/parse-command-line.js:6991-7469	src/main-process/parse-command-line.js:7108-7799	FN	TP			
+100	atom	062dfdea80861f9c918c99a3f86895f908635862	RENAME_FUNCTION	resetUserScopedSettings	resetScopedSettings	src/config.js:38924-39656	src/config.js:38928-39656	TP	TP			
+101	atom	113453a219e692fe1e5f0eb3c1c09703daaa0a89	EXTRACT_MOVE_FUNCTION	update	update	src/dock.js:25917-26184	src/dock.js:27541-27594			Too hard to inspect		
+102	atom	113453a219e692fe1e5f0eb3c1c09703daaa0a89	EXTRACT_MOVE_FUNCTION	update	update	src/dock.js:27305-27665	src/dock.js:27541-27594			Too hard to inspect		
+103	atom	1cdb804824546e8572912df8cf51c9d5072c33ba	RENAME_FUNCTION	addLegacyScopeAlias	setLegacyScopeAliasForNewScope	src/config.js:26055-26168	src/config.js:26455-26582	FN	FN			
+104	atom	1cdb804824546e8572912df8cf51c9d5072c33ba	RENAME_FUNCTION	getLegacyScopeDescriptor	getLegacyScopeDescriptorForNewScopeDescriptor	src/config.js:39216-39493	src/config.js:26083-26451	FN	TP			
+105	atom	1cdb804824546e8572912df8cf51c9d5072c33ba	RENAME_FUNCTION	removeLegacyScopeAlias	removeLegacyScopeAliasForNewScope	src/config.js:26172-26260	src/config.js:26586-26685	FN	TP			
+106	atom	48d36776648149c4170fed630207ef9ec1cb962a	RENAME_FUNCTION	getAtomProjectFilePath	getProjectFilePath	src/project.js:3150-3213	src/project.js:3085-3144	FN	TP	Easy Ref Missed BY RM		
+107	atom	48d36776648149c4170fed630207ef9ec1cb962a	RENAME_FUNCTION	onDidReplaceAtomProject	onDidReplace	src/project.js:2873-2974	src/project.js:3004-3081	FN	FN			
+108	atom	48d36776648149c4170fed630207ef9ec1cb962a	RENAME_FUNCTION	replaceAtomProject	replace	src/project.js:2628-2869	src/project.js:2628-3000	FN	TP			
+109	atom	4dbfadd0d5a603fec292519c9115c857e26201eb	RENAME_FUNCTION	grammarMatchesContents	grammarMatchesPrefix	src/grammar-registry.js:8808-9656	src/grammar-registry.js:9028-9711	FN	TP	Easy Ref Missed BY RM		
+110	atom	50088b16c9a4e6fda78ea98430bb0705229883e8	RENAME_FUNCTION	isHorizontalScrollbarVisible	canScrollHorizontally	src/text-editor-component.js:90505-90959	src/text-editor-component.js:90819-91266	FN	TP			
+111	atom	50088b16c9a4e6fda78ea98430bb0705229883e8	RENAME_FUNCTION	isVerticalScrollbarVisible	canScrollVertically	src/text-editor-component.js:90087-90501	src/text-editor-component.js:90408-90815	FN	TP	Fixable		
+112	atom	547b067f3e03f7d3e7eb162af8f257cfe6f05154	MOVE_CLASS	DummyDirectory	DummyDirectory	spec/project-spec.js:13468-14013	spec/project-spec.js:15307-15852	TN	TN	A function added to the parent		
+113	atom	547b067f3e03f7d3e7eb162af8f257cfe6f05154	MOVE_FUNCTION	checkCallback	checkCallback	spec/project-spec.js:29723-29731	spec/project-spec.js:31562-31570	TN	TN	A function added to the parent		
+114	atom	547b067f3e03f7d3e7eb162af8f257cfe6f05154	MOVE_FUNCTION	waitForEvents	waitForEvents	spec/project-spec.js:29950-30527	spec/project-spec.js:31789-32366	TN	TN	A function added to the parent		
+115	atom	547b067f3e03f7d3e7eb162af8f257cfe6f05154	RENAME_FUNCTION	removeProjectSettings	clearProjectSettings	src/config.js:32439-32526	src/config.js:32439-32525	TN	TN	A function added to the parent		
+116	atom	72c30d7e78f94e432874b54e2c9d71857a06211a	RENAME_FUNCTION	isWatched	isWatchedPath	src/path-watcher.js:16717-16771	src/path-watcher.js:16721-16775	FN	TP			
+117	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	getDefaultLocation	getDefaultLocation	spec/workspace-spec.js:11688-11700	spec/workspace-spec.js:12216-12228	TN	TN	A function added to the parent		
+118	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	getElement	getElement	spec/workspace-spec.js:10802-10837	spec/workspace-spec.js:12256-12291	TN	TN	A function added to the parent		
+119	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	getElement	getElement	spec/workspace-spec.js:14752-14787	spec/workspace-spec.js:16140-16175	TN	TN	A function added to the parent		
+120	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	getURI	getURI	spec/workspace-spec.js:11638-11652	spec/workspace-spec.js:12166-12180	TN	TN	A function added to the parent		
+121	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	getURI	getURI	spec/workspace-spec.js:14641-14655	spec/workspace-spec.js:16029-16043	TN	TN	A function added to the parent		
+122	atom	7c9463aceae23a9bd7b88b141994d87fd4c08779	MOVE_FUNCTION	opener	opener	spec/workspace-spec.js:11805-11842	spec/workspace-spec.js:12333-12370	TN	TN	A function added to the parent		
+123	atom	7ce5b000e448552bb4ba9556c8f38ccfef127162	INLINE_FUNCTION	loadDataOverProcessBoundary	constructor	src/main-process/atom-window.js:5464-5785	src/main-process/atom-window.js:376-5195	FN	TP			
+124	atom	7ce5b000e448552bb4ba9556c8f38ccfef127162	INTERNAL_MOVE_FUNCTION	get	get	src/main-process/atom-window.js:5576-5748	src/main-process/atom-window.js:2451-2623	FN	TP	Not Sure		
+125	atom	adbd5400295494173e59285bbcb6ac967ed3ebfb	EXTRACT_FUNCTION	grammarOverrideForPath	getAssignedLanguageId	src/grammar-registry.js:9706-9951	src/grammar-registry.js:4999-5094	FN	TP	Easy Ref Missed BY RM		
+126	atom	bf6a4e3db4b28bfe068feb72199746dad98d6a83	ADD_PARAMETER					TP			Add Parameter options in method Config.resetUserScopedSettings(newScopedSettings ,options) atsrc/config.js|Config.resetUserScopedSettings	
+127	atom	bf6a4e3db4b28bfe068feb72199746dad98d6a83	EXTRACT_FUNCTION	getAll	getAllForPriority	src/config.js:18879-19752	src/config.js:20211-21360	TP	FN			
+128	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_CLASS	AtomBackend	AtomNativeWatcher	src/path-watcher.js:890-3895	src/path-watcher.js:5352-8290	FN	TP			
+129	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_CLASS	AtomBackend	NSFWNativeWatcher	src/path-watcher.js:890-3895	src/path-watcher.js:8375-9190	FP	TN			
+130	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_CLASS	NSFWBackend	NSFWNativeWatcher	src/path-watcher.js:3980-4738	src/path-watcher.js:8375-9190	FN	TP			
+131	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_FUNCTION	start	doStart	src/path-watcher.js:4002-4688	src/path-watcher.js:8425-9138	FN	TP			
+132	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_FUNCTION	start	doStart	src/path-watcher.js:912-3833	src/path-watcher.js:5402-8288	FN	TP			
+133	atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_VARIABLE	watcher	w	src/path-watcher.js:19306-19371	src/path-watcher.js:20255-20314	TP			Rename Variable watcher to w in PathWatcherManager.createWatcher(rootPath ,options ,eventCallback) at src/path-watcher.js|PathWatcherManager.createWatcher	
+134	atom	dec52a7384d9f241cae0cd2d0a51f440bafa7677	EXTRACT_FUNCTION	toggle	hide	src/workspace.js:41285-42228	src/workspace.js:28576-29421	FN	TP			
+135	atom	e2c480847c81f6f97cc184cb5353080ffbcd590d	EXTRACT_FUNCTION	constructor	loadDataOverProcessBoundary	src/main-process/atom-window.js:376-5355	src/main-process/atom-window.js:5526-5851	FN	TP			
+136	atom	e2c480847c81f6f97cc184cb5353080ffbcd590d	INTERNAL_MOVE_FUNCTION	get	get	src/main-process/atom-window.js:2547-2697	src/main-process/atom-window.js:5637-5814	TN	FP	Container Moved		
+137	atom	f6d2d5729944abbff8a2db1ab2a35d223e998b8c	EXTRACT_FUNCTION	bufferDidChange	treeEditForBufferChange	src/tree-sitter-language-mode.js:1335-1908	src/tree-sitter-language-mode.js:1781-2169	FN	TP			
+138	axios	0e2f4f14171ccd161e85478c7b1aba61c3b431a2	MOVE_FUNCTION	Axios	Axios	lib/axios.js:405-595	lib/core/Axios.js:478-668	TP	TP	Mentioned in message		
+139	axios	0e2f4f14171ccd161e85478c7b1aba61c3b431a2	MOVE_FUNCTION	method	method	lib/axios.js:3062-3187	lib/core/Axios.js:2603-2728			Hard to Tell		
+140	axios	0e2f4f14171ccd161e85478c7b1aba61c3b431a2	MOVE_FUNCTION	method	method	lib/axios.js:3395-3544	lib/core/Axios.js:2870-3019			Hard to Tell		
+141	axios	0e2f4f14171ccd161e85478c7b1aba61c3b431a2	MOVE_FUNCTION	request	request	lib/axios.js:623-2220	lib/core/Axios.js:820-2417			Hard to Tell		
+142	axios	1629a026da17a1e1d8999a02f3fe6b6b60aaac9c	RENAME_FILE	wrapper.spec.js	headers.spec.js	test/specs/wrapper.spec.js:0-4771	test/specs/headers.spec.js:0-2220	TP	TP		Rename File test/specs/wrapper.spec.js renamed to test/specs/headers.spec.js	NV
+143	axios	1629a026da17a1e1d8999a02f3fe6b6b60aaac9c	RENAME_FILE	wrapper.spec.js	requests.spec.js	test/specs/wrapper.spec.js:0-4771	test/specs/requests.spec.js:0-3064	TN	FP			
+144	axios	1e2cb9bdca0e19298aa7c242a7db4b45427967ea	INTERNAL_MOVE_FUNCTION	method	method	lib/axios.js:2107-2253	lib/axios.js:2207-2333	TN	FP	Hard to Tell		
+145	axios	1e2cb9bdca0e19298aa7c242a7db4b45427967ea	INTERNAL_MOVE_FUNCTION	method	method	lib/axios.js:2461-2635	lib/axios.js:2494-2644	TN	FP	Hard to Tell		
+146	axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	settle.js	settle.js	lib/helpers/settle.js:0-568	lib/core/settle.js:0-568	TP	TP	Mentioned in message		
+147	axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	settle.spec.js	settle.spec.js	test/specs/helpers/settle.spec.js:0-1905	test/specs/core/settle.spec.js:0-1899	TP	TP	Mentioned in message		
+148	axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	transformData.js	transformData.js	lib/helpers/transformData.js:0-550	lib/core/transformData.js:0-550	TP	TP	Mentioned in message		
+149	axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	transformData.spec.js	transformData.spec.js	test/specs/helpers/transformData.spec.js:0-687	test/specs/core/transformData.spec.js:0-681	TP	TP	Mentioned in message		
+150	axios	2797f10ea5d2cd963a8e5c80da319848bad9f499	RENAME_FUNCTION	onload	loadEvent	dist/axios.js:16024-17069	dist/axios.js:16520-17800	FN	TP			
+151	axios	3d65057d7111d7873cf4fad40805cd9ebe327574	RENAME_FILE	urlIsSameOrigin.js	isURLSameOrigin.js	lib/helpers/urlIsSameOrigin.js:0-1831	lib/helpers/isURLSameOrigin.js:0-2206	FN	TP			
+152	axios	3d65057d7111d7873cf4fad40805cd9ebe327574	RENAME_FILE	urlIsSameOrigin.spec.js	isURLSameOrigin.spec.js	test/specs/helpers/urlIsSameOrigin.spec.js:0-389	test/specs/helpers/isURLSameOrigin.spec.js:0-389	TP	TP	Missed similar refs		
+153	axios	3d65057d7111d7873cf4fad40805cd9ebe327574	RENAME_FUNCTION	urlResolve	resolveURL	lib/helpers/urlIsSameOrigin.js:466-1347	lib/helpers/isURLSameOrigin.js:541-1506	FN	TP			
+154	axios	46e275c407f81c44dd9aad419b6e861d8a936580	INTERNAL_MOVE_FUNCTION	loadEvent	loadEvent	dist/axios.js:76120-77400	dist/axios.js:19936-21216	TN	FP	Maybe container moved		
+155	axios	46e275c407f81c44dd9aad419b6e861d8a936580	INTERNAL_MOVE_FUNCTION	onerror	onerror	dist/axios.js:77467-77718	dist/axios.js:21283-21549	TN	FP	Maybe container moved		
+156	axios	46e275c407f81c44dd9aad419b6e861d8a936580	INTERNAL_MOVE_FUNCTION	onprogress	onprogress	dist/axios.js:75522-75550	dist/axios.js:19338-19366	TN	FP	Maybe container moved		
+157	axios	46e275c407f81c44dd9aad419b6e861d8a936580	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:75579-75606	dist/axios.js:19395-19422	TN	FP	Maybe container moved		
+158	axios	46e275c407f81c44dd9aad419b6e861d8a936580	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:77770-77955	dist/axios.js:21601-21804	TN	FP	Maybe container moved		
+159	axios	4ac0fbd1c1dc0c5f9ac290b635d6eee3783e355b	RENAME_FUNCTION	createNew	create	lib/axios.js:1608-1671	lib/axios.js:1605-1668	FN	TP	Mentioned in Commit		
+160	axios	4d1269cb4a9773db128f459046b6c4c2a0926859	INTERNAL_MOVE_FUNCTION	loadEvent	loadEvent	dist/axios.js:17206-18309	dist/axios.js:18211-19314	TN	FP	Maybe container moved		
+161	axios	4d1269cb4a9773db128f459046b6c4c2a0926859	INTERNAL_MOVE_FUNCTION	onerror	onerror	dist/axios.js:18372-18601	dist/axios.js:19377-19606	TN	FP	Maybe container moved		
+162	axios	4d1269cb4a9773db128f459046b6c4c2a0926859	INTERNAL_MOVE_FUNCTION	onprogress	onprogress	dist/axios.js:16634-16662	dist/axios.js:17639-17667	TN	FP	Maybe container moved		
+163	axios	4d1269cb4a9773db128f459046b6c4c2a0926859	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:16689-16716	dist/axios.js:17694-17721	TN	FP	Maybe container moved		
+164	axios	4d1269cb4a9773db128f459046b6c4c2a0926859	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:18649-18887	dist/axios.js:19654-19892	TN	FP	Maybe container moved		
+165	axios	61617543268b024e42996e20ff0435b94a893c5d	EXTRACT_FUNCTION	create	createInstance	lib/axios.js:539-608	lib/axios.js:277-595	FN	FN			
+166	axios	72c66dfdecbcc165c52fcd19d1f8444ad8c011c6	MOVE_RENAME_FUNCTION	mergeConfig	exports	lib/utils.js:7336-8513	lib/core/mergeConfig.js:371-1655	FN	TP			
+167	axios	7ec97dd26b3af7bb0995eef178c4edd8989c3152	RENAME_FUNCTION	loadEvent	onload	dist/axios.js:15654-16556	dist/axios.js:16024-16897	FN	TP			
+168	axios	986647be59259125750fd44dbb429658d67dc156	RENAME_FUNCTION	loadEvent	onload	lib/adapters/xhr.js:1523-2401	lib/adapters/xhr.js:1342-2190	FN	TP			
+169	axios	a59bc8d2ae218484cdcb1d7e6a295a4ff93225a1	INTERNAL_MOVE_RENAME_FUNCTION	onreadystatechange	loadEvent	dist/axios.js:16756-17575	dist/axios.js:15419-16305	FN	TP			
+170	axios	a59bc8d2ae218484cdcb1d7e6a295a4ff93225a1	RENAME_FUNCTION	onreadystatechange	loadEvent	lib/adapters/xhr.js:1088-1882	lib/adapters/xhr.js:1348-2210	FN	TP			
+171	axios	b10874fa67ed77dd6ecbe1fd1f6eb2045ce9854f	RENAME_FUNCTION	exports	request	lib/axios.js:235-1263	lib/axios.js:581-1473	TN	FP	request was assgned to another var		
+172	axios	bce07e53aa681367082ce9f683de366918647cd6	INTERNAL_MOVE_FUNCTION	method	method	dist/axios.js:3784-3928	dist/axios.js:4363-4494	TN	FP	Hard to Tell		
+173	axios	bce07e53aa681367082ce9f683de366918647cd6	INTERNAL_MOVE_FUNCTION	method	method	dist/axios.js:4062-4235	dist/axios.js:4660-4816					
+174	axios	bce07e53aa681367082ce9f683de366918647cd6	INTERNAL_MOVE_RENAME_FUNCTION	onreadystatechange	loadEvent	dist/axios.js:16756-17575	dist/axios.js:15290-16176	FN	TP	Seemed rename only		
+175	axios	bce07e53aa681367082ce9f683de366918647cd6	RENAME_FUNCTION	createShortMethodsWithData	method	dist/axios.js:3949-4250	dist/axios.js:4660-4816	TN	TN	Hard to Tell		
+176	axios	bce07e53aa681367082ce9f683de366918647cd6	RENAME_FUNCTION	urlResolve	resolveURL	dist/axios.js:23560-24465	dist/axios.js:21293-22282	FN	TP			
+177	axios	ca0617061e77f8fca502cacd0cced92242b3712e	RENAME_FUNCTION	onload	loadEvent	lib/adapters/xhr.js:1342-2359	lib/adapters/xhr.js:1455-2676	FN	TP			
+178	axios	cd0cd1805434dea0d250d195a466a1236b98e502	INTERNAL_MOVE_FUNCTION	onreadystatechange	onreadystatechange	dist/axios.js:16692-17511	dist/axios.js:15976-16795	TN	FP			
+179	axios	d23f9d5d4782e5849362895f8b648ed587999706	EXTRACT_FUNCTION	exports	settle	lib/adapters/http.js:435-4518	lib/adapters/http.js:440-576	FN	TP			
+180	axios	dcbb35226245483930a1f2969927a3b348bb2558	MOVE_FUNCTION	attemptGettingAjaxRequest	attemptGettingAjaxRequest	test/specs/__getAjaxRequest.js:241-660	test/specs/__helpers.js:579-998	FN	TP			
+181	axios	dcbb35226245483930a1f2969927a3b348bb2558	MOVE_RENAME_FUNCTION	exports	getAjaxRequest	test/specs/__getAjaxRequest.js:88-239	test/specs/__helpers.js:426-577	FN	TP	exports is used for moduling		
+182	axios	dcbb35226245483930a1f2969927a3b348bb2558	MOVE_RENAME_FUNCTION	exports	setupBasicAuthTest	test/specs/__setupBasicAuthTest.js:136-1167	test/specs/__helpers.js:1258-2289	FN	TP	exports is used for moduling		
+183	axios	dcbb35226245483930a1f2969927a3b348bb2558	MOVE_RENAME_FUNCTION	exports	validateInvalidCharacterError	test/specs/__validateInvalidCharacterError.js:17-124	test/specs/__helpers.js:1101-1208	FN	TP	exports is used for moduling		
+184	axios	dcbb35226245483930a1f2969927a3b348bb2558	RENAME_FILE	__getAjaxRequest.js	__helpers.js	test/specs/__getAjaxRequest.js:0-661|(1,0)-(29,0)	test/specs/__helpers.js:0-2291|(1,0)-(89,0)	FP	TN	Move Functions, developer written moving helpers		
+185	axios	df6d3ce6cf10432b7920d8c3ac0efb7254989bc4	RENAME_FUNCTION	testProxy	testHTTPProxy	test/unit/adapters/http.js:6983-8070	test/unit/adapters/http.js:6983-8074	TP	TP			
+186	axios	e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93	INTERNAL_MOVE_FUNCTION	loadEvent	loadEvent	dist/axios.js:22374-23431	dist/axios.js:18889-20169	FN	TP			
+187	axios	e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93	INTERNAL_MOVE_FUNCTION	onerror	onerror	dist/axios.js:23498-23749	dist/axios.js:20236-20487	TN	FP			
+188	axios	e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93	INTERNAL_MOVE_FUNCTION	onprogress	onprogress	dist/axios.js:21776-21804	dist/axios.js:18291-18319	TN	FP			
+189	axios	e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:21833-21860	dist/axios.js:18348-18375	TN	FP			
+190	axios	e8c5c49ea2f2cf4fd45eaf81270a6d23546e2c93	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:23801-23986	dist/axios.js:20539-20724	TN	FP			
+191	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_FILE	http.js	http.js	test/unit/axios/http.js:0-1071	test/unit/adapters/http.js:0-1071	TP	TP			
+192	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_FUNCTION	toString	toString	test/unit/utils/isX.js:935-961	test/specs/utils/isX.spec.js:956-982	TN	FP	Perhaps didn't move		
+193	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_RENAME_FILE	forEach.js	forEach.spec.js	test/unit/utils/forEach.js:0-1078	test/specs/utils/forEach.spec.js:0-1153	FN	TP			
+194	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_RENAME_FILE	merge.js	merge.spec.js	test/unit/utils/merge.js:0-605	test/specs/utils/merge.spec.js:0-636	FN	TP			
+195	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_RENAME_FILE	parseHeaders.js	parseHeaders.spec.js	test/unit/helpers/parseHeaders.js:0-587	test/specs/helpers/parseHeaders.spec.js:0-628	FN	TP	Easy Missed by RM		
+196	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_RENAME_FILE	spread.js	spread.spec.js	test/unit/helpers/spread.js:0-243	test/specs/helpers/spread.spec.js:0-280	FN	TP			
+197	axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_RENAME_FILE	transformData.js	transformData.spec.js	test/unit/helpers/transformData.js:0-638	test/specs/helpers/transformData.spec.js:0-687	FN	TP			
+198	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	EXTRACT_FUNCTION	create	createInstance	dist/axios.js:4712-4783	dist/axios.js:2292-2621	FN	FN			
+199	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	INTERNAL_MOVE_FUNCTION	loadEvent	loadEvent	dist/axios.js:18211-19314	dist/axios.js:21958-23015	FN	TP			
+200	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	INTERNAL_MOVE_FUNCTION	onerror	onerror	dist/axios.js:19377-19606	dist/axios.js:23082-23333	TN	FP			
+201	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	INTERNAL_MOVE_FUNCTION	onprogress	onprogress	dist/axios.js:17639-17667	dist/axios.js:21360-21388	TN	FP			
+202	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:17694-17721	dist/axios.js:21417-21444	TN	FP			
+203	axios	ff919487e13430098d3da37a37cc04c3f24b59c4	INTERNAL_MOVE_FUNCTION	ontimeout	ontimeout	dist/axios.js:19654-19892	dist/axios.js:23385-23570	TN	FP			

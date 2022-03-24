@@ -1,66 +1,56 @@
-DROP TABLE IF EXISTS dbo.DataSet;
-DROP TABLE IF EXISTS dbo.ProjectValidation;
-DROP TABLE IF EXISTS dbo.Result;
+DROP TABLE IF EXISTS dbo.ValidationByProject;
+DROP TABLE IF EXISTS dbo.PRByProjects;
 
-SELECT * 
-INTO dbo.DataSet
-FROM 
-(
-SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
-FROM dbo.Angular
-
-UNION  
-
-SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
-FROM dbo.ChartJS
-
-UNION  
-
-SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
-FROM dbo.CreateReactApp
-UNION  
-SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
-FROM dbo.Axios
-UNION  
-SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
-FROM dbo.Atom
-) AS b
-ORDER BY Validation DESC
-
-SELECT 
-[project] AS Project,
-COUNT(*) AS Total,
-COUNT(Validation) AS Validated,
-SUM(CASE  WHEN [Validation] IS NULL THEN 1 ELSE 0 END) AS UnValidated,
-COUNT(CASE [Validation] WHEN 'TP' THEN 1 END) AS TPs,
-COUNT(CASE [Validation] WHEN 'FP' THEN 1 END) AS Fps,
-COUNT(CASE [Validation] WHEN 'TN' THEN 1 END) AS TNs,
-COUNT(CASE [Validation] WHEN 'FN' THEN 1 END) AS FNs
-INTO dbo.ProjectValidation 
-FROM dbo.DataSet
+-- PR BY Projects
+SELECT project,
+	COUNT(*) AS Total,
+	COUNT(ISNULL(rm_validation, [rd_validation])) AS Validated,
+	SUM(CASE  WHEN ISNULL(rm_validation, [rd_validation]) IS NULL THEN 1 ELSE 0 END) AS UnValidated,
+	COUNT(CASE rm_validation WHEN 'TP' THEN 1 END) AS RmTPs,
+	COUNT(CASE rm_validation WHEN 'FP' THEN 1 END) AS RmFps,
+	COUNT(CASE rm_validation WHEN 'TN' THEN 1 END) AS RmTNs,
+	COUNT(CASE rm_validation WHEN 'FN' THEN 1 END) AS RmFNs,
+	COUNT(CASE [rd_validation] WHEN 'TP' THEN 1 END) AS RdTPs,
+	COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
+	COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
+	COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
+INTO dbo.ValidationByProject 
+FROM dbo.Oracle
 GROUP BY [project];
 
 
 SELECT *
-, ROUND(CAST(Tps AS FLOAT) / NULLIF((TPS + FPs),0), 2) AS Precision
-, ROUND(CAST(Tps AS FLOAT) / NULLIF((TPS + FNs),0), 2) AS Recall
+, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFps),0), 2) AS RmPrecision
+, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFNs),0), 2) AS RmRecall
 
-INTO dbo.Result
-FROM dbo.ProjectValidation;
+, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFps),0), 2) AS RdPrecision
+, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFNs),0), 2) AS RdRecall
+INTO dbo.PRByProjects
+FROM dbo.ValidationByProject;
 
 
 SELECT *
-FROM dbo.Result;
+FROM dbo.PRByProjects;
 
 
 SELECT COUNT(Project) AS ProjectCount
 , SUM(Validated) As Validated
 , SUM(UnValidated) As UnValidated
 , SUM(Total) AS RefactoringCount
-, SUM(TPs) AS Tps
-, SUM(Fps) AS Fps
-, SUM(TNs) AS TNs
-, SUM(Fns) AS Fns
-, AVG(Precision) AS Precision
-, AVG(Recall) AS Recall
-FROM dbo.Result;
+, SUM(RmTPs) AS RmTPs
+, SUM(RmFps) AS RmFps
+, SUM(RmTNs) AS RmTNs
+, SUM(RdFNs) AS RdFNs
+
+, SUM(RdTPs) AS RdTPs
+, SUM(RdFps) AS RdFps
+, SUM(RdTNs) AS RdTNs
+, SUM(RmFNs) AS RmFNs
+, ROUND(AVG(RmPrecision), 2) AS RmPrecision
+, ROUND(AVG(RmRecall), 2) AS RmRecall
+, ROUND(AVG(RdPrecision), 2) AS RdPrecision
+, ROUND(AVG(RdRecall), 2) AS RdRecall
+FROM dbo.PRByProjects;
+
+DROP TABLE IF EXISTS dbo.ValidationByProject;
+DROP TABLE IF EXISTS dbo.PRByProjects;

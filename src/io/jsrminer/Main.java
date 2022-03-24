@@ -15,14 +15,14 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-       //angular();
-//            atom();
-//           axios();
+      // angular();
+        atom();
+         //axios();
            // chartJsExample();
           //  createReactApp();
                        //d3();
                       // expressJs();
-                       JQuery();
+                       //JQuery();
             //webpackExample();
 //            threeJsExample();
             //commitsExample();
