@@ -17,7 +17,7 @@ COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
 COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
 COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
 INTO dbo.RefactoringTypeValidation 
-FROM dbo.Dataset
+FROM dbo.Oracle
 GROUP BY refactoring_type;
 
 

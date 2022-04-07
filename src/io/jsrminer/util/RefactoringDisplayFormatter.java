@@ -6,6 +6,7 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 
 import java.util.List;
+import java.util.Locale;
 
 public class RefactoringDisplayFormatter {
     private static class AfterBeforeInfo {
@@ -63,7 +64,7 @@ public class RefactoringDisplayFormatter {
     }
 
     public static StringBuilder format(IRefactoring refactoring, StringBuilder builder) {
-        builder.append(refactoring.getRefactoringType().toString());
+        builder.append(refactoring.getRefactoringType().toString().toUpperCase().replace("OPERATION", "FUNCTION").replace("METHOD", "FUNCTION"));
         builder.append("\t");
         var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(refactoring);
         builder.append(afterBeforeInfo);
@@ -112,7 +113,9 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(renameFunctionRefactoring.getRenamedOperation().getSourceLocation())
                 );
                 break;
+            case PARAMETERIZE_VARIABLE:
             case RENAME_VARIABLE:
+            case RENAME_PARAMETER:
                 var renameVariableRefactoring = (RenameVariableRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
                         renameVariableRefactoring.getOriginalVariable().variableName
@@ -158,10 +161,22 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(renameFile.getOriginalFile().getSourceLocation())
                         , getLocationString(renameFile.getRenamedFile().getSourceLocation())
                 );
+                break;
             case ADD_PARAMETER:
+                var addParameterRefactoring = (AddParameterRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        ""
+                        , addParameterRefactoring.getParameter().name
+                        , ""
+                        , getLocationString(addParameterRefactoring.getParameter().getSourceLocation()));
+                break;
             case REMOVE_PARAMETER:
-            case RENAME_PARAMETER:
-            case PARAMETERIZE_VARIABLE:
+                var removeParameterRefactoring = (RemoveParameterRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        removeParameterRefactoring.getParameter().name
+                        , ""
+                        , getLocationString(removeParameterRefactoring.getParameter().getSourceLocation())
+                        , "");
                 break;
             case RENAME_CLASS:
                 var renameClassRefactoring = (RenameClassRefactoring) refactoring;
