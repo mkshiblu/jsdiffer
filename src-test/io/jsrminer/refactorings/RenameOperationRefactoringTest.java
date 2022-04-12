@@ -4,6 +4,7 @@ import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
+import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.Replacement;
 import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,10 +43,6 @@ public class RenameOperationRefactoringTest extends BaseTest {
         Set<CodeFragmentMapping> mappings = renameOperationRefactoring.getBodyMapper().getMappings();
         Iterator<CodeFragmentMapping> iterator = mappings.iterator();
         CodeFragmentMapping first = iterator.next();
-        CodeFragmentMapping second = iterator.next();
-
-        assertTrue(second.fragment1.getText().startsWith("return hyphenate"));
-        assertTrue(second.fragment2.getText().startsWith("return hyphenate"));
 
         assertEquals("let z = 10;", first.fragment1.getText());
         assertEquals("let z = 5;", first.fragment2.getText());
@@ -55,17 +52,22 @@ public class RenameOperationRefactoringTest extends BaseTest {
     void testReplacementsCount() {
         Iterator<CodeFragmentMapping> iterator = renameOperationRefactoring.getBodyMapper().getMappings().iterator();
         CodeFragmentMapping first = iterator.next();
-        CodeFragmentMapping second = iterator.next();
 
         assertEquals(1, first.getReplacements().size());
-        assertEquals(0, second.getReplacements().size());
+    }
+
+    @Test
+    void testNestedFunctionMappings() {
+        var iterator = renameOperationRefactoring.getBodyMapper().getNestedFunctionDeclrationMappings().iterator();
+        FunctionBodyMapper first = iterator.next();
+        assertEquals("m1.d", first.function1.getQualifiedName());
+        assertEquals("m2.d", first.function2.getQualifiedName());
     }
 
     @Test
     void testReplacements() {
         Iterator<CodeFragmentMapping> iterator = renameOperationRefactoring.getBodyMapper().getMappings().iterator();
         CodeFragmentMapping first = iterator.next();
-        CodeFragmentMapping second = iterator.next();
 
         Replacement replacement = first.getReplacements().iterator().next();
 

@@ -18,6 +18,9 @@
 \usepackage[hyphens]{url}     % print links
 \usepackage{hyperref}         % provides hyperlinks (text different than link)
 %\usepackage[hyphenbreaks]{breakurl}       % break long URL after hyphens
+
+\usepackage[ruled, lined, linesnumbered, commentsnumbered, longend]{algorithm2e}
+
 \hypersetup{
 	colorlinks=true,
 	breaklinks=true,
@@ -32,6 +35,54 @@
 
 \usepackage{blindtext}
 
+
+
+%Code Snippets
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeblack}{rgb}{0.95,0.95,0.92}
+\definecolor{mediumgray}{rgb}{0.3, 0.4, 0.4}
+\definecolor{mediumblue}{rgb}{0.0, 0.0, 0.8}
+\definecolor{forestgreen}{rgb}{0.13, 0.55, 0.13}
+\definecolor{darkviolet}{rgb}{0.58, 0.0, 0.83}
+\definecolor{royalblue}{rgb}{0.25, 0.41, 0.88}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, let, const, void, while, with, true, false},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  ndkeywords={class, function, export, throw, implements, import, this},
+  sensitive=true,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{codeblack},   
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showlines=false,
+    showtabs=false,                  
+    tabsize=2,
+    emph={},
+    emphstyle=\color{magenta},
+    commentstyle=\color{forestgreen},
+    keywordstyle=\color{magenta},
+    ndkeywordstyle=\color{royalblue}\bfseries,
+    stringstyle=\color{red}\ttfamily,
+}
+
+\lstset{language=JavaScript, style=mystyle, upquote=true }
 
 %% CUSTOM MACROS
 %\newcommand{\tickyes}{{\small\checkmark}}
@@ -143,14 +194,13 @@ This thesis makes the following contributions:
 
 (1) We presented the first tool to detect method-level refactorings applied between two version of JavaScript programs. 
 (2) Our tool JsrMiner can detect a total of 19 refactorings
-(3) We compare JsrMiner with the current state-of-the-art refactoring detection tool: RefDiff 2.0, where an empirical study on 100 commits from 10 open source JavaScript repositories including 3000 true refactorings are performed.
+(3) We compare JsrMiner with the current state-of-the-art refactoring detection tool: RefDiff 2.0, where an empirical study on 100 commits from 10 open source JavaScript repositories including \_ true refactorings are performed.
 (4) \_Efficiency, precision, recall
 
 
 \section{Outline}
 \label{sec:outline}
 The rest of the thesis is structured as follows. \hyperref[chap:relatedWork]{Chapter 2}  provides an overview and discussion of related works. Our approach to automatic detection of the refactorings that occurred between two program versions is presented in Chapter 3. The correctness and completeness of our approach is evaluated in Chapter 4, while the limitations of the proposed approach and threats to the validity of our study are discussed in Chapter 4 respectively. Finally, in Chapter 5, we provide our conclusions and discuss possible related future research.
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -224,16 +274,158 @@ Several studies in the field of software measurement and metric-based code smell
 
 \textbf{Dependence on built project versions} Tools like RefactoringCrawler, RefFinder and UMLDiff requires building the project versions in order to retrieve structural information such as field access, method call, subtyping and overriding etc. To accurately obtain such information in Java projects, a compiler such as eclipse JDT plugin is used to resolve type, variable and method binding information. However this approach is severely limited by the fact that most commits are not compilable \cite{Tufano2017}. As a result, these tools may not be suitable for performing large-scale refactoring detection in the entire commit hisoty of a project.
 
-\textbf{Incomplete oracle:} Calculating the true recall for refactoring detection studies has always been very challenging and debatable since it is hard to identify all the refactorings have been performed in commit. Inspecting commit messages has been proved to be an unreliable indicator of refactorings in a commit as developers do not always mention them in the commit message \cite{MurphyHill2012}. Moreover, Moreno et al. \cite{laura2017arena} found out that only 21\% of the release notes include information about refactoring operations by manually inspecting 990 release notes from 55 open source projects. Last but not the least, analyzing each file manually for identifying performed refactorings is time intensive and requires expertise and does not guarantee of finding all the refactorings. 
+\textbf{Incomplete oracle:} Calculating the true recall for refactoring detection studies has always been very challenging and debatable since it is hard to identify all the refactorings have been performed in a commit. Inspecting commit messages has been proved to be an unreliable indicator of presence refactorings as developers do not always mention them in the commit message \cite{MurphyHill2012}. Moreover, Moreno et al. \cite{laura2017arena} found out that only 21\% of the release notes include information about refactoring operations by manually inspecting 990 release notes from 55 open source projects. Last but not the least, analyzing each file manually for identifying performed refactorings is time intensive and requires expertise and does not guarantee of finding all the refactorings. 
 
 \textbf{Java Based Literature:} Majority of the existing approaches support only Java systems. In fact, to the best of our knowledge no other tool can detect refactorings in JavaScript ecosystem except RefDiff 2.0. Even so, because of the nature of its detection methodology, RefDiff 2.0 cannot detect method level refactorings such as rename variable, add parameter etc.
 
-%\paragraph{SDsadsa}
-
 %%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Then}
+\chapter{Approach}
+
+In this chapter, we present our approach to detecting refactorings between any two source codes.
+
+\section *{Overview}
+
+Similar to RefactoringMiner, JsrMiner can take a commit of a java project as input. A commit contains the changed, added, or removed files between the before and the after versions of the source code of a project. Additionally, JsrMiner can take any two source directories or code snippets as input and returns the detected refactorings between the two sources. The whole process can be divided into 5 general steps: 1) Source Code Extraction 2) Modeling Code Elements, 3) Matching code Elements, 4) Applying Refactoring Heuristics and 5) Determining the Best Refactoring Candidate.
+
+%Source Model Creation and Refactoring Detection It supports the detection of 15 refactoring types for 4 different kinds of code elements, as shown in Table 1. This is a representative set of refactoring types, because it covers all structural code elements (i.e., packages, types, methods, and fields), and also covers control-flows
+%of program statements (e.g., Extract and Inline Method).
 
 
+\section {Source Code Extraction}
+Extracting the source code efficiently and then representing it by a useful source model is itself often a challenging task. Supersets of JavaScript such as TypeScript, JSXElements can be trans-piled\footnote{Transpilation: Conversion of source code written in one language to another language} into JavaScript code and are often found intermixed in vanilla JavaScript source files which further complicates the parsing task.
+
+We have chosen Babel\footnote{https://babeljs.io/} as our source code parser. Babel is the most popular JavaScript compiler/transpiler that can handle any modern JavaScript syntaxes (e.g. class). Babel library is written in JavaScript therefore we needed a way to execute Babel in a JavaScript environment (i.e. NodeJs\footnote{nodejs. org}).
+
+Since RefactoringMiner is written in Java, for potential reusability we chose to develop JsrMiner in Java as well. Therefore we have used J2V8\footnote{https://github.com/eclipsesource/J2V8} - a JavaScript engine /executor for Java. We had chosen J2V8 because it is one of the most performant ones and has been successfully used by RefDiff 2.0\cite{Silva2020}. Moreover, we have also tried Google Closure Compiler\footnote{https://github.com/google/closure-compiler} which is written in Java and thus much faster than executing Babel in a virtual environment from a Java project. Unfortunately, it cannot correctly parse JavaScript files which have intermixed supersets of JavaScript or modern JavaScript syntaxes such as arrow functions, class declaration, etc.
+
+For detecting refactoring between two directories we consider all the JavaScript files of each revision. On the other hand for git repository-based comparison we only process the added, modified, or removed files in the specific input commit. Analyzing only the changed files improves accuracy and performance since it reduces the number of identical files and elements to be matched. In both cases, we only consider files with .js extension to filter out vanilla JavaScript files. Still, these files may contain TypeScript or even HTML-based source code, and using Babel, JsrMiner process only the portion of the code that contains pure JavaScript code.
+
+This phase finishes by returning a list of JavaScript source files with their content that would be processed in the subsequent steps.
+
+\section {Source Model Creation}
+In this phase, JsrMiner parses source code files and returns two corresponding Java source code models which represent the first and second versions of the input.
+
+Each program model contains a list of SourceFile models representing the input JavaScript files from the first step. For each source file, we extract the following information by traversing its Abstract Syntex Tree (AST) using Babel -
+
+\begin{itemize}
+\item \textbf{Function:} In JavaScript, a function can be either a declaration or an expression (when used in a statement). Since RefactoringMiner models anonymous class declaration of Java, the function expressions are treated in a similar fashion. In addition to the name, we extract the name of the parameters and the statements inside the body of a function. 
+
+\item \textbf{Class:} Classes are a syntactic sugar of legacy JavaScript functional constructor. It contains field declarations and methods. In addition, it can have an inheritance relationship to another class. Class declarations can be also used in a statement in which case it's considered as a class expression similar to the Anonymous Class declaration of Java-based Refactoring Miner.
+
+\item \textbf{Object Literal:} In JavaScript, object literals are structurally very similar to class declarations and therefore treated as such.
+
+\item \textbf{Single Statement:}
+Single Statements or Leaf Statements contains no nested statements inside (e.g. let x = 1;). We extract and categorize all the elements such as variable names, literals, array access, function invocations, anonymous classes/function expressions that appear in a single statement It is associated with all the elements it contains, its parent method (if any), its original AST in a text representation, as well as its depth and the index in the AST.
+
+\item  \textbf{Block Statement}
+A Block statement is a composite statement that contains the same attributes as a single statement. However, a Block Statement may contain a body that consists of other statements. For example, Try, For, If are all Block Statements. In addition, in JavaScript, a BlockStatement may contain function or class declarations.
+\end{itemize}
+
+In JsrMiner, we introduced an additional layer of abstraction for functions, classes, and objects named \textit{Container} which keeps a reference to its parent container (if any) and its \textit{statements}, and \textit{declarations}. Because, unlike Java, in JavaScript, a function declaration can contain other function declarations, class declaration, object declaration, and vice versa. Besides, in JavaScript, these Containers can be assigned and used as variables. Note that RefactoringMiner does not consider these two frequent patterns of JavaScript programs and thus JsrMiner cannot detect the majority of the refactorings which has nested function declarations.
+
+
+
+\subsubsection *{Example Representation}
+
+\begin{lstlisting}[language=JavaScript, caption=Example JavaScript Code Snippet, numbers=none, label={lst:examplecode}]
+var math;
+
+math.sum = function (a, b) {
+    return a + b;
+};
+
+function main() {
+    const result = sum(10, 20);
+    print(result);
+    function print(text) {
+        console.log(text);
+    }
+}
+
+
+
+\end{lstlisting}
+\label{fig:jobInformationDialog}
+
+The example code snippet on ~\ref{lst:examplecode} is modeled as a \textit{File Container} with the following properties.
+
+\begin{enumerate}
+\item List of Function Declarations \textbf{FDs} = \{main\}
+\item List of Single Statements \textbf{LSs} = \{var math, math.sum = function...\}
+\item List of Block Statements \textbf{BSs} = \{\}
+\item List of Function Expressions \textbf{FEs} = \{\}
+\end{enumerate}
+
+\section {Matching code Elements}
+This phase takes the two program models from the previous step and identifies the matched and unmatched elements between the two versions. Each program models are consist of a list of source file models which contain various code elements.
+
+\textbf{Source File Models Matching:} 
+Between the versions, source files can either be moved, renamed, moved, and renamed or remain the same.
+
+\begin{algorithm}
+\caption{Source File Models Matching}\label{alg:algo1}
+\SetKwInOut{KwIn}{Input}
+\SetKwInOut{KwOut}{Output}
+
+\KwIn{Two Lists of Source File Models $S_{1}$ and $S_{2}$.}
+\KwOut{Set MS of matched source models, Sets of unmatched nodes $U_{S1}$, $U_{S2}$ from $S_{1}$ and $S_{2}$, respectively}
+
+$M_{S} \gets \phi$, $U_{S1} \gets \phi$, $U_{S2} \gets \phi$\;
+
+$newList = [\ ]$
+\end{algorithm}
+
+JsrMiner first tries to match each source file model of version one with source file models from version two by their qualified name (i.e. directory path and filename without extension). If the corresponding file is found on the second version, they are added to a list of common files. If they are not found, it's added to a list of removed files. Reversely, if a file from the second version cannot be matched, it is added to a list of added files. Thus, this step returns lists of common and unmatched files.
+
+Next, it tries to match the moved files with equal filenames but in different directories. It also utilizes any rename file hint available by the input commit. The algorithm tries to exactly match the name of classes, functions inside the pair of candidate files up to a nesting depth of 3. Then, a similar approach is used for renaming files detection where the file name is different in the same directory.
+
+Lastly, for each pair of common source files, the declared container elements and directly written statements (i.e. script) are matched.
+
+\textbf{Container Matching:} 
+The container elements are matched in a round-based fashion. In the first round, the class and function declarations are matched by their qualified name (i.e. parent container name and its name). Similar to the previous step they are added to the initial lists of matched, removed or added containers based on the comparison of their names. Note that functions are matched with functions only and classes are matched with classes only. Since anonymous classes and function expressions are part of a single statement or expression they are matched during statement matching.
+
+For each matched container elements (i.e. function or class declarations)
+
+The body of Each container element can contain Leaf Statements, Block Statments, class or function declaration and in rare cases function or class expressions. Thus to we consider all of these to determine if two functions are equivalent or not.
+
+-- SHOW BODY OF A CONTAINER
+
+\textbf{Leaf Matching:}
+
+_ Leaf Statement and expressions are the backbone of our algorithm as they help matching other elemenets such as block statemnt or a the body of container element. We followed the samee technique described in refactoring miner 2.0 paper.
+
+One thing noticable is that because of the lavenshtein distance calculation the anonynomu classes and functions are matched differently when they are part of the statement. We do a round based technicuqe as refactoring miner does checking before actually matching.
+
+
+- Expression matching
+
+Expressions are the body 
+- abstraction
+- for loop example
+- Diagram
+
+- Composite matching
+- Passed back to the previous one
+For modules, classes, and
+methods/functions, we use the following heuristics to decide
+whether two code elements in two revisions match:
+
+\subsection *{D. Applying Refactoring Heuristics}
+\subsection *{E. Determining the Best Refactoring Candidate}
+
+\chapter{Evaluation}
+
+1. We Run latest version of RefDiff on the commits found in their data.csv files and union of refdiff evaulation file
+2. We run both tools with the commits and the documented commits as well
+3. At first we considered INTERNAL_MOVES (Give 1-2 examples) but they were noisty and no tparitcallury supported by jsrminer. So in our evaulation we ommited those. Sometimes internal moves are reported by REFDIFF but not very good
+3. E.G ChartJS has 
+4. D3 has 2 commits mentioning refactorings but neither tools reported one.
+5. We have found the some of the reported refacotrings mentione din the paper evaluation data was not produced by refdiff tool even with the commit around TSe
+6. So we ran the latest version of the tool
+\section{Limitation}
+
+1. Cannot process nodes like default parameter value
+2. 
 %%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conclusion and future work}
 \label{chap:conclusion}

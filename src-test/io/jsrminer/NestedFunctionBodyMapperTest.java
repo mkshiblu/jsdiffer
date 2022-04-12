@@ -27,7 +27,7 @@ public class NestedFunctionBodyMapperTest extends BaseTest {
 
     @Test
     void testRefactoringCount() {
-        assertEquals(1, refactorings.size());
+        assertEquals(2, refactorings.size());
     }
 
     @Test
@@ -50,7 +50,7 @@ public class NestedFunctionBodyMapperTest extends BaseTest {
         var first = iterator.next();
 
         assertTrue("d".equals(first.function1.getName()));
-        assertTrue("d".equals(first.function2.getName()));
+        assertTrue("d2".equals(first.function2.getName()));
     }
 
     @Test
