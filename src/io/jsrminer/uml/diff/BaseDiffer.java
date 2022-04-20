@@ -22,39 +22,39 @@ public abstract class BaseDiffer<T extends IContainer> {
     public static final double MAX_OPERATION_NAME_DISTANCE = 0.4;
 
     protected void updateMapperSet(TreeSet<FunctionBodyMapper> mapperSet, FunctionDeclaration removedOperation
-            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff<T> containerDiff) {
-        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, containerDiff);
+            , FunctionDeclaration addedOperation, int differenceInPosition, ContainerDiff<T> sourceDiff) {
+        FunctionBodyMapper operationBodyMapper = new FunctionBodyMapper(removedOperation, addedOperation, sourceDiff);
 
         List<CodeFragmentMapping> totalMappings = new ArrayList<>(operationBodyMapper.getMappings());
         int mappings = operationBodyMapper.mappingsWithoutBlocks();
         if (mappings > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation, containerDiff.container1, containerDiff.container2);
-            if (exactMappings(operationBodyMapper, containerDiff)) {
+            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation, sourceDiff.container1, sourceDiff.container2);
+            if (exactMappings(operationBodyMapper, sourceDiff)) {
                 mapperSet.add(operationBodyMapper);
             } else if (mappedElementsMoreThanNonMappedT1AndT2(mappings, operationBodyMapper)
                     && absoluteDifferenceInPosition <= differenceInPosition
-                    && compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition, containerDiff.getContainer1(), containerDiff.getContainer2())
+                    && compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition, sourceDiff.getContainer1(), sourceDiff.getContainer2())
                 //&& removedOperation.testAnnotationCheck(addedOperation)
             ) {
                 mapperSet.add(operationBodyMapper);
             } else if (mappedElementsMoreThanNonMappedT2(mappings, operationBodyMapper
-                    , new ArrayList<>(containerDiff.getAddedOperations())
+                    , new ArrayList<>(sourceDiff.getAddedOperations())
             ) && absoluteDifferenceInPosition <= differenceInPosition
-                    && isPartOfMethodExtracted(removedOperation, addedOperation, containerDiff.getAddedOperations())
+                    && isPartOfMethodExtracted(removedOperation, addedOperation, sourceDiff.getAddedOperations())
                 //        && removedOperation.testAnnotationCheck(addedOperation)
             ) {
                 mapperSet.add(operationBodyMapper);
             } else if (mappedElementsMoreThanNonMappedT1(mappings, operationBodyMapper
-                    , new ArrayList<>(containerDiff.getRemovedOperations()))
+                    , new ArrayList<>(sourceDiff.getRemovedOperations()))
                     && absoluteDifferenceInPosition <= differenceInPosition
-                    && isPartOfMethodInlined(removedOperation, addedOperation, containerDiff.getRemovedOperations())
+                    && isPartOfMethodInlined(removedOperation, addedOperation, sourceDiff.getRemovedOperations())
                 //                && removedOperation.testAnnotationCheck(addedOperation)
             ) {
                 mapperSet.add(operationBodyMapper);
             }
         } else {
 
-            Set<MethodInvocationReplacement> consistentMethodInvocationRenames = findConsistentMethodInvocationRenames(containerDiff);
+            Set<MethodInvocationReplacement> consistentMethodInvocationRenames = findConsistentMethodInvocationRenames(sourceDiff);
             for (MethodInvocationReplacement replacement : consistentMethodInvocationRenames) {
                 if (replacement.getInvokedOperationBefore().matchesOperation(removedOperation) &&
                         replacement.getInvokedOperationAfter().matchesOperation(addedOperation)) {
@@ -64,49 +64,13 @@ public abstract class BaseDiffer<T extends IContainer> {
             }
         }
         if (totalMappings.size() > 0) {
-            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation, containerDiff.container1, containerDiff.container2);
-            if (singleUnmatchedStatementCallsAddedOperation(operationBodyMapper, containerDiff) &&
+            int absoluteDifferenceInPosition = computeAbsoluteDifferenceInPositionWithinClass(removedOperation, addedOperation, sourceDiff.container1, sourceDiff.container2);
+            if (singleUnmatchedStatementCallsAddedOperation(operationBodyMapper, sourceDiff) &&
                     absoluteDifferenceInPosition <= differenceInPosition &&
-                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition, containerDiff.getContainer1(), containerDiff.getContainer2())) {
+                    compatibleSignatures(removedOperation, addedOperation, absoluteDifferenceInPosition, sourceDiff.getContainer1(), sourceDiff.getContainer2())) {
                 mapperSet.add(operationBodyMapper);
             }
         }
-
-        if (mapperSet.isEmpty() && operationBodyMapper.getNestedFunctionDeclrationMappings().size() > 0) {
-            if (isNestedFunctionMappersMatched(operationBodyMapper)) {
-                mapperSet.add(operationBodyMapper);
-            }
-        }
-    }
-
-
-    private boolean isNestedFunctionMappersMatched(FunctionBodyMapper bodyMapper) {
-        boolean isMatched = false;
-        List<FunctionBodyMapper> nestedBodyMappers = new ArrayList<>(bodyMapper.getNestedFunctionDeclrationMappings());
-        int functionMappings = nestedBodyMappers.size();
-        var nonMappedNestedFunctionsT1 = bodyMapper.getNonMappedNestedFunctionDeclrationsT1().size();
-        var nonMappedNestedFunctionsT2 = bodyMapper.getNonMappedNestedFunctionDeclrationsT2().size();
-
-        if (functionMappings > 0) {
-            int nonMappedFunctionsAndLeavesT1 = nonMappedNestedFunctionsT1 + bodyMapper.getNonMappedLeavesT1().size();
-            int nonMappedFunctionsAndLeavesT2 = nonMappedNestedFunctionsT2 + bodyMapper.getNonMappedLeavesT2().size();
-
-            boolean mappedFunctionsAndLeavesGreaterThanNonMappedFunctionsAndleaves =
-                    (bodyMapper.mappingsWithoutBlocks() + functionMappings) >= nonMappedFunctionsAndLeavesT1
-                    || (bodyMapper.mappingsWithoutBlocks() + functionMappings) >= nonMappedFunctionsAndLeavesT2;
-
-            if (mappedFunctionsAndLeavesGreaterThanNonMappedFunctionsAndleaves) {
-                boolean mappedNestedFunctionsMoreThanNonMappedT1AndT2 =
-                        (functionMappings > nonMappedNestedFunctionsT1 && functionMappings > nonMappedNestedFunctionsT2) ||
-                                (nonMappedNestedFunctionsT1 == 0 && functionMappings > Math.floor(nonMappedNestedFunctionsT2 / 2.0)) ||
-                                (functionMappings == 1 && nonMappedNestedFunctionsT1 + nonMappedNestedFunctionsT2 == 1 && bodyMapper
-                                        .function1.getName().equals(bodyMapper.function2.getName()));
-
-                isMatched = mappedNestedFunctionsMoreThanNonMappedT1AndT2;
-            }
-        }
-
-        return isMatched;
     }
 
     protected int computeAbsoluteDifferenceInPositionWithinClass(FunctionDeclaration removedOperation

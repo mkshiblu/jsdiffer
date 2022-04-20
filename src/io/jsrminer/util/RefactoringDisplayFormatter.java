@@ -6,7 +6,6 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 
 import java.util.List;
-import java.util.Locale;
 
 public class RefactoringDisplayFormatter {
     private static class AfterBeforeInfo {
@@ -40,7 +39,7 @@ public class RefactoringDisplayFormatter {
     }
 
     public static String getHeader() {
-        return "project\tcommit_id\trefactoring_type\tname_before\tname_after\tlocation_before\tlocation_after\tdescription";
+        return "project\tcommit_Id\tRefactoring_Type\tName_Before\tName_After\tLocation_Before\tLocation_After\tRefactoring";
     }
 
     public static String generateDisplayStringForRefactorings(String project, String commitId, List<IRefactoring> refactorings, boolean printHeader) {
@@ -64,7 +63,7 @@ public class RefactoringDisplayFormatter {
     }
 
     public static StringBuilder format(IRefactoring refactoring, StringBuilder builder) {
-        builder.append(refactoring.getRefactoringType().toString().toUpperCase().replace("OPERATION", "FUNCTION").replace("METHOD", "FUNCTION"));
+        builder.append(refactoring.getRefactoringType().toString().replace("METHOD", "FUNCTION").replace("OPERATION","FUNCTION"));
         builder.append("\t");
         var afterBeforeInfo = RefactoringDisplayFormatter.formatAsAfterBefore(refactoring);
         builder.append(afterBeforeInfo);
@@ -113,9 +112,7 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(renameFunctionRefactoring.getRenamedOperation().getSourceLocation())
                 );
                 break;
-            case PARAMETERIZE_VARIABLE:
             case RENAME_VARIABLE:
-            case RENAME_PARAMETER:
                 var renameVariableRefactoring = (RenameVariableRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
                         renameVariableRefactoring.getOriginalVariable().variableName
@@ -137,10 +134,10 @@ public class RefactoringDisplayFormatter {
             case INLINE_OPERATION:
                 var inlineOperationRefactoring = (InlineOperationRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
-                        inlineOperationRefactoring.getInlinedOperation().getName()
-                        , inlineOperationRefactoring.getTargetOperationAfterInline().getName()
+                        inlineOperationRefactoring.getTargetOperationBeforeInline().getName()
+                        , inlineOperationRefactoring.getInlinedOperation().getName()
+                        , getLocationString(inlineOperationRefactoring.getTargetOperationBeforeInline().getSourceLocation())
                         , getLocationString(inlineOperationRefactoring.getInlinedOperation().getSourceLocation())
-                        , getLocationString(inlineOperationRefactoring.getTargetOperationAfterInline().getSourceLocation())
                 );
 
                 break;
@@ -161,22 +158,10 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(renameFile.getOriginalFile().getSourceLocation())
                         , getLocationString(renameFile.getRenamedFile().getSourceLocation())
                 );
-                break;
             case ADD_PARAMETER:
-                var addParameterRefactoring = (AddParameterRefactoring) refactoring;
-                afterBeforeInfo = new AfterBeforeInfo(
-                        ""
-                        , addParameterRefactoring.getParameter().name
-                        , ""
-                        , getLocationString(addParameterRefactoring.getParameter().getSourceLocation()));
-                break;
             case REMOVE_PARAMETER:
-                var removeParameterRefactoring = (RemoveParameterRefactoring) refactoring;
-                afterBeforeInfo = new AfterBeforeInfo(
-                        removeParameterRefactoring.getParameter().name
-                        , ""
-                        , getLocationString(removeParameterRefactoring.getParameter().getSourceLocation())
-                        , "");
+            case RENAME_PARAMETER:
+            case PARAMETERIZE_VARIABLE:
                 break;
             case RENAME_CLASS:
                 var renameClassRefactoring = (RenameClassRefactoring) refactoring;

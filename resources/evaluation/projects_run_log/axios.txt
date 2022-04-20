@@ -1,0 +1,15 @@
+project	commit_Id	Refactoring_Type	Name_Before	Name_After	Location_Before	Location_After	Refactoring
+axios	0e2f4f14171ccd161e85478c7b1aba61c3b431a2	MOVE_FUNCTION	Axios	Axios	lib/axios.js:405-595|(12,0)-(18,1)	lib/core/Axios.js:478-668|(16,0)-(22,1)	Move Method    Axios(defaultConfig) from axios.js to Axios(defaultConfig) at Axios.js
+axios	1629a026da17a1e1d8999a02f3fe6b6b60aaac9c	RENAME_FILE	wrapper.spec.js	headers.spec.js	test/specs/wrapper.spec.js:0-4771|(1,0)-(218,0)	test/specs/headers.spec.js:0-2220|(1,0)-(105,0)	Rename File test/specs/wrapper.spec.js renamed to test/specs/headers.spec.js
+axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	transformData.spec.js	transformData.spec.js	test/specs/helpers/transformData.spec.js:0-687|(1,0)-(31,0)	test/specs/core/transformData.spec.js:0-681|(1,0)-(31,0)	Move File test/specs/helpers/transformData.spec.js to test/specs/core/transformData.spec.js
+axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	settle.js	settle.js	lib/helpers/settle.js:0-568|(1,0)-(19,0)	lib/core/settle.js:0-568|(1,0)-(19,0)	Move File lib/helpers/settle.js to lib/core/settle.js
+axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	transformData.js	transformData.js	lib/helpers/transformData.js:0-550|(1,0)-(21,0)	lib/core/transformData.js:0-550|(1,0)-(21,0)	Move File lib/helpers/transformData.js to lib/core/transformData.js
+axios	203cbc2da0ef0f68d517ba2a6176df1d48efc2fb	MOVE_FILE	settle.spec.js	settle.spec.js	test/specs/helpers/settle.spec.js:0-1905|(1,0)-(76,0)	test/specs/core/settle.spec.js:0-1899|(1,0)-(76,0)	Move File test/specs/helpers/settle.spec.js to test/specs/core/settle.spec.js
+axios	3d65057d7111d7873cf4fad40805cd9ebe327574	RENAME_FILE	urlIsSameOrigin.spec.js	isURLSameOrigin.spec.js	test/specs/helpers/urlIsSameOrigin.spec.js:0-389|(1,0)-(12,0)	test/specs/helpers/isURLSameOrigin.spec.js:0-389|(1,0)-(12,0)	Rename File test/specs/helpers/urlIsSameOrigin.spec.js renamed to test/specs/helpers/isURLSameOrigin.spec.js
+axios	dcbb35226245483930a1f2969927a3b348bb2558	RENAME_FILE	__getAjaxRequest.js	__helpers.js	test/specs/__getAjaxRequest.js:0-661|(1,0)-(29,0)	test/specs/__helpers.js:0-2291|(1,0)-(89,0)	Rename File test/specs/__getAjaxRequest.js renamed to test/specs/__helpers.js
+axios	df6d3ce6cf10432b7920d8c3ac0efb7254989bc4	RENAME_FUNCTION	testProxy	testHTTPProxy	test/unit/adapters/http.js:6983-8070|(251,2)-(287,3)	test/unit/adapters/http.js:6983-8074|(251,2)-(287,3)	Rename Method 1.testProxy(test) renamed to 1.testHTTPProxy(test) at test/unit/adapters/http.js|1.testProxy
+axios	fc12b933f729f236b2149872c42961a8626dafb7	MOVE_FILE	http.js	http.js	test/unit/axios/http.js:0-1071|(1,0)-(44,0)	test/unit/adapters/http.js:0-1071|(1,0)-(44,0)	Move File test/unit/axios/http.js to test/unit/adapters/http.js
+
+23:37:04.207 [main] INFO  io.jsrminer.JSRefactoringMiner - Analyzed axios [Commits: 24, Errors: 0, Refactorings: 10]
+23:37:04.209 [main] INFO  io.jsrminer.JSRefactoringMiner - Total Duration for 24 commits: 21.27 s
+23:37:04.209 [main] INFO  io.jsrminer.Main - -----------------Program Ends--------------------

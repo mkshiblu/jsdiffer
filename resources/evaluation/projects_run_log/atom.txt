@@ -1,0 +1,11 @@
+project	commit_Id	Refactoring_Type	Name_Before	Name_After	Location_Before	Location_After	Refactoring
+atom	062dfdea80861f9c918c99a3f86895f908635862	RENAME_FUNCTION	resetUserScopedSettings	resetScopedSettings	src/config.js:38924-39656|(1228,2)-(1242,3)	src/config.js:38928-39656|(1231,2)-(1245,3)	Rename Method Config.resetUserScopedSettings(newScopedSettings ,options) renamed to Config.resetScopedSettings(newScopedSettings ,options) at src/config.js|Config.resetUserScopedSettings
+atom	062dfdea80861f9c918c99a3f86895f908635862	EXTRACT_FUNCTION	resetUserSettings	_resetSettings	src/config.js:30005-31170|(950,2)-(988,3)	src/config.js:30106-30972|(954,2)-(981,3)	Extract Method Config._resetSettings(newSettings ,options) extracted from Config.resetUserSettings(newSettings ,options) in  Config in file src/config.js
+atom	bf6a4e3db4b28bfe068feb72199746dad98d6a83	ADD_PARAMETER					Add Parameter options in method Config.resetUserScopedSettings(newScopedSettings ,options) atsrc/config.js|Config.resetUserScopedSettings
+atom	bf6a4e3db4b28bfe068feb72199746dad98d6a83	EXTRACT_FUNCTION	getAll	getAllForPriority	src/config.js:18879-19752|(609,2)-(639,3)	src/config.js:20211-21360|(651,2)-(691,3)	Extract Method Config.getAllForPriority(keyPath ,priority) extracted from Config.getAll(keyPath ,options) in  Config in file src/config.js
+atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_CLASS	AtomBackend	NSFWNativeWatcher	src/path-watcher.js:890-3895|(26,0)-(118,1)	src/path-watcher.js:8375-9190|(260,0)-(290,1)	Rename Class AtomBackend renamed to NSFWNativeWatcher
+atom	cb783fd15cea1d06b254799e7af8ff71d7d7ed33	RENAME_VARIABLE	watcher	w	src/path-watcher.js:19306-19371|(579,10)-(579,75)	src/path-watcher.js:20255-20314|(617,10)-(617,69)	Rename Variable watcher to w in PathWatcherManager.createWatcher(rootPath ,options ,eventCallback) at src/path-watcher.js|PathWatcherManager.createWatcher
+
+23:33:15.347 [main] INFO  io.jsrminer.JSRefactoringMiner - Analyzed atom [Commits: 14, Errors: 0, Refactorings: 6]
+23:33:15.349 [main] INFO  io.jsrminer.JSRefactoringMiner - Total Duration for 14 commits: 4.728 min
+23:33:15.350 [main] INFO  io.jsrminer.Main - -----------------Program Ends--------------------
