@@ -149,8 +149,6 @@ public class AnonymousFunctionReplacementFinder {
                 // this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
             }
 
-            this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getAllRefactorings());
-
             // Copy refactorings of operation signature diffs
 //            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
 //                //this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
@@ -162,6 +160,9 @@ public class AnonymousFunctionReplacementFinder {
             // Here attributes are sataements
             //  this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
         }
+
+
+        this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getAllRefactorings());
     }
 
     private boolean createMapperOfFunctionsInsideAnonymous(FunctionDeclaration operation1, FunctionDeclaration operation2) {

@@ -1,0 +1,15 @@
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT TOP (1000) [project]
+      ,[commit_id]
+      ,[refactoring_type]
+      , ISNULL([location_before], '') AS [location_before]
+      , ISNULL([name_before], '') AS [name_before]
+	  , ISNULL([location_after], '') AS [location_after]
+	  , ISNULL([name_after], '') AS [name_after]
+	  , ISNULL([rm_validation], '') AS [rm_validation]
+	  , ISNULL([rd_validation], '') AS [rd_validation]
+	  , ISNULL([comment], '') AS [comment]
+	  , ISNULL([refactoring], '') AS [refactoring]
+	  , ISNULL([Tags], '') AS [Tags]
+  FROM [jsrminer].[dbo].[ChartJSOracle]
+  ORDER BY [commit_id], [refactoring_type], [location_before], [name_before], [location_after], [name_after];
