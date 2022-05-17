@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
+        <Console name="console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
         <RollingFile name="fileLogger" fileName="jsrminer.log"
@@ -16,11 +16,9 @@
     </Appenders>
     <Loggers>
         <Logger name="org.eclipse.jgit" level="ERROR"/>
-        <Root level="DEBUG">
-            <AppenderRef ref="Console"/>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="console" />
+            <appender-ref ref="fileLogger" />
         </Root>
-        <Logger name="io.jsrminer" level="DEBUG">
-            <appender-ref ref="fileLogger" level="DEBUG"/>
-        </Logger>
     </Loggers>
 </Configuration>

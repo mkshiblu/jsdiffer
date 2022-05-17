@@ -93,19 +93,19 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
     public List<IRefactoring> detectAtCommit(String gitRepositoryPath, String commitId) {
         List<IRefactoring> refactorings = null;
         try {
-            StopWatch watch = new StopWatch();
-            watch.start();
+            //StopWatch watch = new StopWatch();
+            //watch.start();
             Repository repository = GitUtil.openRepository(gitRepositoryPath);
             RevCommit commit = GitUtil.getRevCommit(repository, commitId);
             Iterable<RevCommit> walk = List.of(commit);
             refactorings = detect(repository, walk, null);
-            log.info("RefCount: " + refactorings.size());
+            //log.info("RefCount: " + refactorings.size());
 
-            printRefactorings(gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
-                    gitRepositoryPath.length()), commitId, refactorings, true);
+            //printRefactorings(gitRepositoryPath.substring(gitRepositoryPath.lastIndexOf("\\") + 1,
+              //      gitRepositoryPath.length()), commitId, refactorings, true);
 
-            watch.stop();
-            log.info("Time taken: " + watch.toString());
+            //watch.stop();
+           // log.info("Time taken: " + watch.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -235,7 +235,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
         }
 
         handler.onFinish(refactoringsCount, commitsCount, errorCommitsCount);
-        log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
+        //log.info(String.format("Analyzed %s [Commits: %d, Errors: %d, Refactorings: %d]", projectName, commitsCount, errorCommitsCount, refactoringsCount));
         return allRefactorings;
     }
 
@@ -275,7 +275,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
                 log.debug("Time taken for parsing and loading models: " + timer.stop());
 
-                log.info("Detecting refactorings...");
+                log.debug("Detecting refactorings...");
                 UMLModelDiff diff = new UMLModelDiffer(umlModelBefore, umlModelCurrent).diff(renamedFilesHint);
                 refactoringsAtRevision = diff.getRefactorings();
                 //refactoringsAtRevision = filter(refactoringsAtRevision);
@@ -287,7 +287,7 @@ public class JSRefactoringMiner implements IGitHistoryMiner {
 
             walk.dispose();
         }
-        log.info("Duration for commit " + commitId + ": " + commitTimer.stop());
+        log.debug("Duration for commit " + commitId + ": " + commitTimer.stop());
         return refactoringsAtRevision;
     }
 

@@ -779,7 +779,9 @@ public class DeclarationVisitor {
         var declaration = node.get("declaration");
         if (declaration.getType() == BabelNodeType.OPT_CLASS_DECLARATION ||
                 declaration.getType() == BabelNodeType.OPT_FUNCTION_DECLARATION
-                || declaration.getType() == BabelNodeType.FUNCTION_DECLARATION) {
+                || declaration.getType() == BabelNodeType.FUNCTION_DECLARATION
+                || declaration.getType() == BabelNodeType.CLASS_DECLARATION
+        ) {
             var id = declaration.get("id");
             if (id.isDefined()) {
                 visitor.visitExpression(id, leaf, container);
