@@ -86,8 +86,11 @@ public enum BabelNodeType {
     AWAIT_EXPRESSION("AwaitExpression"),
     ASSIGNMENT_PATTERN("AssignmentPattern"),
     TAGGED_TEMPLATE_EXPRESSION("TaggedTemplateExpression"),
+
+    // Flow Types
     DECLARE_MODULE("DeclareModule"),
     DECLARE_FUNCTION("DeclareFunction"),
+    DECLARE_VARIABLE("DeclareVariable"),
     EXPORT_ALL_DECLARATION("ExportAllDeclaration"),
     DEBUGGER_STATEMENT("DebuggerStatement"),
     ;
