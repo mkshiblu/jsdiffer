@@ -70,14 +70,17 @@ public class ExceptionVisitor {
 
         // Treat exception as variable declaration
         var paramNode = node.get("param");
-        var variableDeclaration
-                = this.visitor.getNodeUtil().createVariableDeclarationFromIdentifier(paramNode
-                , VariableDeclarationKind.VAR
-                , composite);
+        if (paramNode.isDefined()) {
+            var variableDeclaration
+                    = this.visitor.getNodeUtil().createVariableDeclarationFromIdentifier(paramNode
+                    , VariableDeclarationKind.VAR
+                    , composite);
 
-        composite.getOwnVariableDeclarations().add(variableDeclaration);
-        Expression exceptionExpression = this.visitor.getNodeUtil().createBaseExpressionWithRMType(paramNode, CodeElementType.CATCH_CLAUSE_EXCEPTION_NAME);
-        visitor.getNodeUtil().addExpressionToBlockStatement(exceptionExpression, composite);
+            composite.getOwnVariableDeclarations().add(variableDeclaration);
+
+            Expression exceptionExpression = this.visitor.getNodeUtil().createBaseExpressionWithRMType(paramNode, CodeElementType.CATCH_CLAUSE_EXCEPTION_NAME);
+            visitor.getNodeUtil().addExpressionToBlockStatement(exceptionExpression, composite);
+        }
 
         // Parse body
         visitor.visitStatement(node.get("body"), composite, container);

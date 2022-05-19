@@ -56,6 +56,7 @@ public class Visitor {
             put(SEQUENCE_EXPRESSION, expressionVisitor.sequenceExpressionVisitor);
             put(TYPE_CAST_EXPRESSION, expressionVisitor.typeCastExpressionVisitor);
             put(SPREAD_ELEMENT, expressionVisitor.spreadElementVisitor);
+            put(YIELD_EXPRESSION, expressionVisitor.yieldExpressionVisitor);
 
             // Invocations
             put(NEW_EXPRESSION, invocationVisitor.newExpressionVisitor);

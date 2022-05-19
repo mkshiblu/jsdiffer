@@ -6,7 +6,6 @@ import io.jsrminer.sourcetree.SourceLocation;
 import io.rminerx.core.api.IContainer;
 
 import java.util.List;
-import java.util.Locale;
 
 public class RefactoringDisplayFormatter {
     private static class AfterBeforeInfo {
@@ -213,6 +212,15 @@ public class RefactoringDisplayFormatter {
                         , moveAndRenameClassRefactoring.getRenamedClassName()
                         , getLocationString(moveAndRenameClassRefactoring.getOriginalClass().getSourceLocation())
                         , getLocationString(moveAndRenameClassRefactoring.getRenamedClass().getSourceLocation())
+                );
+                break;
+            case CHANGE_VARIABLE_KIND:
+                var changeVariableKindRefactoring = (ChangeVariableKindRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        changeVariableKindRefactoring.getOriginalVariable().getKind().keywordName
+                        , changeVariableKindRefactoring.getChangedTypeVariable().getKind().keywordName
+                        , getLocationString(changeVariableKindRefactoring.getOriginalVariable().getSourceLocation())
+                        , getLocationString(changeVariableKindRefactoring.getChangedTypeVariable().getSourceLocation())
                 );
                 break;
             default:

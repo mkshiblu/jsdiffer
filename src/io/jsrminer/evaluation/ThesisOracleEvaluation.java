@@ -7,8 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 
@@ -19,54 +24,62 @@ public class ThesisOracleEvaluation {
 
     public Map<String, String[]> projectRandomCommmitMap = new LinkedHashMap<>();
     public Map<String, Long> commitRunTime = new LinkedHashMap<>();
-    public Map<String, String> projectRepoPathMap = Map.ofEntries(
-            entry("angular.js", "E:\\PROJECTS_REPO\\angular.js"),
-            entry("atom", "E:\\PROJECTS_REPO\\atom"),
-            entry("axios", "E:\\PROJECTS_REPO\\axios"),
-            entry("Chart.js", "E:\\PROJECTS_REPO\\chart-js")
-            , entry("create-react-app", "E:\\PROJECTS_REPO\\create-react-app")
-            , entry("d3", "E:\\PROJECTS_REPO\\d3")
-            , entry("express", "E:\\PROJECTS_REPO\\expressjs")
-            , entry("jquery", "E:\\PROJECTS_REPO\\jquery")
-            , entry("material-ui", "E:\\PROJECTS_REPO\\material-ui") //exp
-            , entry("meteor", "E:\\PROJECTS_REPO\\meteor")
-            , entry("react", "E:\\PROJECTS_REPO\\react") //exp
-            , entry("react-native", "E:\\PROJECTS_REPO\\react-native")
-            , entry("redux", "E:\\PROJECTS_REPO\\redux")
-            , entry("reveal.js", "E:\\PROJECTS_REPO\\reveal.js")
-            , entry("Semantic-UI", "E:\\PROJECTS_REPO\\Semantic-UI")
-            , entry("socket.io", "E:\\PROJECTS_REPO\\socket.io")
-            , entry("three.js", "E:\\PROJECTS_REPO\\three.js")
-            , entry("vue", "E:\\PROJECTS_REPO\\vue")
-            , entry("webpack", "E:\\PROJECTS_REPO\\webpack")
-    );
+    public Map<String, String> projectRepoPathMap = new LinkedHashMap<>();
 
+
+    private void createProjectRepoMap() {
+        projectRepoPathMap.put("angular.js", "E:\\PROJECTS_REPO\\angular.js");
+        projectRepoPathMap.put("atom", "E:\\PROJECTS_REPO\\atom");
+        projectRepoPathMap.put("axios", "E:\\PROJECTS_REPO\\axios");
+        projectRepoPathMap.put("Chart.js", "E:\\PROJECTS_REPO\\chart-js");
+        projectRepoPathMap.put("create-react-app", "E:\\PROJECTS_REPO\\create-react-app");
+        projectRepoPathMap.put("d3", "E:\\PROJECTS_REPO\\d3");
+        projectRepoPathMap.put("express", "E:\\PROJECTS_REPO\\expressjs");
+        projectRepoPathMap.put("jquery", "E:\\PROJECTS_REPO\\jquery");
+        projectRepoPathMap.put("material-ui", "E:\\PROJECTS_REPO\\material-ui"); //exp
+        projectRepoPathMap.put("meteor", "E:\\PROJECTS_REPO\\meteor");
+        projectRepoPathMap.put("react", "E:\\PROJECTS_REPO\\react"); //exp
+        projectRepoPathMap.put("react-native", "E:\\PROJECTS_REPO\\react-native");
+        projectRepoPathMap.put("redux", "E:\\PROJECTS_REPO\\redux");
+        projectRepoPathMap.put("reveal.js", "E:\\PROJECTS_REPO\\reveal.js");
+        projectRepoPathMap.put("Semantic-UI", "E:\\PROJECTS_REPO\\Semantic-UI");
+        projectRepoPathMap.put("socket.io", "E:\\PROJECTS_REPO\\socket.io");
+        projectRepoPathMap.put("three.js", "E:\\PROJECTS_REPO\\three.js");
+        projectRepoPathMap.put("vue", "E:\\PROJECTS_REPO\\vue");
+        projectRepoPathMap.put("webpack", "E:\\PROJECTS_REPO\\webpack");
+    }
 
     public static void main(String[] args) {
         var evaluator = new ThesisOracleEvaluation();
         evaluator.createMap();
-        evaluator.RunAll();
+        evaluator.createProjectRepoMap();
+        //evaluator.runAll();
+        evaluator.run("three.js", allProjectCommits);
+        //evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
     }
 
-    public void RunRandomized() {
+    public void runRandomized() {
         builder.setLength(0);
         for (var project : projectRepoPathMap.keySet()) {
-            Run(project, projectRandomCommmitMap);
+            run(project, projectRandomCommmitMap);
         }
         log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
-        printCommitRuntime();
+        printCommitRuntime("random");
     }
 
-    public void RunAll() {
+    public void runAll() {
         builder.setLength(0);
+        log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n");
         for (var project : projectRepoPathMap.keySet()) {
-            Run(project, allProjectCommits);
+            run(project, allProjectCommits);
+            log.info(builder.toString() + "\n");
+            builder.setLength(0);
         }
-        log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
-        printCommitRuntime();
+        //log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
+        printCommitRuntime("all");
     }
 
-    public void Run(String project, Map<String, String[]> projectCommmitMap) {
+    public void run(String project, Map<String, String[]> projectCommmitMap) {
         var repoPath = projectRepoPathMap.get(project);
         var commitIds = projectCommmitMap.get(project);
 
@@ -80,6 +93,33 @@ public class ThesisOracleEvaluation {
             String commitStr = RefactoringDisplayFormatter.generateDisplayStringForRefactorings(project, commitId, refactorings, false);
             builder.append(commitStr);
         }
+
+        log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n");
+        var result = builder.toString();
+        log.info(result + "\n");
+        printCommitRuntime(project);
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(RefactoringDisplayFormatter.getHeader() + "\n");
+            sb.append(result);
+            Files.writeString(Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt"), sb.toString(), StandardOpenOption.CREATE);
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public void run(String project, String commitId) {
+        var repoPath = projectRepoPathMap.get(project);
+        watch.start();
+        var refactorings = new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+        watch.stop();
+        commitRunTime.put(commitId, watch.getTime());
+        watch.reset();
+        String commitStr = RefactoringDisplayFormatter.generateDisplayStringForRefactorings(project, commitId, refactorings, false);
+        builder.append(commitStr);
+        log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
+        printCommitRuntime(project);
     }
 
     public void createMap() {
@@ -134,10 +174,19 @@ public class ThesisOracleEvaluation {
         });
     }
 
-    void printCommitRuntime() {
+    void printCommitRuntime(String project) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("commit_id\tms\n");
         System.out.println("\n\ncommit_id\tms");
         for (var entry : commitRunTime.entrySet()) {
             System.out.println(entry.getKey() + "\t" + entry.getValue());
+            builder.append(entry.getKey()+ "\t" + entry.getValue() + "\n");
+        }
+        try {
+
+        Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), builder.toString(), StandardOpenOption.CREATE);
+        }catch (Exception ex){
+            throw  new RuntimeException(ex);
         }
     }
 
@@ -161,5 +210,5 @@ public class ThesisOracleEvaluation {
             entry("three.js", new String[]{"01b263d3362f8bab63dc26b04e4a7ac1fb1d2641", "06903c44a2d9c8cb0a57373999e0596aa51d5627", "06ba5ebad10fc6d7192b0c522fc4941c2807d416", "27a5b9a172a532c54e9ad75bdaa7434652409198", "2a808c6e455c5053536a3caf7a9dac48dee13c03", "35ae830a7c4544582ed2759e5b18c5d6ef37c6d9", "5a1fb62e49d796cff22e1bf848f363aaedbef9fe", "5ed9d6cf803c4283c948c6c47ff278f6ecb22d0d", "6d916aed6b31f4d860efb52f6b94e3d3ce49d1ba", "73f083710d64acb493f55ba2c07e24c5a7f62899", "7f0a1234c2d6726f625740595455ff5274f7d5f6", "847ecb4d678f9f40b31dd7139bc40b2cffa34830", "8e8589c88105b4f9258867f61aadd70c9fccffaa", "99d5b58a771fc09377d7393e913fc641f5d9aece", "a4b52f8cb5569c69d3801e5b4ba236cd75fdfde9", "a879d8d05be150ba3f2790be6212d92215558269", "b55374012d1842c3c536b757adc7ad9ff5caa68d", "ba4489ded66212ac9e6d3017a6bb856023bd026f", "c209347254eff973802088c7e4e336490db2597e", "c9bb04c1b000b02c153b71ace001b9cae5872fcc", "ca803d97c0e4fab6eadd3f745f3068443e8ca1f4", "cb9dc432ac2e4c2fb586f3131ce2a0e1376a28a1", "cc3d60f8d860326264ca7416b25ffca5386a9a27", "e6c13503ac9a467f78bfe39f7a2c8fe4219308ec", "f0e7bdc1de54a1b896089d819872111a86aa4185", "f3f33b5c5a661c04062cd0b8bf98f74d85e2abb7"}),
             entry("vue", new String[]{"015a31890250e93564959de97372be7bd6195f62", "050bb33f9b02589357c037623ea8cbf8ff13555b", "09106f066a1ba71431e4f9f26246aaf619153e2e", "0c11aa8addf5ad852e37da358ce2887af72e4193", "0c9534ff0069b5289ea9598bcb4f5e5ac346c979", "144a4dd860b20ca48263bac150286f627e08d953", "1a979c44d6543d89f8a7e26ad7f995b1bf2aee3c", "1c8e2e88ed2d74a02178217b318564b73a096c18", "1dd6b6f046c3093950e599ccc6bbe7a393b8a494", "215f877d1b7eb6583f7adf15676ead8611f07379", "230c6ae7822347b9b2a659503291e45fcc58fe41", "2b3e1a0a964c21d405f67479a9960c2d00f235b4", "2b5c83af6d8b15510424af4877d58c261ea02e16", "2e0f6d5d817957ab23819f90b264243d87ef968c", "318f29fcdf3372ff57a09be6d1dc595d14c92e70", "3932a451a1419a97ea0200c5cb8096afe9a3e7e7", "3b32652aa68a06d881e3149bb21ac8711887e7f6", "3d14e855e422b656859d1b419af43b94320fcfce", "3ee62fd59e20030dd63c08c2390e803d034928fe", "41d774d112946f986bf0b0e3f30fd962c01ceba2", "46c8016562c3a9308fcf45d31a5a674312e2c110", "4d8226fb2c84fa2e13a2d8a86dea8a9a5c6ea95f", "4e0c48511d49f331fde31fc87b6ca428330f32d1", "50b711af43708426e63b4ea529436b49fafc3f2e", "514b90b64770cba9f905d2dff59dfa0e064e580c", "55a719c93aeffb8176fcc7193aa3a813cac3099d", "5db86b4e94857fdde3ae6b71e24da637bc116baa", "60da366a2653a3984d79331d02ebb2ecf7e73a9a", "62265035c0c400ad6ec213541dd7cca58dd71f6e", "62e47c9eb4446da79d66ad2385c199f31b4348d8", "644274cbd34e14e74e8931fa979b22dc2db04895", "653aac2c57d15f0e93a2c1cc7e6fad156658df19", "679cd1fef448989bf645313c391e4134ecd9f593", "68934997444c0047c49e419761dfad7fbc043a5d", "6bc75cacb72c0cc7f3d1041b5d9ff447ac2f5f69", "6d6b3739e132723915bc2209663db1b825307865", "6dac3dbe441302cebb945b675f78f8e7247e2a97", "711aaf71bb126fb5a0dd3ab032a7793a74918f02", "7ad368ebb6987bd4044f9df184d73ce14ca680f2", "8335217cb4bd13fb07e08a76c07df0fceed6c197", "882e7199fd8eee039291c4b9f7f324dcf46f32fd", "88423fc66a2a4917dcdb7631a4594f05446283b1", "88f3889f19678981944339be8d22c3ebcd11f822", "8936b8d9c147441555fcfd4ac748d817ba5ff60e", "8b893c13d6ffa79f294fec76a228509ec48e4706", "90891709708e8ebdc1522eed678a49eb9f312fda", "90ed48224e0ae281a2579b997e4bd5a150b80413", "956756b1be7084daf8b6afb92ac0da7c24cde2a5", "984927a1a98d10ad8af44f2accfb08d34d517610", "9bded22a83b6fb9a89a32009e7f47f6201e167a3", "9edcc6b6c7612efc15e4bfc5079279533190a2f2", "a08feed8c410b89fa049fdbd6b9459e2d858e912", "a23b913796a7d18e76185607f250655e18a390c8", "a32490f27dbc2994c456e2c9ab183630d3b42a21", "a43d66743be2bd62b2398090663e41eeaf0dc75f", "ae07fedf8ab00a000db56a155f2e2fdaa6daeff2", "b0f00e31e7d06edfdc733e2e7f24d5ca448759f9", "b3cd9bc3940eb1e01da7081450929557d9c1651e", "b5cc8b9e935897184ac43119bf5fbeca606f4b6a", "b60964256c876de2516977c776201ef56ab13fb7", "bc2918f0e596d0e133a25606cbb66075402ce6c3", "bc719405c084afb5dd4168413d880a4b801e234f", "c104cc582d647f5e10b90563cb80907b9e30ec12", "cf1ff5b0dc3d15c1e16821cb5e4fc984c74f07c1", "d6e6f1deb180a4f47e94496724623b9e6d8e08b3", "dae173d96d15f47de6ce6961354d5c05e4273005", "dbf15103f797a54f41288af2a393b1e8ccee0aec", "dc2171a33a38d0563ef14934b078d9dc4c39acf3", "df82aeb0bf7454ac99d403000a1ac993e8d8d4de", "e9ea565d915cdffbad17bb78aa30af752dd4e5e6", "ea0d227d2ddfa5fc5e1112acf9cd485b4eae62cb", "ef432c6e86d34d891034fd7668a85793be4a2607", "f3fe012d5499f607656b152ce5fcb506c641f9f4", "fd0c4f5a6c9324a4943fe6e7f47bde8a05b4996d"}),
             entry("webpack", new String[]{"17eb5b47009b925901f6489df77ba1092d5d254b", "1e4b1c72125e826aba32e99d62464db4613ed64f", "1e4d2b7fe71a2633df6816b82411402136064159", "214801493ed33f3ee91215f45c38408327516a86", "21e1e6f8d5ec994d1b5583b524278ff33c573ada", "35130585ae6a7a346234c27ba379a4280006452c", "42c0214254df5ade315daf4a51580f0424a1792f", "4b1a76bdb00ebf89b977c2cc1199870d0c180c72", "53103a9690d653daf1de405756f5638999c36f22", "53d26bfc963c34dd26c7eba44facdea1d5081991", "5d05136904e74bfef9d14892b403706c44f44096", "5da9d8c7ef29f954a37f58f5138f116579c6efe8", "64925a80c7f13302b17b62e5fe581505d3ab08eb", "6b583e375103a66ce7de857dced19f572f620f48", "6d8bc91a9b32b492d40fd358c964ed66516dd518", "756f2ca1779fd9836412041cbc9baa7912d490ae", "78b31936c3baf7dc0e71f10189ddf415d22c2762", "82a71be1dcb14e057637ef6d558ee7a53516717b", "8636670169131f0617713eb012c41f2c04413430", "86aa18d6990f4102704854ad5dc76b1cc45323f0", "86c00207bdc9cb1ef60441d1ec836624a162c9ab", "8b3772d47fc94fe3c3175602bba5eef6605fad86", "9156be961d890b9877ddef3a70964c9665662abb", "9b37c6bf2c40ede496de8c2720eb3f93bfc29e62", "9c7100ba6023347cd2ded17ec16900753b01c18d", "9cb1a663173f5fcbda83b2916e0f1679c1dc642e", "b50d4cf7c370dc0f9fa2c39ea0e73e28ca8918ac", "b642403d86caa9f5d4d085135ad2e40059bd8bfe", "c47150c42c980b297c747a17d79bd6722a65fb84", "d91e7ecafc5f52a27463db031c114a71f29c3b0a", "da6f869c1ef39abd0f1e512b07f41f6bbecd4b88", "dccd8624ed7f3f73e33b6430470e8a3bc3db0c4d", "e4836826373151c8d14db011a1c3f2763aeb727a", "e6562319fecf9ce5230876c504bfa495ce3bdabd", "eefacf3f2a8bdb5506163932138786a03985390f", "f613e9ac2e6de4e8f767e2268ca7dd636ac3aa9d", "f65a24d9dbc7a3642b1f019b0ed37216b83438d1"})
-            );
+    );
 }

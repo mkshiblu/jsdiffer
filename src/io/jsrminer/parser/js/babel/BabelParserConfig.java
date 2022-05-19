@@ -13,11 +13,14 @@ public class BabelParserConfig {
             BabelNodeType.TYPE_ALIAS,
             BabelNodeType.JSX_ELEMENT,
             BabelNodeType.AWAIT_EXPRESSION,
+            BabelNodeType.INTERFACE_DECLARATION,
 
             // Flow Types
             BabelNodeType.DECLARE_MODULE,
             BabelNodeType.DECLARE_FUNCTION,
-            BabelNodeType.DECLARE_VARIABLE
+            BabelNodeType.DECLARE_VARIABLE,
+            BabelNodeType.DECLARE_CLASS,
+            BabelNodeType.DECLARE_TYPE_ALIAS
     );
 
     public final static EnumMap<BabelNodeType, CodeElementType> babelNodeToCodeElementTypeMap =

@@ -86,13 +86,18 @@ public enum BabelNodeType {
     AWAIT_EXPRESSION("AwaitExpression"),
     ASSIGNMENT_PATTERN("AssignmentPattern"),
     TAGGED_TEMPLATE_EXPRESSION("TaggedTemplateExpression"),
+    YIELD_EXPRESSION("YieldExpression"),
 
     // Flow Types
     DECLARE_MODULE("DeclareModule"),
     DECLARE_FUNCTION("DeclareFunction"),
+    DECLARE_CLASS("DeclareClass"),
     DECLARE_VARIABLE("DeclareVariable"),
     EXPORT_ALL_DECLARATION("ExportAllDeclaration"),
     DEBUGGER_STATEMENT("DebuggerStatement"),
+    DECLARE_TYPE_ALIAS("DeclareTypeAlias"),
+    INTERFACE_DECLARATION("InterfaceDeclaration"),
+
     ;
     private static final Map<String, BabelNodeType> typeTitleCaseMap = new HashMap<>();
 

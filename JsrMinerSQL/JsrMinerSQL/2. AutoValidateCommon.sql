@@ -15,6 +15,6 @@ WHERE commit_id IN
 ;
 
 SELECT * FROM dbo.OracleTemp;
-
+SELECT * FROM [Eval].[dbo].[RmRaw] 
 
 

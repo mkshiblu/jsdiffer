@@ -37,7 +37,7 @@ public class ChangeVariableKindRefactoring extends Refactoring implements IRefac
     public RefactoringType getRefactoringType() {
         if (originalVariable.isParameter() && changedTypeVariable.isParameter())
             return RefactoringType.CHANGE_PARAMETER_TYPE;
-        return RefactoringType.CHANGE_VARIABLE_TYPE;
+        return RefactoringType.CHANGE_VARIABLE_KIND;
     }
 
     public String getName() {

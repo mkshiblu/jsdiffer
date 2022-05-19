@@ -1,0 +1,5 @@
+project	commit_id	refactoring_type	name_before	name_after	location_before	location_after	description
+socket.io	3aa3213b13e914a668a76bc5eab1cef80708bf01	MOVE_FILE	main.js	main.js	examples/chat/main.js:0-5800|(1,0)-(207,3)	examples/chat/public/main.js:0-6364|(1,0)-(223,3)	Move File examples/chat/main.js to examples/chat/public/main.js
+socket.io	852a9d34dfae0fa9344805105511cb18d1e375a3	EXTRACT_FUNCTION	sendMessage	cleanInput	examples/chat/main.js:898-1440|(35,2)-(50,3)	examples/chat/main.js:2923-3008|(101,2)-(103,3)	Extract Method 1.cleanInput(input) extracted from 1.sendMessage() in  1 in file examples/chat/main.js
+socket.io	852a9d34dfae0fa9344805105511cb18d1e375a3	PARAMETERIZE_VARIABLE	message	input	examples/chat/main.js:932-961|(36,8)-(36,37)	examples/chat/main.js:2944-2949|(101,23)-(101,28)	Parameterize Variable message to input in 1.cleanInput(input) at examples/chat/main.js|1.cleanInput
+socket.io	d286ba2064e516c4643e48222b60af404aad31e4	RENAME_FILE	app.js	index.js	examples/chat/app.js:0-2110|(1,0)-(78,0)	examples/chat/index.js:0-2110|(1,0)-(78,0)	Rename File examples/chat/app.js renamed to examples/chat/index.js

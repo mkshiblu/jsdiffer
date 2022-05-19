@@ -24,6 +24,10 @@ public class ExpressionVisitor {
         return visitUnaryExpression(node, parent, container);
     };
 
+    BabelNodeVisitor<ILeafFragment, Object> yieldExpressionVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
+        return visitYieldExpression(node, parent, container);
+    };
+
     BabelNodeVisitor<ILeafFragment, Object> identifierVisitor = (BabelNode node, ILeafFragment parent, IContainer container) -> {
         return visitIdentifier(node, parent, container);
     };
@@ -155,6 +159,21 @@ public class ExpressionVisitor {
         String name = node.getString("name");
         leaf.registerVariable(name);
         return name;
+    }
+
+    /**
+     * interface YieldExpression <: Expression {
+     * type: "YieldExpression";
+     * argument: Expression | null;
+     * delegate: boolean;
+     * }
+     */
+    String visitYieldExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        String text = this.visitor.getNodeUtil().getTextInSource(node, false);
+        var argumentNode = node.get("argument");
+        if (argumentNode.isDefined())
+            visitor.visitExpression(argumentNode, leaf, container);
+        return text;
     }
 
     /**

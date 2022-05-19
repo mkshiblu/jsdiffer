@@ -180,6 +180,10 @@ public class InvocationVisitor {
                 visitor.visitExpression(callee, leaf, container);
                 parsedProperly = operand != null && operand.isDefined() && operand.getType() == BabelNodeType.IDENTIFIER;
                 break;
+
+            case TYPE_CAST_EXPRESSION:
+                parsedProperly = false;
+                break;
             case LOGICAL_EXPRESSION:
                 visitor.visitExpression(callee, leaf, container);
                 parsedProperly = false;
@@ -192,6 +196,7 @@ public class InvocationVisitor {
                 visitor.getErrorReporter().reportWarning(node.getSourceLocation(),
                         "Unsupported CallExpression Operand of type: "  + callee.getType()
                 + " Text: " + node.getText());
+                parsedProperly = false;
         }
 
         invocation.setText(this.visitor.getNodeUtil().getTextInSource(node, false));
