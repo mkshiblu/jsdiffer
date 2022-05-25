@@ -54,8 +54,8 @@ public class ThesisOracleEvaluation {
         evaluator.createMap();
         evaluator.createProjectRepoMap();
         //evaluator.runAll();
-        evaluator.run("three.js", allProjectCommits);
-        //evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
+        evaluator.run("express", allProjectCommits);
+       // evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
     }
 
     public void runRandomized() {
@@ -69,13 +69,22 @@ public class ThesisOracleEvaluation {
 
     public void runAll() {
         builder.setLength(0);
+        StringBuilder allBuilder = new StringBuilder();
+
+        allBuilder.append(RefactoringDisplayFormatter.getHeader() + "\n");
         log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n");
         for (var project : projectRepoPathMap.keySet()) {
             run(project, allProjectCommits);
             log.info(builder.toString() + "\n");
+            allBuilder.append(builder.toString());
             builder.setLength(0);
         }
         //log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
+        try {
+            Files.writeString(Path.of("resources\\evaluation\\projects_run_log\\" + "all" + ".txt"), allBuilder.toString(), StandardOpenOption.CREATE);
+        } catch (Exception ex) {
+
+        }
         printCommitRuntime("all");
     }
 
@@ -104,7 +113,7 @@ public class ThesisOracleEvaluation {
             sb.append(RefactoringDisplayFormatter.getHeader() + "\n");
             sb.append(result);
             Files.writeString(Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt"), sb.toString(), StandardOpenOption.CREATE);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
@@ -179,14 +188,14 @@ public class ThesisOracleEvaluation {
         builder.append("commit_id\tms\n");
         System.out.println("\n\ncommit_id\tms");
         for (var entry : commitRunTime.entrySet()) {
-            System.out.println(entry.getKey() + "\t" + entry.getValue());
-            builder.append(entry.getKey()+ "\t" + entry.getValue() + "\n");
+           // System.out.println(entry.getKey() + "\t" + entry.getValue());
+            builder.append(entry.getKey() + "\t" + entry.getValue() + "\n");
         }
         try {
 
-        Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), builder.toString(), StandardOpenOption.CREATE);
-        }catch (Exception ex){
-            throw  new RuntimeException(ex);
+            Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), builder.toString(), StandardOpenOption.CREATE);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

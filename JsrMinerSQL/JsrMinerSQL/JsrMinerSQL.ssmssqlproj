@@ -85,6 +85,12 @@
           <AssociatedConnUserName />
           <FullPath>ReplaceOperationWithFunction.sql</FullPath>
         </FileNode>
+        <FileNode Name="Take100RandomRenameVariable.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:(local)\SQLEXPRESS:True</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>(local)\SQLEXPRESS</AssociatedConnSrvName>
+          <AssociatedConnUserName />
+          <FullPath>Take100RandomRenameVariable.sql</FullPath>
+        </FileNode>
       </Items>
     </LogicalFolder>
     <LogicalFolder Name="Miscellaneous" Type="3" Sorted="true">
