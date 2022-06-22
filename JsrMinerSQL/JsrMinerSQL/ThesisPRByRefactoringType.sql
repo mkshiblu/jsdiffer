@@ -1,6 +1,14 @@
+USE Eval;
+
 -- Run ORacle first
 DROP TABLE IF EXISTS dbo.RefactoringTypeValidation;
 DROP TABLE IF EXISTS dbo.RefactoringTypePrecisionRecall;
+DROP TABLE IF EXISTS dbo.OracleTemp;
+
+SELECT *
+--INTO dbo.OracleTemp
+FROM Eval.dbo.ThesisOracle
+INNER JOIN ;
 
 SELECT  refactoring_type AS RefactoringType
 , COUNT(*) AS Total,
@@ -17,7 +25,7 @@ COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
 COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
 COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
 INTO dbo.RefactoringTypeValidation 
-FROM dbo.ThesisOracle
+FROM dbo.OracleTemp
 GROUP BY refactoring_type;
 
 
@@ -59,3 +67,4 @@ FROM dbo.RefactoringTypePrecisionRecall;
 
 DROP TABLE IF EXISTS dbo.RefactoringTypeValidation;
 DROP TABLE IF EXISTS dbo.RefactoringTypePrecisionRecall;
+DROP TABLE IF EXISTS dbo.OracleTemp;

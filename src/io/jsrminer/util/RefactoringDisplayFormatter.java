@@ -196,7 +196,7 @@ public class RefactoringDisplayFormatter {
                         , getLocationString(moveClassRefactoring.getMovedClass().getSourceLocation())
                 );
                 break;
-            case MOVE_AND_RENAME_FILE:
+            case MOVE_RENAME_FILE:
                 var moveAndRenameFileRefactoring = (MoveAndRenameFileRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
                         moveAndRenameFileRefactoring.getOriginalFileName()

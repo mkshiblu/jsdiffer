@@ -5,7 +5,7 @@ import java.util.EnumSet;
 public class RefactoringRelationship implements Comparable<RefactoringRelationship> {
 
     private static final EnumSet<RefactoringType> typesWithMainEntityAfter = EnumSet.of(
-            RefactoringType.EXTRACT_AND_MOVE_OPERATION,
+            RefactoringType.EXTRACT_MOVE_OPERATION,
             RefactoringType.EXTRACT_INTERFACE,
             RefactoringType.EXTRACT_OPERATION,
             RefactoringType.EXTRACT_SUPERCLASS,

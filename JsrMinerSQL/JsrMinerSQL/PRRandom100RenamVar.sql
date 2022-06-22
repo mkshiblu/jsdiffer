@@ -17,7 +17,7 @@ COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
 COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
 COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
 INTO dbo.RefactoringTypeValidation 
-FROM dbo.ThesisOracle
+FROM dbo.Oracle
 GROUP BY refactoring_type;
 
 
@@ -55,7 +55,3 @@ SELECT COUNT(RefactoringType) AS TypeCount
 , ROUND(AVG(RdPrecision),2) AS RdPrecision
 , ROUND(AVG(RdRecall),2) AS RdRecall
 FROM dbo.RefactoringTypePrecisionRecall;
-
-
-DROP TABLE IF EXISTS dbo.RefactoringTypeValidation;
-DROP TABLE IF EXISTS dbo.RefactoringTypePrecisionRecall;

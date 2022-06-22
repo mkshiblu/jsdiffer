@@ -29,7 +29,7 @@ public class MoveAndRenameFunctionRefactoring extends Refactoring{
 
     @Override
     public RefactoringType getRefactoringType() {
-        return RefactoringType.MOVE_AND_RENAME_OPERATION;
+        return RefactoringType.MOVE_RENAME_OPERATION;
     }
 
     @Override
