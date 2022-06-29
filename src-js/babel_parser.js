@@ -1,9 +1,9 @@
 const babelParser = require('@babel/parser');
 const generator = require('@babel/generator');
 
-exports.parse = function parse(content) {
+exports.parse = function parse(content, asJson = false) {
   const ast = parseAndMakeAst(content);
-  return ast;
+  return asJson ? JSON.stringify(ast) : ast;
 };
 
 function parseAndMakeAst(content) {
