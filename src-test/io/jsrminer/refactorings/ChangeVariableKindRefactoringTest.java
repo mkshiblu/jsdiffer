@@ -36,16 +36,26 @@ public class ChangeVariableKindRefactoringTest extends BaseTest {
 
     @Test
     void testRefactoringCount() {
-        assertEquals(1, refactorings.size());
+        assertEquals(2, refactorings.size());
+    }
+
+    @Test
+    void testOriginalVariableKind() {
+        assertEquals("const", changeKindRefactoring.getOriginalVariableKind());
+    }
+
+    @Test
+    void testNewVariableKind() {
+        assertEquals("let", changeKindRefactoring.getNewVariableKind());
     }
 
     @Test
     void testOriginalVariableName() {
-        assertEquals("keyCodes", changeKindRefactoring.getOriginalVariable().variableName);
+        assertEquals("x", changeKindRefactoring.getOriginalVariable().variableName);
     }
 
     @Test
-    void testRenamedVariableName() {
-        assertEquals("mappedKeyCode", changeKindRefactoring.getChangedTypeVariable().variableName);
+    void testNewVariableName() {
+        assertEquals("y", changeKindRefactoring.getChangedTypeVariable().variableName);
     }
 }

@@ -51,7 +51,12 @@ public class ChangeVariableKindRefactoring extends Refactoring implements IRefac
     public VariableDeclaration getChangedTypeVariable() {
         return changedTypeVariable;
     }
-
+    public String getNewVariableKind() {
+        return changedTypeVariable.getKind().keywordName;
+    }
+    public String getOriginalVariableKind() {
+        return originalVariable.getKind().keywordName;
+    }
     public FunctionDeclaration getOperationBefore() {
         return operationBefore;
     }

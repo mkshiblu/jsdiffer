@@ -26,70 +26,64 @@ public class ReactComponentDeclarationTest extends BaseTest {
 
     @Test
     public void testName() {
-        assertEquals("Circle", classDeclaration.getName());
+        assertEquals("FormDialog", classDeclaration.getName());
     }
 
     @Test
     public void testQualifiedName() {
-        assertEquals("Circle", classDeclaration.getQualifiedName());
+        assertEquals("FormDialog", classDeclaration.getQualifiedName());
     }
 
     @Test
     public void testParentContainerQualifiedName() {
-        assertEquals("file.js", classDeclaration.getParentContainerQualifiedName());
+        assertEquals("react_component_declarartion.js", classDeclaration.getParentContainerQualifiedName());
     }
 
     @Test
     public void testSuperClassName() {
-        assertEquals("Shape", classDeclaration.getSuperClass().getTypeName());
+        assertEquals("React.Component", classDeclaration.getSuperClass().getTypeQualifiedName());
     }
 
     @Test
     public void testAttributeCount() {
-        assertEquals(1, classDeclaration.getAttributes().size());
+        assertEquals(3, classDeclaration.getAttributes().size());
     }
 
 
     @Test
     public void testAttributeName() {
         var attribute = classDeclaration.getAttributes().get(0);
-        assertEquals("radius", attribute.getName());
+        assertEquals("state", attribute.getName());
     }
 
-
-    @Test
-    public void testAttributeModifiers() {
-        var attribute = classDeclaration.getAttributes().get(0);
-        assertTrue(attribute.isStatic());
-    }
 
     @Test
     public void testAttributeLocation() {
         var attribute = classDeclaration.getAttributes().get(0);
         var  attributeLocation = attribute.getLocationInfo();
-        assertEquals(29, attributeLocation.start);
-        assertEquals(48, attributeLocation.end);
+        assertEquals(45, attributeLocation.start);
+        assertEquals(69, attributeLocation.end);
     }
 
     @Test
     public void testAttributeVariableDeclarationLocation() {
         var variableDeclaration = classDeclaration.getAttributes().get(0).getVariableDeclaration();
         var  location = variableDeclaration.getSourceLocation();
-        assertEquals(29, location.start);
-        assertEquals(48, location.end);
+        assertEquals(45, location.start);
+        assertEquals(69, location.end);
     }
 
     @Test
     public void testAttributeVariableDeclarationScope() {
         var variableDeclaration = classDeclaration.getAttributes().get(0).getVariableDeclaration();
         var  scope = variableDeclaration.getScope();
-        assertEquals(29, scope.start);
-        assertEquals(50, scope.end);
+        assertEquals(45, scope.start);
+        assertEquals(1019, scope.end);
     }
 
     @Test
     public void testAttributeInitializer() {
         var attribute = classDeclaration.getAttributes().get(0);
-        assertEquals("10", attribute.getVariableDeclaration().getInitializer().getText());
+        assertEquals(1, attribute.getVariableDeclaration().getInitializer().getAnonymousFunctionDeclarations().size());
     }
 }
