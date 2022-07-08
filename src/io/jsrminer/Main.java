@@ -15,14 +15,11 @@ public class Main {
     public static void main(String[] args) {
         log.info("Program Starts");
         try {
-      // angular();
-        atom();
-         //axios();
-           // chartJsExample();
-          //  createReactApp();
-                       //d3();
-                      // expressJs();
-                       //JQuery();
+       //angular();
+            //atom();
+            // axios();
+          //  chartJsExample();
+            createReactApp();
             //webpackExample();
 //            threeJsExample();
             //commitsExample();
@@ -31,6 +28,7 @@ public class Main {
 //            socketIoExample();
 //            directoryExample();
 //            fileExample();
+//            jqueryExample();
 
             //new JSRefactoringMiner().detectAtCurrentCommit("E:\\PROJECTS_REPO\\toy_js");
 
@@ -125,35 +123,11 @@ public class Main {
         String repoPath = "E:\\PROJECTS_REPO\\create-react-app";
         String[] commitIds = new String[]{
                 // All
-                "00ed100b26adc519fd90e09ebffd83c8d7dc4343", "0e51eef6d7694fbfc4a8fe952bd73b65af2220dd", "2c34d5b66eab7d1c96e573bc48b8e82b6d8e82b0", "3a0b836be376575b5227a0237e8b2334a9f9ab24", "51d0df490295b70808b61d780a54ebcf296a8db2", "72b6eb8c3c65e6ed0f2413708069287311a386c2", "78dbf7bf2b50a35c426e5dbbfdf20ef1afcd8789", "9559ba486e085b6956580ebbc6dad1d7ef4c26e2", "9c167a42490d134832e6e1b721292ea99eaf8ca5", "b3527d7783b290d37275925a1d6a7ff9e40e7a86", "cd3d04b71e91f533bdbdc3856775e1da81d445cf", "d49ffde4e627eea1f935ebc4f8fb2ea61010577d", "d72678fb0c02145d24b7684802a3f5cfc94bd746", "ecd1f0544b6f8a05a4061712932cd0055d6e34c9", "eed708a822d6cf3ff17b665b093a2c23a50f6b15",
+                "00ed100b26adc519fd90e09ebffd83c8d7dc4343", "0e51eef6d7694fbfc4a8fe952bd73b65af2220dd", "2c34d5b66eab7d1c96e573bc48b8e82b6d8e82b0", "3a0b836be376575b5227a0237e8b2334a9f9ab24", "51d0df490295b70808b61d780a54ebcf296a8db2", "72b6eb8c3c65e6ed0f2413708069287311a386c2", "78dbf7bf2b50a35c426e5dbbfdf20ef1afcd8789", "9559ba486e085b6956580ebbc6dad1d7ef4c26e2", "9c167a42490d134832e6e1b721292ea99eaf8ca5", "b3527d7783b290d37275925a1d6a7ff9e40e7a86", "cd3d04b71e91f533bdbdc3856775e1da81d445cf", "d49ffde4e627eea1f935ebc4f8fb2ea61010577d", "d72678fb0c02145d24b7684802a3f5cfc94bd746",
+                "ecd1f0544b6f8a05a4061712932cd0055d6e34c9"
+                , "eed708a822d6cf3ff17b665b093a2c23a50f6b15",
                 // Recalls
                 "fbdff9d722d6ce669a090138022c4d3536ae95bb",
-        };
-        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
-    }
-
-    private static void d3() throws Exception {
-        String repoPath = "E:\\PROJECTS_REPO\\d3";
-        String[] commitIds = new String[]{
-                //Recalls
-                "0a39765f3cbcb940e6fb354cec010a7ffeba9289", "2eba0320407442e85be97b2cd84398fb6c626fe3", "959da21882ad7ea5f35f851adb629ae7a29d5a38"
-        };
-        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
-    }
-
-    private static void expressJs() throws Exception {
-        String repoPath = "E:\\PROJECTS_REPO\\expressjs";
-        String[] commitIds = new String[]{
-                "12bc16e72fe34ce7e3658679b694e47dce56ae7a", "4012846d2534addd8de0b0c237cd63ada104109a", "5312a990b920d5ce1313fafaebcac2d440146c16", "d9d09b8b9041504b645f3173ca70ef173c7e1563", "dab9222942cb9f7c3ff17abad4e0f6137c9e2cfc", "f5a240636d71781c7875191d2048279efce5ad56", "f90f9dde3fe02cd9f4b081c16441415817b297b0"
-        };
-        new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
-    }
-
-    private static void JQuery() throws Exception {
-        String repoPath = "E:\\PROJECTS_REPO\\jquery";
-        String[] commitIds = new String[]{
-                "022b69a44e42684bdd0029dd456bedb3b495cc24", "1ea092a54b00aa4d902f4e22ada3854d195d4a18", "1f4375a34227f42570d2b72e190e51bcfb1e8597", "224271982eb9cd351d7db1b38c740b4e927e6f97", "2b5f5d5e90b37f4a735738a6d0b6f22affbea340", "356a3bccb0e7468a2c8ce7d8c9c6cd0c5d436b8b", "39cdb8c9aa0fde68f733553ba050a2ba9d86474c", "3a8e44745c014871bc56e94d91e57c45ae4be208", "3d732cca6b5076a9d13eee98e2b075b37384cd91", "4d6b4536b2e0148d4b228884a0b356e73dd8beec", "59ec78e6020cc963c1f95cb96a28eaaf20e37b3e", "5cbb234dd3273d8e0bbd454fb431ad639c7242c1", "619bf98d5b479f9582dbc40259b666f1c5a83146", "64a289286a743516bce82462200062a647ef3ac0", "67c96a59f5af9e8404b3f904028e1c730d647498", "67d7a2eefee768b59eb3d51cb1fb2c671873e58a", "6d43dc42337089f5fb52b715981c12993f490920", "80f57f8a13debaab87b99f73631669699da3e1a5", "93a8fa6bfc1c8a469e188630b61e736dfb69e128", "9e121482a532d61aa36d7b314ee46dd1ac40f29e", "a4474c9a0025095f82d734a9d7230eace2f08ef8", "a6fc0b16511c70472ebb3dd9469d08566969ac88", "ac9e3016645078e1e42120822cfb2076151c8cbe", "b078a62013782c7424a4a61a240c23c4c0b42614", "b442abacbb8464f0165059e8da734e3143d0721f", "b5f7c9e2d526b17b9962976bb704dce8779d7362", "b930d14ce64937e9478405eee2828d4da091d2cb", "b97c8d30c5aedace75dc17056d429f28e41b20c1", "bd984f0ee2cf40107a669d80d92566b8625b1e6b", "bf3a43eff8682b59cec785be6003753fa4b93706", "bf48c21d225c31f0f9b5441d95f73615ca3dcfdb", "bf591fb597a056bf2fc9bc474010374695b18d1a", "c18d608537d8945de6c5855a9475657177fa74ac", "c4494d4abc84d368d6597889ab45fc07466f8f26", "c9935b6d2db9e1be4bed12f7419e98cdca45763e", "cdaed15c7ea1bbfdde5a5bea691c583ce7961526", "e4fd41f8fa4190fbbb6cb98cf7ace64f6e00685d", "e5ffcb0838c894e26f4ff32dfec162cf624d8d7d", "ecd8ddea33dc40ae2a57e4340be03faf2ba2f99b", "ee0854f85bd686b55757e8854a10480f23c928da"
-                ,
         };
         new JSRefactoringMiner().detectAtCommits(repoPath, Arrays.asList(commitIds));
     }
@@ -177,6 +151,11 @@ public class Main {
 
     static void directoryExample() {
         new JSRefactoringMiner().detectBetweenDirectories("tmp\\s1", "tmp\\s2");
+    }
+
+    static void jqueryExample() {
+        String root = "resources\\real-projects\\jquery";
+        new JSRefactoringMiner().detectBetweenDirectories(root, root);
     }
 
     static void vueExample() throws IOException {
