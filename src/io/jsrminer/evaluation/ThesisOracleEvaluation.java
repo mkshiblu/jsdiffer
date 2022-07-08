@@ -6,6 +6,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Console;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -54,8 +55,9 @@ public class ThesisOracleEvaluation {
         evaluator.createMap();
         evaluator.createProjectRepoMap();
         //evaluator.runAll();
-        evaluator.run("material-ui", allProjectCommits);
-       // evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
+        //evaluator.run("material-ui", allProjectCommits);
+       //evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
+       evaluator.run("Semantic-UI", "7e37d4a098a51c0a888ca273b07d1423e21eef7c");
     }
 
     public void runRandomized() {
@@ -68,16 +70,17 @@ public class ThesisOracleEvaluation {
     }
 
     public void runAll() {
-        builder.setLength(0);
+        builder= new StringBuilder();
         StringBuilder allBuilder = new StringBuilder();
-
+        String projectRefs = null;
         allBuilder.append(RefactoringDisplayFormatter.getHeader() + "\n");
         log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n");
         for (var project : projectRepoPathMap.keySet()) {
             run(project, allProjectCommits);
-            log.info(builder.toString() + "\n");
-            allBuilder.append(builder.toString());
-            builder.setLength(0);
+            projectRefs = builder.toString();
+            log.info(projectRefs);
+            allBuilder.append(projectRefs);
+            builder = new StringBuilder();
         }
         //log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
         try {
@@ -91,11 +94,11 @@ public class ThesisOracleEvaluation {
     public void run(String project, Map<String, String[]> projectCommmitMap) {
         var repoPath = projectRepoPathMap.get(project);
         var commitIds = projectCommmitMap.get(project);
-
+        var jsrminer = new JSRefactoringMiner();
         for (int i = 0; i < commitIds.length; i++) {
             var commitId = commitIds[i];
             watch.start();
-            var refactorings = new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+            var refactorings = jsrminer.detectAtCommit(repoPath, commitId);
             watch.stop();
             commitRunTime.put(commitId, watch.getTime());
             watch.reset();
@@ -186,14 +189,14 @@ public class ThesisOracleEvaluation {
     void printCommitRuntime(String project) {
         StringBuilder builder = new StringBuilder();
         builder.append("commit_id\tms\n");
-        System.out.println("\n\ncommit_id\tms");
         for (var entry : commitRunTime.entrySet()) {
-           // System.out.println(entry.getKey() + "\t" + entry.getValue());
             builder.append(entry.getKey() + "\t" + entry.getValue() + "\n");
         }
+        var str = builder.toString();
         try {
 
-            Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), builder.toString(), StandardOpenOption.CREATE);
+            System.out.println(str);
+            Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), str, StandardOpenOption.CREATE);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

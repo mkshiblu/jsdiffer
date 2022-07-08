@@ -74,9 +74,16 @@ class JBabel implements AutoCloseable {
         return this.nodeJs.getRuntime().executeJSFunction("format", v8Object).toString();
     }
 
+    private String formatCode(String source) {
+        return executeStringFunction("format", source);
+    }
+
     public BabelNode parse(String filename, String content) {
         V8Object ast = (V8Object) executeFunction("parse", content);
-       // var result = executeStringFunction("parse", content, true);
+        //var result = executeStringFunction("parse", content, true);
+        //var js = new JsonBabelNode(result, this::formatCode, filename);
+        //return  js;
+
         return new V8BabelNode(ast, this::formatCode, filename);
     }
 

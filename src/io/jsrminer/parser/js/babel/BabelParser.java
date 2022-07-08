@@ -28,25 +28,30 @@ public class BabelParser extends JavaScriptParser {
     @Override
     public UMLModel parse(Map<String, String> fileContents) {
         final UMLModel umlModel = new UMLModel();
+
+        JBabel babel = new JBabel();
         try {
-            var sourceFileMap = internalParse(fileContents);
+            var sourceFileMap = internalParse(fileContents, babel);
             sourceFileMap.entrySet().forEach((entry) -> {
                 umlModel.getSourceFileModels().put(entry.getKey(), entry.getValue());
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }finally {
+            babel.close();
         }
         return umlModel;
     }
 
-    private Map<String, SourceFile> internalParse(Map<String, String> fileContents) {
-        JBabel babel = new JBabel();
+    private Map<String, SourceFile> internalParse(Map<String, String> fileContents, JBabel jBabel) {
+
         Map<String, SourceFile> map = new HashMap<>();
         for (Map.Entry<String, String> entry : fileContents.entrySet()) {
             try {
                 log.debug("Parsing and loading " + entry.getKey() + "...");
-                SourceFile file = parseAndLoadSourceFile(entry.getValue(), entry.getKey(), babel);
+                SourceFile file = parseAndLoadSourceFile(entry.getValue(), entry.getKey(), jBabel);
                 map.put(file.getFilepath(), file);
+
             } catch (Exception ex) {
                 log.error("Ignoring file: " + entry.getKey());
                 ex.printStackTrace();

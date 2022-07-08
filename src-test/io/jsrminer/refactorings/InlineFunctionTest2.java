@@ -26,7 +26,7 @@ public class InlineFunctionTest2 extends BaseTest {
         refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "inline\\v1\\angular_compile.js",
                 getRootResourceDirectory() + "inline\\v2\\angular_compile.js");
 
-        IRefactoring refactoring = refactorings.get(7);
+        IRefactoring refactoring = refactorings.get(2);
         inlineOperationRefactoring = (InlineOperationRefactoring) refactoring;
     }
 

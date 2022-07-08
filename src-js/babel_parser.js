@@ -3,6 +3,7 @@ const generator = require('@babel/generator');
 
 exports.parse = function parse(content, asJson = false) {
   const ast = parseAndMakeAst(content);
+
   return asJson ? JSON.stringify(ast) : ast;
 };
 
