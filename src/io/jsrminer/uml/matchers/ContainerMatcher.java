@@ -1,21 +1,24 @@
-package io.jsrminer.uml;
+package io.jsrminer.uml.matchers;
 
 import io.jsrminer.sourcetree.JsConfig;
 import io.jsrminer.sourcetree.OperationInvocation;
 import io.jsrminer.sourcetree.Statement;
+import io.jsrminer.uml.FunctionUtil;
 import io.jsrminer.uml.diff.RenamePattern;
 import io.jsrminer.uml.mapping.replacement.PrefixSuffixUtils;
+import io.rminerx.core.api.IAnonymousFunctionDeclaration;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 import io.rminerx.core.api.ISourceFile;
 
+import javax.swing.*;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public abstract class ContainerMatcher {
+public abstract class ContainerMatcher implements IContainerMatcher {
 
     public abstract boolean match(IContainer container1, IContainer container2);
 
@@ -25,6 +28,11 @@ public abstract class ContainerMatcher {
         public boolean match(IContainer container1, IContainer container2) {
             return hasSameOperationsAndStatements(container1, container2);
         }
+
+        @Override
+        public String toString() {
+            return "ContainerMatcher.SAME";
+        }
     };
 
     public static final ContainerMatcher COMMON = new ContainerMatcher() {
@@ -33,10 +41,33 @@ public abstract class ContainerMatcher {
         public boolean match(IContainer container1, IContainer container2) {
             return hasCommonAttributesAndOperations(container1, container2);
         }
+        public String toString() {
+            return "ContainerMatcher.COMMON";
+        }
     };
+
+    public static final ContainerMatcher COMMON_PARAMETERS = new ContainerMatcher() {
+
+        @Override
+        public boolean match(IContainer container1, IContainer container2) {
+            return hasCommonParameters(container1, container2);
+        }
+
+        public String toString() {
+            return "ContainerMatcher.COMMON_PARAMETERS";
+        }
+    };
+
 
     private ContainerMatcher() {
 
+    }
+
+    public boolean hasCommonParameters(IContainer container1, IContainer container2) {
+        if (container1 instanceof IAnonymousFunctionDeclaration && container2 instanceof IAnonymousFunctionDeclaration) {
+            return FunctionUtil.isCommonParameterNamesMoreThanUncommon((IAnonymousFunctionDeclaration) container1, (IAnonymousFunctionDeclaration) container2);
+        }
+        return false;
     }
 
     public boolean hasEqualTopLevelFunctionsCount(IContainer container1, IContainer container2) {

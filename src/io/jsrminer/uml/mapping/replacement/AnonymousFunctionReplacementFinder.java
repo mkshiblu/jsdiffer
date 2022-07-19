@@ -1,7 +1,7 @@
 package io.jsrminer.uml.mapping.replacement;
 
 import io.jsrminer.sourcetree.*;
-import io.jsrminer.uml.ContainerMatcher;
+import io.jsrminer.uml.matchers.ContainerMatcher;
 import io.jsrminer.uml.UMLParameter;
 import io.jsrminer.uml.diff.ContainerDiff;
 import io.jsrminer.uml.diff.ContainerDiffer;
@@ -37,6 +37,10 @@ public class AnonymousFunctionReplacementFinder {
 
         // Relaxed
         matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.COMMON,
+                statement1, statement2, function1, function2, replacements);
+
+        // Relaxed
+        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.COMMON_PARAMETERS,
                 statement1, statement2, function1, function2, replacements);
 
         return replacements.size() > 0 ? replacements : null;
@@ -135,32 +139,25 @@ public class AnonymousFunctionReplacementFinder {
 
     private void copyMappingsAndRefactoringsToParentMapper(ContainerDiff<IAnonymousFunctionDeclaration> anonymousClassDiff) {
         var matchedOperationMappers = anonymousClassDiff.getOperationBodyMapperList();
-        if (matchedOperationMappers.size() > 0) {
+        var bodyStatementMapper = anonymousClassDiff.getBodyStatementMapper();
+        var allMappers = new LinkedHashSet<FunctionBodyMapper>();
 
+        if (bodyStatementMapper != null) {
+            allMappers.add(bodyStatementMapper);
+        }
+
+        allMappers.addAll(matchedOperationMappers);
+
+        if (allMappers.size() > 0) {
             // Copy operation mapper mappings ?
-            for (var mapper : matchedOperationMappers) {
+            for (var mapper : allMappers) {
                 this.parentOperationsMapper.getMappings().addAll(mapper.getMappings());
                 this.parentOperationsMapper.getNonMappedInnerNodesT1().addAll(mapper.getNonMappedInnerNodesT1());
                 this.parentOperationsMapper.getNonMappedInnerNodesT2().addAll(mapper.getNonMappedInnerNodesT2());
                 this.parentOperationsMapper.getNonMappedLeavesT1().addAll(mapper.getNonMappedLeavesT1());
                 this.parentOperationsMapper.getNonMappedLeavesT2().addAll(mapper.getNonMappedLeavesT2());
-
-                // Copy refs
-                // this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(mapper.getRefactoringsByVariableAnalysis());
             }
-
             this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getAllRefactorings());
-
-            // Copy refactorings of operation signature diffs
-//            for (UMLOperationDiff operationDiff : anonymousClassDiff.getOperationDiffList()) {
-//                //this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(operationDiff.getRefactorings());
-//            }
-//            for(UMLAttributeDiff attributeDiff : anonymousClassDiff.getAttributeDiffs()) {
-//                this.refactorings.addAll(attributeDiff.getRefactorings());
-//            }
-
-            // Here attributes are sataements
-            //  this.parentOperationsMapper.getRefactoringsAfterPostProcessing().addAll(anonymousClassDiff.getBodyStatementMapper().getRefactoringsByVariableAnalysis());
         }
     }
 
