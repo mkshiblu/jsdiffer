@@ -27,7 +27,6 @@ public class ExtractFunctionAxiosSettleTest extends BaseTest {
                 , getRootResourceDirectory() + "src2\\AxiosHttp.js");
 
         IRefactoring refactoring = refactorings.get(1);
-        assertEquals(RefactoringType.EXTRACT_AND_MOVE_OPERATION, refactoring.getRefactoringType());
         extractOperationRefactoring = (ExtractOperationRefactoring) refactoring;
     }
 
@@ -38,7 +37,7 @@ public class ExtractFunctionAxiosSettleTest extends BaseTest {
 
     @Test
     void testRefactoringType() {
-        assertEquals(RefactoringType.EXTRACT_OPERATION, extractOperationRefactoring.getRefactoringType());
+        assertEquals(RefactoringType.EXTRACT_AND_MOVE_OPERATION, extractOperationRefactoring.getRefactoringType());
     }
 
     @Test
