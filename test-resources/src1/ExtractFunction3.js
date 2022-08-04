@@ -1,23 +1,39 @@
-const sizeCheck = () => WebApp.connectHandlers.use((req, res, next) => {
-  let totalSize = 0;
-  const request = WebApp.categorizeRequest(req);
-  const reqArch = isModern(request.browser) ? 'web.browser' : 'web.browser.legacy';
-  WebApp.clientPrograms[reqArch].manifest.forEach(resource => {
-    if (resource.where === 'client' &&
-        ! RoutePolicy.classify(resource.url) &&
-        ! shouldSkip(resource)) {
-      totalSize += resource.size;
-    }
-  });
-  if (totalSize > 5 * 1024 * 1024) {
-    Meteor._debug(
-      "** You are using the appcache package but the total size of the\n" +
-      "** cached resources is " +
-      `${(totalSize / 1024 / 1024).toFixed(1)}MB.\n` +
-      "**\n" +
-      "** This is over the recommended maximum of 5 MB and may break your\n" +
-      "** app in some browsers! See http://docs.meteor.com/#appcache\n" +
-      "** for more information and fixes.\n"
-    );
+proto.handle = function(req, res, done) {
+  var self = this;
+
+  debug('dispatching %s %s', req.method, req.url);
+
+  var search = 1 + req.url.indexOf('?');
+  var pathlength = search ? search - 1 : req.url.length;
+  var fqdn = req.url[0] !== '/' && 1 + req.url.substr(0, pathlength).indexOf('://');
+  var protohost = fqdn ? req.url.substr(0, req.url.indexOf('/', 2 + fqdn)) : '';
+  var idx = 0;
+  var removed = '';
+  var slashAdded = false;
+  var paramcalled = {};
+
+  // store options for OPTIONS request
+  // only used if OPTIONS request
+  var options = [];
+
+  // middleware and routes
+  var stack = self.stack;
+
+  // manage inter-router variables
+  var parentParams = req.params;
+  var parentUrl = req.baseUrl || '';
+  done = restore(done, req, 'baseUrl', 'next', 'params');
+
+  // setup next layer
+  req.next = next;
+
+  // for options requests, respond with a default if nothing else responds
+  if (req.method === 'OPTIONS') {
+    done = wrap(done, function(old, err) {
+      if (err || options.length === 0) return old(err);
+
+      var body = options.join(',');
+      return res.set('Allow', body).send(body);
+    });
   }
-});
+}

@@ -1,5 +1,6 @@
 package io.jsrminer.uml;
 
+import io.jsrminer.uml.matchers.ContainerMatcher;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ISourceFile;
 

@@ -11,10 +11,7 @@ import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> extends BaseDiffer<T> {
     protected final D containerDiff;
@@ -27,7 +24,7 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
      * Diff all the children functions and statements
      */
     public ContainerDiff<T> diff() {
-        diffChildFunctions();
+        diffFunctions();
         matchStatements();
         return this.containerDiff;
     }
@@ -35,7 +32,7 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
     /**
      * Diff all the children functions ony
      */
-    public ContainerDiff<T> diffChildFunctions() {
+    public ContainerDiff<T> diffFunctions() {
         reportAddedAndRemovedOperations();
         createBodyMapperForCommonFunctions();
         checkForOperationSignatureChanges();
@@ -244,8 +241,16 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
         List<FunctionDeclaration> addedOperations = new ArrayList<>(containerDiff.getAddedOperations());
         List<FunctionDeclaration> operationsToBeRemoved = new ArrayList<>();
 
+        var functionMappers = containerDiff.getOperationBodyMapperList();
+        var statementMapper = containerDiff.getBodyStatementMapper();
+
+        var allMappers = new LinkedHashSet<>(functionMappers);
+        if (statementMapper != null) {
+            allMappers.add(statementMapper);
+        }
+
         for (FunctionDeclaration addedOperation : addedOperations) {
-            for (FunctionBodyMapper mapper : containerDiff.getOperationBodyMapperList()) {
+            for (FunctionBodyMapper mapper : allMappers) {
                 ExtractOperationDetection detection = new ExtractOperationDetection(mapper, addedOperations, containerDiff/*, modelDiff*/);
                 List<ExtractOperationRefactoring> refs = detection.check(addedOperation);
                 for (ExtractOperationRefactoring refactoring : refs) {
@@ -315,10 +320,10 @@ public class ContainerDiffer<T extends IContainer, D extends ContainerDiff<T>> e
 
         int mappings = mapper.mappingsWithoutBlocks();
         if (mappings > 0) {
-//            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
-//            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
-//            if(mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2) {
-            if (mappings > mapper.nonMappedElementsT1() && mappings > mapper.nonMappedElementsT2()) {
+            int nonMappedElementsT1 = mapper.nonMappedElementsT1();
+            int nonMappedElementsT2 = mapper.nonMappedElementsT2();
+            if (mappings > nonMappedElementsT1 && mappings > nonMappedElementsT2
+                    || (nonMappedElementsT1 == 0 && nonMappedElementsT2 == 0)) {
 //                this.mappings.addAll(mapper.mappings);
 //                this.nonMappedInnerNodesT1.addAll(mapper.nonMappedInnerNodesT1);
 //                this.nonMappedInnerNodesT2.addAll(mapper.nonMappedInnerNodesT2);
