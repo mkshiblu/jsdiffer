@@ -37,7 +37,7 @@ public class ExtractFunctionAxiosSettleTest extends BaseTest {
 
     @Test
     void testRefactoringType() {
-        assertEquals(RefactoringType.EXTRACT_AND_MOVE_OPERATION, extractOperationRefactoring.getRefactoringType());
+        assertEquals(RefactoringType.EXTRACT_MOVE_OPERATION, extractOperationRefactoring.getRefactoringType());
     }
 
     @Test

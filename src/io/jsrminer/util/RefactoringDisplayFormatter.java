@@ -134,7 +134,7 @@ public class RefactoringDisplayFormatter {
 
                 break;
 
-            case EXTRACT_AND_MOVE_OPERATION:
+            case EXTRACT_MOVE_OPERATION:
                 var extractAndMoveOperationRefactoring = (ExtractOperationRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(
                         extractAndMoveOperationRefactoring.getSourceOperationBeforeExtraction().getName()
