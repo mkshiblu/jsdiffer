@@ -525,20 +525,26 @@ public class ReplacementHeuristic {
                             objectCreation1.identicalExpression(creationCoveringTheEntireStatement2, replacementInfo.getReplacements())) {
 
                         if (((ObjectCreation) objectCreation1).isArray() && creationCoveringTheEntireStatement2.isArray()) {
-                            String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
-                            if (substring1.length() > 0 && substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
-                                //return replacementInfo.getReplacements();
-                                return true;
+
+                            if (s1.contains("[") && s1.contains("]")) {
+                                String substring1 = s1.substring(s1.indexOf("[") + 1, s1.lastIndexOf("]"));
+                                if (substring1.length() > 0 && substring1.equals(s2.substring(s2.indexOf("[") + 1, s2.lastIndexOf("]")))) {
+                                    //return replacementInfo.getReplacements();
+                                    return true;
+                                }
                             }
                         }
 
                         if (!((ObjectCreation) objectCreation1).isArray() && !creationCoveringTheEntireStatement2.isArray()) {
-                            String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
-                            if (substring2.length() > 0 &&
-                                    substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))
-                            ) {
-                                //return replacementInfo.getReplacements();
-                                return true;
+
+                            if (s2.contains("[") && s2.contains("]")) {
+                                String substring2 = s1.substring(s1.indexOf("(") + 1, s1.lastIndexOf(")"));
+                                if (substring2.length() > 0 &&
+                                        substring2.equals(s2.substring(s2.indexOf("(") + 1, s2.lastIndexOf(")")))
+                                ) {
+                                    //return replacementInfo.getReplacements();
+                                    return true;
+                                }
                             }
                         }
                     }
