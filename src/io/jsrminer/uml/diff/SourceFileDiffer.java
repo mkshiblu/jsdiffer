@@ -34,9 +34,9 @@ public class SourceFileDiffer extends ContainerDiffer<ISourceFile, ContainerDiff
         reportAddedAndRemovedClassDeclarations();
         diffCommonClasses();
 
-        super.diffChildFunctions();
         // Match statements declared inside the body directly
         matchStatements();
+        super.diffFunctions();
         return super.containerDiff;
     }
 

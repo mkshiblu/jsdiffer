@@ -133,6 +133,17 @@ public class RefactoringDisplayFormatter {
                 );
 
                 break;
+
+            case EXTRACT_AND_MOVE_OPERATION:
+                var extractAndMoveOperationRefactoring = (ExtractOperationRefactoring) refactoring;
+                afterBeforeInfo = new AfterBeforeInfo(
+                        extractAndMoveOperationRefactoring.getSourceOperationBeforeExtraction().getName()
+                        , extractAndMoveOperationRefactoring.getExtractedOperation().getName()
+                        , getLocationString(extractAndMoveOperationRefactoring.getSourceOperationBeforeExtraction().getSourceLocation())
+                        , getLocationString(extractAndMoveOperationRefactoring.getExtractedOperation().getSourceLocation())
+                );
+
+                break;
             case INLINE_OPERATION:
                 var inlineOperationRefactoring = (InlineOperationRefactoring) refactoring;
                 afterBeforeInfo = new AfterBeforeInfo(

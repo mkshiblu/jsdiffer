@@ -3,8 +3,6 @@ package io.jsrminer.refactorings;
 import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.refactorings.ExtractOperationRefactoring;
-import io.jsrminer.refactorings.RefactoringType;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.Replacement;

@@ -203,7 +203,7 @@ public class InvocationVisitor {
         invocation.setExpressionText(expressionText);
         invocation.setSourceLocation(node.getSourceLocation());
         invocation.setType(this.visitor.getNodeUtil().getCodeElementTypeFromBabelNodeType(node.getType()));
-        invocation.setFunctionName(name);
+        invocation.setFunctionName(name == null ? "" : name);
 
         // Parse the arguments
         var argumentsNode = node.get("arguments");

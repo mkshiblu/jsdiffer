@@ -1,34 +1,47 @@
-function eachResource(request, callback) {
-  const browser = request.browser ||
-    WebApp.categorizeRequest(request).browser;
+proto.handle = function(req, res, done) {
+  var self = this;
 
-  const arch = isModern(browser)
-    ? "web.browser"
-    : "web.browser.legacy";
+  debug('dispatching %s %s', req.method, req.url);
 
-  WebApp.clientPrograms[arch].manifest.forEach(callback);
-}
+  var search = 1 + req.url.indexOf('?');
+  var pathlength = search ? search - 1 : req.url.length;
+  var fqdn = req.url[0] !== '/' && 1 + req.url.substr(0, pathlength).indexOf('://');
+  var protohost = fqdn ? req.url.substr(0, req.url.indexOf('/', 2 + fqdn)) : '';
+  var idx = 0;
+  var removed = '';
+  var slashAdded = false;
+  var paramcalled = {};
 
-const sizeCheck = () => WebApp.connectHandlers.use((req, res, next) => {
-  let totalSize = 0;
+  // store options for OPTIONS request
+  // only used if OPTIONS request
+  var options = [];
 
-  eachResource(req, resource => {
-    if (resource.where === 'client' &&
-        ! RoutePolicy.classify(resource.url) &&
-        ! shouldSkip(resource)) {
-      totalSize += resource.size;
-    }
-  });
+  // middleware and routes
+  var stack = self.stack;
 
-  if (totalSize > 5 * 1024 * 1024) {
-    Meteor._debug(
-      "** You are using the appcache package but the total size of the\n" +
-      "** cached resources is " +
-      `${(totalSize / 1024 / 1024).toFixed(1)}MB.\n` +
-      "**\n" +
-      "** This is over the recommended maximum of 5 MB and may break your\n" +
-      "** app in some browsers! See http://docs.meteor.com/#appcache\n" +
-      "** for more information and fixes.\n"
-    );
+  // manage inter-router variables
+  var parentParams = req.params;
+  var parentUrl = req.baseUrl || '';
+  done = restore(done, req, 'baseUrl', 'next', 'params');
+
+  // setup next layer
+  req.next = next;
+
+  // for options requests, respond with a default if nothing else responds
+  if (req.method === 'OPTIONS') {
+    done = wrap(done, function(old, err) {
+      if (err || options.length === 0) return old(err);
+      sendOptionsResponse(res, options, old);
+    });
   }
-});
+ }
+ // send an OPTIONS response
+ function sendOptionsResponse(res, options, next) {
+   try {
+     var body = options.join(',');
+     res.set('Allow', body);
+     res.send(body);
+   } catch (err) {
+     next(err);
+   }
+ }
