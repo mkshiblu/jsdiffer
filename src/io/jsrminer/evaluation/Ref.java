@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class Ref {
     int lineNo;
-    String repository;
-    String commit;
+    String project;
+    String commitId;
     RefType refType;
 
     String localNameBefore;
@@ -69,7 +69,11 @@ public class Ref {
         ADD_PARAMETER,
         RENAME_VARIABLE,
         PARAMETERIZE_VARIABLE,
-        MOVE_RENAME_CLASS;
+        MOVE_RENAME_CLASS,
+
+        // INTERNALS
+        INTERNAL_MOVE_FUNCTION,
+        INTERNAL_MOVE_RENAME_FUNCTION;
 
         public static Map<String, RefType> fromStringMap = new HashMap<>();
 
@@ -82,7 +86,8 @@ public class Ref {
             fromStringMap.put("INLINE_FUNCTION", INLINE_FUNCTION);
             fromStringMap.put("MOVE_CLASS", MOVE_CLASS);
             fromStringMap.put("EXTRACT_MOVE_FUNCTION", EXTRACT_AND_MOVE_FUNCTION);
-            fromStringMap.put("INTERNAL_MOVE_FUNCTION", MOVE_FUNCTION);
+            fromStringMap.put("INTERNAL_MOVE_FUNCTION", INTERNAL_MOVE_FUNCTION);
+            fromStringMap.put("INTERNAL_MOVE_RENAME_FUNCTION", INTERNAL_MOVE_RENAME_FUNCTION);
             fromStringMap.put("MOVE_RENAME_FUNCTION", MOVE_AND_RENAME_FUNCTION);
             fromStringMap.put("MOVE_RENAME_CLASS", MOVE_RENAME_CLASS);
             fromStringMap.put("MOVE_RENAME_FILE", MOVE_AND_RENAME_FILE);
@@ -105,8 +110,9 @@ public class Ref {
             var splitted = location.split(":");
             String filePath = splitted[0];
 
-            if (splitted[1].contains("|")) {
-                var segments = splitted[1].split("\\|");
+            var sourceLocationInfo =  splitted[1];
+            if (sourceLocationInfo.contains("|")) {
+                var segments = sourceLocationInfo.split("\\|");
                 var startEndSplitted = segments[0].split("-");
                 var start = Integer.parseInt(startEndSplitted[0]);
                 var end = Integer.parseInt(startEndSplitted[1]);
@@ -124,6 +130,8 @@ public class Ref {
                     var endLineColSplitted = lineColSplitted[1].substring(1, lineColSplitted[1].length() - 1).split(",");
                     endLine = Integer.parseInt(endLineColSplitted[0]);
                     endColumn = Integer.parseInt(endLineColSplitted[1]);
+                } else if (lineColSplitted.length  == 1) {
+                    startLine = Integer.parseInt(lineColSplitted[0]);
                 }
                 return new SourceLocation(filePath, startLine, startColumn, endLine, endColumn, start, end);
             } else {
@@ -157,16 +165,16 @@ public class Ref {
         return locationAfter;
     }
 
-    public String getRepository() {
-        return repository;
+    public String getProject() {
+        return project;
     }
 
     public RefType getRefType() {
         return refType;
     }
 
-    public String getCommit() {
-        return commit;
+    public String getCommitId() {
+        return commitId;
     }
 
     public String getLocalNameAfter() {

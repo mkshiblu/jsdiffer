@@ -12,9 +12,9 @@ public class Dataset {
         this.refactorings.add(refactoring);
         var repositoryCommits
                 = repositoryCommitsMap
-                .computeIfAbsent(refactoring.repository, mapper -> new RepositoryCommits(refactoring.repository));
+                .computeIfAbsent(refactoring.project, mapper -> new RepositoryCommits(refactoring.project));
 
-        repositoryCommits.registerRefactoring(refactoring.commit, refactoring);
+        repositoryCommits.registerRefactoring(refactoring.commitId, refactoring);
     }
 
     public List<Ref> getRefsInRepositoryCommit(String repository, String commitId) {
@@ -22,10 +22,7 @@ public class Dataset {
     }
 
     int getRefactoringsCount() {
-        return (int) repositoryCommitsMap.values()
-                .stream()
-                .flatMap(repositoryCommits -> Stream.of(repositoryCommits.refactoringsCount()))
-                .count();
+        return  this.refactorings.size();
     }
 
 

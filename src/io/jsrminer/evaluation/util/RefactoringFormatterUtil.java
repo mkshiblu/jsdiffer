@@ -31,8 +31,8 @@ public class RefactoringFormatterUtil {
         builder.append(System.lineSeparator());
 
         var sortedStream = refactorings.stream()
-                .sorted(Comparator.comparing(Ref::getRepository)
-                        .thenComparing(ref -> ref.getCommit())
+                .sorted(Comparator.comparing(Ref::getProject)
+                        .thenComparing(ref -> ref.getCommitId())
                         .thenComparing(ref -> ref.getRefType().toString().toLowerCase()));
         sortedStream.forEachOrdered(ref -> {
             writeRow(ref, builder);
@@ -48,9 +48,9 @@ public class RefactoringFormatterUtil {
 
     private void writeRow(Ref ref, StringBuilder builder) {
         boolean isTp = ref.getValidationType() == ValidationType.TruePositive;
-        builder.append(ref.getRepository());
+        builder.append(ref.getProject());
         builder.append(delimiter);
-        builder.append(ref.getCommit());
+        builder.append(ref.getCommitId());
         builder.append(delimiter);
         builder.append(ref.getRefType());
         builder.append(delimiter);

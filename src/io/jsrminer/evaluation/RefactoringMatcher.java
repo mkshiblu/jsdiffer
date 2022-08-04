@@ -8,7 +8,7 @@ class RefactoringMatcher {
         boolean equalAfterName = rd.localNameAfter.equals(rm.localNameAfter);
 
         if (rd.refType.name().toLowerCase().contains("file")) {
-            return rd.commit.equals(rm.commit)
+            return rd.commitId.equals(rm.commitId)
                     && rm.refType.equals(rd.refType)
                     && equalBeforeName
                     && equalAfterName;
@@ -17,7 +17,7 @@ class RefactoringMatcher {
         boolean equalBeforeLocation = equalLocation(rd.getLocationBefore(), rm.getLocationBefore());
         boolean equalAfterLocation = equalLocation(rd.getLocationAfter(), rm.getLocationAfter());
 
-        return rd.commit.equals(rm.commit)
+        return rd.commitId.equals(rm.commitId)
                 && rm.refType.equals(rd.refType)
                 && equalBeforeLocation
                 && equalBeforeName

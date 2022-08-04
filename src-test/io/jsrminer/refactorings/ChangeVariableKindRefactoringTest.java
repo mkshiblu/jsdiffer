@@ -17,11 +17,15 @@ public class ChangeVariableKindRefactoringTest extends BaseTest {
                }
             """;
 
-    static String code2 = """
-               function f1() {
-                    let y = 5;
-               }
-            """;
+    static String code2;
+
+    static {
+        code2 = """
+                   function f1() {
+                        let y = 5;
+                   }
+                """;
+    }
 
     static List<IRefactoring> refactorings;
     static ChangeVariableKindRefactoring changeKindRefactoring;
