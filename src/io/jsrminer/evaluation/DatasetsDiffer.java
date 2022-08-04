@@ -69,7 +69,7 @@ public class DatasetsDiffer {
     }
 
     private CommitRefactoringsDiff diffRefTypeMaps(Map<Ref.RefType, List<Ref>> rdRefTypeMap, Map<Ref.RefType, List<Ref>> rmRefTypeMap) {
-        var commitID = rdRefTypeMap.values().stream().findAny().get().get(0).commit;
+        var commitID = rdRefTypeMap.values().stream().findAny().get().get(0).commitId;
         CommitRefactoringsDiff result = new CommitRefactoringsDiff(commitID);
 
         for (var rdEntry : rdRefTypeMap.entrySet()) {

@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 public class Evaluator {
 
     private static final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    final String rdEvaluationFile = "resources\\evaluation\\rd_eval.txt";
+    final String rdEvaluationFile = "resources\\evaluation\\rd_prestaging.txt";
     final String rmEvaluationFile = "resources\\evaluation\\rm_eval_data.txt";
     Dataset rdDataSet = new Dataset();
     Dataset rmDataSet = new Dataset();
@@ -123,8 +123,8 @@ public class Evaluator {
         var row = new RmRow();
         row.lineNo = lineNo;
         var tokens = line.split("\t");
-        row.repository = tokens[0];
-        row.commit = tokens[1];
+        row.project = tokens[0];
+        row.commitId = tokens[1];
         row.refType = toRefType(tokens[2].replaceAll("(?i)(method|operation)", "function"));
 
         if (tokens.length == 8) {
@@ -146,15 +146,17 @@ public class Evaluator {
         row.lineNo = lineNo;
         var tokens = line.split("\t", -1);
 
-        row.repository = formatToCommonProjectName(tokens[0]);
-        row.commit = tokens[1];
-        row.nodeType = tokens[3];
-        row.setLocationBefore(tokens[4]);
-        row.localNameBefore = tokens[5];
-        row.setLocationAfter(tokens[6]);
-        row.localNameAfter = tokens[7];
-        row.setRefactoring(tokens[2]);
-        row.refType = toRefType(tokens[2] + "_" + row.nodeType);
+        row.id = tokens[0];
+        row.project = formatToCommonProjectName(tokens[1]);
+        row.commitId = tokens[2];
+        row.refType = toRefType(tokens[3]);
+        //  row.nodeType = tokens[3];
+        row.localNameBefore = tokens[4];
+        row.localNameAfter = tokens[5];
+        row.setLocationBefore(tokens[6]);
+        row.setLocationAfter(tokens[7]);
+      //  row.setRefactoring(tokens[2]);
+
         return row;
     }
 
@@ -162,6 +164,10 @@ public class Evaluator {
         String typeName = name.toUpperCase();
         var typeNameUnderscored = typeName.replaceAll(" ", "_");
         var refType = Ref.RefType.fromStringMap.get(typeNameUnderscored);
+
+        if(refType == null){
+            throw  new RuntimeException("Ref Type not foound " + name);
+        }
         return refType;
     }
 
