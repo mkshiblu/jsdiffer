@@ -90,10 +90,12 @@ class JBabel implements AutoCloseable {
     @Override
     public void close() {
         if (parser != null) {
+            parser.getRuntime().release(false);
             parser.release();
         }
 
         if (nodeJs != null) {
+            nodeJs.getRuntime().release(false);
             nodeJs.release();
         }
     }

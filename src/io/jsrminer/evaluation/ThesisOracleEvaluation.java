@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Console;
+import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -27,27 +28,27 @@ public class ThesisOracleEvaluation {
     public Map<String, Long> commitRunTime = new LinkedHashMap<>();
     public Map<String, String> projectRepoPathMap = new LinkedHashMap<>();
 
-
+    private static  final  String REPOS_PATH =  "D:\\PROJECTS_REPO";
     private void createProjectRepoMap() {
-        projectRepoPathMap.put("angular.js", "E:\\PROJECTS_REPO\\angular.js");
-        projectRepoPathMap.put("atom", "E:\\PROJECTS_REPO\\atom");
-        projectRepoPathMap.put("axios", "E:\\PROJECTS_REPO\\axios");
-        projectRepoPathMap.put("Chart.js", "E:\\PROJECTS_REPO\\chart-js");
-        projectRepoPathMap.put("create-react-app", "E:\\PROJECTS_REPO\\create-react-app");
-        projectRepoPathMap.put("d3", "E:\\PROJECTS_REPO\\d3");
-        projectRepoPathMap.put("express", "E:\\PROJECTS_REPO\\expressjs");
-        projectRepoPathMap.put("jquery", "E:\\PROJECTS_REPO\\jquery");
-        projectRepoPathMap.put("material-ui", "E:\\PROJECTS_REPO\\material-ui"); //exp
-        projectRepoPathMap.put("meteor", "E:\\PROJECTS_REPO\\meteor");
-        projectRepoPathMap.put("react", "E:\\PROJECTS_REPO\\react"); //exp
-        projectRepoPathMap.put("react-native", "E:\\PROJECTS_REPO\\react-native");
-        projectRepoPathMap.put("redux", "E:\\PROJECTS_REPO\\redux");
-        projectRepoPathMap.put("reveal.js", "E:\\PROJECTS_REPO\\reveal.js");
-        projectRepoPathMap.put("Semantic-UI", "E:\\PROJECTS_REPO\\Semantic-UI");
-        projectRepoPathMap.put("socket.io", "E:\\PROJECTS_REPO\\socket.io");
-        projectRepoPathMap.put("three.js", "E:\\PROJECTS_REPO\\three.js");
-        projectRepoPathMap.put("vue", "E:\\PROJECTS_REPO\\vue");
-        projectRepoPathMap.put("webpack", "E:\\PROJECTS_REPO\\webpack");
+        projectRepoPathMap.put("angular.js", REPOS_PATH + "\\angular.js");
+        projectRepoPathMap.put("atom", REPOS_PATH + "\\atom");
+        projectRepoPathMap.put("axios", REPOS_PATH + "\\axios");
+        projectRepoPathMap.put("Chart.js", REPOS_PATH + "\\chart-js");
+        projectRepoPathMap.put("create-react-app", REPOS_PATH + "\\create-react-app");
+        projectRepoPathMap.put("d3", REPOS_PATH + "\\d3");
+        projectRepoPathMap.put("express", REPOS_PATH + "\\expressjs");
+        projectRepoPathMap.put("jquery", REPOS_PATH + "\\jquery");
+        projectRepoPathMap.put("material-ui", REPOS_PATH + "\\material-ui"); //exp
+        projectRepoPathMap.put("meteor", REPOS_PATH + "\\meteor");
+        projectRepoPathMap.put("react", REPOS_PATH + "\\react"); //exp
+        projectRepoPathMap.put("react-native", REPOS_PATH + "\\react-native");
+        projectRepoPathMap.put("redux", REPOS_PATH + "\\redux");
+        projectRepoPathMap.put("reveal.js", REPOS_PATH + "\\reveal.js");
+        projectRepoPathMap.put("Semantic-UI", REPOS_PATH + "\\Semantic-UI");
+        projectRepoPathMap.put("socket.io", REPOS_PATH + "\\socket.io");
+        projectRepoPathMap.put("three.js", REPOS_PATH + "\\three.js");
+        projectRepoPathMap.put("vue", REPOS_PATH + "\\vue");
+        projectRepoPathMap.put("webpack", REPOS_PATH + "\\webpack");
     }
 
     public static void main(String[] args) {
@@ -55,9 +56,9 @@ public class ThesisOracleEvaluation {
         evaluator.createMap();
         evaluator.createProjectRepoMap();
         //evaluator.runAll();
-        //evaluator.run("material-ui", allProjectCommits);
-       //evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
-       evaluator.run("Semantic-UI", "7e37d4a098a51c0a888ca273b07d1423e21eef7c");
+        evaluator.run("angular.js", allProjectCommits);
+       //evaluator.run("angular.js", "03043839d5a540b02208001fe12e812dfde00a8e");
+       //evaluator.run("Semantic-UI", "7e37d4a098a51c0a888ca273b07d1423e21eef7c");
     }
 
     public void runRandomized() {
@@ -115,7 +116,9 @@ public class ThesisOracleEvaluation {
             StringBuilder sb = new StringBuilder();
             sb.append(RefactoringDisplayFormatter.getHeader() + "\n");
             sb.append(result);
-            Files.writeString(Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt"), sb.toString(), StandardOpenOption.CREATE);
+            var path = Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt");
+            Files.deleteIfExists(path);
+            Files.writeString(path, sb.toString(), StandardOpenOption.CREATE);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -196,7 +199,9 @@ public class ThesisOracleEvaluation {
         try {
 
             System.out.println(str);
-            Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), str, StandardOpenOption.CREATE);
+            var path = Path.of("resources\\evaluation\\performance\\" + project + ".txt");
+            Files.deleteIfExists(path);
+            Files.writeString(path, str, StandardOpenOption.CREATE);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

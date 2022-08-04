@@ -38,7 +38,7 @@ public class BabelParser extends JavaScriptParser {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }finally {
-            babel.close();
+       //    babel.close();
         }
         return umlModel;
     }

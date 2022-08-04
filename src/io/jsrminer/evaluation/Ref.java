@@ -70,6 +70,7 @@ public class Ref {
         RENAME_VARIABLE,
         PARAMETERIZE_VARIABLE,
         MOVE_RENAME_CLASS,
+        CHANGE_VARIABLE_KIND,
 
         // INTERNALS
         INTERNAL_MOVE_FUNCTION,
@@ -101,6 +102,7 @@ public class Ref {
             fromStringMap.put("RENAME_PARAMETER", RENAME_PARAMETER);
             fromStringMap.put("RENAME_VARIABLE", RENAME_VARIABLE);
             fromStringMap.put("PARAMETERIZE_VARIABLE", PARAMETERIZE_VARIABLE);
+            fromStringMap.put("CHANGE_VARIABLE_KIND", CHANGE_VARIABLE_KIND);
         }
     }
 
