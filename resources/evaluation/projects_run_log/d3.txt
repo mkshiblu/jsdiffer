@@ -1,1 +1,2 @@
 project	commit_id	refactoring_type	name_before	name_after	location_before	location_after	description
+d3	2eba0320407442e85be97b2cd84398fb6c626fe3	RENAME_VARIABLE	d	extent	src/scale/log.js:838-857|(33,8)-(33,27)	src/scale/log.js:613-653|(28,8)-(28,48)	Rename Variable d to extent in 1.4() at src/scale/log.js|1.4
