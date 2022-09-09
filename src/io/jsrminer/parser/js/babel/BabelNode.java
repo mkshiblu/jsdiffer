@@ -152,6 +152,10 @@ class BabelNode implements AutoCloseable {
         if (v8Object != null) {
             v8Object.release();
         }
+
+        if (objectAsArray != null) {
+            objectAsArray.release();
+        }
     }
 
     public boolean isDefined() {

@@ -117,7 +117,6 @@ public class Visitor {
         }
 
         container.getStatements().addAll(dummyBodyBlock.getStatements());
-
         return container;
     }
 

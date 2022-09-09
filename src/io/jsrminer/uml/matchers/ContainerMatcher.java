@@ -64,7 +64,7 @@ public abstract class ContainerMatcher implements IContainerMatcher {
     }
 
     public boolean hasCommonParameters(IContainer container1, IContainer container2) {
-        if (container1 instanceof IAnonymousFunctionDeclaration && container2 instanceof IAnonymousFunctionDeclaration) {
+        if (container1 instanceof IFunctionDeclaration && container2 instanceof IFunctionDeclaration) {
             return FunctionUtil.isCommonParameterNamesMoreThanUncommon((IAnonymousFunctionDeclaration) container1, (IAnonymousFunctionDeclaration) container2);
         }
         return false;

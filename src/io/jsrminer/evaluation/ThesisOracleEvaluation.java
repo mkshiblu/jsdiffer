@@ -6,6 +6,8 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Console;
+import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
@@ -25,7 +27,6 @@ public class ThesisOracleEvaluation {
     public Map<String, String[]> projectRandomCommmitMap = new LinkedHashMap<>();
     public Map<String, Long> commitRunTime = new LinkedHashMap<>();
     public Map<String, String> projectRepoPathMap = new LinkedHashMap<>();
-
 
     private static  final  String REPOS_PATH =  "D:\\PROJECTS_REPO";
     private void createProjectRepoMap() {
@@ -56,9 +57,9 @@ public class ThesisOracleEvaluation {
         evaluator.createProjectRepoMap();
         //evaluator.runAll();
         //evaluator.run("material-ui", allProjectCommits);
-       // evaluator.run("angular.js", allProjectCommits);
-       // evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
-        evaluator.run("angular.js", "538f4606ff32e776b093243fed4af3460df74f2a");
+        evaluator.run("webpack", allProjectCommits);
+        // evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
+       /// evaluator.run("angular.js", "538f4606ff32e776b093243fed4af3460df74f2a");
     }
 
     public void runRandomized() {
@@ -71,16 +72,17 @@ public class ThesisOracleEvaluation {
     }
 
     public void runAll() {
-        builder.setLength(0);
+        builder= new StringBuilder();
         StringBuilder allBuilder = new StringBuilder();
-
+        String projectRefs = null;
         allBuilder.append(RefactoringDisplayFormatter.getHeader() + "\n");
         log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n");
         for (var project : projectRepoPathMap.keySet()) {
             run(project, allProjectCommits);
-            log.info(builder.toString() + "\n");
-            allBuilder.append(builder.toString());
-            builder.setLength(0);
+            projectRefs = builder.toString();
+            log.info(projectRefs);
+            allBuilder.append(projectRefs);
+            builder = new StringBuilder();
         }
         //log.info("\n" + RefactoringDisplayFormatter.getHeader() + "\n" + builder.toString());
         try {
@@ -94,11 +96,11 @@ public class ThesisOracleEvaluation {
     public void run(String project, Map<String, String[]> projectCommmitMap) {
         var repoPath = projectRepoPathMap.get(project);
         var commitIds = projectCommmitMap.get(project);
-
+        var jsrminer = new JSRefactoringMiner();
         for (int i = 0; i < commitIds.length; i++) {
             var commitId = commitIds[i];
             watch.start();
-            var refactorings = new JSRefactoringMiner().detectAtCommit(repoPath, commitId);
+            var refactorings = jsrminer.detectAtCommit(repoPath, commitId);
             watch.stop();
             commitRunTime.put(commitId, watch.getTime());
             watch.reset();
@@ -115,7 +117,9 @@ public class ThesisOracleEvaluation {
             StringBuilder sb = new StringBuilder();
             sb.append(RefactoringDisplayFormatter.getHeader() + "\n");
             sb.append(result);
-            Files.writeString(Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt"), sb.toString(), StandardOpenOption.CREATE);
+            var path = Path.of("resources\\evaluation\\projects_run_log\\" + project + ".txt");
+            Files.deleteIfExists(path);
+            Files.writeString(path, sb.toString(), StandardOpenOption.CREATE);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -189,14 +193,16 @@ public class ThesisOracleEvaluation {
     void printCommitRuntime(String project) {
         StringBuilder builder = new StringBuilder();
         builder.append("commit_id\tms\n");
-        System.out.println("\n\ncommit_id\tms");
         for (var entry : commitRunTime.entrySet()) {
-           // System.out.println(entry.getKey() + "\t" + entry.getValue());
             builder.append(entry.getKey() + "\t" + entry.getValue() + "\n");
         }
+        var str = builder.toString();
         try {
 
-            Files.writeString(Path.of("resources\\evaluation\\performance\\" + project + ".txt"), builder.toString(), StandardOpenOption.CREATE);
+            System.out.println(str);
+            var path = Path.of("resources\\evaluation\\performance\\" + project + ".txt");
+            Files.deleteIfExists(path);
+            Files.writeString(path, str, StandardOpenOption.CREATE);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
