@@ -8,7 +8,6 @@ import java.util.Set;
 public class BabelParserConfig {
     public static final Set<BabelNodeType> ignoredNodeTypes = Set.of(
             BabelNodeType.EMPTY_STATEMENT,
-            BabelNodeType.EXPORT_NAMED_DECLARATION,
             BabelNodeType.IMPORT_DECLARATION,
             BabelNodeType.TYPE_ALIAS,
             BabelNodeType.JSX_ELEMENT,

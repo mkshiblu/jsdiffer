@@ -8,6 +8,7 @@ import io.rminerx.core.api.IClassDeclaration;
 import io.rminerx.core.api.ICodeFragment;
 import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.ILeafFragment;
+import io.rminerx.core.entities.DeclarationContainer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,6 +41,10 @@ public class DeclarationVisitor {
 
     BabelNodeVisitor<BlockStatement, SingleStatement> exportDefaultVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
         return visitExportDefaultDeclaration(node, parent, container);
+    };
+
+    BabelNodeVisitor<BlockStatement, SingleStatement> exportNamedDeclarationVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
+        return visitExportNamedDeclaration(node, parent, container);
     };
 
     BabelNodeVisitor<BlockStatement, ClassDeclaration> classDeclarationVisitor = (BabelNode node, BlockStatement parent, IContainer container) -> {
@@ -596,6 +601,7 @@ public class DeclarationVisitor {
      * An object expression.
      */
     AnonymousFunctionDeclaration visitObjectExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+
         var anonymousFunctionDeclaration = new AnonymousFunctionDeclaration();
         anonymousFunctionDeclaration.setSourceLocation(node.getSourceLocation());
         String name = visitor.getNodeUtil().generateNameForAnonymousFunction(container);
@@ -603,6 +609,11 @@ public class DeclarationVisitor {
                 name, anonymousFunctionDeclaration.getSourceLocation(), container);
         String text = visitor.getNodeUtil().getTextInSource(node, false);
         anonymousFunctionDeclaration.setText(text);
+
+        if ("{}".equals(node.getText())) {
+            leaf.getStringLiterals().add("{}");
+            return anonymousFunctionDeclaration;
+        }
 
         BlockStatement blockStatement = new BlockStatement();
         blockStatement.setSourceLocation(node.getSourceLocation());
@@ -791,5 +802,22 @@ public class DeclarationVisitor {
         }
 
         return leaf;
+    }
+
+    SingleStatement visitExportNamedDeclaration(BabelNode node, BlockStatement parent, IContainer container) {
+
+        var declarationNode = node.get("declaration");
+        if (declarationNode != null) {
+            if (declarationNode.getType() == BabelNodeType.FUNCTION_DECLARATION) {
+                visitor.geDeclarationVisitor().visitFunctionDeclaration(declarationNode, parent, container);
+            } else if (declarationNode.getType() == BabelNodeType.CLASS_DECLARATION) {
+                visitor.geDeclarationVisitor().visitClassDeclaration(declarationNode, parent, container);
+            } else {
+                var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, parent);
+                 visitor.visitExpression(node, leaf, container);
+                 return  leaf;
+            }
+        }
+            return null;
     }
 }

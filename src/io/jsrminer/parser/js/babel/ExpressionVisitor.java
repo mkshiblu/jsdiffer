@@ -92,6 +92,7 @@ public class ExpressionVisitor {
      * An assignment operator token.
      **/
     String visitAssignmentExpression(BabelNode node, ILeafFragment leaf, IContainer container) {
+        boolean parsedAsDeclaration = false;
         String text = visitor.getNodeUtil().getTextInSource(node, false);
         var operator = node.get("operator").asString();
 
@@ -101,9 +102,29 @@ public class ExpressionVisitor {
             leaf.registerInfixExpression(text);
         }
 
-        visitor.visitExpression(node.get("left"), leaf, container);
-        visitor.visitExpression(node.get("right"), leaf, container);
+        var leftNode = node.get("left");
+        var rightNode = node.get("right");
 
+        if ((rightNode.getType() == BabelNodeType.CLASS_EXPRESSION
+                || rightNode.getType() == BabelNodeType.FUNCTION_EXPRESSION) &&
+                leftNode.getText().equals("module.exports")) {
+
+            var id = rightNode.get("id");
+            if (id != null) {
+                var declarationVisitor = visitor.geDeclarationVisitor();
+                if(rightNode.getType() == BabelNodeType.CLASS_EXPRESSION) {
+                    declarationVisitor.visitClassDeclaration(rightNode, leaf.getParent(), container);
+                }else if(rightNode.getType() == BabelNodeType.FUNCTION_EXPRESSION) {
+                    declarationVisitor.visitFunctionDeclaration(rightNode, leaf.getParent(), container);
+                }
+                parsedAsDeclaration = true;
+            }
+        }
+
+        if (!parsedAsDeclaration){
+            visitor.visitExpression(leftNode, leaf, container);
+            visitor.visitExpression(rightNode, leaf, container);
+        }
         return text;
     }
 

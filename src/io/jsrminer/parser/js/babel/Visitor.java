@@ -99,6 +99,7 @@ public class Visitor {
 
             // Export import
             put(EXPORT_DEFAULT_DECLARATION, declarationVisitor.exportDefaultVisitor);
+            put(EXPORT_NAMED_DECLARATION, declarationVisitor.exportNamedDeclarationVisitor);
         }};
     }
 
@@ -159,5 +160,9 @@ public class Visitor {
 
     public ErrorReporter getErrorReporter() {
         return errorReporter;
+    }
+    
+    public DeclarationVisitor geDeclarationVisitor(){
+        return this.declarationVisitor;
     }
 }
