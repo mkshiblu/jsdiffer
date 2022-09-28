@@ -72,7 +72,7 @@ public abstract class BaseDiffer<T extends IContainer> {
             }
         }
 
-        if (mapperSet.isEmpty() && operationBodyMapper.getNestedFunctionDeclrationMappings().size() > 0) {
+        if (mapperSet.isEmpty() && operationBodyMapper.getMappedNestedFunctionDeclrations().size() > 0) {
             if (isNestedFunctionMappersMatched(operationBodyMapper)) {
                 mapperSet.add(operationBodyMapper);
             }
@@ -82,7 +82,7 @@ public abstract class BaseDiffer<T extends IContainer> {
 
     private boolean isNestedFunctionMappersMatched(FunctionBodyMapper bodyMapper) {
         boolean isMatched = false;
-        List<FunctionBodyMapper> nestedBodyMappers = new ArrayList<>(bodyMapper.getNestedFunctionDeclrationMappings());
+        List<FunctionBodyMapper> nestedBodyMappers = new ArrayList<>(bodyMapper.getMappedNestedFunctionDeclrations());
         int functionMappings = nestedBodyMappers.size();
         var nonMappedNestedFunctionsT1 = bodyMapper.getNonMappedNestedFunctionDeclrationsT1().size();
         var nonMappedNestedFunctionsT2 = bodyMapper.getNonMappedNestedFunctionDeclrationsT2().size();

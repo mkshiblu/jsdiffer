@@ -40,8 +40,8 @@ public class AnonymousFunctionReplacementFinder {
                 statement1, statement2, function1, function2, replacements);
 
         // Common parameters
-//        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.COMMON_PARAMETERS,
-//                statement1, statement2, function1, function2, replacements);
+        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.COMMON_PARAMETERS,
+                statement1, statement2, function1, function2, replacements);
 
         return replacements.size() > 0 ? replacements : null;
     }

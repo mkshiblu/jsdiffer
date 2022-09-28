@@ -57,7 +57,7 @@ public class LiteralVisitor {
      * }
      */
     String visitStringLiteral(BabelNode node, ILeafFragment leaf, IContainer container) {
-        final String value = node.getString("value");
+        final String value = node.getText();//.getString("value");
         leaf.getStringLiterals().add(value);
         return value;
     }

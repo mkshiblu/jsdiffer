@@ -37,14 +37,14 @@ public class NestedFunctionBodyMapperTest extends BaseTest {
 
     @Test
     void testNestedFunctionsMappingsCount() {
-        assertEquals(1, renameOperationRefactoring.getBodyMapper().getNestedFunctionDeclrationMappings().size());
+        assertEquals(1, renameOperationRefactoring.getBodyMapper().getMappedNestedFunctionDeclrations().size());
         assertEquals(0, renameOperationRefactoring.getBodyMapper().getNonMappedNestedFunctionDeclrationsT1().size());
         assertEquals(0, renameOperationRefactoring.getBodyMapper().getNonMappedNestedFunctionDeclrationsT2().size());
     }
 
     @Test
     void testNestedFunctionMappingsName() {
-        var nestedMapper = renameOperationRefactoring.getBodyMapper().getNestedFunctionDeclrationMappings();
+        var nestedMapper = renameOperationRefactoring.getBodyMapper().getMappedNestedFunctionDeclrations();
 
         var iterator = nestedMapper.iterator();
         var first = iterator.next();

@@ -3,13 +3,9 @@ package io.jsrminer.refactorings;
 import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
-import io.jsrminer.uml.mapping.FunctionBodyMapper;
-import io.jsrminer.uml.mapping.replacement.Replacement;
-import io.jsrminer.uml.mapping.replacement.ReplacementType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RenameFunctionAtomReplaceTest extends BaseTest {
 
     static List<IRefactoring> refactorings;
-    static RenameOperationRefactoring renameOperationRefactoring;
+    static RenameOperationRefactoring renameReplaceRefactoring;
 
     @BeforeAll
     public static void setup() {
@@ -25,7 +21,7 @@ public class RenameFunctionAtomReplaceTest extends BaseTest {
                 , getRootResourceDirectory() + "src2\\RenameFunctionReplace_Atom.js");
 
         IRefactoring refactoring = refactorings.get(0);
-        renameOperationRefactoring = (RenameOperationRefactoring) refactoring;
+        renameReplaceRefactoring = (RenameOperationRefactoring) refactoring;
     }
 
     @Test
@@ -35,12 +31,28 @@ public class RenameFunctionAtomReplaceTest extends BaseTest {
 
     @Test
     void testRefactoringType() {
-        assertEquals(RefactoringType.RENAME_METHOD, renameOperationRefactoring.getRefactoringType());
+        assertEquals(RefactoringType.RENAME_METHOD, renameReplaceRefactoring.getRefactoringType());
     }
 
     @Test
-    void testFunctionNames() {
-        assertEquals("getProjectFilePath", renameOperationRefactoring.getRenamedOperation().getName());
-        assertEquals("getAtomProjectFilePath", renameOperationRefactoring.getOriginalOperation().getName());
+    void testFunctionNamesReplace() {
+        assertEquals("replace", renameReplaceRefactoring.getRenamedOperation().getName());
+        assertEquals("replaceAtomProject", renameReplaceRefactoring.getOriginalOperation().getName());
+
+
+    }
+
+    @Test
+    void testFunctionNamesDidReplace() {
+        RenameOperationRefactoring renameDidReplaceRefactoring = (RenameOperationRefactoring)  refactorings.get(1);
+        assertEquals("onDidReplace", renameDidReplaceRefactoring.getRenamedOperation().getName());
+        assertEquals("onDidReplaceAtomProject", renameDidReplaceRefactoring.getOriginalOperation().getName());
+    }
+
+    @Test
+    void testFunctionNamesGetAtomProjectFilePath() {
+        RenameOperationRefactoring renameDidReplaceRefactoring = (RenameOperationRefactoring)  refactorings.get(2);
+        assertEquals("getProjectFilePath", renameDidReplaceRefactoring.getRenamedOperation().getName());
+        assertEquals("getAtomProjectFilePath", renameDidReplaceRefactoring.getOriginalOperation().getName());
     }
 }
