@@ -1,83 +1,66 @@
-DROP TABLE IF EXISTS dbo.OracleTemp;
-DROP TABLE IF EXISTS dbo.ValidationByProject;
-DROP TABLE IF EXISTS dbo.PRByProjects;
+DROP TABLE IF EXISTS dbo.DataSet;
+DROP TABLE IF EXISTS dbo.ProjectValidation;
+DROP TABLE IF EXISTS dbo.Result;
 
-SELECT *
-FROM dbo.Oracle AS o
-LEFT JOIN dbo.RefactoringType AS rt ON (rt.name = o.refactoring_type)
-WHERE rt.id IS NULL;
+SELECT * 
+INTO dbo.DataSet
+FROM 
+(
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
+FROM dbo.Angular
 
+UNION  
 
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
+FROM dbo.ChartJS
 
-SELECT *
-FROM dbo.Oracle AS o
-INNER JOIN dbo.RefactoringType AS rt ON (rt.name = o.refactoring_type AND rt.supported_by_rd = 'Y' AND rt.supported_by_rm = 'Y');
+UNION  
 
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment]  
+FROM dbo.CreateReactApp
+UNION  
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
+FROM dbo.Axios
+UNION  
+SELECT [project] ,[commit_id] ,[refactoring_type] ,[name_before] ,[name_after] ,[location_before] ,[location_after] ,[refactoring] ,[validation] ,[rd_validation], [rd_id], [comment] 
+FROM dbo.Atom
+) AS b
+ORDER BY Validation DESC
 
--- PR BY Projects on Supported Refactorings
-SELECT project,
-	COUNT(*) AS Total,
-	--COUNT(ISNULL(rm_validation, [rd_validation])) AS Validated,
-	COUNT(rm_validation) AS rm_validated_count,
-	COUNT(rd_validation) AS rd_validated_count,
-	SUM(CASE  WHEN ISNULL(rm_validation, [rd_validation]) IS NULL THEN 1 ELSE 0 END) AS UnValidated,
-	COUNT(CASE rm_validation WHEN 'TP' THEN 1 END) AS RmTPs,
-	COUNT(CASE rm_validation WHEN 'FP' THEN 1 END) AS RmFps,
-	COUNT(CASE rm_validation WHEN 'TN' THEN 1 END) AS RmTNs,
-	COUNT(CASE rm_validation WHEN 'FN' THEN 1 END) AS RmFNs,
-	COUNT(CASE [rd_validation] WHEN 'TP' THEN 1 END) AS RdTPs,
-	COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
-	COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
-	COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
-INTO dbo.ValidationByProject 
-FROM dbo.Oracle
+SELECT 
+[project] AS Project,
+COUNT(*) AS Total,
+COUNT(Validation) AS Validated,
+SUM(CASE  WHEN [Validation] IS NULL THEN 1 ELSE 0 END) AS UnValidated,
+COUNT(CASE [Validation] WHEN 'TP' THEN 1 END) AS TPs,
+COUNT(CASE [Validation] WHEN 'FP' THEN 1 END) AS Fps,
+COUNT(CASE [Validation] WHEN 'TN' THEN 1 END) AS TNs,
+COUNT(CASE [Validation] WHEN 'FN' THEN 1 END) AS FNs
+INTO dbo.ProjectValidation 
+FROM dbo.DataSet
 GROUP BY [project];
 
 
 SELECT *
-, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFps),0), 2) AS RmPrecision
-, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFNs),0), 2) AS RmRecall
+, ROUND(CAST(Tps AS FLOAT) / NULLIF((TPS + FPs),0), 2) AS Precision
+, ROUND(CAST(Tps AS FLOAT) / NULLIF((TPS + FNs),0), 2) AS Recall
 
-, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFps),0), 2) AS RdPrecision
-, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFNs),0), 2) AS RdRecall
-INTO dbo.PRByProjects
-FROM dbo.ValidationByProject;
+INTO dbo.Result
+FROM dbo.ProjectValidation;
 
 
 SELECT *
-FROM dbo.PRByProjects;
+FROM dbo.Result;
 
 
--- Calculate Weighted Overall Average
 SELECT COUNT(Project) AS ProjectCount
-	, SUM(Total) AS RefactoringCount
-	, SUM(UnValidated) As UnValidated
-	, SUM(rm_validated_count) AS rm_validated_count
-	, SUM(rd_validated_count) AS rd_validated_count
-
-	, SUM(RmTPs) AS RmTPs
-	, SUM(RmFps) AS RmFps
-	, SUM(RmTNs) AS RmTNs
-	, SUM(RdFNs) AS RdFNs
-
-	, SUM(RdTPs) AS RdTPs
-	, SUM(RdFps) AS RdFps
-	, SUM(RdTNs) AS RdTNs
-	, SUM(RmFNs) AS RmFNs
-	
-	, ROUND(SUM(RmPrecision * rm_validated_count) / SUM(rm_validated_count), 2) AS RmPrecision
-	, ROUND(SUM(RmRecall * rm_validated_count) / SUM(rm_validated_count), 2) AS RmRecall
-	
-	, ROUND(SUM(RdPrecision * rd_validated_count) / SUM(rd_validated_count), 2) AS RdPrecision
-	, ROUND(SUM(RdRecall * rd_validated_count) / SUM(rd_validated_count), 2) AS RdRecall
-FROM dbo.PRByProjects;
-
-
-SELECT ((0.93 * 92) + (38 * 0.83) + (62 * 0.9)) / (92 + 38 + 62) AS RmPrecision, 
- ((0.31 * 92) + (38 * 0.19) + (62 * 0.26)) / (92 + 38 + 62) AS RmRecall
-, ((0.91 * 85) + (36 * 0.95) + (62 * 0.57)) / (85 + 36 + 62) AS RdPrecision
-, ((0.81 * 85) + (36 * 0.88) + (62 * 0.94)) / (85 + 36 + 62) AS RdRecall;
-
-DROP TABLE IF EXISTS dbo.ValidationByProject;
-DROP TABLE IF EXISTS dbo.PRByProjects;
-
+, SUM(Validated) As Validated
+, SUM(UnValidated) As UnValidated
+, SUM(Total) AS RefactoringCount
+, SUM(TPs) AS Tps
+, SUM(Fps) AS Fps
+, SUM(TNs) AS TNs
+, SUM(Fns) AS Fns
+, AVG(Precision) AS Precision
+, AVG(Recall) AS Recall
+FROM dbo.Result;

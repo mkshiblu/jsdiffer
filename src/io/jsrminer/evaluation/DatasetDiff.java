@@ -21,13 +21,7 @@ public class DatasetDiff {
     public void registerRepositoryNotReportedByDataset2(String project) {
         this.projectNotReportedByRm.add(project);
     }
-
-//    private final List<Ref> commonRefactorings = new ArrayList<>();
-//
-//    public void addCommonRefactoring(Ref refactoring) {
-//        commonRefactorings.add(refactoring);
-//    }
-
+    
     public List<Ref> getProjectCommonRefactorings(String projectName) {
         var x = commitDiffs.get(projectName)
                 .stream()

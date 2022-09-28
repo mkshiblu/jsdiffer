@@ -1,5 +1,6 @@
 package io.jsrminer.uml;
 
+import com.eclipsesource.v8.NodeJS;
 import io.jsrminer.io.FileUtil;
 import io.jsrminer.parser.js.UMDHandler;
 import io.jsrminer.parser.js.babel.BabelParser;

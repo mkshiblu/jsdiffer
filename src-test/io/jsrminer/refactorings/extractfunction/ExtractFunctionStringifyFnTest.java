@@ -1,8 +1,10 @@
-package io.jsrminer.refactorings;
+package io.jsrminer.refactorings.extractfunction;
 
 import io.jsrminer.BaseTest;
 import io.jsrminer.JSRefactoringMiner;
 import io.jsrminer.api.IRefactoring;
+import io.jsrminer.refactorings.ExtractOperationRefactoring;
+import io.jsrminer.refactorings.RefactoringType;
 import io.jsrminer.uml.mapping.CodeFragmentMapping;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.jsrminer.uml.mapping.replacement.Replacement;
@@ -16,15 +18,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ExtractFunctionGetCaretPositionTest extends BaseTest {
+public class ExtractFunctionStringifyFnTest extends BaseTest {
 
     static List<IRefactoring> refactorings;
     static ExtractOperationRefactoring extractOperationRefactoring;
 
     @BeforeAll
     public static void setup() {
-        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src1\\ExtractFunctionGetCaretPosition.js"
-                , getRootResourceDirectory() + "src2\\ExtractFunctionGetCaretPosition.js");
+        refactorings = new JSRefactoringMiner().detectBetweenFiles(getRootResourceDirectory() + "src1\\ExtractFunctionStringifyFnInjector.js"
+                , getRootResourceDirectory() + "src2\\ExtractFunctionStringifyFnInjector.js");
 
         IRefactoring refactoring = refactorings.get(0);
         assertEquals(RefactoringType.EXTRACT_OPERATION, refactoring.getRefactoringType());
