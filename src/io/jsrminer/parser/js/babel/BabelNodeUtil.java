@@ -158,6 +158,16 @@ public class BabelNodeUtil {
     void loadAnonymousFunctionDeclarationInfo(BabelNode node, AnonymousFunctionDeclaration function, IContainer container) {
         String name = generateNameForAnonymousFunction(container);
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);
+
+        // Parse optional name if defined
+        var idNode = node.get("id");
+        if (idNode != null && idNode.isDefined()) {
+            var nameNode = idNode.get("name");
+            if (nameNode != null) {
+                var optionalName = nameNode.asString();
+                function.setOptionalName(optionalName);
+            }
+        }
     }
 
 

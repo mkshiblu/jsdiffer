@@ -8,6 +8,7 @@ import io.jsrminer.uml.diff.ContainerDiffer;
 import io.jsrminer.uml.diff.UMLOperationDiff;
 import io.jsrminer.uml.mapping.FunctionBodyMapper;
 import io.rminerx.core.api.IAnonymousFunctionDeclaration;
+import io.rminerx.core.api.IContainer;
 import io.rminerx.core.api.IFunctionDeclaration;
 
 import java.util.*;
@@ -30,6 +31,17 @@ public class AnonymousFunctionReplacementFinder {
         var replacements = new LinkedHashSet<Replacement>(); // Previous replacements are empty it should be passed
         List<IAnonymousFunctionDeclaration> anonymousContainers1 = new ArrayList<>(statement1.getAnonymousFunctionDeclarations());
         List<IAnonymousFunctionDeclaration> anonymousContainers2 = new ArrayList<>(statement2.getAnonymousFunctionDeclarations());
+
+        matchAnonymousContainers(anonymousContainers1, anonymousContainers2, new ContainerMatcher() {
+                    @Override
+                    public boolean match(IContainer container1, IContainer container2) {
+                        var a1 = (IAnonymousFunctionDeclaration) container1;
+                        var a2 = (IAnonymousFunctionDeclaration) container2;
+                        return  a1.getOptionalName() != null && a1.getOptionalName() != ""
+                                && a1.getOptionalName().equals(a2.getOptionalName());
+                    }
+                },
+                statement1, statement2, function1, function2, replacements);
 
         // First exact matches
         matchAnonymousContainers(anonymousContainers1, anonymousContainers2, ContainerMatcher.SAME,

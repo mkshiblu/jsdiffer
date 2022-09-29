@@ -7,6 +7,7 @@ import io.rminerx.core.api.IAnonymousFunctionDeclaration;
  */
 public class AnonymousFunctionDeclaration extends FunctionDeclaration implements IAnonymousFunctionDeclaration {
     private String text;
+    private String optionalName;
 
     public void setText(String text) {
         this.text = text;
@@ -18,5 +19,13 @@ public class AnonymousFunctionDeclaration extends FunctionDeclaration implements
     @Override
     public String getText() {
         return text;
+    }
+
+    public String getOptionalName() {
+        return optionalName;
+    }
+
+    public void setOptionalName(String optionalName) {
+        this.optionalName = optionalName;
     }
 }

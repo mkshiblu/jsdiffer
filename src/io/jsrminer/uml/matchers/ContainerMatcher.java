@@ -59,7 +59,7 @@ public abstract class ContainerMatcher implements IContainerMatcher {
     };
 
 
-    private ContainerMatcher() {
+    public ContainerMatcher() {
 
     }
 
