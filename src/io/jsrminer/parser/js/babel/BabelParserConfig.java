@@ -56,6 +56,7 @@ public class BabelParserConfig {
                     .put(BabelNodeType.LABELED_STATEMENT, CodeElementType.LABELED_STATEMENT)
 
                     .put(BabelNodeType.EXPORT_DEFAULT_DECLARATION, CodeElementType.EXPRESSION_STATEMENT)
+                    .put(BabelNodeType.EXPORT_NAMED_DECLARATION, CodeElementType.EXPRESSION_STATEMENT)
 //
 //        put(ParseTreeType.VARIABLE_STATEMENT, CodeElementType.VARIABLE_DECLARATION_STATEMENT);
 //        put(ParseTreeType.VARIABLE_DECLARATION, CodeElementType.VARIABLE_DECLARATION);

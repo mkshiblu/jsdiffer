@@ -57,8 +57,8 @@ public class ThesisOracleEvaluation {
         evaluator.createProjectRepoMap();
         //evaluator.runAll();
         //evaluator.run("material-ui", allProjectCommits);
-        evaluator.run("webpack", allProjectCommits);
-        // evaluator.run("react", "9bd4d1fae21a6521c185cb114a15ca5dc74d6d9b");
+        evaluator.run("Chart.js", allProjectCommits);
+        // evaluator.run("angular.js", "42e622b751d1ad1520b824473f9ad31e7efb75b3");
        /// evaluator.run("angular.js", "538f4606ff32e776b093243fed4af3460df74f2a");
     }
 

@@ -813,9 +813,13 @@ public class DeclarationVisitor {
             } else if (declarationNode.getType() == BabelNodeType.CLASS_DECLARATION) {
                 visitor.geDeclarationVisitor().visitClassDeclaration(declarationNode, parent, container);
             } else {
-                var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, parent);
-                 visitor.visitExpression(node, leaf, container);
-                 return  leaf;
+                try {
+                    var leaf = visitor.getNodeUtil().createSingleStatementPopulateAndAddToParent(node, parent);
+                    visitor.visitExpression(declarationNode, leaf, container);
+                    return leaf;
+                }catch (Exception ex){
+                    this.visitor.getErrorReporter().reportWarning(node.getSourceLocation(),"Could not parse: " + ex.toString());
+                }
             }
         }
             return null;

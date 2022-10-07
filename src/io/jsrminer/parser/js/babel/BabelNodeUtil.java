@@ -172,12 +172,15 @@ public class BabelNodeUtil {
 
 
     void loadFunctionDeclarationInfo(BabelNode node, FunctionDeclaration function, IContainer container) {
-        var nameNode = node.get("id").get("name");
-
-        String name;
-        if (nameNode != null) {
-            name = nameNode.asString();
-        } else {
+        String name = null;
+        var idNode = node.get("id");
+        if (idNode != null && idNode.isDefined()) {
+            var nameNode = idNode.get("name");
+            if (nameNode != null) {
+                 name = nameNode.asString();
+            }
+        }
+        if (name == null) {
             name = generateNameForAnonymousFunction(container);
         }
         populateContainerNamesAndLocation(function, name, node.getSourceLocation(), container);

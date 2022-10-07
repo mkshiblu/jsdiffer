@@ -1,6 +1,7 @@
 -- Run ORacle first
 DROP TABLE IF EXISTS dbo.RefactoringTypeValidation;
 DROP TABLE IF EXISTS dbo.RefactoringTypePrecisionRecall;
+DROP TABLE IF EXISTS dbo.WeightedAverage;
 
 SELECT  refactoring_type AS RefactoringType
 , COUNT(*) AS Total,
@@ -17,7 +18,7 @@ COUNT(CASE [rd_validation] WHEN 'FP' THEN 1 END) AS RdFps,
 COUNT(CASE [rd_validation] WHEN 'TN' THEN 1 END) AS RdTNs,
 COUNT(CASE [rd_validation] WHEN 'FN' THEN 1 END) AS RdFNs
 INTO dbo.RefactoringTypeValidation 
-FROM dbo.Dataset
+FROM dbo.TrainingDataset
 GROUP BY refactoring_type;
 
 
@@ -35,23 +36,27 @@ SELECT *
 FROM dbo.RefactoringTypePrecisionRecall;
 
 
-SELECT COUNT(RefactoringType) AS TypeCount
-, SUM(Total) AS RefactoringCount
-, SUM(Validated) As Validated
-, SUM(UnValidated) As UnValidated
-, SUM(RmTPs) AS RmTPs
-, SUM(RmFps) AS RmFps
-, SUM(RmTNs) AS RmTNs
-, SUM(RdFNs) AS RdFNs
+SELECT t.*
+, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFps),0), 2) AS RmPrecision
+, ROUND(CAST(RmTPs AS FLOAT) / NULLIF((RmTPs + RmFNs),0), 2) AS RmRecall
 
-, SUM(RdTPs) AS RdTPs
-, SUM(RdFps) AS RdFps
-, SUM(RdTNs) AS RdTNs
-, SUM(RmFNs) AS RmFNs
+, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFps),0), 2) AS RdPrecision
+, ROUND(CAST(RdTPs AS FLOAT) / NULLIF((RdTPs + RdFNs),0), 2) AS RdRecall
+FROM
+(
+	SELECT COUNT(RefactoringType) AS TypeCount
+	, SUM(Total) AS RefactoringCount
+	, SUM(Validated) As Validated
+	, SUM(UnValidated) As UnValidated
+	, SUM(RmTPs) AS RmTPs
+	, SUM(RmFps) AS RmFps
+	, SUM(RmTNs) AS RmTNs
+	, SUM(RdFNs) AS RdFNs
 
+	, SUM(RdTPs) AS RdTPs
+	, SUM(RdFps) AS RdFps
+	, SUM(RdTNs) AS RdTNs
+	, SUM(RmFNs) AS RmFNs
 
-, ROUND(AVG(RmPrecision),2) AS RmPrecision
-, ROUND(AVG(RmRecall),2) AS RmRecall
-, ROUND(AVG(RdPrecision),2) AS RdPrecision
-, ROUND(AVG(RdRecall),2) AS RdRecall
-FROM dbo.RefactoringTypePrecisionRecall;
+	FROM dbo.RefactoringTypeValidation
+) AS t;
