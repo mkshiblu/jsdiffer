@@ -42,7 +42,6 @@
 %Code Snippets
 \usepackage{listings}
 \usepackage{xcolor}
-
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{codeblack}{rgb}{0.95,0.95,0.92}
@@ -85,6 +84,8 @@
 }
 
 \lstset{language=JavaScript, style=mystyle, upquote=true }
+\usepackage{caption} 
+\captionsetup[table]{skip=10pt}
 
 %% CUSTOM MACROS
 %\newcommand{\tickyes}{{\small\checkmark}}
@@ -143,7 +144,7 @@
 
 Refactoring refers to any code changes that improve the maintainability of the software system. Identifying such activities helps to understand the evolution and the relationship between two versions of a system. Therefore, automatic detection of refactorings applied in a system by comparing the source code between two snapshots has been an active research topic. Current state-of-the-art refactoring detection tools RefactoringMiner 2.0, however only supports programs written in Java language. On the other hand, JavaScript, despite being the most popular language, is supported by only one refactoring detection tool - RefDiff 2.0 which cannot detect variable level refactorings such as rename variable, rename parameter, etc. 
 
-In this study, we present JsDiffer which supports \textbf{\supportedRefTypesJsDiffer{}} different refactoring operations including several variable related refactorings in JavaScript projects. Although the tool is inspired by RefactoringMiner, it differs quite a lot from refactoring miner in terms of structural mapping. We evaluated JsDiffer against an oracle of \textbf{\oracleValidatedInstances{}} refactoring instances mined from \evTotalProjectCounts{} open-source JavaScript projects and compared it with RefDiff 2.0. Our results indicate that JsDiffer can achieve a precision and recall of \oraclePrecision{}\% and \oracleRecall{}\% respectively. Although  RefDiff 2.0 turned out to be the better of the two tools for JavaScript projects, our approach shows promising results in detection on Rename Variable refactorings where it achieves a precision of  \renameVarPrecision{}\%.
+In this study, we present JsDiffer, which supports \textbf{\supportedRefTypesJsDiffer{}} different refactoring operations including several variable related refactorings in JavaScript projects. Although the tool is inspired by RefactoringMiner, it differs quite a lot from refactoring miner in terms of structural mapping. We evaluated JsDiffer by constructing an oracle of \textbf{\oracleValidatedInstances{}} refactoring instances mined from \oracleProjectCount{} open-source JavaScript projects and compared it with RefDiff 2.0. Our results indicate that JsDiffer can achieve a precision and recall of \rmOverallPrecision{}\% and \rmOverallRecall{}\% respectively. Although  RefDiff 2.0 turned out to be the better of the two tools for JavaScript projects, our approach shows promising results in detection on Rename Variable refactorings where it achieves a precision of \renameVarPrecision{}\%.
 
 }\end{abstract}
 
@@ -169,19 +170,19 @@ Mosabbir Khan Shiblu
 %%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Introduction}
 \section{Motivation}
-Refactoring means restructuring the source code to improve its maintainability without altering its functionality. It plays an important role in the modern software development life cycle.
-In addition to improving software maintainability, refactoring is frequently used to denote changes that improve software performance, software security, and even the energy consumption of a system\nikos{add references to papers}. In an agile environment, it enables the limited upfront design of the software to advance\nikos{add references to papers}. On the other hand, in test-driven development, it is regarded as a necessary activity in keeping the code-base compliant for further development\nikos{add references to papers}. 
+Refactoring means restructuring source code to improve its maintainability without altering its functionality. It plays an important role in the modern software development life cycle.
+In addition to improving software maintainability, refactoring is frequently used to denote changes that improve software performance, software security, and even the energy consumption of a system \cite{almogahed2022refactoring}, \cite{da2010evaluation}, \cite{cruz2017leafactor}. In an agile environment, it enables the limited upfront design of the software to advance \cite{moser2007case}. On the other hand, in test-driven development, it is regarded as a necessary activity in keeping the code-base compliant for further development \cite{kumar2013comparative}. 
 
 A recent survey paper \cite{abid202030} found over 3,000 papers on refactoring topics which attests its popularity in modern research. Many researchers empirically investigated the benefits of refactorings by studying how the renaming of identifiers affects code readability \cite{fakhoury2019improving}, how and why developers rename identifiers \cite{peruma2018empirical}, the impact of refactoring on code naturalness \cite{lin2019impact}, the impact of refactoring on code smells \cite{cedrim2017understanding}, the co-occurrence of refactoring and self-admitted technical debt removal \cite{iammarino2019self}, and how the introduction of Lambda expressions affects program comprehension \cite{lucas2019does}.
 
 Therefore, by detecting refactorings in software projects, researchers can better understand software evolution. Earlier studies used such information to investigate the usage of refactoring tools  \cite{MurphyHill2012}, \cite{Negara2013}, the motivations behind refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{Silva2016}, the risks associated with refactoring \cite{kim2012field}, \cite{kim2014empirical}, \cite{kim2011empirical}, \cite{weissgerber2006refactorings}, \cite{bavota2012does}, and the effect of refactoring on code quality metrics \cite{kim2012field}, \cite{kim2014empirical}. Additionally, the accuracy of source code evolution analysis can be improved by keeping track of refactorings, because files, classes, or functions may have their histories split by Move or Rename \cite{hora2018assessing} refactorings. Lastly, according to a survey spanning 86 articles \cite{soetens2017changes}, the most desirable application for detecting changes that occurred between two program versions is extracting patterns of change and re-performing changes in different contexts.
-Knowing the applied refactoring operations in the version history of a system not only can help advance software evaluation research, but also can help developers in their practice.  First, such information can be used to help resolve merge conflicts and improve code review time as many developers face difficulties when reviewing or integrating code changes with large refactoring operations \cite{kim2012field}. It has been reported that refactoring activities can cause merge conflicts when merging development branches \cite{mahmoudi2019refactorings}. Therefore, if a tool can identify applied refactorings at commit level, it can possibly be used to resolve merge conflicts automatically. Second, identified refactoring instances can be automatically appended in the commit message to let code reviewers know about the refactored components upfront. Third, if an API is refactored, corresponding refactorings could be applied to the client code automatically \cite{henkel2005catchup} \cite{Xing2008}. Fourth, detected refactorings can be used to distinguish new lines of code representing a feature in a software development sprint from behavior-preserving changes, which can potentially help a project manager to monitor the progress of the current milestone. Last but not the least, refactoring detection tools can potentially be used to increase the accuracy of source code plagiarism detection tools.
+Knowing the applied refactoring operations in the version history of a system not only can help advance software evaluation research, but also can help developers in their practice. First, such information can be used to help resolve merge conflicts and improve code review time as many developers face difficulties when reviewing or integrating code changes with large refactoring operations \cite{kim2012field}. It has been reported that refactoring activities can cause merge conflicts when merging development branches \cite{mahmoudi2019refactorings}. Therefore, if a tool can identify applied refactorings at commit level, it can possibly be used to resolve merge conflicts automatically. Additionally, various source code diff tools can use this information to match textually different code elements between two versions. Second, identified refactoring instances can be automatically appended in the commit message to let code reviewers know about the refactored components upfront. Third, if an API is refactored, corresponding refactorings could be applied to the client code automatically \cite{henkel2005catchup} \cite{Xing2008}. Fourth, detected refactorings can be used to distinguish new lines of code representing a feature in a software development sprint from behavior-preserving changes, which can potentially help a project manager to monitor the progress of the current milestone. Last but not the least, refactoring detection tools can potentially be used to increase the accuracy of source code plagiarism detection tools.
 
 Detecting refactorings is a challenging task due to the fact that developers rarely document such activities \cite{alomar2021refactoring} and refactorings are often intertwined with other code changes making them even harder to distinguish. However, given the practical importance of refactoring in software development as well as its research potential, it is unsurprising that we have seen many automatic refactoring detection tools over the past few decades. RefactoringMiner 2.0 by Tsantalis et. al \cite{Tsantalis2020} currently represents the state of the art and is capable of detecting 40 refactoring types with a precision and recall of 99.6\% and 94\% respectively.  Unfortunately, like the majority of the detection tools, it supports only the Java programming language. On the other hand, REFDIFF 2.0 by Silva et. al  \cite{Silva2020} is the only tool capable of detecting refactorings in JavaScript projects. RefactoringMiner structurally matches statements of code thus capable of detecting lower level refactorings (such as rename /merge variable). On the other hand, the body of a function is represented as a bag of tokens by RefDiff and thus such lower-level structural information is never present after the tokenization.
 
-Given the fact that JavaScript is currently the most popular programming language, a refactoring detection tool that can detect lower-level refactorings in JavaScript may provide more insight into its ecosystem, as developers tend to apply such refactorings more frequently than high-level refactorings \cite{MurphyHill2012}. Besides, there are significant differences between Java and JavaScript besides language grammar. For example, in JavaScript,  functions are the first-class citizen and can be stored and used as a variable. JavaScript code can reside outside of the body of a function. Moreover, unlike Java which is object pretend\nikos{what is object pretend?} and class-based, JavaScript projects can follow styles of OOP, functional programming, or a mix of both. Lastly, there are many super sets and extensions of JavaScript language (e.g., Typescript JSX) which are often intermixed with vanilla JavaScript code further complicating the task of parsing and modeling the source code.
+Given the fact that JavaScript is currently the most popular programming language, a refactoring detection tool that can detect lower-level refactorings in JavaScript may provide more insight into its ecosystem, as developers tend to apply such refactorings more frequently than high-level refactorings \cite{MurphyHill2012}. Besides, there are significant differences between Java and JavaScript besides language grammar. For example, in JavaScript, functions are the first-class citizen and can be stored and used as a variable. JavaScript code can reside outside of the body of a function. Moreover, unlike Java which is object oriented and class-based, JavaScript projects can follow styles of OOP, functional programming, or a mix of both. Lastly, there are many super sets and extensions of JavaScript language (e.g., Typescript JSX) which are often intermixed with vanilla JavaScript code further complicating the task of parsing and modeling the source code.
 
-In this thesis, we present JsDiffer, the first tool to allow the detection of variable-related refactorings in JavaScript projects. Our tool is heavily inspired by RefactoringMiner 2.0; however, it has its own unique approach to detecting refactorings. JsDiffer takes two source code versions and outputs the refactorings performed between them. Currently, JsDiffer supports \supportedRefTypesJsDiffer{} types of refactorings including 1 JavaScript specific refactoring (Change Variable Kind refactoring). To evaluate the performance of JsDiffer, we ran it on \evTotalCommits{} commits from \evTotalProjectCounts{} open-source JavaScript projects, and manually validated the detected refactoring instances. On average, JsDiffer achieved a precision of \oraclePrecision{}\% and a recall of \oracleRecall{}\%. Although the precision is higher than the current state-of-the-art, JsDiffer has performed poorly on recall.  This result showed the potential of JsDiffer for some specific refactoring types in JavaScript projects. Additionally, we compared JsDiffer with the only publicly available refactoring detection tool for JavaScript, namely RefDiff 2.0, and found that JsDiffer was able to find a few unique refactoring instances, which were not detected by the state-of-the-art.
+In this thesis, we present JsDiffer - the first tool that allows the detection of variable-related refactorings in JavaScript projects. Our tool is heavily inspired by RefactoringMiner 2.0; however, it has its own unique approach to detecting refactorings. JsDiffer takes two source code versions and outputs the refactorings performed between them. Currently, JsDiffer supports \supportedRefTypesJsDiffer{} types of refactorings including 1 JavaScript specific refactoring (Change Variable Kind refactoring). To evaluate the performance of JsDiffer, we ran it on \evTotalCommits{} commits from \evTotalProjectCounts{} open-source JavaScript projects, and manually validated a portion of the detected refactoring instances. Overall, JsDiffer achieved a precision of \rmOverallPrecision{}\% and a recall of \rmOverallRecall{}\%. Although the precision is higher than the current state-of-the-art, JsDiffer has performed poorly on recall. This result showed the potential of JsDiffer for detecting some specific refactoring types in JavaScript projects. Additionally, we compared JsDiffer with the only publicly available refactoring detection tool for JavaScript, namely RefDiff 2.0, and found that JsDiffer was able to find a few unique refactoring instances, which were not detected by the state-of-the-art.
 
 
 \section{Objectives and Contributions}
@@ -196,7 +197,7 @@ This thesis makes the following contributions:
 
 (2) We support a total of \supportedRefTypesJsDiffer{} refactoring types including Change Variable Kind refactoring, which is the first JavaScript-specific refactoring in contrast to object-oriented refactorings, which are supported by most tools.
 
-(3) We compared JsDiffer with the current state-of-the-art refactoring detection tool: RefDiff 2.0, where an empirical study on \evTotalCommits{} commits from \evTotalProjectCounts{} open source JavaScript repositories were performed to create an oracle of \oracleValidatedInstances{} refactorings\nikos{the number of validated instances seems small}.
+(3) We compared JsDiffer with the current state-of-the-art refactoring detection tool: RefDiff 2.0, where an empirical study on \evTotalCommits{} commits from \evTotalProjectCounts{} open source JavaScript repositories were performed to create an oracle of \oracleValidatedInstances{} refactorings. This oracle is also publicly available for future researchers \footnote{\url{https://docs.google.com/spreadsheets/d/1CQg7FO30GresGrHSGh0lxn5cWdrd_Y3EXEO98MPrQqE}}.
 
 
 \section{Outline}
@@ -208,7 +209,7 @@ The rest of the thesis is structured as follows. \hyperref[chap:relatedWork]{Cha
 \chapter{Related Work}
 \label{chap:relatedwork}
 
-In this section, we start by briefly talking about the spectrum of research exploring the practice of refactoring and later go into details about modern refactoring detection tools.
+In this section, we start by briefly talking about the spectrum of research exploring the practice of refactoring and later go into details about modern refactoring detection tools.
 
 Leo Brodie \cite{thinkingforth} first mentioned the word “Refactoring” in his book “Thinking Forth”, originally published in 1984. As per the author, “Factoring” and “Refactoring” were interchangeably used in the Forth community back then and he defined refactoring activities as identifying useful fragments that could be pulled out to make code more generally useful and more maintainable, or to eliminate duplication. In addition, the author also discussed many software development principles and practices that are still applicable to date.
 
@@ -276,7 +277,7 @@ Several studies in the field of software measurement and metric-based code smell
 
 \textbf{Incomplete oracle (ground truth):} Calculating the true recall for refactoring detection studies has always been very challenging and debatable, since it is hard to identify all the refactorings that have been performed in a commit. Inspecting commit messages has been proved to be an unreliable indicator of presence refactorings as developers do not always mention them in the commit message \cite{MurphyHill2012}. Moreover, Moreno et al. \cite{laura2017arena} found out that only 21\% of the release notes include information about refactoring operations by manually inspecting 990 release notes from 55 open-source projects. Last but not the least, analyzing each file manually for identifying performed refactorings is time-intensive, requires expertise, and does not guarantee finding all refactoring instances. 
 
-\textbf{Programming language specificity:} The majority of the existing approaches support only Java systems. In fact, to the best of our knowledge, no other tool can detect refactorings in the JavaScript ecosystem except for RefDiff 2.0. Even so, because of the nature of its detection methodology, RefDiff 2.0 cannot detect low-level refactorings, such as renaming variables, renaming parameters.
+\textbf{Programming language specificity:} The majority of the existing approaches support only Java systems. In fact, to the best of our knowledge, no other tool can detect refactorings in the JavaScript ecosystem except for RefDiff 2.0. Even so, because of the token based nature of its detection methodology, RefDiff 2.0 cannot detect low-level refactorings, such as renaming variables, renaming parameters. Lastly, the token-based approach cannot be successfully used by source code diff tools to cross-match code elements inside containers (e.g. Functions, Classes) as this approach cannot match the corresponding token in the next version.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Approach}
@@ -343,21 +344,44 @@ function main() {
         console.log(text);
     }
 }
+
+class AtomBackend {
+    const buffer = editor.getBuffer()
+    stop() {
+        this.subs && this.subs.dispose()
+    }
+}
 \end{lstlisting}
 
-The example code snippet on ~\ref{lst:examplecode} is modeled as a \textit{File Container} with the following properties.\nikos{Extend the example to include at list one instance of each mode element, so that the example is complete}
+The example code snippet on ~\ref{lst:examplecode} is modeled as a \textit{File Container} with the following properties-\nikos{Extend the example to include at list one instance of each mode element, so that the example is complete}
 
 \begin{enumerate}
 \item List of Function Declarations \textbf{FDs} = \{main\}
 \item List of Single Statements \textbf{LSs} = \{var math, math.sum = function...\}
 \item List of Block Statements \textbf{BSs} = \{\}
 \item List of Function Expressions \textbf{FEs} = \{\}
+\item List of Class Declarations \textbf{CDs} = \{AtomBackend\}
 \end{enumerate}
 
-Here, on line 2, even though the "sum" is a function variable of "math", by RefactoringMiner concept, it is an anonymous class/function declaration as it is part of a leaf statement. However, for JsDiffer, if a function is assigned to a variable and the variable has a simple one-word identifier (e.g. sum), it is treated as a function declaration.
+Here, in line 2, even though the "sum" is a function variable of "math", by RefactoringMiner's concept, it is an anonymous class/function declaration as it is part of a leaf statement. However, for JsDiffer, if a function is assigned to a variable and the variable has a simple one-word identifier (e.g. sum), it is treated as a function declaration.
+
+In line 13, "AtomBackend" is modeled as a class declaration with a function declaration named "stop". Line 14 is modeled as an attribute of this class where the name of the attribute is "buffer". Note that since RefactoringMiner does not take into account that statements can be written directly inside a class, therefore, JsDiffer supports variable declaration statements inside a class that can be converted to an attribute inside a class.
+
+Contents inside of a function declaration are modeled identically to RefactoringMiner except we also support direct declaration of a function. Therefore, the function "main" declared in line 5 has the following properties -
+
+\begin{enumerate}
+\item List of Single Statements \textbf{LSs} = \{const result =..., print(result);\}
+\item List of Function Declarations \textbf{FDs} = \{print(text)\}
+\end{enumerate}
+
+
+By introducing this new property to the function declaration model, we supported JavaScripts' potential infinite nesting depth of Function or class declarations. Note that this is in contrast to Java where a function cannot be declared outside of a class.
+
+Since both functions and file containers are identical in source code structure for JavaScript, we were able to abstract them into a general container. However, to re-use RefactoringMiner's code and improve the accuracy of the detection process, we had to keep class declaration as a different container to file and function declarations.
+
+For each leaf statement, we keep track of all the tokens such as the identifiers, function calls, object creations, literals, operators, etc. They are used to compare the differences between two leaf statements in the matching phase.
 
 \section {Matching Code Elements}
-\nikos{OVERALL COMMENT: This section can be strengthened by adding some running examples, showing the matching process}
 This phase takes the two program models from the previous step and identifies the matched and unmatched elements between the two versions. Each program model consists of a list of source file models, which contain various code elements.
 
 \textbf{Source File Models Matching:} 
@@ -403,6 +427,22 @@ A notable difference from RefactoringMiner is that due to the Levenshtein Distan
 
 In addition to exact matching, a set of heuristics is finally used to determine if two leaf statements can be matched if identical matching fails.
 
+\begin{figure}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/leaf_matching.PNG}
+  \caption{An example of leaf statement (line 7) with multiple functional expression.}
+   \label{fig:leafMatching}
+\end{figure} 
+
+
+Figure \ref{fig:leafMatching} shows an example of two versions of a code snippet. The "proto.handle..." is considered a leaf statement in RefactoringMiner's concept as it is not a straightforward function declaration which is a method of a class. Moreover, this statement contains two functional expressions. As we cannot identically match them by simple textual comparison because of the added statement in line 11 of version 2 and the renamed parameter "done2", RefactoringMiner would perform a Levenshtein Distance calculation by replacing "done" with "done2". This is not suitable for JavaScript as we have found frequent cases where the size of code related to the leaf statement is very large. Thus in some cases, it took 3 hours to match just one pair of statements.
+
+Therefore, in JsDiffer, to match the statement pairs, we employed a round-based technique. First, if any of the statements contain functional expressions, we do not perform any string replacement and thus do not calculate the expensive edit distance between the text of the two leaf statements. For this example. we first check if there is a name for the functional expressions provided. In this case, both statements have a functional expression with the identical name "http". Therefore we go inside the body of "http" functional expression to match the statements inside. 
+
+However, a name for a function expression is not always available therefore in the second round, we try to match functional expressions which have common child function declarations inside of them. This increases the confidence in matching two functional expressions as JavaScript is a popular functional programming language, thus if a pair of functions contain common child function declarations, they are likely to be the same function.
+
+In the third round, we check for functional expressions with the same-named parameters. Thus, having step-by-step matching helps JsDiffer relax the matching rule gradually to allow the detection of complex leaf statements that are textually different.
+
+
 \textbf{Expression Matching:} The condition of an \texttt{if} statement or \texttt{switch} statement, \texttt{for} loop, \texttt{catch block}, etc. is considered as an expression in JsDiffer. An expression is handled in a very similar fashion to a leaf statement and holds the same information, such as variables, and literal and container expressions that appear inside of an expression.
 
 The expressions from two pairs of composite statements help JsDiffer to determine whether they are considered matched or unmatched.
@@ -417,18 +457,18 @@ This step is applied in every container diff elements to determine applied refac
 \textbf{Renamed Containers Detection:} This is determined by observing the changes in the signatures of the container diff. For example, if two function expressions have been matched but there is a difference in the names of the functions, JsDiffer adds a Rename Function refactoring to the global list of detected refactorings.
 
 \textbf{Variable Related Refactorings Detection:} Rename Variable, Rename Parameter, etc. refactorings are supported by JsDiffer. These are determined during container matching by observing the difference between their matched leaf statements and expression pairs. For example, if two leaf statements are matched identically by replacing one of the variables of version 1 with an added variable in version 2, chances are those two are the same but renamed variables.
-\nikos{Are you using the VariableReplacementAnalysis of RMiner? If so, it applies several consistency checks to make sure that the rename is valid.}
 
-\textbf{Extract/Inline Function Detection:} JsDiffer first tries to employ the same techniques described in the RefactoringMiner paper to determine whether a method has been extracted or inlined. It tries to check if some removed statements from a function can be matched with the statements inside of an unmatched newly added function and a call from the original function is made to the newly added function.\nikos{Add the logic for Inline Function detection}
+We were able to re-use a significant portion of variable replacement techniques used by RefactoringMiner for this portion. This process applies several consistency checks to make sure that the detected rename instance is a valid refactoring. For example, if a variable is renamed, all the references of that variable are also renamed in the same commit. We check for this consistency to make sure that the detected refactoring is correct. On the other hand, multiple variables declared in the same container are harder for JsDiffer to match. Since, in JavaScript, there are no named strong types (e.g. string, int, etc.), we used variable kinds (e.g let, var and const) for identifying the correct variable pairs. However, we have found that this is significantly under performing because of not having strong types as the 3 variable kinds of JavaScript are often interchangeable.
 
-\textbf{Moved Containers Detection:} Moved Source Files are detected in two rounds. In the first-round, the contents of two files with the same name but in a different directory are identically matched to determine if they are indeed the same file but in a different directory. This is referred to as exact or strict matching by JsDiffer. After matching the common named files, one additional round of relaxed move detection rules is used to determine if an unmatched file is actually moved.\nikos{Explain in more detail, the relaxed move rules}
+\textbf{Extract/Inline Function Detection:} JsDiffer first tries to employ the same techniques described in the RefactoringMiner paper to determine whether a method has been extracted or inlined. It tries to check if some removed statements from a function can be matched with the statements inside of an unmatched newly added function and a call from the original function is made to the newly added function. Conversely, for inlined function refactorings, we check for removed functions where the call to the function is also removed and replaced with the statements that were inside of the removed function.
 
+\textbf{Moved Containers Detection:} Moved Source Files are detected in two rounds. In the first-round, the contents of two files with the same name but in a different directory are identically matched to determine if they are indeed the same file but in a different directory. This is referred to as exact or strict matching by JsDiffer. After matching the common named files, one additional round of relaxed move detection rules is used to determine if an unmatched file is actually moved. This detection phase is more relaxed than the previous stricter exact matching rule because in this phase if the number of matched function declarations is more than half of the total number of function declarations, we consider the source files as matched i.e. moved.
 
 \chapter{Evaluation}
 
 Evaluating the accuracy of a refactoring detection tool is often challenging due to the lack of a proper dataset. Developers often do not mention the applied refactorings, and thus it is not possible to find and confirm all the refactorings performed in a commit. Moreover, the validity of some refactoring instances is subjective in nature, and depending on the validator, one particular instance can be marked as valid or invalid.
 
-To evaluate the accuracy of our approach, we ran our tool on \evTotalCommits{} commits which potentially include refactoring instances. To the best of our knowledge, RefDiff 2.0 \cite{Silva2020} is currently the only other tool capable of detecting refactorings performed in JavaScript projects. Therefore, we evaluated \toolname{}'s precision and recall by comparing it with RefDiff 2.0 on an oracle of \oracleValidatedInstances{} JavaScript refactorings.\nikos{again, the number of instances (88) seems small.}
+To evaluate the accuracy of our approach, we ran our tool on \evTotalCommits{} commits which potentially include refactoring instances. To the best of our knowledge, RefDiff 2.0 \cite{Silva2020} is currently the only other tool capable of detecting refactorings performed in JavaScript projects. Therefore, we evaluated \toolname{}'s precision and recall by comparing it with RefDiff 2.0 on an oracle of \oracleValidatedInstances{} JavaScript refactorings.
 
 In our evaluation we investigate the following research questions:
 
@@ -443,19 +483,19 @@ In our evaluation we investigate the following research questions:
 \subsection {Dataset Creation}
 In their paper, Silva et al. \cite{Silva2020} mentioned a dataset consisting of \evRefDiffReportedCount{} reported JavaScript refactoring instances out of which \evRefDiffValidatedCount{} instances were manually validated to calculate the precision and recall of their tool.
 
-Interestingly, we discovered that not all the refactorings that were found in the dataset provided in the paper were reported when executing the latest version of RefDiff\footnote{https://github.com/aserg-ufmg/RefDiff/commit/889b0bf}. Additionally, we have discovered a different file containing \evRefDiffJsDataCsvCount{} refactoring instances in their evaluation project on GitHub. Moreover, Silva et al. also provided  \evRefDiffDocumentedCount{} instances of documented refactorings based on the commit message. Combining all these sources, we ended up with a total of \evTotalCommits{} unique commits each containing at least one refactoring across \evTotalProjectCounts{} unique projects.
+Interestingly, we discovered that not all the refactorings that were found in the dataset provided in the paper were reported when executing the latest version of RefDiff\footnote{https://github.com/aserg-ufmg/RefDiff/commit/889b0bf}. Additionally, we have discovered a different file containing \evRefDiffJsDataCsvCount{} refactoring instances in their evaluation project on GitHub. Moreover, Silva et al. also provided  \evRefDiffDocumentedCount{} instances of documented refactorings based on the commit message. Combining all these sources, we ended up with a total of \evTotalCommits{} unique commits each containing at least one reported refactoring across \evTotalProjectCounts{} unique projects.
 
 The inconsistency in the reported refactorings in the paper and those actually detected by RefDiff 2.0 could result in a noisy or biased precision and recall. Therefore, we decided to run the latest versions of both tools. RefDiff 2.0 and JsDiffer reported \evRefDiffToolTotalRefCount{} and \evJsDifferToolTotalRefCount{} refactorings, respectively, from these \evTotalCommits{} commits which constitute our dataset.
-\nikos{Both tools reported the same exacly number of refactorings? There must be a mistake in the variable values}
 
 \subsection {Commit Selection for Oracle}
 Due to the difficult nature and time-consuming manual process of validation, it was not feasible to validate all refactorings from the dataset to create an oracle. One way to calculate the precision and recall of both tools would be to validate a specific number of random refactoring instances. This approach was taken by RefDiff 2.0 when evaluating its accuracy on JavaScript projects by taking 10 random refactoring instances for each of the different refactoring types.
 
-However, we opted for validating all instances in a commit versus validating random refactoring instances, mainly because of the increased chance of discovering other refactorings undetected by one of the tools. This potentially helps us to calculate recall more accurately. Furthermore, validating all refactorings in a commit could provide a better estimation of accuracy because ultimately both tools detect refactorings between two source codes that could be represented by a commit. Therefore, we felt this approach for validating precision and recall is better than validating random instances.
+However, we opted for validating all instances in a commit versus validating random refactoring instances, mainly because of the increased chance of discovering other refactorings undetected by one of the tools. This potentially helps us to calculate recall more accurately. Furthermore, validating all refactorings in a commit could provide a better estimation of accuracy because ultimately both tools detect refactorings between two source codes that could be represented by a commit. Therefore, we felt this approach for validating precision and recall is better than validating random instances. It's also important to note that, all the commits come from modern popular JavaScript library projects such as react js, angular, etc. More details can be found for the selection criteria of these projects in the original RefDiff 2.0 paper \cite{Silva2016}.
 
 To create an oracle from the dataset, we selected \evCompareRandomCommitCount{} random commits from each of the projects which fulfill the following criteria:
 
 First, the commit must contain at least one common refactoring type that was reported by either of the tools. This helps us compare both tools as we don't have to validate a commit that does not contain a commonly supported refactoring instance. Second, the number of reported refactorings that is supported by both tools in that commit should not exceed more than 10, because JsDiffer and RefDiff 2.0 reported more than 10 refactorings in only 29 and 44 commits respectively out of these \evCompareRandomCommitCount{} commits. Therefore we felt confident that choosing these commits represents a more general population. For example, in one of the commits\footnote{https://github.com/mui/material-ui/commit/3e4854b39b17511d9b312071ca93061eeb503f5d}, JsDiffer and RefDiff 2.0 reported 408 and 362 refactorings, respectively. Both tools reported 362 Move File refactoring in this commit which is a significant portion of their total reported refactorings. From Table \ref{table:refcountrange} it can be seen that this huge number of refactorings in a single commit can be considered an anomaly and thus could adversely affect the practical precision or recall.
+
 
 \begin{table}[!ht]
     \centering
@@ -480,13 +520,14 @@ First, the commit must contain at least one common refactoring type that was rep
 Furthermore, a large number of refactoring instances in a commit not only makes it difficult to understand the source code during manual inspection, but it also increases the chance of making errors while validating refactorings. Last but not the least, having a smaller number of refactorings in a single commit makes it easier for the evaluator to fully validate a commit while increasing the chance of noticing refactorings missed by the evaluated tools. 
 
 \subsection {Validation of Refactorings}
-To validate the refactorings, we employed a semi-automated,\nikos{Something is missing from this sentence}
+To validate the refactorings, we employed a semi-automated approach which involves identifying commonly reported refactorings and manual inspection of source code.
 
-First, the reported instances from both JsDiffer and RefDiff 2.0 were stored in a common format. This helped us to compare and identify refactorings reported by both tools. If a refactoring is reported by both tools, in many cases we were able to automatically mark them as a true positive instance. For the rest, the author of this thesis manually inspected the commit, and each reported refactoring was marked as true positive, false positive, true negative, or falsenegative for JsDiffer and RefDiff 2.0, respectively. If one of the tools reports a false positive instance and the other tool does not report it, we put a true negative for the other tool, but keep the false positive for the first tool. Moreover, in case of the same refactorings reported by both tools, we keep only one refactoring instance in our oracle as it is considered a duplicate.
+
+First, the reported instances from both JsDiffer and RefDiff 2.0 were stored in a common format. This helped us to compare and identify refactorings reported by both tools. If a refactoring is reported by both tools, in many cases we were able to automatically mark them as a true positive instance. For the rest, the first author of this thesis manually inspected the commit, and each reported refactoring was marked as true positive, false positive, true negative, or false negative for JsDiffer and RefDiff 2.0, respectively. If one of the tools reports a false positive instance and the other tool does not report it, we put a true negative for the other tool, but keep the false positive for the first tool. Moreover, in case of the same refactorings reported by both tools, we keep only one refactoring instance in our oracle as it is considered a duplicate.
 
 In case of difficult or complex refactorings, either the first author asks for validation from the thesis supervisor who has much more expertise in validating refactorings or keeps them as invalidated. This way we feel confident that the oracle we have created is quite accurate. In addition to validating reported refactorings, during the inspection, if a refactoring is discovered which is not reported anywhere, it is also added to the oracle as a false negative for both JsDiffer and RefDiff 2.0. 
 
-Note that Internal\_Move\_Function and Internal\_Move\_Rename\_Function reported by RefDiff 2.0 are excluded from validation as RefDiff 2.0 reported multiple Internal Moves for some cases when the scope of a function is moved to another block statement i.e., moved to another pair of curly braces, and JsDiffer does not report such refactorings. On the other hand, we did validate refactorings that are not supported by RefDiff 2.0 to find the precision of JsDiffer as an individual tool.
+Internal\_Move\_Function and Internal\_Move\_Rename\_Function are only supported by RefDiff 2.0 which represents the change of the parent container of a function. It also reports internal move functions for cases where a function is moved to another block statement i.e., moved to another pair of curly braces, and JsDiffer does not report such refactorings. Moreover, sometimes all the child functions are reported as individual internal moves by RefDiff 2.0 when the parent function is actually moved to another container and JsDiffer reports only the parent container move. In such cases, manual validation is necessary to consider multiple internal moves as one single Move Function refactoring. On the other hand, we did validate refactorings that are not supported by RefDiff 2.0 to find the precision of JsDiffer as an individual tool.
 
 \section {Result and Discussion}
 
@@ -506,18 +547,18 @@ Table \ref{table:toolComparisonPrecisionAndRecall} shows the precision and recal
         & \multicolumn{1}{|p{2cm}|}{\centering RefDiff 2.0  \\ Precision}  
         & \multicolumn{1}{|p{2cm}|}{\centering JsDiffer  \\ Recall}  
         & \multicolumn{1}{|p{2cm}|}{\centering RefDiff 2.0  \\ Recall}  \\ \hline
-        1 & EXTRACT\_FUNCTION & 23 & 1 & 0.95 & 0.18 & 0.95 \\ \hline
-        2 & EXTRACT\_MOVE\_FUNCTION & 7 & - & 0.75 & 0 & 0.5 \\ \hline
-        3 & INLINE\_FUNCTION & 3 & - & 1 & 0 & 1 \\ \hline
-        4 & MOVE\_CLASS & 0 & - & - & - & - \\ \hline
-        5 & MOVE\_FILE & 1 & 1 & 1 & 1 & 1 \\ \hline
-        6 & MOVE\_FUNCTION & 10 & 1 & 1 & 0.5 & 0.9 \\ \hline
-        7 & MOVE\_RENAME\_FILE & 1 & 1 & 1 & 1 & 1 \\ \hline
-        8 & MOVE\_RENAME\_FUNCTION & 2 & - & 1 & 0 & 1 \\ \hline
+         1 & EXTRACT\_FUNCTION & 65 & 1 & 0.93 & 0.43 & 0.82 \\ \hline
+        2 & EXTRACT\_MOVE\_FUNCTION & 14 & - & 0.83 & 0 & 0.38 \\ \hline
+        3 & INLINE\_FUNCTION & 10 & 1 & 1 & 0.14 & 0.71 \\ \hline
+        4 & MOVE\_CLASS & 1 & 1 & 1 & 1 & 1 \\ \hline
+        5 & MOVE\_FILE & 36 & 1 & 1 & 1 & 1 \\ \hline
+        6 & MOVE\_FUNCTION & 42 & 1 & 0.97 & 0.3 & 0.94 \\ \hline
+        7 & MOVE\_RENAME\_FILE & 10 & 1 & 1 & 0.5 & 1 \\ \hline
+        8 & MOVE\_RENAME\_FUNCTION & 13 & - & 1 & 0 & 1 \\ \hline
         9 & RENAME\_CLASS & 4 & 0.5 & 1 & 0.33 & 1 \\ \hline
-        10 & RENAME\_FILE & 7 & 1 & 1 & 0.43 & 1 \\ \hline
-        11 & RENAME\_FUNCTION & 26 & 0.8 & 0.83 & 0.18 & 0.91 \\ \hline
-        ~ & \textbf{Total} & \bfseries 84 & \bfseries 0.9 & \bfseries 0.95 & \bfseries 0.36 & \bfseries 0.93 \\ \hline
+        10 & RENAME\_FILE & 17 & 0.92 & 0.94 & 0.73 & 1 \\ \hline
+        11 & RENAME\_FUNCTION & 67 & 0.96 & 0.92 & 0.39 & 0.92 \\ \hline
+        ~ & \textbf{Total} & \bfseries \oracleCommonValidatedInstances{} & \bfseries 0.\rmCommonPrecision{} & \bfseries 0.\rdCommonPrecision{} & \bfseries 0.\rmCommonRecall{} & \bfseries 0.\rdCommonPrecision{} \\ \hline
     \end{tabular}}
     \label{table:toolComparisonPrecisionAndRecall}
 \end{table}
@@ -529,32 +570,84 @@ For each tool, we calculated precision and recall for each category of refactori
 
 Where  \textbf{TP} = Number of True Positives and \textbf{FP} = Number of False Positives and \textbf{FN} = Number of False Negatives.
 
-The result shows that RefDiff 2.0 has significantly outperformed JsDiffer in terms of recall. JsDiffer seems to have better precision in every category except for Rename Class refactoring. JsDiffer obtained a poor recall on Extract Function and Rename Function refactorings.
+The total precision and recall are also calculated by using the total number of true positives, false positives, and true negative instances. Table \ref{table:precisionAndRecall} shows the overall precision and recall as well as precision and recall for only the common refactorings of both types.
+Note that this does not include \renameVarValidatedCount{} instances of Rename Variable refactorings which are discussed separately.
+
+\begin{table}[!ht] 
+    \caption{ Oracle precision and recall for \oracleValidatedInstances{} validated instances overall and out of \oracleCommonValidatedInstances{} instances were a refactoring type supported by both tools (Common Types). }
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+        Tool & \multicolumn{1}{|p{2cm}|}{\centering Precision  \\ (Overall)}
+        & \multicolumn{1}{|p{2cm}|}{\centering Precision  \\ (Common Types)}  
+        & \multicolumn{1}{|p{2cm}|}{\centering Recall  \\ (Overall)}  
+        & \multicolumn{1}{|p{2cm}|}{\centering Recall  \\ (Common Types)} \\ \hline
+        JsDiffer & 0.96 & 0.97 & 0.44 & 0.45 \\ \hline
+        RefDiff 2.0 & 0.86 & 0.95 & 0.9 & 0.89 \\ \hline
+    \end{tabular}
+     \label{table:precisionAndRecall}
+\end{table}
 
 
-However, JsDiffer has found a few unique cases which are not detected by RefDiff 2.0. For example, in Figure \ref{fig:extractToggle}, although the \texttt{toggleOserving} function has been extracted from the \texttt{updateChildComponent} method it was not reported by RefDiff but 2.0 JsDiffer was able to successfully identify that refactoring.\nikos{Explain why this happened?}
+The result shows that RefDiff 2.0 has significantly outperformed JsDiffer in terms of recall. JsDiffer seems to have better precision in every category except for Rename Class refactoring. JsDiffer obtained a very poor recall on Inline Function and Move Function refactorings. We inspected \falseNegativesCount{} false negative instances of JsDiffer to categorize the root cause of missing them and present them in Figure \ref{fig:falseNegativesFeature}.
+
+\begin{figure}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/falsenegativereasons_pie_chart.PNG}
+  \caption{Top reasons behind the low recall of JsDiffer }
+   \label{fig:falseNegativesFeature}
+\end{figure} 
+
+We can generalize the moving or extracting outside of a container categories into a single one and can say  that it is the most prevalent reason for the missing refactorings. This happens when a piece of code or a function is moved from a file to another file or in the same container. Therefore it's a limitation of RefactoringMiner's approach.
+
+Figure \ref{fig:extractStringify} represents a sub expression base matching problem where an expression becomes a statement in a extracted function. Even though it is textually identical it is not currently possible to match by RefactoringMiner's approach.
+
+\begin{figure}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/stringify.PNG}
+  \caption{The expression Function.prototype.toString.call(fn) has been extracted to stringifyFn function.}
+   \label{fig:extractStringify}
+\end{figure} 
+
+\begin{figure}
+\includegraphics[width=\textwidth,keepaspectratio]{images/MissingInline.PNG}
+  \caption{The function loadDataOverProcessBoundary has been inlined to the parent container class. This is not currently detected by JsDiffer.}
+   \label{fig:inlineFunction}
+\end{figure} 
+
+On the other hand, JsDiffer missed Inline Function refactorings where the removed function resides outside of its destination container or has its statements become part of an expression of the destination container. Figure \ref{fig:inlineFunction} however, describes a different scenario where JsDiffer fails to support the addition of named argument passing (i.e. configurable: true) and thus cannot match the statement of 155 to 57. In practice, we have found cases where the whole program is passed to a function call as an argument. Therefore, a more sophisticated approach is needed to handle such a part. ReDiff 2.0, however, was able to successfully report this refactoring because it has many textually similar tokens that were matched.
+
+For Rename Class refactorings, the missed cases by JsDiffer are cases where a class contains a single functional expression-based statement. Since, during class matching, RefactoringMiner's approach does not consider any directly written statement, we cannot match if they are renamed.
+
+
+However, JsDiffer has found 10 unique instances which are not detected by RefDiff 2.0. For example, in Figure \ref{fig:extractToggle}, although the \texttt{toggleOserving} function has been extracted from the \texttt{updateChildComponent} method it was not reported by RefDiff but 2.0 JsDiffer was able to successfully identify that refactoring.
 
 \begin{figure}
 \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{extracttoggleObserving}
-  \caption{Extract function toggleObserving from updateChildComponent}
+  \caption{Extract Function toggleObserving from updateChildComponent}
    \label{fig:extractToggle}
 \end{figure}
 
-
+JsDiffer is able to keep track of the arguments passed to a function, when detecting extract method refactoring, it can identify when a variable has been parameterized. In this case, JsDiffer considered the parameter "value" of toggleObserving function as "true" when it encountered the function invoking statement - toggleObserving(true). Therefore it can match the shouldObserve = value to the statement observerState.shouldConvert = true; This is very similar to the "argumentization" process used by RefactoringMiner 2.0 for mapping function invocation with added operations. On the other hand, we assume that because of the low textual similarity between the removed statement and the newly added function, RefDiff 2.0 was not able to detect this refactoring.
 
 \subsection{RQ2: Accuracy on Detecting Variable Related Refactorings}
 
 From \evTotalCommits{} commits, JsDiffer reported \renameVarTotalCount{} Rename Variable Refactorings. We validated \renameVarValidatedCount{} instances and calculated a precision of \renameVarPrecision{}\%.
 We could not calculate recall as it is an extremely challenging and subjective task to find all the rename variable refactorings performed in a commit. However, our assumption is that most of the missed rename variable refactorings would be inside of a container expression which is currently poorly supported by JsDiffer.
 
-In Addition to Rename Variable refactorings, we  also found Rename Parameter,  Add/Remove Parameter refactoring  instances. Only one Change Variable Kind refactoring was reported which turned out to be true positive.\nikos{I searched all your thesis and there is no definition or example about Change Variable Kind}
+In Addition, to Rename Variable refactorings, we also found Rename Parameter, and Add/Remove Parameter refactoring instances. Only one Change Variable Kind refactoring was reported which turned out to be a true positive. Modern JavaScript allows 3 kinds of named variable kinds - var, let, and const which can be used to declare variables. A Change Variable Kind refactoring occurred when the declaration kind is changed. For example, var can be changed to let. This is somewhat similar to Change Type Refactoring of Java (such as int to long).
+
+\begin{figure}
+\centering
+\includegraphics[keepaspectratio]{images/change_var_kind}
+  \caption{Change Variable Kind refactoring from var to let}
+   \label{fig:extractToggle}
+\end{figure}
 
 After taking a closer look at some of the false positives of Rename Variable refactorings, we have found that without static types, the syntax-aware replacement technique of RefactoringMiner does not perform very well in detecting variable level refactorings. This limitation was also mentioned in their paper. RefactoringMiner 2.0 relies heavily on types while detecting the signature of a method which helps find a pair of methods for comparison even after it has been renamed. This caused many false positives.
 
 
 \subsection{RQ3: Performance Comparison}
 
-RefDiff 2.0 outperforms JsDiffer in terms of execution time. Table \ref{table:performancecomparison} shows the execution time range for both tools. It took less than a second to detect refactorings in more than half of the commits for RefDiff 2.0. On the other hand, for the majority of the commits JsDiffer took 1 to 9 seconds to process them.
+RefDiff 2.0 outperforms JsDiffer in terms of execution time. Table \ref{table:performancecomparison} shows the execution time range for both tools. It took less than a second to detect refactorings in more than half of the commits for RefDiff 2.0. On the other hand, for the majority of the commits, JsDiffer took 1 to 9 seconds to process.
 
 \begin{table}[!ht]
     \centering
@@ -582,39 +675,46 @@ On the other hand, the performance of detection of refactorings was degraded by 
 \section{Limitations and Threats to Validity}
 The reason behind such a low recall for JsDiffer is because RefactoringMiner employs a top-down approach when matching container elements where it checks the signature of two containers are similar, so that they are potential candidates for matching.
 
-For example, if a class has more than half of its attributes matched with the same types, then our tool performs a diff between the classes similar to RefactoringMiner 2.0. However for JavaScript, since there are no types the only indicator is the name. So, if the name changes between two versions, the probability of finding a potential candidate to be matched with is reduced and since we do not employ a brute force approach JsDiffer missed many refactorings.
+For example, if a class has more than half of its attributes matched with the same types, then our tool performs a diff between the classes similar to RefactoringMiner 2.0. However for JavaScript, since there are no types, the only indicator is the name. So, if the name changes between two versions, the probability of finding a potential candidate to be matched with is reduced and since we do not employ a brute force approach, JsDiffer misses many refactorings.
 
 
-To remedy this problem, we currently check for child function names up to a nesting depth of 3. That means if two containers have similarly named functions inside their body or in their children/grandchildren's (up to depth 3) they are being considered for matching.
+To remedy this problem, we currently check for child function names up to a nesting depth of 3. That means if two containers have similarly named functions inside their body or in their children/grandchildren's (up to depth 3) they are considered for matching.
 
 Unfortunately, this has proven to be highly inadequate for cases where the two containers do not contain any function declarations. In such a case, we cannot do the statement mapping because two differently named containers have no common function declarations and without static types, it's not possible to properly match the signature of the containers. This essentially became a Chicken and Egg problem where we want to do the statement mapping between two potential container elements but without the statement mappings sometimes it is not possible to find such candidate container pairs.
 
 We do consider the name and number of the parameters during matching two function signatures. However,  due to the style of JavaScript code, we found that in many cases the whole program was written as a functional expression and assigned as a default value to the parameter. Therefore our approach can handle only simple cases and cannot generalize the structure yet.
 
-
 As for the evaluation, even though we were careful when constructing our oracle, it is possible that we might have wrongly but unintentionally put the wrong validation. For example, whenever both tools reported the same refactoring, we considered it automatically as a True positive for both tools. However, we have found that in at least one case, both tools reported an Extract Function refactoring as Rename Function refactoring.
 
-In addition,  JsDiffer by default processes files with .js extensions from a commit. It is very likely that a huge portion of the source code is left unprocessed which is typically found in .html, .jsx, or .ts file extensions. These files may contain vanilla  JavaScript,  TypeScript, JSX, or a mix of them. To reduce the scope we opted to not process other file extensions at this moment. 
+In addition, JsDiffer by default processes files with .js extensions from a commit. It is very likely that a huge portion of the source code is left unprocessed which is typically found in .html, .jsx, or .ts file extensions. These files may contain vanilla JavaScript, TypeScript, JSX, or a mix of them. To reduce the scope we opted to not process other file extensions at this moment.
 
-Last but not the least, recall calculation for both tools suffer from the lack having all actually applied refactorings in the commit history.
+Additionally, because of the low number of validated instances for some refactoring, the accuracy of the tools might not reflect their correctness in practice. For example, we validated only one instance of Move Class refactoring and both tools were able to detect that. But only a single instance validation is not enough to judge the strength of the tools.
+
+Moreover, estimating recall for both tools suffers from the lack of information on all the actually applied refactorings in the commit history. However, we do believe precision is more important than recall in a refactoring detection tool. Because having a tool with higher precision produces a less noisy result for the end users. This increases the trust in the tool put in by the developer. Since recall is difficult to calculate and validate fully, precision represents the effectiveness of the tool more explicitly. Especially for empirical study, it is preferred to have high precision tool because we don't want wrong instances that can adversely affect the findings.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Conclusion and future work}
+\chapter{Conclusion and Future Work}
 \label{chap:conclusion}
 
 In this thesis, we represent our tool JsDiffer which can detect Refactorings in JavaScript projects. We described our methodology and thoroughly discussed the difference between our tool and compared it with the current state-of-the-art RefDiff 2.0.
 
-Our result showed that even though RefDiff 2.0 performed significantly better than JsDiffer, our approach was able to find some interesting refactorings that were missed by RefDiff 2.0. Especially our tool was able to find refactorings that were significantly structurally different. 
+Our result showed that even though RefDiff 2.0 performed significantly better than JsDiffer in Recall, our approach was able to find some interesting refactorings that were missed by RefDiff 2.0. Especially our tool was able to find refactorings that were significantly structurally different.
+
 
 In summary, we learned the followings from this thesis:
-\nikos{Add the general conclusion, as I discuss it in the email I sent to you on Sept 13th}
+
 \begin{enumerate}
-\item Though JsDiffer achieved a decent precision of \oraclePrecision{}\% in the oracle it has a low recall of \oracleRecall{}\%    for detecting JavaScript refactorings. 
+\item Though JsDiffer achieved a decent precision of \rmOverallPrecision{}\% in the oracle it has a low recall of \rmOverallRecall{}\%    for detecting JavaScript refactorings. 
 \item JsDiffer achieved a precision of \renameVarPrecision{}\% on detecting Rename Variable refactorings.
 \item RefDiff 2.0 also outperformed JsDiffer in execution as the majority of the commits were processed in under one second by RefDiff, while JsDiffer took 1-9 seconds to process the majority of the commits in the oracle.
 \item JsDiffer was able to detect a single true positive instance of Change Variable Kind Refactoring.
 \end{enumerate}
-\nikos{You should discuss some potential improvements that can be made as future work}
+
+Additionally, We learned that, structurally, JavaScript programs differ a lot from Java ones such as having more nesting depth of container elements, allowing direct function declaration within other functions, and allowing full source code to be written in a single statement, etc. RefactoringMiner was designed having the typical Java program structure in mind. It does not support sub-expression matching which is more frequent and vastly different in JavaScript. Though, RefactoringMiner does go lower than a statement it has a support of nesting depth of up to 3-4 levels.
+
+On the other hand, RefDiff completely ignores the statement structure, and this makes it robust in structural changes. However, we should emphasize that RefDiff by design cannot support low-level refactorings (variable renames, etc) as RefDiff uses tokens that do not have the program structure.
+
+Based on our experiment we recommend that JavaScript projects may need a hybrid approach that combines both RefDiff and RefactoringMiner approaches where at first, high-level program elements (functions, classes, files) in the RefDiff way could be matched in the RefDiff way and then we apply the RefactoringMiner way in the matched program elements to detect low-level refactorings.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Bibliography
