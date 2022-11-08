@@ -335,14 +335,26 @@ Such structure is significant for a diff tool because, in Java, the classes must
 
 Function can be used as variable in JavaScript and can be passed as the argument of a return expression. Figure \ref{fig:functionvar} shows how the variable \texttt{handle} is invoked after it was initialized.
 
-At first glance, this may seem like a Java lambda expression. However, in Java the lambda expressions need a named method to invoke which is typically declared inside of an interface. On the other hand, in this JavaScript example, the first parenthesis is directly written after the variable \texttt{handle}.
+At first glance, this may seem like a Java lambda expression. However, in Java the lambda expressions need a named method to invoke which is typically declared inside of an interface. On the other hand, during invocation, the first parenthesis is directly written after the variable \texttt{handle} at line 5.
 
-This increases challenges for a structural matching tool to match an invocation with its declaration during Extract Function refactoring where a code is extracted to a new function and the original function invokes the newly added function in place of the removed code.
+This increases challenges for a structural matching tool to match an invocation with its declaration during Extract Function refactoring where a code is extracted to a new function and the original function invokes the newly added function in lieu of the removed code.
 
 
 \subsection {No Static Types}
 
 In JavaScript, there are no strong types such as \texttt{long}, \texttt{int} etc. like in Java. Therefore variables are declared without any static types. This makes it potentially difficult to identify renamed variables between versions because there is no hint of the type of the variable. Furthermore, the absence of types negatively affects the matching of parameters of functions and therefore their signatures.
+
+\subsection {Other Differences}
+
+Figure \ref{fig:jsvsjava} illustrates some of the other differences in syntax between Java and JavaScript code. We have found that in many projects developers do not put semicolons at the end of a JavaScript statement. Moreover, since functions can be assigned to a variable, in JavaScript they are often returned from a function and then invoked immediately after the call. The optional default value of a parameter often contains a function or empty object literals to be used inside of the function body in case the caller does not provide an argument to that parameter during invocation. Object expressions are similar to class declarations in java however, the values of properties are assigned using a colon (:) instead of an equal sign (=). The destructirng pattern basically selects specified elements or properties from an array or object and can assign them to variables in a single expression. Lastly, the array elements can be of any type thus sometimes a function element can be obtained to immediately invoke from an array.
+
+
+\begin{figure}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{images/jsvsjava.PNG}
+  \caption{Some of the supported features of JavaScript which are not available to Java.}
+   \label{fig:jsvsjava}
+\end{figure} 
+
 
 \section {Detection Methodology}
 
