@@ -12,7 +12,4 @@ Setup & Run
 
 Thesis
 --------
-- The docs folder contains the thesis is latex format. 
-- The thesis can be viewed in this link  https://www.overleaf.com/read/trtnbmvpdscd
-
-> Changes in the .tex file gives a hint on what portion of the thesis to review
+- The thesis can be viewed in this link  https://users.encs.concordia.ca/~nikolaos/theses/Mosabbir_Khan_Shiblu.pdf
